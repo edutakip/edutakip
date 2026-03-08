@@ -66,13 +66,24 @@ export default function TeacherStudents() {
           <StudentCard key={s.id} student={s} onAddPayment={setPayStudent} />
         ))}
         <div onClick={() => setShowAdd(true)}
-          style={{ background: 'var(--bg-card)', border: '2px dashed var(--border)', borderRadius: '16px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.5rem', minHeight: '180px', transition: 'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Plus size={24} color='var(--text-muted)' />
+          style={{
+            background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
+            border: '2px dashed rgba(99,102,241,0.4)',
+            borderRadius: '18px',
+            padding: '1.25rem',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', gap: '0.75rem',
+            minHeight: '200px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.8)'; e.currentTarget.style.background = 'linear-gradient(145deg, #1e1b4b, #16213e)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.background = 'linear-gradient(145deg, #1a1a2e, #16213e)'; }}>
+          <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Plus size={24} color='#818cf8' />
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Yeni Öğrenci Ekle</span>
+          <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', fontWeight: '600' }}>Yeni Öğrenci Ekle</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>Tıkla ve ekle</span>
         </div>
       </div>
 
