@@ -118,33 +118,28 @@ export default function Landing() {
           <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Binlerce öğretmen ve veli EduTrack ile nasıl daha verimli çalıştığını keşfedin</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
           {[
             {
-              name: 'Veli',
+              side: 'Veli Perspektifi',
               icon: '👨‍👩‍👧',
-              time: '08:47',
+              color: '#fef3c7',
+              borderColor: '#f59e0b',
               messages: [
-                { text: 'Hocam bu hafta ders var mı?', highlight: 'Programı unuttuğu' },
-                { text: 'Geçen ayın ödemesini yapmıştık ya hocam?', highlight: 'Ödemeyi kontrol ettiği', sender: 'right' },
+                { text: 'Hocam bu hafta Emre\'nin dersi var mı?', sender: 'left' },
+                { text: 'Geçen ayın ödeme tutarı kaç lira?', sender: 'left' },
+                { text: 'Ders başarıdan mı gidiyor?', sender: 'left' },
               ]
             },
             {
-              name: 'Öğrenci',
-              icon: '👦',
-              time: '10:32',
+              side: 'Öğretmen Perspektifi',
+              icon: '👨‍🏫',
+              color: '#d1fae5',
+              borderColor: '#10b981',
               messages: [
-                { text: 'Hocam hangi sayfadayız? Defter im kaybettim', highlight: 'İlerleme takip' },
-                { text: 'Hocam bu haftaya ödev var mıydı? 📝', highlight: 'Devleri hatırlayan', sender: 'right' },
-              ]
-            },
-            {
-              name: 'İç Sesiniz',
-              icon: '⚡',
-              time: '21:45',
-              messages: [
-                { text: 'Yine pazar akşamı, yine saatlerce planlama...', highlight: 'Manuel planlama' },
-                { text: '3 aydır ödeme alamadım, şu aileiden nasıl söyleyeceğim', highlight: 'Finans takibi sıkıntısı', sender: 'right' },
+                { text: '9 Mart Pazartesi saat 16:00\'de dersi var', sender: 'right' },
+                { text: '3.500 TL, geçen ay tam ödedi', sender: 'right' },
+                { text: 'Çok iyi gidiyor, son sınavdan 85 aldı 🎉', sender: 'right' },
               ]
             },
           ].map((conv, idx) => (
@@ -153,30 +148,25 @@ export default function Landing() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.1)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #f3f4f6' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>{conv.icon}</span>
-                  <span style={{ fontWeight: '700', color: '#111827', fontSize: '0.9rem' }}>{conv.name}</span>
-                </div>
-                <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{conv.time}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #f3f4f6' }}>
+                <span style={{ fontSize: '1.5rem' }}>{conv.icon}</span>
+                <span style={{ fontWeight: '800', color: '#111827', fontSize: '0.95rem' }}>{conv.side}</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {conv.messages.map((msg, midx) => (
                   <div key={midx} style={{ display: 'flex', justifyContent: msg.sender === 'right' ? 'flex-end' : 'flex-start' }}>
                     <div style={{
-                      background: msg.sender === 'right' ? '#f0fdf4' : '#fef3c7',
+                      background: conv.color,
                       borderRadius: '14px',
-                      padding: '0.75rem 1rem',
-                      maxWidth: '85%',
-                      borderLeft: msg.sender === 'right' ? 'none' : '3px solid #f59e0b'
+                      padding: '0.75rem 1.1rem',
+                      maxWidth: '90%',
+                      borderLeft: msg.sender === 'right' ? 'none' : `3px solid ${conv.borderColor}`,
+                      borderRight: msg.sender === 'right' ? `3px solid ${conv.borderColor}` : 'none'
                     }}>
-                      <p style={{ color: '#111827', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 0.3rem 0' }}>
-                        {msg.text.split(msg.highlight).map((part, i) => (
-                          i === 1 ? <span key={i} style={{ fontWeight: '700' }}>{msg.highlight}</span> : part
-                        ))}
+                      <p style={{ color: '#111827', fontSize: '0.9rem', lineHeight: '1.6', margin: 0, fontWeight: '500' }}>
+                        {msg.text}
                       </p>
-                      <p style={{ color: '#6b7280', fontSize: '0.75rem', margin: 0 }}>{msg.highlight}</p>
                     </div>
                   </div>
                 ))}
