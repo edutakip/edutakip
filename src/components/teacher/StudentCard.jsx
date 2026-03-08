@@ -4,6 +4,8 @@ import { BookOpen, Clock, DollarSign, AlertCircle, Plus, User } from 'lucide-rea
 
 export default function StudentCard({ student, onAddPayment }) {
   const [debt, setDebt] = useState(null);
+  const [editingFee, setEditingFee] = useState(false);
+  const [feeValue, setFeeValue] = useState('');
 
   useEffect(() => {
     base44.entities.Payment.filter({ studentId: student.id }).then(payments => {
@@ -18,6 +20,21 @@ export default function StudentCard({ student, onAddPayment }) {
   const lessonFee = student.monthlyFee && student.weeklyLessons
     ? Math.round(student.monthlyFee / (student.weeklyLessons * 4.3))
     : null;
+
+  const startEditFee = () => {
+    setFeeValue(lessonFee || '');
+    setEditingFee(true);
+  };
+
+  const saveFee = async () => {
+    const newFee = parseInt(feeValue);
+    if (!isNaN(newFee) && newFee > 0) {
+      const newMonthlyFee = Math.round(newFee * (student.weeklyLessons || 1) * 4.3);
+      await base44.entities.Student.update(student.id, { monthlyFee: newMonthlyFee });
+      student.monthlyFee = newMonthlyFee;
+    }
+    setEditingFee(false);
+  };
 
   const hasDebt = debt && debt > 0;
 
