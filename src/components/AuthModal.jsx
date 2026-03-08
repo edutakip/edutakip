@@ -2,22 +2,11 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function AuthModal({ role, onClose, onSuccess }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+export default function AuthModal({ role, onClose }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    confirmPassword: '',
-  });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
+    // placeholder
   };
 
   const handleSubmit = async (e) => {
