@@ -1,160 +1,124 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, Clock, DollarSign, AlertCircle, Plus, User } from 'lucide-react';
+import { Phone, Clock, DollarSign, BookOpen, Plus } from 'lucide-react';
 
 export default function StudentCard({ student, onAddPayment }) {
-  const [debt, setDebt] = useState(null);
-  const [editingFee, setEditingFee] = useState(false);
-  const [feeValue, setFeeValue] = useState('');
+  const [payments, setPayments] = useState([]);
 
   useEffect(() => {
-    base44.entities.Payment.filter({ studentId: student.id }).then(payments => {
-      const pending = payments
-        .filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş')
-        .reduce((s, p) => s + (p.amount || 0), 0);
-      setDebt(pending);
-    });
+    base44.entities.Payment.filter({ studentId: student.id }).then(setPayments);
   }, [student.id]);
 
-  const initials = student.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
-  const lessonFee = student.monthlyFee && student.weeklyLessons
-    ? Math.round(student.monthlyFee / (student.weeklyLessons * 4.3))
-    : null;
+  const monthlyFee = student.monthlyFee || 0;
+  const weeklyLessons = student.weeklyLessons || 1;
+  const lessonFee = monthlyFee > 0 ? Math.round(monthlyFee / (weeklyLessons * 4.3)) : 0;
 
-  const startEditFee = () => {
-    setFeeValue(lessonFee || '');
-    setEditingFee(true);
-  };
-
-  const saveFee = async () => {
-    const newFee = parseInt(feeValue);
-    if (!isNaN(newFee) && newFee > 0) {
-      const newMonthlyFee = Math.round(newFee * (student.weeklyLessons || 1) * 4.3);
-      await base44.entities.Student.update(student.id, { monthlyFee: newMonthlyFee });
-      student.monthlyFee = newMonthlyFee;
-    }
-    setEditingFee(false);
-  };
-
-  const hasDebt = debt && debt > 0;
+  const earned = payments.reduce((s, p) => s + (p.amount || 0), 0);
+  const collected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  const balance = collected - earned; // negative = owes
 
   return (
-    <div
-      style={{
-        background: 'white', borderRadius: '16px',
-        border: `1.5px solid ${hasDebt ? '#fde68a' : '#e5e7eb'}`,
-        padding: '1.25rem', transition: 'all 0.2s', cursor: 'default',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
-    >
-      {/* Top: avatar + name + status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
-        <div style={{
-          width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0,
-          background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'white', fontWeight: '800', fontSize: '0.9rem',
-          boxShadow: '0 4px 10px rgba(79,70,229,0.25)',
-        }}>
-          {initials}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{student.name}</h3>
-          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-            {student.grade && (
-              <span style={{ background: '#eef2ff', color: '#4f46e5', fontSize: '0.68rem', fontWeight: '600', padding: '0.1rem 0.5rem', borderRadius: '20px' }}>
-                {student.grade}
-              </span>
-            )}
-            {student.subject && (
-              <span style={{ background: '#f0fdf4', color: '#15803d', fontSize: '0.68rem', fontWeight: '600', padding: '0.1rem 0.5rem', borderRadius: '20px' }}>
-                {student.subject}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
-        {/* Weekly lessons */}
-        <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.65rem 0.5rem', textAlign: 'center' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
-            <BookOpen size={14} color='#4f46e5' />
-          </div>
-          <div style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', lineHeight: 1 }}>
-            {student.weeklyLessons || 1}
-          </div>
-          <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginTop: '0.2rem', fontWeight: '500' }}>Haftalık ders</div>
-        </div>
-
-        {/* Lesson fee */}
-        <div
-          onClick={startEditFee}
-          style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.65rem 0.5rem', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#e0f2fe'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; }}
-          title="Düzenlemek için tıkla"
-        >
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
-            <Clock size={14} color='#10b981' />
-          </div>
-          {editingFee ? (
-            <input
-              autoFocus
-              type='number'
-              value={feeValue}
-              onChange={e => setFeeValue(e.target.value)}
-              onBlur={saveFee}
-              onKeyDown={e => { if (e.key === 'Enter') saveFee(); if (e.key === 'Escape') setEditingFee(false); }}
-              onClick={e => e.stopPropagation()}
-              style={{ width: '100%', textAlign: 'center', border: 'none', borderBottom: '2px solid #10b981', background: 'transparent', fontWeight: '700', fontSize: '0.9rem', color: '#111827', outline: 'none', padding: '0' }}
-            />
-          ) : (
-            <div style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', lineHeight: 1 }}>
-              {lessonFee ? `₺${lessonFee}` : '—'}
-            </div>
+    <div style={{
+      background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
+      borderRadius: '18px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      padding: '1.25rem',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem',
+    }}>
+      {/* Name + badges */}
+      <div>
+        <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.05rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>{student.name}</h3>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {student.grade && (
+            <span style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.7)', fontSize: '0.68rem', fontWeight: '600', padding: '0.18rem 0.55rem', borderRadius: '6px' }}>
+              {student.grade}
+            </span>
           )}
-          <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginTop: '0.2rem', fontWeight: '500' }}>Ders/saati</div>
-        </div>
-
-        {/* Debt */}
-        <div style={{ background: hasDebt ? '#fef9c3' : '#f8fafc', borderRadius: '10px', padding: '0.65rem 0.5rem', textAlign: 'center' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
-            <AlertCircle size={14} color={hasDebt ? '#d97706' : '#94a3b8'} />
-          </div>
-          <div style={{ color: hasDebt ? '#b45309' : '#111827', fontWeight: '700', fontSize: '1rem', lineHeight: 1 }}>
-            {debt === null ? '...' : debt > 0 ? `₺${debt.toLocaleString('tr-TR')}` : '₺0'}
-          </div>
-          <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginTop: '0.2rem', fontWeight: '500' }}>Borç</div>
+          <span style={{ background: 'transparent', border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.68rem', fontWeight: '700', padding: '0.18rem 0.55rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: student.status === 'active' ? '#22c55e' : '#9ca3af', display: 'inline-block' }} />
+            {student.status === 'active' ? 'Aktif' : 'Arşiv'}
+          </span>
         </div>
       </div>
 
-      {/* Invite code */}
-      {student.inviteCode && !student.inviteAccepted && (
-        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '0.45rem 0.75rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: '600' }}>Davet Kodu:</span>
-          <span style={{ color: '#92400e', fontSize: '0.85rem', fontWeight: '800', letterSpacing: '2px' }}>{student.inviteCode}</span>
+      {/* Phone */}
+      {student.phone && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem' }}>
+          <Phone size={13} />
+          <span>{student.phone}</span>
         </div>
       )}
 
-      {/* Add payment button */}
-      <button
-        onClick={() => onAddPayment(student)}
-        style={{
-          width: '100%', padding: '0.55rem', borderRadius: '10px',
-          border: '1.5px solid #e5e7eb', background: 'white',
-          color: '#374151', fontWeight: '600', fontSize: '0.8rem',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
-          transition: 'all 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.color = '#4f46e5'; e.currentTarget.style.background = '#eef2ff'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#374151'; e.currentTarget.style.background = 'white'; }}
-      >
-        <Plus size={14} /> Ödeme Ekle
-      </button>
+      {/* Haftalık + Saatlik boxes */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.35), rgba(99,102,241,0.2))', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '12px', padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.4rem' }}>HAFTALIK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: '800', fontSize: '0.95rem' }}>
+            <Clock size={14} color='#818cf8' />
+            {weeklyLessons} Ders
+          </div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.35), rgba(139,92,246,0.2))', border: '1px solid rgba(139,92,246,0.4)', borderRadius: '12px', padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(196,181,253,0.8)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.4rem' }}>SAATLİK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: '800', fontSize: '0.95rem' }}>
+            <DollarSign size={14} color='#a78bfa' />
+            ₺{lessonFee.toLocaleString('tr-TR')}
+          </div>
+        </div>
+      </div>
+
+      {/* Subject badge */}
+      {student.subject && (
+        <div>
+          <span style={{ border: '1px solid #f97316', color: '#fb923c', fontSize: '0.75rem', fontWeight: '600', padding: '0.25rem 0.75rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <BookOpen size={11} />
+            {student.subject}
+          </span>
+        </div>
+      )}
+
+      {/* Finance table */}
+      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '0.85rem' }}>
+        {[
+          { label: 'Aylık Gelir (MRR)', value: `₺${monthlyFee.toLocaleString('tr-TR')}`, color: 'white' },
+          { label: 'Hak Edilen', value: `₺${earned.toLocaleString('tr-TR')}`, color: 'rgba(255,255,255,0.7)' },
+          { label: 'Tahsil Edilen', value: `₺${collected.toLocaleString('tr-TR')}`, color: '#22c55e' },
+        ].map(({ label, value, color }, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.35rem 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>{label}</span>
+            <span style={{ color, fontWeight: '700', fontSize: '0.82rem' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer: balance + payment button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem' }}>
+        <div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span>▤</span> BAKİYE
+          </div>
+          <div style={{ color: balance < 0 ? '#f87171' : '#22c55e', fontWeight: '800', fontSize: '1.15rem' }}>
+            {balance < 0 ? '-' : '+'}₺{Math.abs(balance).toLocaleString('tr-TR')}
+          </div>
+        </div>
+        <button
+          onClick={() => onAddPayment(student)}
+          style={{
+            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+            border: 'none', color: 'white', borderRadius: '10px',
+            padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+            boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Plus size={14} /> Ödeme
+        </button>
+      </div>
     </div>
   );
 }
