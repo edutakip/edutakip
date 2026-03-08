@@ -41,10 +41,6 @@ export default function Landing() {
           <span style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--accent)', letterSpacing: '-0.5px' }}>EduTrack</span>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button onClick={() => setIsDark(d => !d)}
-            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.4rem 0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem' }}>
-            {isDark ? '☀️ Açık' : '🌙 Koyu'}
-          </button>
           <button onClick={() => selectRole('teacher')}
             style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 1.25rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
             Giriş Yap
