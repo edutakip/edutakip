@@ -47,7 +47,9 @@ export default function Landing() {
         backdropFilter: 'blur(20px)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <img src="https://images.unsplash.com/photo-1602956154236-5c02392867f0?w=40&h=40&fit=crop" alt="EduTrack" style={{ width: '38px', height: '38px', borderRadius: '12px', boxShadow: '0 6px 20px rgba(79,70,229,0.35)' }} />
+          <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 20px rgba(79,70,229,0.35)' }}>
+            <GraduationCap size={20} color='white' />
+          </div>
           <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTrack</span>
         </div>
         <button onClick={() => selectRole('teacher')}
