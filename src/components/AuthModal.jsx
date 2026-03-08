@@ -92,7 +92,7 @@ export default function AuthModal({ role, onClose }) {
             fontWeight: '800',
             marginBottom: '0.5rem',
           }}>
-            Devam Etmek İçin Giriş Yapın
+            {isLogin ? 'Giriş Yapın' : 'Kayıt Olun'}
           </h2>
           <p style={{
             color: '#6b7280',
@@ -104,11 +104,99 @@ export default function AuthModal({ role, onClose }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ padding: '1.5rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-            <p style={{ color: '#15803d', fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>
-              ℹ️ Hesabınız yoksa, giriş yaptıktan sonra otomatik olarak oluşturulacak.
-            </p>
+          {/* Email */}
+          <div style={{ position: 'relative' }}>
+            <Mail size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="E-posta adresiniz"
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem 0.75rem 0.75rem 2.25rem',
+                borderRadius: '10px',
+                border: '1.5px solid #e5e7eb',
+                background: '#ffffff',
+                color: '#111827',
+                fontSize: '0.9rem',
+                outline: 'none',
+                transition: 'border 0.2s',
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = '#6366f1'}
+              onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+            />
           </div>
+
+          {/* Password */}
+          <div style={{ position: 'relative' }}>
+            <Lock size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Şifre"
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem 2.25rem 0.75rem 2.25rem',
+                borderRadius: '10px',
+                border: '1.5px solid #e5e7eb',
+                background: '#ffffff',
+                color: '#111827',
+                fontSize: '0.9rem',
+                outline: 'none',
+                transition: 'border 0.2s',
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = '#6366f1'}
+              onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          {/* Full name (signup only) */}
+          {!isLogin && (
+            <div style={{ position: 'relative' }}>
+              <User size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Ad Soyad"
+                required={!isLogin}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 0.75rem 0.75rem 2.25rem',
+                  borderRadius: '10px',
+                  border: '1.5px solid #e5e7eb',
+                  background: '#ffffff',
+                  color: '#111827',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  transition: 'border 0.2s',
+                }}
+                onFocus={e => e.currentTarget.style.borderColor = '#6366f1'}
+                onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+          )}
+
+          {/* Error message */}
+          {error && (
+            <div style={{ padding: '0.75rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px' }}>
+              <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: 0 }}>{error}</p>
+            </div>
+          )}
 
           {/* Submit button */}
           <button
@@ -128,8 +216,26 @@ export default function AuthModal({ role, onClose }) {
             onMouseEnter={e => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')}
             onMouseLeave={e => !loading && (e.currentTarget.style.transform = 'translateY(0)')}
           >
-            {loading ? 'Yükleniyor...' : 'Giriş Yap / Kayıt Ol'}
+            {loading ? 'Yükleniyor...' : (isLogin ? 'Giriş Yap' : 'Kayıt Ol')}
           </button>
+
+          {/* Toggle login/signup */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0.5rem 0 0 0' }}>
+              {isLogin ? 'Hesabınız yok mu? ' : 'Zaten hesabınız var mı? '}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                  setFormData({ email: '', password: '', fullName: '' });
+                }}
+                style={{ background: 'none', border: 'none', color: '#6366f1', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+              >
+                {isLogin ? 'Kayıt Olun' : 'Giriş Yapın'}
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>
