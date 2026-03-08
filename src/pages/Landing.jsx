@@ -10,17 +10,12 @@ const FEATURES = [
 ];
 
 export default function Landing() {
-  const [isDark, setIsDark] = useState(false);
-
   useEffect(() => {
+    document.body.classList.remove('dark-mode');
     const role = localStorage.getItem('tilki_role');
     if (role === 'teacher') window.location.href = createPageUrl('TeacherDashboard');
     else if (role === 'parent') window.location.href = createPageUrl('ParentDashboard');
   }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', isDark);
-  }, [isDark]);
 
   const selectRole = (role) => {
     localStorage.setItem('tilki_role', role);
