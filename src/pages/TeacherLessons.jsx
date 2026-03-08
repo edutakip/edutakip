@@ -28,6 +28,29 @@ export default function TeacherLessons() {
 
   const markDone = async (lesson) => {
     await base44.entities.Lesson.update(lesson.id, { status: 'tamamlandı' });
+    // Otomatik olarak hak edilen (bekliyor) kaydı oluştur
+    const fee = getLessonFee(lesson);
+    const existing = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.description?.includes('Ders'));
+    if (!existing && fee > 0) {
+      await base44.entities.Payment.create({
+        studentId: lesson.studentId,
+        studentName: lesson.studentName,
+        teacherEmail: lesson.teacherEmail,
+        amount: fee,
+        date: lesson.date,
+        status: 'bekliyor',
+        description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
+        month: lesson.date?.slice(0, 7),
+      });
+    }
+    loadData();
+  };
+
+  const markUndone = async (lesson) => {
+    await base44.entities.Lesson.update(lesson.id, { status: 'planlandı' });
+    // Otomatik eklenen bekliyor kaydını sil
+    const autoPayment = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'bekliyor');
+    if (autoPayment) await base44.entities.Payment.delete(autoPayment.id);
     loadData();
   };
 
@@ -37,18 +60,33 @@ export default function TeacherLessons() {
   };
 
   const markPaid = async (lesson) => {
-    const fee = getLessonFee(lesson);
-    await base44.entities.Payment.create({
-      studentId: lesson.studentId,
-      studentName: lesson.studentName,
-      teacherEmail: lesson.teacherEmail,
-      amount: fee,
-      date: lesson.date,
-      status: 'alındı',
-      description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
-      month: lesson.date?.slice(0, 7),
-    });
+    // bekliyor kaydını alındı'ya güncelle, yoksa yeni oluştur
+    const pending = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'bekliyor');
+    if (pending) {
+      await base44.entities.Payment.update(pending.id, { status: 'alındı' });
+    } else {
+      const fee = getLessonFee(lesson);
+      await base44.entities.Payment.create({
+        studentId: lesson.studentId,
+        studentName: lesson.studentName,
+        teacherEmail: lesson.teacherEmail,
+        amount: fee,
+        date: lesson.date,
+        status: 'alındı',
+        description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
+        month: lesson.date?.slice(0, 7),
+      });
+    }
     loadData();
+  };
+
+  const markUnpaid = async (lesson) => {
+    const paid = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'alındı');
+    if (paid) {
+      // Geri al: bekliyor'a döndür
+      await base44.entities.Payment.update(paid.id, { status: 'bekliyor' });
+      loadData();
+    }
   };
 
   const getLessonFee = (lesson) => {
