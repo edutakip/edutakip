@@ -69,159 +69,23 @@ export default function AuthModal({ role, onClose }) {
             fontWeight: '800',
             marginBottom: '0.5rem',
           }}>
-            {isLogin ? 'Hoşgeldiniz' : 'Hesap Oluşturun'}
+            Devam Etmek İçin Giriş Yapın
           </h2>
           <p style={{
             color: '#6b7280',
             fontSize: '0.9rem',
           }}>
-            {isLogin ? 'Devam etmek için giriş yapın' : 'Yeni bir hesap oluşturun'}
+            {role === 'teacher' ? 'Öğretmen Paneli' : 'Veli Paneli'}
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Name field (signup only) */}
-          {!isLogin && (
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#374151', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                <User size={16} /> Adınız
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Adınız Soyadınız"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: '10px',
-                  fontSize: '0.9rem',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.2s',
-                }}
-                onFocus={e => e.target.style.borderColor = '#4f46e5'}
-                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-              />
-            </div>
-          )}
-
-          {/* Email field */}
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#374151', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-              <Mail size={16} /> E-posta
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="ornek@mail.com"
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '1.5px solid #e5e7eb',
-                borderRadius: '10px',
-                fontSize: '0.9rem',
-                fontFamily: 'inherit',
-                boxSizing: 'border-box',
-                transition: 'all 0.2s',
-              }}
-              onFocus={e => e.target.style.borderColor = '#4f46e5'}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-            />
+          <div style={{ padding: '1.5rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+            <p style={{ color: '#15803d', fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>
+              ℹ️ Hesabınız yoksa, giriş yaptıktan sonra otomatik olarak oluşturulacak.
+            </p>
           </div>
-
-          {/* Password field */}
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#374151', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-              <Lock size={16} /> Şifre
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Güçlü bir şifre girin"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem 0.75rem 1rem',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: '10px',
-                  fontSize: '0.9rem',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.2s',
-                  paddingRight: '2.5rem',
-                }}
-                onFocus={e => e.target.style.borderColor = '#4f46e5'}
-                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#9ca3af',
-                  padding: '0.5rem',
-                }}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm password (signup only) */}
-          {!isLogin && (
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#374151', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                <Lock size={16} /> Şifre Tekrarı
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Şifrenizi tekrar girin"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: '10px',
-                  fontSize: '0.9rem',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.2s',
-                }}
-                onFocus={e => e.target.style.borderColor = '#4f46e5'}
-                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-              />
-            </div>
-          )}
-
-          {/* Error message */}
-          {error && (
-            <div style={{
-              background: '#fee2e2',
-              color: '#dc2626',
-              padding: '0.75rem 1rem',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: '500',
-            }}>
-              {error}
-            </div>
-          )}
 
           {/* Submit button */}
           <button
@@ -237,38 +101,12 @@ export default function AuthModal({ role, onClose }) {
               fontSize: '0.95rem',
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
-              marginTop: '0.5rem',
             }}
             onMouseEnter={e => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')}
             onMouseLeave={e => !loading && (e.currentTarget.style.transform = 'translateY(0)')}
           >
-            {loading ? 'Yükleniyor...' : isLogin ? 'Giriş Yap' : 'Hesap Oluştur'}
+            {loading ? 'Yükleniyor...' : 'Giriş Yap / Kayıt Ol'}
           </button>
-
-          {/* Toggle */}
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>
-              {isLogin ? 'Hesabınız yok mu?' : 'Zaten hesabınız var mı?'}{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setError('');
-                  setFormData({ email: '', password: '', name: '', confirmPassword: '' });
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#4f46e5',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  fontSize: 'inherit',
-                }}
-              >
-                {isLogin ? 'Kayıt Olun' : 'Giriş Yapın'}
-              </button>
-            </span>
-          </div>
         </form>
       </div>
     </div>
