@@ -17,7 +17,6 @@ const PARENT_NAV = [
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [isDark, setIsDark] = useState(() => localStorage.getItem('edutrack_theme') === 'dark');
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
 
