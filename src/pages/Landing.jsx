@@ -23,110 +23,133 @@ export default function Landing() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Inter', sans-serif", color: '#111827' }}>
+    <div style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Inter', sans-serif", color: '#111827', overflow: 'hidden' }}>
 
       {/* NAV */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(255,255,255,0.9)',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '0 2rem', height: '60px',
+        background: 'rgba(255,255,255,0.8)',
+        borderBottom: '1px solid rgba(229,231,235,0.5)',
+        padding: '0 2rem', height: '64px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        backdropFilter: 'blur(12px)',
+        backdropFilter: 'blur(20px)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(79,70,229,0.3)' }}>
-            <GraduationCap size={18} color='white' />
+          <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 20px rgba(79,70,229,0.35)' }}>
+            <GraduationCap size={20} color='white' />
           </div>
-          <span style={{ fontWeight: '800', fontSize: '1.15rem', color: '#111827', letterSpacing: '-0.5px' }}>EduTrack</span>
+          <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTrack</span>
         </div>
         <button onClick={() => selectRole('teacher')}
-          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 1.25rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79,70,229,0.3)' }}>
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)', transition: 'all 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
           Giriş Yap
         </button>
       </nav>
 
       {/* HERO */}
       <section style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #4f46e5 60%, #7c3aed 100%)',
-        padding: '5rem 2rem 5rem', textAlign: 'center', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(180deg, #1e1b4b 0%, #4f46e5 50%, #7c3aed 100%)',
+        padding: '6rem 2rem 4rem', textAlign: 'center', position: 'relative', overflow: 'hidden',
+        minHeight: '85vh', display: 'flex', flexDirection: 'column', justifyContent: 'center',
       }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* Animated background elements */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '50px 50px', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-200px', right: '-200px', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)', pointerEvents: 'none', animation: 'pulse 8s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', bottom: '-150px', left: '-150px', width: '450px', height: '450px', background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)', pointerEvents: 'none', animation: 'pulse 10s ease-in-out infinite 1s' }} />
 
-        <div style={{ position: 'relative', maxWidth: '680px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '20px', padding: '0.3rem 0.9rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.9)', marginBottom: '1.5rem', fontWeight: '500' }}>
-            <Star size={11} fill='currentColor' color='#fbbf24' /> Özel Ders Yönetim Platformu
+        <div style={{ position: 'relative', maxWidth: '750px', margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', padding: '0.4rem 1rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.95)', marginBottom: '2rem', fontWeight: '600', backdropFilter: 'blur(10px)', boxShadow: '0 4px 30px rgba(0,0,0,0.1)' }}>
+            <Zap size={13} fill='currentColor' color='#fbbf24' /> Türkiye'nin En Güvenilir Özel Ders Platformu
           </div>
-          <h1 style={{ color: 'white', fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: '900', lineHeight: '1.15', letterSpacing: '-1px', marginBottom: '1.25rem' }}>
-            Öğretmenlik'i<br />
-            <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Kolaylaştırın</span>
+          <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: '950', lineHeight: '1.1', letterSpacing: '-1.5px', marginBottom: '1.5rem' }}>
+            Özel Dersinizi<br />
+            <span style={{ background: 'linear-gradient(120deg, #a5b4fc 0%, #ddd6fe 50%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%' }}>Profesyonel Yönetin</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', lineHeight: '1.75', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>
-            Ders planlama, ödeme takibi ve veli iletişimini tek platformda yönetin.
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2.5rem', maxWidth: '550px', margin: '0 auto 2.5rem' }}>
+            Ders takvimi, öğrenci takibi, ödeme yönetimi ve veli iletişimini bir platformda gerçekleştirin. 1000+ öğretmen tarafından güveniliyor.
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => selectRole('teacher')}
-              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '0.8rem 1.75rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', transition: 'all 0.2s' }}>
-              <GraduationCap size={17} /> Öğretmen Girişi <ChevronRight size={15} />
+              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', transition: 'all 0.3s' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              <GraduationCap size={19} /> Öğretmen Paneli <ChevronRight size={17} />
             </button>
             <button onClick={() => selectRole('parent')}
-              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '12px', padding: '0.8rem 1.75rem', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', backdropFilter: 'blur(8px)', transition: 'all 0.2s' }}>
-              <Users size={17} /> Veli Girişi <ChevronRight size={15} />
+              style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', backdropFilter: 'blur(15px)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}>
+              <Users size={19} /> Veli Paneli <ChevronRight size={17} />
             </button>
           </div>
         </div>
 
         {/* stats */}
-        <div style={{ display: 'flex', gap: '2.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '4rem', position: 'relative' }}>
-          {[['500+', 'Aktif Öğretmen'], ['12K+', 'Ders Planlandı'], ['98%', 'Memnuniyet']].map(([val, lbl]) => (
+        <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '5rem', position: 'relative' }}>
+          {[['1000+', 'Öğretmen'], ['50K+', 'Öğrenci'], ['₺100M+', 'Yönetilen']].map(([val, lbl]) => (
             <div key={lbl} style={{ textAlign: 'center' }}>
-              <div style={{ color: 'white', fontSize: '1.6rem', fontWeight: '900', letterSpacing: '-0.5px' }}>{val}</div>
-              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem', marginTop: '0.2rem' }}>{lbl}</div>
+              <div style={{ color: 'white', fontSize: '1.9rem', fontWeight: '950', letterSpacing: '-0.5px' }}>{val}</div>
+              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginTop: '0.4rem', fontWeight: '500' }}>{lbl}</div>
             </div>
           ))}
         </div>
+        
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+          }
+        `}</style>
       </section>
 
       {/* ROLE SELECT */}
-      <section style={{ padding: '5rem 2rem', maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
-        <span style={{ display: 'inline-block', background: '#ede9fe', color: '#6d28d9', fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: '20px', padding: '0.3rem 0.9rem', marginBottom: '1rem' }}>Giriş</span>
-        <h2 style={{ color: '#111827', fontSize: 'clamp(1.3rem, 3vw, 1.9rem)', fontWeight: '800', marginBottom: '2.5rem' }}>Rolünüzü seçin</h2>
+      <section style={{ padding: '6rem 2rem', maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(79,70,229,0.3), transparent)' }} />
+        
+        <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>✨ Rolünüzü Seçin</span>
+        <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-0.8px' }}>Hangi rolü üstleniyorsunuz?</h2>
+        <p style={{ color: '#6b7280', fontSize: '1rem', marginBottom: '3rem', maxWidth: '500px', margin: '0 auto 3rem' }}>Paneline giriş yaparak tüm özelliklere erişim sağlayın</p>
 
-        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', justifyContent: 'center' }}>
           {[
             {
-              role: 'teacher', icon: GraduationCap, title: 'Öğretmenim',
+              role: 'teacher', icon: GraduationCap, title: 'Öğretmen Paneli',
               accent: '#4f46e5', bg: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-              features: ['Ders takvimi yönetimi', 'Öğrenci takibi', 'Finans raporları', 'Veli bildirimleri'],
-              cta: 'Öğretmen Paneli',
+              features: ['📅 Ders Takvimi', '👨‍🎓 Öğrenci Takibi', '💰 Finans Yönetimi', '👨‍👩‍👧 Veli Bildirimleri'],
+              cta: 'Öğretmen Girişi',
             },
             {
-              role: 'parent', icon: Users, title: 'Veliyim',
+              role: 'parent', icon: Users, title: 'Veli Paneli',
               accent: '#0ea5e9', bg: 'linear-gradient(135deg, #0284c7, #0ea5e9)',
-              features: ['Ders programını görüntüle', 'Ödeme geçmişi', 'Öğretmen ile iletişim', 'Online ders linki'],
-              cta: 'Veli Paneli',
+              features: ['📋 Ders Programı', '🧾 Ödeme Geçmişi', '💬 Öğretmen İletişim', '🔗 Ders Linki'],
+              cta: 'Veli Girişi',
             },
           ].map(({ role, icon: Icon, title, accent, bg, features, cta }) => (
             <div key={role}
-              style={{ background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '20px', padding: '2rem 1.75rem', width: '300px', textAlign: 'left', transition: 'all 0.25s', cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}
+              style={{ background: 'linear-gradient(135deg, #ffffff, #f9fafb)', border: '1.5px solid #e5e7eb', borderRadius: '24px', padding: '2.5rem 2rem', textAlign: 'center', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', position: 'relative', overflow: 'hidden' }}
               onClick={() => selectRole(role)}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = `0 16px 40px rgba(0,0,0,0.12)`; e.currentTarget.style.borderColor = accent; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
-              <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', boxShadow: `0 6px 20px ${accent}35` }}>
-                <Icon size={24} color='white' />
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = `0 24px 48px rgba(0,0,0,0.12)`; e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, white)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #f9fafb)'; }}>
+              <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: `linear-gradient(135deg, ${accent}20, transparent)`, borderRadius: '50%', transform: 'translate(80px, -80px)', pointerEvents: 'none' }} />
+              
+              <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.75rem', boxShadow: `0 8px 25px ${accent}40`, position: 'relative', zIndex: 1 }}>
+                <Icon size={28} color='white' />
               </div>
-              <h3 style={{ color: '#111827', fontSize: '1.1rem', fontWeight: '800', marginBottom: '1rem' }}>{title}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ color: '#111827', fontSize: '1.3rem', fontWeight: '900', marginBottom: '1.25rem', letterSpacing: '-0.5px', position: 'relative', zIndex: 1 }}>{title}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', position: 'relative', zIndex: 1 }}>
                 {features.map(f => (
-                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6b7280', fontSize: '0.83rem' }}>
-                    <CheckCircle size={13} color={accent} style={{ flexShrink: 0 }} /> {f}
+                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#4b5563', fontSize: '0.9rem', fontWeight: '500' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent }}></span>
+                    {f}
                   </div>
                 ))}
               </div>
-              <button style={{ width: '100%', padding: '0.7rem', borderRadius: '10px', border: 'none', background: bg, color: 'white', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                {cta} <ChevronRight size={15} />
+              <button style={{ width: '100%', padding: '0.9rem 1.5rem', borderRadius: '12px', border: 'none', background: bg, color: 'white', fontWeight: '800', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: `0 6px 20px ${accent}35`, transition: 'all 0.2s', position: 'relative', zIndex: 1 }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                {cta} <ChevronRight size={17} />
               </button>
             </div>
           ))}
@@ -134,22 +157,28 @@ export default function Landing() {
       </section>
 
       {/* FEATURES */}
-      <section style={{ background: 'white', borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', padding: '4.5rem 2rem' }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ display: 'inline-block', background: '#f0fdf4', color: '#15803d', fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: '20px', padding: '0.3rem 0.9rem', marginBottom: '0.75rem' }}>Özellikler</span>
-            <h2 style={{ color: '#111827', fontSize: 'clamp(1.3rem, 3vw, 1.9rem)', fontWeight: '800' }}>İhtiyacınız olan her şey</h2>
+      <section style={{ background: 'linear-gradient(180deg, #f9fafb 0%, #f5f7fa 100%)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: '5.5rem 2rem', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 0, left: '10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, right: '10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        
+        <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+            <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', color: '#15803d', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>🚀 Özellikler</span>
+            <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Güçlü araçlar, basit arayüz</h2>
+            <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '500px', margin: '0 auto' }}>Tüm ihtiyacınız olan özellikleri tek platformda bulun</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.75rem' }}>
             {FEATURES.map(({ icon: Icon, title, desc, color }) => (
-              <div key={title} style={{ background: '#f9fafb', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '1.5rem', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.boxShadow = 'none'; }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <Icon size={19} color={color} />
+              <div key={title} style={{ background: 'white', borderRadius: '18px', border: '1.5px solid #e5e7eb', padding: '2rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = color; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '120px', height: '120px', background: `linear-gradient(135deg, ${color}15, transparent)`, borderRadius: '50%', transform: 'translate(40px, -40px)' }} />
+                
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', position: 'relative', zIndex: 1 }}>
+                  <Icon size={22} color={color} strokeWidth={1.5} />
                 </div>
-                <h4 style={{ color: '#111827', fontWeight: '700', marginBottom: '0.4rem', fontSize: '0.9rem' }}>{title}</h4>
-                <p style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: '1.65' }}>{desc}</p>
+                <h4 style={{ color: '#111827', fontWeight: '800', marginBottom: '0.5rem', fontSize: '1rem', position: 'relative', zIndex: 1 }}>{title}</h4>
+                <p style={{ color: '#6b7280', fontSize: '0.85rem', lineHeight: '1.7', position: 'relative', zIndex: 1 }}>{desc}</p>
               </div>
             ))}
           </div>
