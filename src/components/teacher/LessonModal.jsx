@@ -24,9 +24,7 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
         prompt: `Generate a realistic fake Zoom meeting link for a tutoring session on ${form.date} at ${form.startTime}. Format: https://zoom.us/j/XXXXXXXXXX?pwd=XXXXXXXXX. Return only the URL.`,
       });
       setMeetingLink(res.trim());
-    } finally {
-      setZoomLoading(false);
-    }
+    } finally { setZoomLoading(false); }
   };
 
   const handleTypeChange = (t) => {
@@ -43,92 +41,89 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
     const end = new Date(`${form.date}T${form.endTime}`);
     const duration = Math.round((end - start) / 60000);
     const groupId = recurring ? `group_${Date.now()}` : undefined;
-
-    const baseLesson = {
-      ...form, studentName: student?.name || '',
-      teacherEmail: (await base44.auth.me()).email,
-      meetingLink, duration,
-      recurringGroupId: groupId,
-    };
-
+    const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: (await base44.auth.me()).email, meetingLink, duration, recurringGroupId: groupId };
     const dates = [form.date];
-    if (recurring) {
-      for (let w = 1; w < recurringWeeks; w++) {
-        dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
-      }
-    }
-
-    for (const d of dates) {
-      await base44.entities.Lesson.create({ ...baseLesson, date: d });
-    }
-
+    if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
+    for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
     setLoading(false);
     onSaved();
     onClose();
   };
 
-  const inputStyle = {
-    width: '100%', padding: '0.55rem 0.75rem', borderRadius: '10px',
-    background: 'var(--bg-hover)', border: '1px solid var(--border)',
-    color: 'var(--text-primary)', fontSize: '0.875rem', outline: 'none',
+  const inp = {
+    width: '100%', padding: '0.6rem 0.85rem', borderRadius: '10px',
+    background: '#f9fafb', border: '1.5px solid #e5e7eb',
+    color: '#111827', fontSize: '0.875rem', outline: 'none',
+    transition: 'border-color 0.15s',
   };
-  const labelStyle = { fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
+  const lbl = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '500px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
+        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '700' }}>Ders Planla</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={20} /></button>
+          <div>
+            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Ders Planla</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>Yeni ders oluştur</p>
+          </div>
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#6b7280'; }}>
+            <X size={16} />
+          </button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* Student */}
           <div>
-            <label style={labelStyle}>Öğrenci</label>
-            <select style={inputStyle} value={form.studentId} onChange={e => u('studentId', e.target.value)}>
+            <label style={lbl}>Öğrenci</label>
+            <select style={inp} value={form.studentId} onChange={e => u('studentId', e.target.value)}
+              onFocus={e => e.target.style.borderColor = '#4f46e5'}
+              onBlur={e => e.target.style.borderColor = '#e5e7eb'}>
               <option value=''>Öğrenci seçin...</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
 
           {/* Date + Time */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={labelStyle}>Tarih</label>
-              <input style={inputStyle} type='date' value={form.date} onChange={e => u('date', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Başlangıç</label>
-              <input style={inputStyle} type='time' value={form.startTime} onChange={e => u('startTime', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Bitiş</label>
-              <input style={inputStyle} type='time' value={form.endTime} onChange={e => u('endTime', e.target.value)} />
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
+            {[
+              { label: 'Tarih', type: 'date', val: form.date, key: 'date' },
+              { label: 'Başlangıç', type: 'time', val: form.startTime, key: 'startTime' },
+              { label: 'Bitiş', type: 'time', val: form.endTime, key: 'endTime' },
+            ].map(({ label, type, val, key }) => (
+              <div key={key}>
+                <label style={lbl}>{label}</label>
+                <input style={inp} type={type} value={val} onChange={e => u(key, e.target.value)}
+                  onFocus={e => e.target.style.borderColor = '#4f46e5'}
+                  onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+              </div>
+            ))}
           </div>
 
           {/* Subject */}
           <div>
-            <label style={labelStyle}>Konu</label>
-            <input style={inputStyle} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)} />
+            <label style={lbl}>Konu</label>
+            <input style={inp} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)}
+              onFocus={e => e.target.style.borderColor = '#4f46e5'}
+              onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
 
           {/* Type */}
           <div>
-            <label style={labelStyle}>Ders Türü</label>
+            <label style={lbl}>Ders Türü</label>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               {[{ v: 'yuzyuze', label: 'Yüz Yüze', icon: MapPin }, { v: 'online', label: 'Online', icon: Video }].map(({ v, label, icon: Icon }) => (
-                <button key={v} onClick={() => handleTypeChange(v)}
-                  style={{
-                    flex: 1, padding: '0.65rem', borderRadius: '12px', border: '2px solid',
-                    borderColor: form.type === v ? 'var(--accent)' : 'var(--border)',
-                    background: form.type === v ? 'var(--accent-light)' : 'transparent',
-                    color: form.type === v ? 'var(--accent)' : 'var(--text-secondary)',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
-                    fontSize: '0.85rem', fontWeight: '600', transition: 'all 0.15s',
-                  }}>
-                  <Icon size={15} />{label}
+                <button key={v} onClick={() => handleTypeChange(v)} style={{
+                  flex: 1, padding: '0.6rem', borderRadius: '10px', border: '1.5px solid',
+                  borderColor: form.type === v ? '#4f46e5' : '#e5e7eb',
+                  background: form.type === v ? '#eef2ff' : '#f9fafb',
+                  color: form.type === v ? '#4f46e5' : '#6b7280',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                  fontSize: '0.83rem', fontWeight: '600', transition: 'all 0.15s',
+                }}>
+                  <Icon size={14} />{label}
                 </button>
               ))}
             </div>
@@ -137,64 +132,66 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
           {/* Meeting link */}
           {form.type === 'online' && (
             <div>
-              <label style={labelStyle}>Zoom Linki</label>
+              <label style={lbl}>Zoom Linki</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input style={{ ...inputStyle, flex: 1 }} placeholder='Oluşturuluyor...' value={meetingLink} onChange={e => setMeetingLink(e.target.value)} />
-                <button onClick={generateZoom} disabled={zoomLoading}
-                  style={{ padding: '0.55rem 0.75rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                  {zoomLoading ? <Loader2 size={15} className='animate-spin' /> : <RefreshCw size={15} />}
+                <input style={{ ...inp, flex: 1 }} placeholder='Oluşturuluyor...' value={meetingLink} onChange={e => setMeetingLink(e.target.value)} />
+                <button onClick={generateZoom} disabled={zoomLoading} style={{ padding: '0.6rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#6b7280', cursor: 'pointer' }}>
+                  {zoomLoading ? <Loader2 size={14} className='animate-spin' /> : <RefreshCw size={14} />}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Location for face-to-face */}
+          {/* Location */}
           {form.type === 'yuzyuze' && (
             <div>
-              <label style={labelStyle}>Konum</label>
-              <input style={inputStyle} placeholder='Adres veya yer...' value={form.location} onChange={e => u('location', e.target.value)} />
+              <label style={lbl}>Konum</label>
+              <input style={inp} placeholder='Adres veya yer...' value={form.location} onChange={e => u('location', e.target.value)}
+                onFocus={e => e.target.style.borderColor = '#4f46e5'}
+                onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
             </div>
           )}
 
           {/* Notes */}
           <div>
-            <label style={labelStyle}>Notlar</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: '70px' }} placeholder='Ders notları...' value={form.notes} onChange={e => u('notes', e.target.value)} />
+            <label style={lbl}>Notlar</label>
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: '72px' }} placeholder='Ders notları...' value={form.notes} onChange={e => u('notes', e.target.value)}
+              onFocus={e => e.target.style.borderColor = '#4f46e5'}
+              onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
 
           {/* Recurring */}
-          <div style={{ background: 'var(--bg-hover)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border)' }}>
+          <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
               <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }} />
-              <RefreshCw size={15} color='var(--accent)' />
-              <span style={{ color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
+                style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
+              <RefreshCw size={14} color='#4f46e5' />
+              <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
             </label>
             {recurring && (
-              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>Toplam hafta:</span>
+              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
                 {[2, 4, 8, 12].map(w => (
-                  <button key={w} onClick={() => setRecurringWeeks(w)}
-                    style={{
-                      padding: '0.25rem 0.65rem', borderRadius: '8px', border: '1px solid',
-                      borderColor: recurringWeeks === w ? 'var(--accent)' : 'var(--border)',
-                      background: recurringWeeks === w ? 'var(--accent-light)' : 'transparent',
-                      color: recurringWeeks === w ? 'var(--accent)' : 'var(--text-secondary)',
-                      cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
-                    }}>{w}</button>
+                  <button key={w} onClick={() => setRecurringWeeks(w)} style={{
+                    padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
+                    borderColor: recurringWeeks === w ? '#4f46e5' : '#e5e7eb',
+                    background: recurringWeeks === w ? '#eef2ff' : 'white',
+                    color: recurringWeeks === w ? '#4f46e5' : '#6b7280',
+                    cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                  }}>{w}</button>
                 ))}
               </div>
             )}
           </div>
 
           {/* Submit */}
-          <button onClick={save} disabled={loading || !form.studentId}
-            style={{
-              padding: '0.75rem', borderRadius: '12px', border: 'none',
-              background: 'var(--accent)', color: 'white', fontWeight: '700',
-              fontSize: '0.95rem', cursor: 'pointer', opacity: (!form.studentId || loading) ? 0.6 : 1,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-            }}>
+          <button onClick={save} disabled={loading || !form.studentId} style={{
+            padding: '0.8rem', borderRadius: '12px', border: 'none',
+            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700',
+            fontSize: '0.9rem', cursor: 'pointer', opacity: (!form.studentId || loading) ? 0.6 : 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s',
+          }}>
             {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : 'Dersi Kaydet'}
           </button>
         </div>
