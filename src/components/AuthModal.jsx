@@ -15,7 +15,7 @@ export default function AuthModal({ role, onClose }) {
     
     localStorage.setItem('tilki_role', role);
     const redirectPage = role === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard';
-    window.location.href = `/${redirectPage}`;
+    base44.auth.redirectToLogin(`/${redirectPage}`);
   };
 
   return (
