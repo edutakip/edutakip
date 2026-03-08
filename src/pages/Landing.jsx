@@ -72,15 +72,15 @@ export default function Landing() {
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => selectRole('teacher')}
-              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', transition: 'all 0.3s' }}
+              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', transition: 'all 0.3s', animation: 'float 3s ease-in-out infinite' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
               <GraduationCap size={19} /> Öğretmen Paneli <ChevronRight size={17} />
             </button>
             <button onClick={() => selectRole('parent')}
-              style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', backdropFilter: 'blur(15px)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}>
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))', border: '1.5px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', backdropFilter: 'blur(15px)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', animation: 'float 3s ease-in-out infinite 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15))'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}>
               <Users size={19} /> Veli Paneli <ChevronRight size={17} />
             </button>
           </div>
@@ -100,6 +100,10 @@ export default function Landing() {
           @keyframes pulse {
             0%, 100% { opacity: 0.6; }
             50% { opacity: 1; }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
           }
         `}</style>
       </section>
