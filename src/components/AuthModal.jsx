@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function AuthModal({ role, onClose }) {
   const [loading, setLoading] = useState(false);
 
+  const handleChange = (e) => {
+    // placeholder
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     localStorage.setItem('tilki_role', role);
     base44.auth.redirectToLogin();
   };
