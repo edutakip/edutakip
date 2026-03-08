@@ -94,13 +94,6 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Bottom */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-          <button onClick={() => setIsDark(d => !d)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.6rem 0.75rem', borderRadius: '10px', border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.85rem', overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            {isDark ? <Sun size={18} style={{ flexShrink: 0 }} /> : <Moon size={18} style={{ flexShrink: 0 }} />}
-            {!collapsed && (isDark ? 'Açık Tema' : 'Koyu Tema')}
-          </button>
           <button onClick={() => { localStorage.removeItem('tilki_role'); window.location.href = createPageUrl('Landing'); }}
             style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.6rem 0.75rem', borderRadius: '10px', border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.85rem', overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
