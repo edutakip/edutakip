@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Calendar, Users, DollarSign, HelpCircle, LogOut, Sun, Moon, Home, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Users, DollarSign, HelpCircle, LogOut, Sun, Moon, Home, GraduationCap, ChevronLeft, ChevronRight, BookOpen, CalendarDays, Baby, LayoutDashboard } from 'lucide-react';
 
 const TEACHER_NAV = [
-  { label: 'Takvim', icon: Calendar, page: 'TeacherDashboard' },
+  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
   { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
+  { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
+  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Destek', icon: HelpCircle, page: null },
+  { label: 'Veli Görünümü', icon: Baby, page: 'ParentDashboard' },
 ];
 
 const PARENT_NAV = [
