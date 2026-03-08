@@ -41,12 +41,7 @@ export default function AuthModal({ role, onClose, onSuccess }) {
           setLoading(false);
           return;
         }
-        await base44.auth.signup({
-          email: formData.email,
-          password: formData.password,
-          full_name: formData.name,
-          role: role === 'teacher' ? 'teacher' : 'user',
-        });
+        await base44.auth.signup(formData.email, formData.password, formData.name);
       }
 
       localStorage.setItem('tilki_role', role);
