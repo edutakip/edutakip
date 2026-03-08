@@ -108,64 +108,64 @@ export default function Landing() {
         `}</style>
       </section>
 
-      {/* TESTIMONIALS / CONVERSATIONS */}
+      {/* CONVERSATIONS - WHATSAPP STYLE */}
       <section style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(79,70,229,0.3), transparent)' }} />
         
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>💬 Gerçek Hayat Örnekleri</span>
-          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Bir Öğretmenin Sıradan Günü</h2>
-          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Binlerce öğretmen ve veli EduTrack ile nasıl daha verimli çalıştığını keşfedin</p>
+          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>💬 Gerçek Konuşmalar</span>
+          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>EduTrack ile Bağlantıda Kalın</h2>
+          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Öğretmen ve veliler bilgilerini anında paylaşıyor</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem' }}>
           {[
             {
-              side: 'Veli Perspektifi',
-              icon: '👨‍👩‍👧',
-              color: '#fef3c7',
-              borderColor: '#f59e0b',
+              name: 'Emre\'nin Hocası',
+              subtitle: 'Matematik',
               messages: [
-                { text: 'Hocam bu hafta Emre\'nin dersi var mı?', sender: 'left' },
-                { text: 'Geçen ayın ödeme tutarı kaç lira?', sender: 'left' },
-                { text: 'Ders başarıdan mı gidiyor?', sender: 'left' },
+                { text: 'Merhaba, bu haftanın dersi Perşembe 16:00\'de', sender: 'right', time: '14:30' },
+                { text: 'Lütfen önemdeki 3. bölümü çalışın', sender: 'right', time: '14:31' },
+                { text: 'Teşekkürler ✓✓', sender: 'left', time: '14:45' },
               ]
             },
             {
-              side: 'Öğretmen Perspektifi',
-              icon: '👨‍🏫',
-              color: '#d1fae5',
-              borderColor: '#10b981',
+              name: 'Emre\'nin Velisi',
+              subtitle: 'Veli',
               messages: [
-                { text: '9 Mart Pazartesi saat 16:00\'de dersi var', sender: 'right' },
-                { text: '3.500 TL, geçen ay tam ödedi', sender: 'right' },
-                { text: 'Çok iyi gidiyor, son sınavdan 85 aldı 🎉', sender: 'right' },
+                { text: 'Hocam bu ay ödemeyi yapabilirim', sender: 'left', time: '09:15' },
+                { text: 'Emre\'nin başarısından çok memnunum', sender: 'left', time: '09:16' },
+                { text: 'Tamamdır, ödeme alındı ✓✓', sender: 'right', time: '09:20' },
+                { text: 'Emre çok başarılı gidiyor 🎉', sender: 'right', time: '09:21' },
               ]
             },
           ].map((conv, idx) => (
             <div key={idx}
-              style={{ background: 'white', borderRadius: '20px', border: '1.5px solid #e5e7eb', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', overflow: 'hidden' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}>
+              style={{ background: '#0f172a', borderRadius: '24px', border: '1px solid #1e293b', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.3)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)'; }}>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #f3f4f6' }}>
-                <span style={{ fontSize: '1.5rem' }}>{conv.icon}</span>
-                <span style={{ fontWeight: '800', color: '#111827', fontSize: '0.95rem' }}>{conv.side}</span>
+              {/* Header */}
+              <div style={{ padding: '1rem', borderBottom: '1px solid #1e293b', background: '#1a1f35' }}>
+                <p style={{ color: 'white', fontWeight: '700', fontSize: '0.9rem', margin: 0 }}>{conv.name}</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.75rem', margin: '0.25rem 0 0 0' }}>{conv.subtitle}</p>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Messages */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.25rem', height: '280px', overflowY: 'auto' }}>
                 {conv.messages.map((msg, midx) => (
                   <div key={midx} style={{ display: 'flex', justifyContent: msg.sender === 'right' ? 'flex-end' : 'flex-start' }}>
                     <div style={{
-                      background: conv.color,
-                      borderRadius: '14px',
-                      padding: '0.75rem 1.1rem',
-                      maxWidth: '90%',
-                      borderLeft: msg.sender === 'right' ? 'none' : `3px solid ${conv.borderColor}`,
-                      borderRight: msg.sender === 'right' ? `3px solid ${conv.borderColor}` : 'none'
+                      background: msg.sender === 'right' ? '#059669' : '#1e293b',
+                      borderRadius: '18px',
+                      padding: '0.7rem 1rem',
+                      maxWidth: '85%',
                     }}>
-                      <p style={{ color: '#111827', fontSize: '0.9rem', lineHeight: '1.6', margin: 0, fontWeight: '500' }}>
+                      <p style={{ color: 'white', fontSize: '0.85rem', lineHeight: '1.5', margin: 0, fontWeight: '500' }}>
                         {msg.text}
+                      </p>
+                      <p style={{ color: msg.sender === 'right' ? 'rgba(255,255,255,0.6)' : '#64748b', fontSize: '0.7rem', margin: '0.3rem 0 0 0', textAlign: 'right' }}>
+                        {msg.time}
                       </p>
                     </div>
                   </div>
