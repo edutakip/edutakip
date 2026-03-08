@@ -28,7 +28,7 @@ export default function Layout({ children, currentPageName }) {
   const sideW = collapsed ? '68px' : '220px';
 
   return (
-    <div className={isDark ? 'dark-mode' : ''} style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
 
       {/* SIDEBAR */}
       <aside style={{
