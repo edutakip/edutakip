@@ -12,6 +12,7 @@ export default function TeacherStudents() {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [payStudent, setPayStudent] = useState(null);
+  const [detailStudent, setDetailStudent] = useState(null);
 
   useEffect(() => { loadStudents(); }, []);
 

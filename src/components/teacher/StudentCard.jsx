@@ -18,7 +18,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const balance = collected - earned; // negative = owes
 
   return (
-    <div style={{
+    <div onClick={onCardClick} style={{
       background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
       borderRadius: '18px',
       border: '1px solid rgba(255,255,255,0.08)',
@@ -27,7 +27,11 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
       display: 'flex',
       flexDirection: 'column',
       gap: '1rem',
-    }}>
+      cursor: 'pointer',
+      transition: 'border-color 0.15s, transform 0.15s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
       {/* Name + badges */}
       <div>
         <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.05rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>{student.name}</h3>
