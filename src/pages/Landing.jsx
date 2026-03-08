@@ -108,53 +108,79 @@ export default function Landing() {
         `}</style>
       </section>
 
-      {/* ROLE SELECT */}
-      <section style={{ padding: '6rem 2rem', maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+      {/* TESTIMONIALS / CONVERSATIONS */}
+      <section style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(79,70,229,0.3), transparent)' }} />
         
-        <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>✨ Rolünüzü Seçin</span>
-        <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-0.8px' }}>Hangi rolü üstleniyorsunuz?</h2>
-        <p style={{ color: '#6b7280', fontSize: '1rem', marginBottom: '3rem', maxWidth: '500px', margin: '0 auto 3rem' }}>Paneline giriş yaparak tüm özelliklere erişim sağlayın</p>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>💬 Gerçek Hayat Örnekleri</span>
+          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Bir Öğretmenin Sıradan Günü</h2>
+          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Binlerce öğretmen ve veli EduTrack ile nasıl daha verimli çalıştığını keşfedin</p>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', justifyContent: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
           {[
             {
-              role: 'teacher', icon: GraduationCap, title: 'Öğretmen Paneli',
-              accent: '#4f46e5', bg: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-              features: ['📅 Ders Takvimi', '👨‍🎓 Öğrenci Takibi', '💰 Finans Yönetimi', '👨‍👩‍👧 Veli Bildirimleri'],
-              cta: 'Öğretmen Girişi',
+              name: 'Veli',
+              icon: '👨‍👩‍👧',
+              time: '08:47',
+              messages: [
+                { text: 'Hocam bu hafta ders var mı?', highlight: 'Programı unuttuğu' },
+                { text: 'Geçen ayın ödemesini yapmıştık ya hocam?', highlight: 'Ödemeyi kontrol ettiği', sender: 'right' },
+              ]
             },
             {
-              role: 'parent', icon: Users, title: 'Veli Paneli',
-              accent: '#0ea5e9', bg: 'linear-gradient(135deg, #0284c7, #0ea5e9)',
-              features: ['📋 Ders Programı', '🧾 Ödeme Geçmişi', '💬 Öğretmen İletişim', '🔗 Ders Linki'],
-              cta: 'Veli Girişi',
+              name: 'Öğrenci',
+              icon: '👦',
+              time: '10:32',
+              messages: [
+                { text: 'Hocam hangi sayfadayız? Defter im kaybettim', highlight: 'İlerleme takip' },
+                { text: 'Hocam bu haftaya ödev var mıydı? 📝', highlight: 'Devleri hatırlayan', sender: 'right' },
+              ]
             },
-          ].map(({ role, icon: Icon, title, accent, bg, features, cta }) => (
-            <div key={role}
-              style={{ background: 'linear-gradient(135deg, #ffffff, #f9fafb)', border: '1.5px solid #e5e7eb', borderRadius: '24px', padding: '2.5rem 2rem', textAlign: 'center', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', position: 'relative', overflow: 'hidden' }}
-              onClick={() => selectRole(role)}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = `0 24px 48px rgba(0,0,0,0.12)`; e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, white)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #f9fafb)'; }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: `linear-gradient(135deg, ${accent}20, transparent)`, borderRadius: '50%', transform: 'translate(80px, -80px)', pointerEvents: 'none' }} />
+            {
+              name: 'İç Sesiniz',
+              icon: '⚡',
+              time: '21:45',
+              messages: [
+                { text: 'Yine pazar akşamı, yine saatlerce planlama...', highlight: 'Manuel planlama' },
+                { text: '3 aydır ödeme alamadım, şu aileiden nasıl söyleyeceğim', highlight: 'Finans takibi sıkıntısı', sender: 'right' },
+              ]
+            },
+          ].map((conv, idx) => (
+            <div key={idx}
+              style={{ background: 'white', borderRadius: '20px', border: '1.5px solid #e5e7eb', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', overflow: 'hidden' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}>
               
-              <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.75rem', boxShadow: `0 8px 25px ${accent}40`, position: 'relative', zIndex: 1 }}>
-                <Icon size={28} color='white' />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #f3f4f6' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>{conv.icon}</span>
+                  <span style={{ fontWeight: '700', color: '#111827', fontSize: '0.9rem' }}>{conv.name}</span>
+                </div>
+                <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{conv.time}</span>
               </div>
-              <h3 style={{ color: '#111827', fontSize: '1.3rem', fontWeight: '900', marginBottom: '1.25rem', letterSpacing: '-0.5px', position: 'relative', zIndex: 1 }}>{title}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', position: 'relative', zIndex: 1 }}>
-                {features.map(f => (
-                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#4b5563', fontSize: '0.9rem', fontWeight: '500' }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent }}></span>
-                    {f}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {conv.messages.map((msg, midx) => (
+                  <div key={midx} style={{ display: 'flex', justifyContent: msg.sender === 'right' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{
+                      background: msg.sender === 'right' ? '#f0fdf4' : '#fef3c7',
+                      borderRadius: '14px',
+                      padding: '0.75rem 1rem',
+                      maxWidth: '85%',
+                      borderLeft: msg.sender === 'right' ? 'none' : '3px solid #f59e0b'
+                    }}>
+                      <p style={{ color: '#111827', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 0.3rem 0' }}>
+                        {msg.text.split(msg.highlight).map((part, i) => (
+                          i === 1 ? <span key={i} style={{ fontWeight: '700' }}>{msg.highlight}</span> : part
+                        ))}
+                      </p>
+                      <p style={{ color: '#6b7280', fontSize: '0.75rem', margin: 0 }}>{msg.highlight}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-              <button style={{ width: '100%', padding: '0.9rem 1.5rem', borderRadius: '12px', border: 'none', background: bg, color: 'white', fontWeight: '800', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: `0 6px 20px ${accent}35`, transition: 'all 0.2s', position: 'relative', zIndex: 1 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                {cta} <ChevronRight size={17} />
-              </button>
             </div>
           ))}
         </div>
