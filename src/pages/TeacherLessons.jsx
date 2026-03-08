@@ -1,95 +1,224 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInMinutes } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Plus, BookOpen, Video, MapPin, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
-
-const STATUS_MAP = {
-  planlandı: { label: 'Planlandı', color: '#2563eb', bg: 'rgba(37,99,235,0.1)', icon: Clock },
-  tamamlandı: { label: 'Tamamlandı', color: '#059669', bg: 'rgba(5,150,105,0.1)', icon: CheckCircle },
-  iptal: { label: 'İptal', color: '#dc2626', bg: 'rgba(220,38,38,0.1)', icon: XCircle },
-};
 
 export default function TeacherLessons() {
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [filter, setFilter] = useState('all');
+  const [editLesson, setEditLesson] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [studentFilter, setStudentFilter] = useState('all');
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     const me = await base44.auth.me();
-    const [l, s] = await Promise.all([
+    const [l, s, p] = await Promise.all([
       base44.entities.Lesson.filter({ teacherEmail: me.email }, '-date'),
-      base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+      base44.entities.Student.filter({ teacherEmail: me.email }),
+      base44.entities.Payment.filter({ teacherEmail: me.email }),
     ]);
-    setLessons(l); setStudents(s);
+    setLessons(l); setStudents(s); setPayments(p);
   };
 
-  const filtered = filter === 'all' ? lessons : lessons.filter(l => l.status === filter);
+  const markDone = async (lesson) => {
+    await base44.entities.Lesson.update(lesson.id, { status: 'tamamlandı' });
+    loadData();
+  };
+
+  const markCancel = async (lesson) => {
+    await base44.entities.Lesson.update(lesson.id, { status: 'iptal' });
+    loadData();
+  };
+
+  const markPaid = async (lesson) => {
+    const fee = getLessonFee(lesson);
+    await base44.entities.Payment.create({
+      studentId: lesson.studentId,
+      studentName: lesson.studentName,
+      teacherEmail: lesson.teacherEmail,
+      amount: fee,
+      date: lesson.date,
+      status: 'alındı',
+      description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
+      month: lesson.date?.slice(0, 7),
+    });
+    loadData();
+  };
+
+  const getLessonFee = (lesson) => {
+    const student = students.find(s => s.id === lesson.studentId);
+    if (!student?.monthlyFee || !student?.weeklyLessons) return 0;
+    return Math.round(student.monthlyFee / (student.weeklyLessons * 4.3));
+  };
+
+  const isLessonPaid = (lesson) => {
+    return payments.some(p =>
+      p.studentId === lesson.studentId &&
+      p.date === lesson.date &&
+      p.status === 'alındı'
+    );
+  };
+
+  const getDuration = (start, end) => {
+    if (!start || !end) return null;
+    try {
+      const s = new Date(`2000-01-01T${start}`);
+      const e = new Date(`2000-01-01T${end}`);
+      const mins = differenceInMinutes(e, s);
+      return mins > 0 ? `${mins}dk` : null;
+    } catch { return null; }
+  };
+
+  const filtered = lessons.filter(l => {
+    const statusOk = statusFilter === 'all' || l.status === statusFilter;
+    const studentOk = studentFilter === 'all' || l.studentId === studentFilter;
+    return statusOk && studentOk;
+  });
+
+  const selStyle = { padding: '0.5rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#ffffff', color: '#374151', fontSize: '0.82rem', fontWeight: '500', cursor: 'pointer', outline: 'none', appearance: 'none', paddingRight: '2rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.6rem center' };
 
   return (
-    <div style={{ padding: '1.5rem', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div style={{ padding: '2rem', minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem' }}>
         <div>
-          <h1 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: '800' }}>Dersler</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.2rem' }}>{lessons.length} ders kayıtlı</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Dersler</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{filtered.length} ders toplam</p>
         </div>
-        <button onClick={() => setShowModal(true)}
-          style={{ background: 'var(--accent)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.6rem 1.2rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Plus size={16} /> Ders Ekle
+        <button onClick={() => { setEditLesson(null); setShowModal(true); }}
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+          <Plus size={16} /> Ders Planla
         </button>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        {[['all', 'Tümü'], ['planlandı', 'Planlandı'], ['tamamlandı', 'Tamamlandı'], ['iptal', 'İptal']].map(([val, lbl]) => (
-          <button key={val} onClick={() => setFilter(val)}
-            style={{ padding: '0.4rem 1rem', borderRadius: '20px', border: `1px solid ${filter === val ? 'var(--accent)' : 'var(--border)'}`, background: filter === val ? 'var(--accent-light)' : 'var(--bg-card)', color: filter === val ? 'var(--accent)' : 'var(--text-secondary)', fontWeight: filter === val ? '600' : '400', cursor: 'pointer', fontSize: '0.82rem' }}>
-            {lbl}
-          </button>
-        ))}
+      <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1rem 1.25rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.82rem', fontWeight: '600' }}>
+          <Filter size={14} /> Filtre:
+        </div>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={selStyle}>
+          <option value="all">Tüm Durumlar</option>
+          <option value="planlandı">Planlandı</option>
+          <option value="tamamlandı">Tamamlandı</option>
+          <option value="iptal">İptal</option>
+        </select>
+        <select value={studentFilter} onChange={e => setStudentFilter(e.target.value)} style={selStyle}>
+          <option value="all">Tüm Öğrenciler</option>
+          {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
       </div>
 
-      {/* List */}
+      {/* Lesson List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+            <BookOpen size={36} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
+            <p>Ders kaydı bulunamadı</p>
+          </div>
+        )}
         {filtered.map(lesson => {
-          const s = STATUS_MAP[lesson.status] || STATUS_MAP.planlandı;
-          const Icon = s.icon;
+          const isPaid = isLessonPaid(lesson);
+          const fee = getLessonFee(lesson);
+          const duration = getDuration(lesson.startTime, lesson.endTime);
+          const isScheduled = lesson.status === 'planlandı';
+          const isCompleted = lesson.status === 'tamamlandı';
+          const isCancelled = lesson.status === 'iptal';
+
+          let dateStr = '';
+          try { dateStr = format(parseISO(lesson.date), 'd MMM', { locale: tr }); } catch {}
+
           return (
-            <div key={lesson.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: lesson.type === 'online' ? 'rgba(59,130,246,0.12)' : 'rgba(124,58,237,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {lesson.type === 'online' ? <Video size={20} color='#2563eb' /> : <MapPin size={20} color='#7c3aed' />}
+            <div key={lesson.id} style={{ background: '#ffffff', borderRadius: '14px', border: '1px solid #f1f5f9', padding: '1.1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', flexWrap: 'wrap' }}>
+              {/* Date/Time */}
+              <div style={{ minWidth: '52px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '500', textTransform: 'capitalize' }}>{dateStr}</div>
+                <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1e1b4b', marginTop: '0.1rem' }}>{lesson.startTime?.slice(0, 5)}</div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.95rem' }}>{lesson.studentName}</span>
-                  {lesson.subject && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>· {lesson.subject}</span>}
-                </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '0.2rem' }}>
-                  {lesson.date ? format(parseISO(lesson.date), 'd MMMM yyyy', { locale: tr }) : ''} · {lesson.startTime} – {lesson.endTime}
+
+              {/* Student + info */}
+              <div style={{ flex: 1, minWidth: '160px' }}>
+                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>{lesson.studentName}</div>
+                <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.15rem' }}>
+                  {[lesson.subject, duration && `${duration}`, fee > 0 && `₺${fee}`].filter(Boolean).join(' · ')}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: s.bg, color: s.color, borderRadius: '20px', padding: '0.3rem 0.75rem', fontSize: '0.78rem', fontWeight: '600', flexShrink: 0 }}>
-                <Icon size={13} /> {s.label}
+
+              {/* Badges */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {/* Status badge */}
+                <span style={{
+                  fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px',
+                  background: isScheduled ? '#e0e7ff' : isCompleted ? '#d1fae5' : '#fee2e2',
+                  color: isScheduled ? '#4338ca' : isCompleted ? '#065f46' : '#b91c1c',
+                }}>
+                  {isScheduled ? 'planlandı' : isCompleted ? 'tamamlandı' : 'iptal'}
+                </span>
+                {/* Payment badge */}
+                {!isCancelled && (
+                  <span style={{
+                    fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px',
+                    background: isPaid ? '#d1fae5' : '#fef3c7',
+                    color: isPaid ? '#065f46' : '#92400e',
+                  }}>
+                    {isPaid ? 'ödendi' : 'ödenmedi'}
+                  </span>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', flexWrap: 'wrap' }}>
+                {isScheduled && (
+                  <>
+                    <ActionBtn icon={<CheckCircle size={13} />} label="Tamamlandı" color="#059669" onClick={() => markDone(lesson)} />
+                    <ActionBtn icon={<XCircle size={13} />} label="İptal" color="#dc2626" onClick={() => markCancel(lesson)} />
+                  </>
+                )}
+                {!isPaid && !isCancelled && (
+                  <ActionBtn label="Ödendi İşaretle" color="#4f46e5" onClick={() => markPaid(lesson)} />
+                )}
+                <button style={{ background: 'none', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.3rem' }}
+                  title="Not ekle"><MessageCircle size={15} /></button>
+                <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#6b7280" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
               </div>
             </div>
           );
         })}
-        {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            <BookOpen size={40} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-            <p>Henüz ders kaydı yok</p>
-          </div>
-        )}
       </div>
 
       {showModal && (
-        <LessonModal students={students} defaultDate={format(new Date(), 'yyyy-MM-dd')} onClose={() => setShowModal(false)} onSaved={loadData} />
+        <LessonModal
+          students={students}
+          defaultDate={editLesson?.date || format(new Date(), 'yyyy-MM-dd')}
+          existingLesson={editLesson}
+          onClose={() => { setShowModal(false); setEditLesson(null); }}
+          onSaved={loadData}
+        />
       )}
     </div>
+  );
+}
+
+function ActionBtn({ icon, label, color, onClick }) {
+  const [hover, setHover] = React.useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        background: hover ? `${color}15` : 'none',
+        border: 'none', color, cursor: 'pointer',
+        padding: '0.3rem 0.55rem', borderRadius: '8px',
+        fontSize: '0.78rem', fontWeight: '600',
+        display: 'flex', alignItems: 'center', gap: '0.25rem',
+        transition: 'background 0.15s', whiteSpace: 'nowrap',
+      }}>
+      {icon}{label}
+    </button>
   );
 }
