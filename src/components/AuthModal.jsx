@@ -1,43 +1,17 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { createPageUrl } from '@/utils';
 
 export default function AuthModal({ role, onClose }) {
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullName: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-
-    try {
-      if (isLogin) {
-        await base44.auth.login(formData.email, formData.password);
-      } else {
-        await base44.auth.signup(formData.email, formData.password, formData.fullName);
-      }
-      
-      localStorage.setItem('tilki_role', role);
-      window.location.href = createPageUrl(role === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');
-    } catch (err) {
-      setError(err.message || (isLogin ? 'Giriş başarısız' : 'Kayıt başarısız'));
-      setLoading(false);
-    }
+    
+    localStorage.setItem('tilki_role', role);
+    const nextUrl = role === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard';
+    base44.auth.redirectToLogin(nextUrl);
   };
 
   return (
