@@ -4,6 +4,7 @@ import { Plus, Search, RefreshCw } from 'lucide-react';
 import StudentCard from '../components/teacher/StudentCard';
 import AddStudentModal from '../components/teacher/AddStudentModal';
 import PaymentModal from '../components/teacher/PaymentModal';
+import StudentDetailModal from '../components/teacher/StudentDetailModal';
 
 export default function TeacherStudents() {
   const [students, setStudents] = useState([]);
