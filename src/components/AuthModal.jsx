@@ -47,7 +47,8 @@ export default function AuthModal({ role, onClose, onSuccess }) {
       localStorage.setItem('tilki_role', role);
       onSuccess();
     } catch (err) {
-      setError(isLogin ? 'E-posta veya şifre yanlış' : 'Kayıt başarısız oldu');
+      console.error('Auth error:', err);
+      setError(isLogin ? 'E-posta veya şifre yanlış' : `Kayıt başarısız oldu: ${err.message || 'Bilinmeyen hata'}`);
     } finally {
       setLoading(false);
     }
