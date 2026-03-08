@@ -20,13 +20,8 @@ export default function Layout({ children, currentPageName }) {
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
 
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', isDark);
-    localStorage.setItem('edutrack_theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
   if (currentPageName === 'Landing') {
-    return <div className={isDark ? 'dark-mode' : ''}>{children}</div>;
+    return <div>{children}</div>;
   }
 
   const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
