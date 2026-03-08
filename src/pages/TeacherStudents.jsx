@@ -61,7 +61,7 @@ export default function TeacherStudents() {
       </div>
 
       {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
         {filtered.map(s => (
           <StudentCard key={s.id} student={s} onAddPayment={setPayStudent} />
         ))}
