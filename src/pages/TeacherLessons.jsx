@@ -217,8 +217,14 @@ export default function TeacherLessons() {
                     <ActionBtn icon={<XCircle size={13} />} label="İptal" color="#dc2626" onClick={() => markCancel(lesson)} />
                   </>
                 )}
+                {isCompleted && (
+                  <ActionBtn label="Tamamlanmadı" color="#6b7280" onClick={() => markUndone(lesson)} />
+                )}
                 {!isPaid && !isCancelled && (
                   <ActionBtn label="Ödendi İşaretle" color="#4f46e5" onClick={() => markPaid(lesson)} />
+                )}
+                {isPaid && !isCancelled && (
+                  <ActionBtn label="Ödenmedi" color="#dc2626" onClick={() => markUnpaid(lesson)} />
                 )}
                 <button style={{ background: 'none', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.3rem' }}
                   title="Not ekle"><MessageCircle size={15} /></button>
