@@ -11,6 +11,8 @@ const FEATURES = [
 ];
 
 export default function Landing() {
+  const [selectedRole, setSelectedRole] = useState(null);
+
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
     const role = localStorage.getItem('tilki_role');
@@ -19,8 +21,11 @@ export default function Landing() {
   }, []);
 
   const selectRole = (role) => {
-    localStorage.setItem('tilki_role', role);
-    window.location.href = createPageUrl(role === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');
+    setSelectedRole(role);
+  };
+
+  const handleAuthSuccess = () => {
+    window.location.href = createPageUrl(selectedRole === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');
   };
 
   return (
