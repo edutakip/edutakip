@@ -91,6 +91,7 @@ export default function TeacherStudents() {
 
       {showAdd && <AddStudentModal onClose={() => setShowAdd(false)} onSaved={loadStudents} />}
       {payStudent && <PaymentModal student={payStudent} onClose={() => setPayStudent(null)} onSaved={loadStudents} />}
+      {detailStudent && <StudentDetailModal student={detailStudent} onClose={() => setDetailStudent(null)} onSaved={loadStudents} />}
     </div>
   );
 }
