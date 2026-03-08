@@ -91,13 +91,32 @@ export default function StudentCard({ student, onAddPayment }) {
         </div>
 
         {/* Lesson fee */}
-        <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.65rem 0.5rem', textAlign: 'center' }}>
+        <div
+          onClick={startEditFee}
+          style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.65rem 0.5rem', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e0f2fe'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; }}
+          title="Düzenlemek için tıkla"
+        >
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
             <Clock size={14} color='#10b981' />
           </div>
-          <div style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', lineHeight: 1 }}>
-            {lessonFee ? `₺${lessonFee}` : '—'}
-          </div>
+          {editingFee ? (
+            <input
+              autoFocus
+              type='number'
+              value={feeValue}
+              onChange={e => setFeeValue(e.target.value)}
+              onBlur={saveFee}
+              onKeyDown={e => { if (e.key === 'Enter') saveFee(); if (e.key === 'Escape') setEditingFee(false); }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', textAlign: 'center', border: 'none', borderBottom: '2px solid #10b981', background: 'transparent', fontWeight: '700', fontSize: '0.9rem', color: '#111827', outline: 'none', padding: '0' }}
+            />
+          ) : (
+            <div style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', lineHeight: 1 }}>
+              {lessonFee ? `₺${lessonFee}` : '—'}
+            </div>
+          )}
           <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginTop: '0.2rem', fontWeight: '500' }}>Ders/saati</div>
         </div>
 
