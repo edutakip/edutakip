@@ -33,7 +33,7 @@ export default function Layout({ children, currentPageName }) {
       {/* SIDEBAR */}
       <aside style={{
         width: sideW, flexShrink: 0,
-        background: isDark ? 'var(--bg-secondary)' : 'linear-gradient(180deg, #0f1f3d 0%, #1e3a8a 100%)',
+        background: 'linear-gradient(180deg, #0f1f3d 0%, #1e3a8a 100%)',
         display: 'flex', flexDirection: 'column',
         padding: '0 0.6rem', paddingTop: '1.25rem', paddingBottom: '1rem',
         position: 'fixed', top: 0, left: 0, height: '100vh',
