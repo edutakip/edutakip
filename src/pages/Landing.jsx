@@ -65,7 +65,7 @@ export default function Landing() {
           </div>
           <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: '950', lineHeight: '1.1', letterSpacing: '-1.5px', marginBottom: '1.5rem' }}>
             Özel Dersinizi<br />
-            <span style={{ background: 'linear-gradient(120deg, #a5b4fc 0%, #ddd6fe 50%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%' }}>Profesyonel Yönetin</span>
+            <span style={{ background: 'linear-gradient(120deg, #e0e7ff 0%, #f3e8ff 50%, #fce7f3 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', filter: 'brightness(1.3)' }}>Profesyonel Yönetin</span>
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2.5rem', maxWidth: '550px', margin: '0 auto 2.5rem' }}>
             Ders takvimi, öğrenci takibi, ödeme yönetimi ve veli iletişimini bir platformda gerçekleştirin. 1000+ öğretmen tarafından güveniliyor.
