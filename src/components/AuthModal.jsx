@@ -23,35 +23,9 @@ export default function AuthModal({ role, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-
-    try {
-      if (isLogin) {
-        // Login
-        await base44.auth.login(formData.email, formData.password);
-      } else {
-        // Signup
-        if (formData.password !== formData.confirmPassword) {
-          setError('Şifreler eşleşmiyor');
-          setLoading(false);
-          return;
-        }
-        if (!formData.name.trim()) {
-          setError('Adınızı girin');
-          setLoading(false);
-          return;
-        }
-        await base44.auth.signup(formData.email, formData.password, formData.name);
-      }
-
-      localStorage.setItem('tilki_role', role);
-      onSuccess();
-    } catch (err) {
-      console.error('Auth error:', err);
-      setError(isLogin ? 'E-posta veya şifre yanlış' : `Kayıt başarısız oldu: ${err.message || 'Bilinmeyen hata'}`);
-    } finally {
-      setLoading(false);
-    }
+    
+    localStorage.setItem('tilki_role', role);
+    base44.auth.redirectToLogin();
   };
 
   return (
