@@ -34,7 +34,6 @@ export default function Landing() {
         <AuthModal
           role={selectedRole}
           onClose={() => setSelectedRole(null)}
-          onSuccess={handleAuthSuccess}
         />
       )}
 
