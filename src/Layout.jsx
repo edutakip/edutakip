@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Calendar, Users, DollarSign, HelpCircle, LogOut, Sun, Moon, Home, GraduationCap, ChevronLeft, ChevronRight, BookOpen, CalendarDays, Baby, LayoutDashboard } from 'lucide-react';
+import { Calendar, Users, DollarSign, HelpCircle, LogOut, Home, GraduationCap, ChevronLeft, ChevronRight, BookOpen, CalendarDays, Baby, LayoutDashboard } from 'lucide-react';
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
