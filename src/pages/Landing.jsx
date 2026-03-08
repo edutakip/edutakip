@@ -30,6 +30,13 @@ export default function Landing() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Inter', sans-serif", color: '#111827', overflow: 'hidden' }}>
+      {selectedRole && (
+        <AuthModal
+          role={selectedRole}
+          onClose={() => setSelectedRole(null)}
+          onSuccess={handleAuthSuccess}
+        />
+      )}
 
       {/* NAV */}
       <nav style={{
