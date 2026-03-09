@@ -252,61 +252,90 @@ export default function AddStudentModal({ onClose, onSaved }) {
           </div>
         )}
 
-        {/* Step 3: Ders Programı */}
+        {/* Step 3: Ders Programı ve Finansal Bilgiler */}
         {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <SectionTitle icon={Calendar} title="Haftalık Ders Programı" />
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginTop: '-0.75rem' }}>Seçili günler yeni öğrencinin ders saatleri. Gri hücreler mevcut derslerinizi gösterir.</p>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
-                <thead>
-                  <tr>
-                    <th style={{ color: 'rgba(255,255,255,0.3)', padding: '0.4rem', textAlign: 'left', fontWeight: '600' }}>Saat</th>
-                    {DAYS.map((d, i) => (
-                      <th key={i} style={{ color: 'rgba(255,255,255,0.5)', padding: '0.4rem', textAlign: 'center', fontWeight: '700' }}>{d}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {TIMES.map(time => (
-                    <tr key={time}>
-                      <td style={{ color: 'rgba(255,255,255,0.35)', padding: '0.25rem 0.4rem', whiteSpace: 'nowrap' }}>{time}</td>
-                      {DAYS.map((_, di) => {
-                        const occupied = getLessonsForSlot(di, time);
-                        const selected = form.schedule.find(s => s.day === di && s.time === time);
-                        return (
-                          <td key={di} style={{ padding: '0.2rem' }}>
-                            <div onClick={() => !occupied.length && toggleScheduleSlot(di, time)}
-                              title={occupied.length ? occupied.map(l => l.studentName).join(', ') : ''}
-                              style={{
-                                width: '100%', minWidth: '34px', height: '26px', borderRadius: '6px', cursor: occupied.length ? 'not-allowed' : 'pointer',
-                                background: selected ? '#f97316' : occupied.length ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
-                                border: selected ? '1.5px solid #f97316' : occupied.length ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                                transition: 'all 0.15s',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }}>
-                              {occupied.length > 0 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#818cf8' }} />}
-                            </div>
-                          </td>
-                        );
-                      })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Schedule Section */}
+            <div>
+              <SectionTitle icon={Calendar} title="Haftalık Ders Programı" />
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginTop: '-0.75rem', marginBottom: '1rem' }}>Seçili günler yeni öğrencinin ders saatleri. Mavi hücreler mevcut derslerinizi gösterir.</p>
+              <div style={{ overflowX: 'auto', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ color: 'rgba(255,255,255,0.3)', padding: '0.5rem 0.4rem', textAlign: 'left', fontWeight: '600' }}>Saat</th>
+                      {DAYS.map((d, i) => (
+                        <th key={i} style={{ color: 'rgba(165,180,252,0.8)', padding: '0.5rem 0.4rem', textAlign: 'center', fontWeight: '700', background: 'rgba(99,102,241,0.08)', borderRadius: '8px' }}>{d}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {form.schedule.length > 0 && (
-              <div style={{ padding: '0.75rem 1rem', background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '10px' }}>
-                <div style={{ color: '#fb923c', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.4rem' }}>Seçilen saatler:</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                  {form.schedule.map((s, i) => (
-                    <span key={i} style={{ background: 'rgba(249,115,22,0.2)', border: '1px solid rgba(249,115,22,0.3)', color: '#fdba74', fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: '6px', fontWeight: '600' }}>
-                      {DAY_FULL[s.day]} {s.time}
-                    </span>
-                  ))}
-                </div>
+                  </thead>
+                  <tbody>
+                    {TIMES.map(time => (
+                      <tr key={time}>
+                        <td style={{ color: 'rgba(255,255,255,0.35)', padding: '0.35rem 0.4rem', whiteSpace: 'nowrap' }}>{time}</td>
+                        {DAYS.map((_, di) => {
+                          const occupied = getLessonsForSlot(di, time);
+                          const selected = form.schedule.find(s => s.day === di && s.time === time);
+                          return (
+                            <td key={di} style={{ padding: '0.25rem' }}>
+                              <div onClick={() => !occupied.length && toggleScheduleSlot(di, time)}
+                                title={occupied.length ? occupied.map(l => l.studentName).join(', ') : ''}
+                                style={{
+                                  width: '100%', minWidth: '38px', height: '32px', borderRadius: '8px', cursor: occupied.length ? 'not-allowed' : 'pointer',
+                                  background: selected ? 'linear-gradient(135deg, #6366f1, #818cf8)' : occupied.length ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.03)',
+                                  border: selected ? '1.5px solid #818cf8' : occupied.length ? '1px solid rgba(99,102,241,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                  transition: 'all 0.15s',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                {occupied.length > 0 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.6)' }} />}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+              {form.schedule.length > 0 && (
+                <div style={{ padding: '0.85rem 1rem', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '10px', marginTop: '1rem' }}>
+                  <div style={{ color: '#a5b4fc', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem' }}>✓ Seçilen saatler:</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {form.schedule.map((s, i) => (
+                      <span key={i} style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(165,180,252,0.4)', color: '#c7d2fe', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600' }}>
+                        {DAY_FULL[s.day]} {s.time}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Finansal Bilgiler */}
+            <div>
+              <SectionTitle icon={DollarSign} title="Finansal Bilgiler" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <Field label="Ders Saat Ücreti (₺)">
+                  <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
+                    onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                </Field>
+                <Field label="Ders Süresi (dakika)">
+                  <input style={inp} type="number" placeholder="60" value={form.lessonDuration || 60} onChange={e => u('lessonDuration', e.target.value)}
+                    onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                </Field>
+              </div>
+              {form.feePerLesson && form.schedule.length > 0 && (
+                <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '10px' }}>
+                  <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Aylık Tahmini Gelir</div>
+                  <div style={{ color: '#c7d2fe', fontWeight: '900', fontSize: '1.4rem' }}>
+                    ₺{((Number(form.feePerLesson) || 0) * form.schedule.length * 4.3).toLocaleString('tr-TR')}
+                  </div>
+                  <div style={{ color: 'rgba(165,180,252,0.6)', fontSize: '0.72rem', marginTop: '0.25rem' }}>
+                    {form.schedule.length} ders/hafta × 4.3 hafta
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
