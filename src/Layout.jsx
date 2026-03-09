@@ -54,7 +54,7 @@ export default function Layout({ children, currentPageName }) {
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.75rem 1rem' }} />
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+      <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
         {nav.map((item, i) => {
           const Icon = item.icon;
           const isActive = item.page === currentPageName;
