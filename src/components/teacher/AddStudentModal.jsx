@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen } from 'lucide-react';
+import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
