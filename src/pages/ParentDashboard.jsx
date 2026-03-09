@@ -139,23 +139,36 @@ export default function ParentDashboard() {
       </div>
 
       {/* Quick Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
-        {[
-          { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
-          { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}`, icon: DollarSign, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-          { label: 'Bekleyen', value: `₺${pendingAmount.toLocaleString('tr-TR')}`, icon: AlertCircle, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ padding: '0.5rem', borderRadius: '10px', background: bg, flexShrink: 0 }}>
-              <Icon size={18} color={color} />
+      <div style={{ background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '1.25rem' }}>Genel Özet</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1px', background: 'var(--border)' }}>
+          {[
+            { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: '#6366f1', bg: 'rgba(99,102,241,0.12)', emoji: '📚' },
+            { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: '#10b981', bg: 'rgba(16,185,129,0.12)', emoji: '✅' },
+            { label: 'Toplam Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}`, icon: DollarSign, color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', emoji: '💰' },
+            { label: 'Bekleyen Ödeme', value: `₺${pendingAmount.toLocaleString('tr-TR')}`, icon: AlertCircle, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', emoji: '⏳' },
+          ].map(({ label, value, color, bg, emoji }, i, arr) => (
+            <div key={label} style={{
+              background: 'var(--bg-card)',
+              padding: '1.25rem 1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              borderRadius: i === 0 ? '12px 0 0 12px' : i === arr.length - 1 ? '0 12px 12px 0' : '0',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                  {emoji}
+                </div>
+              </div>
+              <p style={{ color: 'var(--text-primary)', fontSize: '1.6rem', fontWeight: '900', lineHeight: 1 }}>{value}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>{label}</p>
+              <div style={{ height: '3px', borderRadius: '99px', background: bg, marginTop: '0.25rem' }}>
+                <div style={{ height: '100%', width: '60%', borderRadius: '99px', background: color }} />
+              </div>
             </div>
-            <div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</p>
-              <p style={{ color: 'var(--text-primary)', fontSize: '1.15rem', fontWeight: '800', marginTop: '0.1rem' }}>{value}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Menu Cards */}
