@@ -7,6 +7,7 @@ const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
   { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
   { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
+  { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
@@ -14,6 +15,8 @@ const TEACHER_NAV = [
 
 const PARENT_NAV = [
   { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
+  { label: 'Ödevler', icon: GraduationCap, page: 'ParentHomework' },
+  { label: 'Gelişim Raporu', icon: BookOpen, page: 'ParentPerformance' },
   { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
