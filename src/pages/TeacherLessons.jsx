@@ -12,6 +12,7 @@ export default function TeacherLessons() {
   const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editLesson, setEditLesson] = useState(null);
+  const [evalLesson, setEvalLesson] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
 
