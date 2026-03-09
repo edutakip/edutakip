@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, Baby, LayoutDashboard, Home, ArrowLeft } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, Baby, LayoutDashboard, Home } from 'lucide-react';
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -16,34 +16,17 @@ const PARENT_NAV = [
   { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
 ];
 
-// Mobile bottom tab pages (teacher)
-const MOBILE_TEACHER_TABS = [
-  { label: 'Genel', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Öğrenciler', icon: Users, page: 'TeacherStudents' },
-  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
-  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-];
-
-const MOBILE_PARENT_TABS = [
-  { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
-];
-
 export default function Layout({ children, currentPageName }) {
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (currentPageName === 'Landing') {
     return <div>{children}</div>;
   }
 
   const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
-  const mobileTabs = role === 'teacher' ? MOBILE_TEACHER_TABS : MOBILE_PARENT_TABS;
   const sideW = collapsed ? '64px' : '224px';
-
-  const handleLogout = () => {
-    localStorage.removeItem('tilki_role');
-    window.location.href = createPageUrl('Landing');
-  };
 
   const SidebarContent = () => (
     <>
@@ -92,7 +75,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Bottom */}
       <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto' }}>
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
-        <button onClick={handleLogout}
+        <button onClick={() => { localStorage.removeItem('tilki_role'); window.location.href = createPageUrl('Landing'); }}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem',
             borderRadius: '10px', border: 'none', background: 'transparent',
@@ -109,10 +92,10 @@ export default function Layout({ children, currentPageName }) {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)', overscrollBehaviorY: 'none' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
 
-      {/* DESKTOP SIDEBAR */}
-      <aside className="desktop-sidebar" style={{
+      {/* SIDEBAR */}
+      <aside style={{
         width: sideW, flexShrink: 0,
         background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
         display: 'flex', flexDirection: 'column',
@@ -121,6 +104,8 @@ export default function Layout({ children, currentPageName }) {
         boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
       }}>
         <SidebarContent />
+
+        {/* Collapse toggle */}
         <button onClick={() => setCollapsed(c => !c)}
           style={{
             position: 'absolute', top: '50%', right: '-11px', transform: 'translateY(-50%)',
@@ -135,58 +120,9 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* MAIN */}
-      <main className="main-content-area" style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
+      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
         {children}
       </main>
-
-      {/* MOBILE BOTTOM TAB BAR */}
-      <nav className="bottom-tab-bar" style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        zIndex: 100,
-        justifyContent: 'space-around', alignItems: 'center',
-        height: `calc(64px + env(safe-area-inset-bottom, 0px))`,
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.3)',
-      }}>
-        {mobileTabs.map((item, i) => {
-          const Icon = item.icon;
-          const isActive = item.page === currentPageName;
-          return (
-            <Link key={i} to={createPageUrl(item.page)} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem',
-              flex: 1, padding: '0.5rem 0', textDecoration: 'none',
-              color: isActive ? 'white' : 'rgba(255,255,255,0.45)',
-              transition: 'all 0.15s',
-            }}>
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '10px',
-                background: isActive ? 'rgba(99,102,241,0.35)' : 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.15s',
-              }}>
-                <Icon size={19} />
-              </div>
-              <span style={{ fontSize: '0.65rem', fontWeight: isActive ? '700' : '400' }}>{item.label}</span>
-            </Link>
-          );
-        })}
-
-        {/* Logout button on mobile */}
-        <button onClick={handleLogout} style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem',
-          flex: 1, padding: '0.5rem 0', background: 'none', border: 'none', cursor: 'pointer',
-          color: 'rgba(255,255,255,0.4)',
-        }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <LogOut size={19} />
-          </div>
-          <span style={{ fontSize: '0.65rem' }}>Çıkış</span>
-        </button>
-      </nav>
     </div>
   );
 }
