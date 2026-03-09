@@ -238,6 +238,14 @@ export default function TeacherLessons() {
         })}
       </div>
 
+      {evalLesson && (
+        <LessonEvaluationModal
+          lesson={evalLesson}
+          onClose={() => setEvalLesson(null)}
+          onSaved={loadData}
+        />
+      )}
+
       {showModal && (
         <LessonModal
           students={students}
