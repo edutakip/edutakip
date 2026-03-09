@@ -142,27 +142,27 @@ export default function ParentDashboard() {
           )}
         </div>
 
-        {/* Payments */}
+        {/* Payments Summary */}
         <div style={{ background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1rem', marginBottom: '1rem' }}>Son Ödemeler</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {payments.slice(0, 6).map(p => (
-              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid var(--border)' }}>
-                <div>
-                  <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '500' }}>₺{p.amount?.toLocaleString('tr-TR')}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{p.date}</div>
-                </div>
-                <span style={{
-                  padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '700',
-                  background: p.status === 'alındı' ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)',
-                  color: p.status === 'alındı' ? 'var(--success)' : 'var(--warning)',
-                }}>{p.status}</span>
+          <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1rem', marginBottom: '1rem' }}>Ödeme Özeti</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[
+              { label: 'Ödenen', value: totalPaid, color: 'var(--success)', bg: 'rgba(16,185,129,0.12)' },
+              { label: 'Bekleyen', value: pendingAmount, color: 'var(--warning)', bg: 'rgba(245,158,11,0.12)' },
+              { label: 'Geç Kalan', value: payments.filter(p => p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0), color: 'var(--danger)', bg: 'rgba(239,68,68,0.12)' },
+            ].map(({ label, value, color, bg }) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.65rem 0.85rem', borderRadius: '10px', background: bg }}>
+                <span style={{ color, fontSize: '0.82rem', fontWeight: '600' }}>{label}</span>
+                <span style={{ color, fontSize: '1rem', fontWeight: '800' }}>₺{value.toLocaleString('tr-TR')}</span>
               </div>
             ))}
-            {payments.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>Ödeme kaydı yok</p>}
+            {payments.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center', marginTop: '0.5rem' }}>Ödeme kaydı yok</p>}
           </div>
         </div>
       </div>
+
+      {/* Full Payment History */}
+      <PaymentHistory payments={payments} />
     </div>
   );
 }
