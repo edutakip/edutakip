@@ -221,7 +221,26 @@ export default function Landing() {
         </div>
       </section>
 
-
+      {/* LOGOUT BUTTON SECTION */}
+      <section style={{ padding: '3rem 2rem', background: 'linear-gradient(180deg, #f5f7fa 0%, #f9fafb 100%)', textAlign: 'center', borderTop: '1px solid rgba(229,231,235,0.5)' }}>
+        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+          <button onClick={() => {
+            localStorage.removeItem('tilki_role');
+            import('@/api/base44Client').then(({ base44 }) => base44.auth.logout(createPageUrl('Landing')));
+          }}
+            style={{
+              width: '100%', background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              border: 'none', color: 'white', borderRadius: '14px', padding: '1rem 2rem',
+              fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(239,68,68,0.25)', transition: 'all 0.3s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(239,68,68,0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(239,68,68,0.25)'; }}>
+            Çıkış Yap
+          </button>
+        </div>
+      </section>
 
       {/* FOOTER */}
       <footer style={{ padding: '1.75rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.8rem' }}>
