@@ -56,6 +56,20 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
         </div>
       </div>
 
+      {/* Invite Code */}
+      {student.inviteCode && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(99,102,241,0.12)', border: '1px dashed rgba(99,102,241,0.4)', borderRadius: '10px', padding: '0.5rem 0.75rem' }}>
+          <div>
+            <div style={{ color: 'rgba(165,180,252,0.7)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.15rem' }}>DAVETİYE KODU</div>
+            <span style={{ color: '#a5b4fc', fontWeight: '800', fontSize: '0.95rem', letterSpacing: '2px' }}>{student.inviteCode}</span>
+          </div>
+          <button onClick={copyCode}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#22c55e' : 'rgba(165,180,252,0.7)', padding: '0.25rem', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+          </button>
+        </div>
+      )}
+
       {/* Phone */}
       {student.phone && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem' }}>
