@@ -186,9 +186,10 @@ export default function AddStudentModal({ onClose, onSaved }) {
             <div>
               <SectionTitle icon={CreditCard} title="Ders & Ücret" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-                <Field label="Saatlik Ücret (₺)">
+                <Field label="Ders Saat Ücreti (₺)">
                   <input style={inp} type="number" placeholder="0" value={form.hourlyFee} onChange={e => u('hourlyFee', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                  <p style={{ marginTop: '0.3rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Belirlenen ders süresi başına</p>
                   <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
                     {[500, 750, 1000].map(v => (
                       <button key={v} onClick={() => u('hourlyFee', v)}
