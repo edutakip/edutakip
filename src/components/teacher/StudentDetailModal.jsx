@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight } from 'lucide-react';
+import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight, History } from 'lucide-react';
+import PaymentHistoryModal from './PaymentHistoryModal';
 
 const DAYS_FULL = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const GRADES = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
