@@ -38,6 +38,7 @@ export default function Layout({ children, currentPageName }) {
 
   const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
   const sideW = collapsed ? '64px' : '224px';
+  const isParent = role === 'parent';
 
   const SidebarContent = () => (
     <>
