@@ -385,7 +385,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
                 { label: 'Öğrenci', value: form.name },
                 { label: 'Sınıf', value: form.grade },
                 { label: 'Ders', value: form.subject },
-                { label: 'Ders Saat Ücreti', value: form.hourlyFee ? `₺${form.hourlyFee}` : '-' },
+                { label: 'Ders Saat Ücreti', value: form.feePerLesson ? `₺${form.feePerLesson}` : '-' },
                 { label: 'Haftalık Ders', value: `${form.schedule.length || 0} ders` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
