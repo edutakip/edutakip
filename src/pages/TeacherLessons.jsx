@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO, differenceInMinutes } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil, ClipboardList } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
+import LessonEvaluationModal from '../components/teacher/LessonEvaluationModal';
 
 export default function TeacherLessons() {
   const [lessons, setLessons] = useState([]);
