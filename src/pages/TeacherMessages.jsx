@@ -181,10 +181,10 @@ export default function TeacherMessages() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 5%', display: 'flex', flexDirection: 'column', gap: '0.25rem', position: 'relative', zIndex: 1 }}>
             {messages.length === 0 && (
               <div style={{ margin: 'auto', textAlign: 'center' }}>
-                <div style={{ background: '#182229', borderRadius: '12px', padding: '0.6rem 1.25rem', display: 'inline-block' }}>
-                  <span style={{ color: '#8696a0', fontSize: '0.8rem' }}>🔒 Mesajlar uçtan uca şifreli</span>
+                <div style={{ background: 'rgba(99,102,241,0.1)', borderRadius: '12px', padding: '0.6rem 1.25rem', display: 'inline-block', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>🔒 Mesajlar güvende</span>
                 </div>
-                <p style={{ color: '#8696a0', fontSize: '0.85rem', marginTop: '1.5rem' }}>Henüz mesaj yok. İlk mesajı siz başlatın!</p>
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginTop: '1.5rem' }}>Henüz mesaj yok. İlk mesajı siz başlatın!</p>
               </div>
             )}
             {messages.map((msg, i) => {
