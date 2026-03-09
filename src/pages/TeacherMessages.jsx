@@ -208,7 +208,7 @@ export default function TeacherMessages() {
                     )}
                     <div style={{
                       maxWidth: '65%', minWidth: '80px',
-                      background: isTeacher ? '#005c4b' : '#202c33',
+                      background: isTeacher ? 'rgba(79,70,229,0.7)' : 'rgba(255,255,255,0.07)',
                       borderRadius: isTeacher ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                       padding: '0.5rem 0.75rem 0.35rem',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
