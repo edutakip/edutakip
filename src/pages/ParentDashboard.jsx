@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Calendar, CheckCircle, Clock, DollarSign, AlertCircle, Video, MapPin, X } from 'lucide-react';
 import PaymentHistory from '@/components/parent/PaymentHistory';
-import ParentChat from '@/components/parent/ParentChat';
+
 import { format, parseISO, isAfter } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
