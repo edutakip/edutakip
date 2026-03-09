@@ -139,8 +139,10 @@ export default function TeacherHomework() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.9rem' }}>{hw.title}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.15rem' }}>
-                    {hw.studentName}{dueDateStr && ` · Son: ${dueDateStr}`}
+                  <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.15rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <span>{hw.studentName}</span>
+                    {hw.created_date && <span>· Verildi: {format(new Date(hw.created_date), 'd MMM yyyy', { locale: tr })}</span>}
+                    {dueDateStr && <span>· Teslim: {dueDateStr}</span>}
                   </div>
                   {hw.description && <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.3rem' }}>{hw.description}</div>}
                 </div>
