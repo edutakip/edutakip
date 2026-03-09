@@ -150,11 +150,11 @@ export default function TeacherMessages() {
             <MessageCircle size={36} color='#6366f1' strokeWidth={1.5} />
           </div>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>EduTrack Mesajlaşma</p>
-            <p style={{ color: '#8696a0', fontSize: '0.875rem', margin: 0 }}>Sol taraftan bir öğrenci seçin</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', fontWeight: '700', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>EduTrack Mesajlaşma</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', margin: 0 }}>Sol taraftan bir öğrenci seçin</p>
           </div>
-          <div style={{ width: '200px', height: '1px', background: 'rgba(134,150,160,0.15)' }} />
-          <p style={{ color: '#8696a0', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ width: '200px', height: '1px', background: 'rgba(99,102,241,0.2)' }} />
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             🔒 Mesajlarınız güvende
           </p>
         </div>
