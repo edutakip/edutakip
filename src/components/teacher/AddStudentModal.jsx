@@ -90,7 +90,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
 
     const student = await base44.entities.Student.create({
       name: form.name, grade: form.grade, subject: form.subject,
-      hourlyFee, lessonDuration, weeklyLessons, monthlyFee,
+      feePerLesson, lessonDuration, weeklyLessons, monthlyFee,
       schedule: form.schedule,
       parentName: form.parentName, parentPhone: form.parentPhone, parentEmail: form.parentEmail,
       resourceName: form.resourceName, notes: form.notes,
