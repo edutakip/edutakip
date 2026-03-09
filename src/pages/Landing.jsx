@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPageUrl } from '@/utils';
 import { BookOpen, Shield, TrendingUp, Users, ChevronRight, GraduationCap, Star, CheckCircle, Zap } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
+import ParentInviteModal from '../components/ParentInviteModal';
 
 const FEATURES = [
   { icon: BookOpen, title: 'Ders Planlama', desc: 'Haftalık takvim, tekrarlayan dersler ve online/yüz yüze seçeneği', color: '#6366f1' },
