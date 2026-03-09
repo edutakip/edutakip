@@ -123,7 +123,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
       </div>
 
       {/* Footer: balance + payment button */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem', gap: '0.75rem' }}>
         <div>
           <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <span>▤</span> BAKİYE
@@ -132,21 +132,41 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
             {balance < 0 ? '-' : '+'}₺{Math.abs(balance).toLocaleString('tr-TR')}
           </div>
         </div>
-        <button
-          onClick={() => onAddPayment(student)}
-          style={{
-            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-            border: 'none', color: 'white', borderRadius: '10px',
-            padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
-            boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Plus size={14} /> Ödeme
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowPaymentHistory(true); }}
+            style={{
+              background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)',
+              color: '#a5b4fc', borderRadius: '10px',
+              padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.35)'; e.currentTarget.style.color = '#c7d2fe'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#a5b4fc'; }}
+          >
+            <History size={14} /> Geçmiş
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAddPayment(student); }}
+            style={{
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              border: 'none', color: 'white', borderRadius: '10px',
+              padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <Plus size={14} /> Ödeme
+          </button>
+        </div>
       </div>
+
+      {showPaymentHistory && (
+        <PaymentHistoryModal student={student} onClose={() => setShowPaymentHistory(false)} />
+      )}
     </div>
   );
 }
