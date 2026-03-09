@@ -230,9 +230,10 @@ export default function ParentDashboard() {
                 ))}
               </div>
             )}
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
+            </a>
+            );
+            })}
+            </div>
+            </div>
+            );
+            }
