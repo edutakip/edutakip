@@ -113,7 +113,7 @@ export default function Landing() {
 
         {/* stats */}
         <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '5rem', position: 'relative' }}>
-          {[['1000+', 'Öğretmen'], ['50K+', 'Öğrenci'], ['₺100M+', 'Yönetilen']].map(([val, lbl]) => (
+          {[['220+', 'Öğretmen'], ['5K+', 'Öğrenci'], ['₺1.2M+', 'Yönetilen']].map(([val, lbl]) => (
             <div key={lbl} style={{ textAlign: 'center' }}>
               <div style={{ color: 'white', fontSize: '1.9rem', fontWeight: '950', letterSpacing: '-0.5px' }}>{val}</div>
               <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginTop: '0.4rem', fontWeight: '500' }}>{lbl}</div>
