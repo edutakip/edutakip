@@ -20,6 +20,13 @@ export default function Layout({ children, currentPageName }) {
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  React.useEffect(() => {
+    import('@/api/base44Client').then(({ base44 }) => {
+      base44.auth.me().then(setUser).catch(() => {});
+    });
+  }, []);
 
   if (currentPageName === 'Landing') {
     return <div>{children}</div>;
