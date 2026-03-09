@@ -8,6 +8,7 @@ export default function PaymentHistoryModal({ student, onClose }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [previousStatus, setPreviousStatus] = useState(null);
 
   useEffect(() => {
     base44.entities.Payment.filter({ studentId: student.id }, '-date').then(p => {
