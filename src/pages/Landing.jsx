@@ -23,7 +23,11 @@ export default function Landing() {
   }, []);
 
   const selectRole = (role) => {
-    setSelectedRole(role);
+    if (role === 'parent') {
+      setShowParentModal(true);
+    } else {
+      setSelectedRole(role);
+    }
   };
 
   const handleAuthSuccess = () => {
