@@ -80,7 +80,7 @@ export default function Layout({ children, currentPageName }) {
       </nav>
 
       {/* Bottom */}
-      <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto' }}>
+      <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
         {user && !collapsed && (
           <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem' }}>
