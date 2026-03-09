@@ -106,6 +106,12 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {!editing && (
+              <button onClick={() => setShowPaymentHistory(true)}
+                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <History size={13} /> Geçmiş
+              </button>
+            )}
             {!editing ? (
               <button onClick={() => setEditing(true)}
                 style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
