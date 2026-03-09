@@ -16,9 +16,12 @@ export default function ParentHomework() {
     (async () => {
       const me = await base44.auth.me();
       const inviteCode = localStorage.getItem('tilki_invite_code');
-      const students = inviteCode
-        ? await base44.entities.Student.filter({ inviteCode })
-        : await base44.entities.Student.filter({ parentEmail: me.email });
+      let students = [];
+      if (inviteCode && inviteCode.trim()) {
+        students = await base44.entities.Student.filter({ inviteCode: inviteCode.trim() });
+      } else if (me.email) {
+        students = await base44.entities.Student.filter({ parentEmail: me.email });
+      }
       if (students.length === 0) { setLoading(false); return; }
       const s = students[0];
       setStudent(s);
