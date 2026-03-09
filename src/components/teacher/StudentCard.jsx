@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Phone, Clock, DollarSign, BookOpen, Plus } from 'lucide-react';
+import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check } from 'lucide-react';
 
 export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const [payments, setPayments] = useState([]);
