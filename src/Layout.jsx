@@ -113,6 +113,47 @@ export default function Layout({ children, currentPageName }) {
     </>
   );
 
+  // Veli için alt navigation layout
+  if (isParent) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+        {/* MAIN */}
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
+          {children}
+        </main>
+
+        {/* BOTTOM NAV */}
+        <nav style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+          height: '70px', boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+        }}>
+          {nav.map((item, i) => {
+            const Icon = item.icon;
+            const isActive = item.page === currentPageName;
+            return (
+              <Link key={i} to={createPageUrl(item.page)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
+                  color: isActive ? '#6366f1' : 'rgba(255,255,255,0.5)',
+                  textDecoration: 'none', flex: 1, height: '100%',
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+                <Icon size={19} />
+                <span style={{ fontSize: '0.6rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
+
+  // Öğretmen için sol sidebar layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
 
