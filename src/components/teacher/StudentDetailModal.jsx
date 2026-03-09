@@ -45,6 +45,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const [payments, setPayments] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [form, setForm] = useState({ ...student });
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
