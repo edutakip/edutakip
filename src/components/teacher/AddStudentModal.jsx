@@ -79,28 +79,43 @@ export default function AddStudentModal({ onClose, onSaved }) {
     });
   };
 
-  const save = async () => {
+ const save = async () => {
     if (!form.name) return;
     setLoading(true);
     const me = await base44.auth.me();
+    
+    // Düzenlenen Kısım Başlangıcı
     const weeklyLessons = form.schedule.length || 1;
-    const hourlyFee = Number(form.hourlyFee) || 0;
+    const hourlyFee = Number(form.hourlyFee) || 0; 
     const lessonDuration = Number(form.lessonDuration) || 60;
+    
+    // Dakika çarpanını (lessonDuration / 60) buradan sildik, artık net ücret çarpılıyor:
     const monthlyFee = Math.round(hourlyFee * weeklyLessons * 4.3);
 
     const student = await base44.entities.Student.create({
-      name: form.name, grade: form.grade, subject: form.subject,
-      hourlyFee, lessonDuration, weeklyLessons, monthlyFee,
+      name: form.name, 
+      grade: form.grade, 
+      subject: form.subject,
+      hourlyFee, 
+      lessonDuration, 
+      weeklyLessons, 
+      monthlyFee,
       schedule: form.schedule,
-      parentName: form.parentName, parentPhone: form.parentPhone, parentEmail: form.parentEmail,
-      resourceName: form.resourceName, notes: form.notes,
+      parentName: form.parentName, 
+      parentPhone: form.parentPhone, 
+      parentEmail: form.parentEmail,
+      resourceName: form.resourceName, 
+      notes: form.notes,
       initialBalance: Number(form.initialBalance) || 0,
       initialBalanceType: form.initialBalanceType,
       teacherEmail: me.email,
-      inviteCode: generateCode(), inviteAccepted: false, status: 'active',
+      inviteCode: generateCode(), 
+      inviteAccepted: false, 
+      status: 'active',
     });
+    // Düzenlenen Kısım Bitişi
 
-    // Başlangıç bakiyesi varsa ödeme kaydı oluştur
+    // Başlangıç bakiyesi varsa ödeme kaydı oluştur (Bu kısım aynı kalıyor)
     if (form.initialBalance && Number(form.initialBalance) > 0) {
       await base44.entities.Payment.create({
         studentId: student.id,
@@ -115,7 +130,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
     }
 
     setLoading(false);
-    onSaved(); onClose();
+    onSaved(); 
+    onClose();
   };
 
   const canNext = () => {
