@@ -13,7 +13,9 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   };
 
   useEffect(() => {
-    base44.entities.Payment.filter({ studentId: student.id }).then(setPayments);
+    import('@/api/base44Client').then(({ base44 }) => {
+      base44.entities.Payment.filter({ studentId: student.id }).then(setPayments);
+    });
   }, [student.id]);
 
   const monthlyFee = student.monthlyFee || 0;
