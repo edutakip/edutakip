@@ -140,9 +140,9 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1.5rem' }}>
                   {[
-                    { label: 'Saatlik', value: `₺${(student.hourlyFee || 0).toLocaleString()}`, color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)' },
-                    { label: 'Süre', value: `${student.lessonDuration || 60} dk`, color: '#a78bfa', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.3)' },
-                    { label: 'Haftalık', value: `${student.weeklyLessons || 0} ders`, color: '#34d399', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)' },
+                    { label: 'Ders Saat Ücreti', value: `₺${(student.feePerLesson || 0).toLocaleString()}`, color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)' },
+                    { label: 'Ders Süresi', value: `${student.lessonDuration || 60} dk`, color: '#a78bfa', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.3)' },
+                    { label: 'Haftalık Ders', value: `${student.weeklyLessons || 0}`, color: '#34d399', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)' },
                     { label: 'Toplam Ders', value: `${lessons.length}+`, color: '#fb923c', bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.3)' },
                   ].map(({ label, value, color, bg, border }) => (
                     <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '12px', padding: '0.75rem' }}>
