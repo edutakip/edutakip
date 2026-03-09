@@ -144,16 +144,17 @@ export default function TeacherHomework() {
                   </div>
                   {hw.description && <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.3rem' }}>{hw.description}</div>}
                 </div>
-                <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px', background: cfg.bg, color: cfg.color, flexShrink: 0 }}>
-                  {cfg.label}
-                </span>
+                <select value={hw.status} onChange={e => changeStatus(hw, e.target.value)}
+                  style={{ fontSize: '0.75rem', fontWeight: '700', padding: '0.25rem 0.5rem', borderRadius: '8px', background: cfg.bg, color: cfg.color, border: 'none', cursor: 'pointer', flexShrink: 0, outline: 'none', fontFamily: 'Inter, sans-serif' }}>
+                  <option value="verildi">Verildi</option>
+                  <option value="tamamlandı">Tamamlandı</option>
+                  <option value="gecikmiş">Gecikmiş</option>
+                </select>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  {hw.status !== 'tamamlandı' && (
-                    <button onClick={() => markDone(hw)} title="Tamamlandı işaretle"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', color: '#10b981' }}>
-                      <CheckCircle size={16} />
-                    </button>
-                  )}
+                  <button onClick={() => openEdit(hw)} title="Düzenle"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', color: '#9ca3af' }}>
+                    <Pencil size={15} />
+                  </button>
                   <button onClick={() => deleteHw(hw)} title="Sil"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', color: '#d1d5db' }}>
                     <Trash2 size={15} />
