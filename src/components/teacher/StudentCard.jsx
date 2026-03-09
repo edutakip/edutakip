@@ -132,7 +132,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
           </div>
         </div>
         <button
-          onClick={(e) => { e.stopPropagation(); onAddPayment(student); }}
+          onClick={() => onAddPayment()}
           style={{
             background: 'linear-gradient(135deg, #16a34a, #22c55e)',
             border: 'none', color: 'white', borderRadius: '10px',
