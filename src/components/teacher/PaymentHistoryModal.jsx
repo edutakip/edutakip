@@ -229,23 +229,42 @@ export default function PaymentHistoryModal({ student, onClose }) {
                                 <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.78rem' }}>{payment.description}</div>
                               </div>
                             )}
-                            {payment.status !== 'alındı' && (
-                              <button
-                                onClick={() => {
-                                  base44.entities.Payment.update(payment.id, { status: 'alındı' });
-                                  setPayments(payments.map(p => p.id === payment.id ? { ...p, status: 'alındı' } : p));
-                                  setExpandedId(null);
-                                }}
-                                style={{
-                                  marginTop: '0.85rem', width: '100%', background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                                  border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem',
-                                  fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
-                                }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                ✓ Tahsil Et
-                              </button>
-                            )}
+                            <div style={{ marginTop: '0.85rem', display: 'flex', gap: '0.6rem' }}>
+                              {payment.status !== 'alındı' && (
+                                <button
+                                  onClick={() => {
+                                    setPreviousStatus(payment.status);
+                                    base44.entities.Payment.update(payment.id, { status: 'alındı' });
+                                    setPayments(payments.map(p => p.id === payment.id ? { ...p, status: 'alındı' } : p));
+                                  }}
+                                  style={{
+                                    flex: 1, background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                                    border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem',
+                                    fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                                  }}
+                                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                  ✓ Tahsil Et
+                                </button>
+                              )}
+                              {payment.status === 'alındı' && previousStatus && (
+                                <button
+                                  onClick={() => {
+                                    base44.entities.Payment.update(payment.id, { status: previousStatus });
+                                    setPayments(payments.map(p => p.id === payment.id ? { ...p, status: previousStatus } : p));
+                                    setPreviousStatus(null);
+                                  }}
+                                  style={{
+                                    flex: 1, background: 'rgba(249,115,22,0.2)', border: '1px solid rgba(249,115,22,0.3)',
+                                    color: '#fb923c', borderRadius: '10px', padding: '0.6rem',
+                                    fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                                  }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.3)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(249,115,22,0.2)'}>
+                                  ↶ Geri Al
+                                </button>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
