@@ -36,9 +36,6 @@ export default function Landing() {
           onClose={() => setSelectedRole(null)}
         />
       )}
-      {showParentModal && (
-        <ParentInviteModal onClose={() => setShowParentModal(false)} />
-      )}
 
       {/* NAV */}
       <nav style={{
