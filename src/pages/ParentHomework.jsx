@@ -63,17 +63,17 @@ export default function ParentHomework() {
   );
 
   return (
-    <div style={{ padding: '2rem', minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Ödevler</h1>
-        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{student.name} · {homeworks.length} ödev</p>
+    <div style={{ padding: '1rem', minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#111827', marginBottom: '0.2rem' }}>Ödevler</h1>
+        <p style={{ color: '#9ca3af', fontSize: '0.8rem' }}>{student.name} · {homeworks.length} ödev</p>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         {[['all', 'Tümü'], ['verildi', 'Yapılacak'], ['tamamlandı', 'Tamamlandı'], ['gecikmiş', 'Gecikmiş']].map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
-            style={{ padding: '0.4rem 1rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', border: filter === val ? 'none' : '1.5px solid #e5e7eb', background: filter === val ? '#4f46e5' : 'white', color: filter === val ? 'white' : '#6b7280' }}>
+            style={{ padding: '0.35rem 0.85rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', border: filter === val ? 'none' : '1.5px solid #e5e7eb', background: filter === val ? '#4f46e5' : 'white', color: filter === val ? 'white' : '#6b7280' }}>
             {label} ({counts[val]})
           </button>
         ))}
