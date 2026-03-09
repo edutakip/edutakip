@@ -53,13 +53,33 @@ export default function TeacherHomework() {
     reload();
   };
 
-  const markDone = async (hw) => {
-    await base44.entities.Homework.update(hw.id, { status: 'tamamlandı' });
+  const changeStatus = async (hw, status) => {
+    await base44.entities.Homework.update(hw.id, { status });
     reload();
   };
 
   const deleteHw = async (hw) => {
     await base44.entities.Homework.delete(hw.id);
+    reload();
+  };
+
+  const openEdit = (hw) => {
+    setEditingHw(hw);
+    setForm({ studentId: hw.studentId, title: hw.title, description: hw.description || '', dueDate: hw.dueDate || '' });
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.studentId || !form.title) return;
+    const student = students.find(s => s.id === form.studentId);
+    if (editingHw) {
+      await base44.entities.Homework.update(editingHw.id, { ...form, studentName: student?.name || editingHw.studentName });
+    } else {
+      await base44.entities.Homework.create({ ...form, studentName: student?.name || '', teacherEmail: me.email, status: 'verildi' });
+    }
+    setForm({ studentId: '', title: '', description: '', dueDate: '' });
+    setEditingHw(null);
+    setShowForm(false);
     reload();
   };
 
