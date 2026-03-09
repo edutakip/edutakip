@@ -101,8 +101,8 @@ export default function TeacherMessages() {
         </div>
 
         {/* Search */}
-        <div style={{ padding: '0.6rem 0.75rem', background: '#111b21' }}>
-          <div style={{ background: '#202c33', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.9rem' }}>
+        <div style={{ padding: '0.6rem 0.75rem', background: '#0f0c29' }}>
+          <div style={{ background: '#1e1b4b', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.9rem' }}>
             <Search size={16} color='#8696a0' />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder='Ara veya yeni sohbet başlat'
