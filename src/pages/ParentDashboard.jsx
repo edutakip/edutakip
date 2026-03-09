@@ -180,8 +180,16 @@ export default function ParentDashboard() {
       {/* Menu Cards */}
       <h2 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.85rem' }}>Menü</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.85rem' }}>
-        {menuItems.map(({ label, desc, icon: Icon, gradient, shadow, page, stats }) => (
-          <a key={label} href={createPageUrl(page)}
+        {menuItems.map(({ label, desc, icon: Icon, gradient, shadow, page, stats }) => {
+          const handleClick = (e) => {
+            if (page === 'logout') {
+              e.preventDefault();
+              localStorage.removeItem('tilki_role');
+              base44.auth.logout();
+            }
+          };
+          return (
+          <a key={label} href={page === 'logout' ? '#' : createPageUrl(page)} onClick={handleClick}
             style={{
               background: gradient,
               borderRadius: '14px',
