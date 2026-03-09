@@ -217,7 +217,7 @@ export default function TeacherMessages() {
                       <p style={{ margin: 0, color: '#e9edef', fontSize: '0.875rem', lineHeight: '1.55', wordBreak: 'break-word' }}>{msg.content}</p>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.25rem', marginTop: '0.2rem' }}>
                         <span style={{ color: '#8696a0', fontSize: '0.66rem' }}>{formatTime(msg.created_date)}</span>
-                        {isTeacher && <span style={{ color: '#53bdeb', fontSize: '0.7rem' }}>✓✓</span>}
+                        {isTeacher && <span style={{ color: '#a5b4fc', fontSize: '0.7rem' }}>✓✓</span>}
                       </div>
                     </div>
                   </div>
