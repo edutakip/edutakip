@@ -55,6 +55,7 @@ import TeacherLessons from './pages/TeacherLessons';
 import TeacherMessages from './pages/TeacherMessages';
 import TeacherStudents from './pages/TeacherStudents';
 import ParentDashboard from './pages/ParentDashboard';
+import ParentMessages from './pages/ParentMessages';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +68,7 @@ export const PAGES = {
     "TeacherMessages": TeacherMessages,
     "TeacherStudents": TeacherStudents,
     "ParentDashboard": ParentDashboard,
+    "ParentMessages": ParentMessages,
 }
 
 export const pagesConfig = {
