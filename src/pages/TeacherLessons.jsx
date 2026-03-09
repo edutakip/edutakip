@@ -240,6 +240,13 @@ export default function TeacherLessons() {
         })}
       </div>
 
+      {reportLesson && (
+        <LessonReportModal
+          lesson={reportLesson}
+          onClose={() => setReportLesson(null)}
+          onSaved={loadData}
+        />
+      )}
       {showModal && (
         <LessonModal
           students={students}
