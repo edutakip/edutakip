@@ -171,7 +171,7 @@ export default function TeacherHomework() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', maxWidth: '480px', width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#111827' }}>Ödev Ver</h2>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#111827' }}>{editingHw ? 'Ödevi Düzenle' : 'Ödev Ver'}</h2>
               <button onClick={() => setShowForm(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
                 <X size={16} color='#6b7280' />
               </button>
