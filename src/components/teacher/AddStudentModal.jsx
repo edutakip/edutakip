@@ -213,7 +213,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
               </div>
               {form.hourlyFee > 0 && (
                 <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', color: '#34d399', fontSize: '0.78rem', fontWeight: '600' }}>
-                  Tahmini aylık gelir: ₺{Math.round(Number(form.hourlyFee) * (Number(form.lessonDuration || 60) / 60) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
+                  Tahmini aylık gelir: ₺{Math.round(Number(form.hourlyFee) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
                 </div>
               )}
             </div>
