@@ -195,7 +195,7 @@ export default function TeacherMessages() {
                 <React.Fragment key={msg.id}>
                   {showDate && (
                     <div style={{ display: 'flex', justifyContent: 'center', margin: '0.75rem 0' }}>
-                      <span style={{ background: '#182229', color: '#8696a0', borderRadius: '8px', padding: '0.3rem 0.85rem', fontSize: '0.75rem', fontWeight: '500' }}>
+                      <span style={{ background: 'rgba(99,102,241,0.15)', color: 'rgba(255,255,255,0.45)', borderRadius: '8px', padding: '0.3rem 0.85rem', fontSize: '0.75rem', fontWeight: '500' }}>
                         {formatDate(msg.created_date)}
                       </span>
                     </div>
