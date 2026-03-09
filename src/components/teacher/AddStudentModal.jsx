@@ -187,18 +187,18 @@ export default function AddStudentModal({ onClose, onSaved }) {
               <SectionTitle icon={CreditCard} title="Ders & Ücret" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <Field label="Ders Saat Ücreti (₺)">
-                  <input style={inp} type="number" placeholder="0" value={form.hourlyFee} onChange={e => u('hourlyFee', e.target.value)}
-                    onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                  <p style={{ marginTop: '0.3rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Belirlenen ders süresi başına</p>
-                  <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
-                    {[500, 750, 1000].map(v => (
-                      <button key={v} onClick={() => u('hourlyFee', v)}
-                        style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c', borderRadius: '6px', padding: '0.2rem 0.55rem', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer' }}>
-                        {v}₺
-                      </button>
-                    ))}
-                  </div>
-                </Field>
+                    <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
+                      onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                    <p style={{ marginTop: '0.3rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Belirlenen ders süresi başına</p>
+                    <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
+                      {[500, 750, 1000].map(v => (
+                        <button key={v} onClick={() => u('feePerLesson', v)}
+                          style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c', borderRadius: '6px', padding: '0.2rem 0.55rem', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer' }}>
+                          {v}₺
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
                 <Field label="Ders Süresi (dk)">
                   <input style={inp} type="number" placeholder="60" value={form.lessonDuration} onChange={e => u('lessonDuration', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
