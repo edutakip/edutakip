@@ -12,7 +12,6 @@ const FEATURES = [
 
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
-  const [showParentModal, setShowParentModal] = useState(false);
 
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
@@ -22,11 +21,7 @@ export default function Landing() {
   }, []);
 
   const selectRole = (role) => {
-    if (role === 'parent') {
-      setShowParentModal(true);
-    } else {
-      setSelectedRole(role);
-    }
+    setSelectedRole(role);
   };
 
   const handleAuthSuccess = () => {
