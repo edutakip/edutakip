@@ -7,7 +7,7 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
   const [form, setForm] = useState({
     studentId: '', date: defaultDate || format(new Date(), 'yyyy-MM-dd'),
     startTime: '09:00', endTime: '10:00', subject: '', type: 'yuzyuze',
-    location: '', notes: '',
+    location: '', notes: '', lessonFee: 0,
   });
   const [recurring, setRecurring] = useState(false);
   const [recurringWeeks, setRecurringWeeks] = useState(4);
