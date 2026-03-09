@@ -97,28 +97,18 @@ export default function Layout({ children, currentPageName }) {
         })}
       </nav>
 
-      {/* Bottom */}
-      <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
-        <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
-        {user && !collapsed && (
-          <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem' }}>
-            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.8rem', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.full_name}</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', margin: '0.15rem 0 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
-          </div>
-        )}
-        <button onClick={() => { localStorage.removeItem('tilki_role'); window.location.href = createPageUrl('Landing'); }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem',
-            borderRadius: '10px', border: 'none', background: 'transparent',
-            color: 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.85rem',
-            overflow: 'hidden', whiteSpace: 'nowrap', width: '100%', transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}>
-          <LogOut size={17} style={{ flexShrink: 0 }} />
-          {!collapsed && 'Çıkış Yap'}
-        </button>
-      </div>
+      {/* Bottom - only show logout icon when collapsed */}
+      {collapsed && (
+        <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
+          <button onClick={() => { localStorage.removeItem('tilki_role'); window.location.href = createPageUrl('Landing'); }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.6rem', borderRadius: '10px', border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', width: '100%', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}>
+            <LogOut size={17} />
+          </button>
+        </div>
+      )}
     </>
   );
 
