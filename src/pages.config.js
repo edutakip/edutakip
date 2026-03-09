@@ -54,6 +54,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherFinance from './pages/TeacherFinance';
 import TeacherLessons from './pages/TeacherLessons';
 import TeacherStudents from './pages/TeacherStudents';
+import TeacherMessages from './pages/TeacherMessages';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "TeacherFinance": TeacherFinance,
     "TeacherLessons": TeacherLessons,
     "TeacherStudents": TeacherStudents,
+    "TeacherMessages": TeacherMessages,
 }
 
 export const pagesConfig = {
