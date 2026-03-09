@@ -82,6 +82,12 @@ export default function Layout({ children, currentPageName }) {
       {/* Bottom */}
       <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto' }}>
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
+        {user && !collapsed && (
+          <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.8rem', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.full_name}</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', margin: '0.15rem 0 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+          </div>
+        )}
         <button onClick={() => { localStorage.removeItem('tilki_role'); window.location.href = createPageUrl('Landing'); }}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem',
