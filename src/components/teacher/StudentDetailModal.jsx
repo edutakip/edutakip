@@ -298,9 +298,13 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
               style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', border: `1px solid ${student.status === 'active' ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)'}`, background: student.status === 'active' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)', color: student.status === 'active' ? '#f87171' : '#34d399', fontWeight: '600', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               {student.status === 'active' ? <><Archive size={13} /> Arşivle</> : <><ArchiveRestore size={13} /> Aktife Al</>}
             </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+            </div>
+            </div>
+            </div>
+
+            {showPaymentHistory && (
+            <PaymentHistoryModal student={student} onClose={() => setShowPaymentHistory(false)} />
+            )}
+            </div>
+            );
+            }
