@@ -43,6 +43,41 @@ body {
 input, select, textarea, button { font-family: inherit; }
 a { text-decoration: none; color: inherit; }
 
+button, a, [role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+/* Safe area support */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Bottom tab bar - mobile only */
+.bottom-tab-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+  .bottom-tab-bar {
+    display: flex;
+  }
+  .main-content-area {
+    margin-left: 0 !important;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 input[type="date"], input[type="time"] {
   color: #111827;
   background: #ffffff;
