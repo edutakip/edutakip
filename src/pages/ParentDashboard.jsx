@@ -165,6 +165,9 @@ export default function ParentDashboard() {
 
       {/* Full Payment History */}
       <PaymentHistory payments={payments} />
+
+      {/* Teacher Chat */}
+      <ParentChat student={student} user={user} />
     </div>
   );
 }
