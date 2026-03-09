@@ -228,8 +228,9 @@ export default function TeacherLessons() {
                 {isPaid && !isCancelled && (
                   <ActionBtn label="Ödenmedi" color="#dc2626" onClick={() => markUnpaid(lesson)} />
                 )}
-                <button style={{ background: 'none', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.3rem' }}
-                  title="Not ekle"><MessageCircle size={15} /></button>
+                {isCompleted && (
+                  <ActionBtn icon={<ClipboardList size={13} />} label={lesson.evaluationRating ? 'Değerlendirmeyi Düzenle' : 'Değerlendir'} color="#7c3aed" onClick={() => setEvalLesson(lesson)} />
+                )}
                 <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#6b7280" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
               </div>
             </div>
