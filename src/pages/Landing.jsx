@@ -13,6 +13,7 @@ const FEATURES = [
 
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
+  const [showParentModal, setShowParentModal] = useState(false);
 
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
