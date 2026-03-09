@@ -62,7 +62,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
     setLoading(true);
     await base44.entities.Student.update(student.id, {
       name: form.name, grade: form.grade, subject: form.subject,
-      phone: form.phone, hourlyFee: Number(form.hourlyFee) || 0,
+      phone: form.phone, feePerLesson: Number(form.feePerLesson) || 0,
       lessonDuration: Number(form.lessonDuration) || 60,
       parentName: form.parentName, parentPhone: form.parentPhone, parentEmail: form.parentEmail,
       resourceName: form.resourceName, notes: form.notes,
