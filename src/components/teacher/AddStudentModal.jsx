@@ -79,43 +79,28 @@ export default function AddStudentModal({ onClose, onSaved }) {
     });
   };
 
- const save = async () => {
+  const save = async () => {
     if (!form.name) return;
     setLoading(true);
     const me = await base44.auth.me();
-    
-    // Düzenlenen Kısım Başlangıcı
     const weeklyLessons = form.schedule.length || 1;
-    const hourlyFee = Number(form.hourlyFee) || 0; 
+    const hourlyFee = Number(form.hourlyFee) || 0;
     const lessonDuration = Number(form.lessonDuration) || 60;
-    
-    // Dakika çarpanını (lessonDuration / 60) buradan sildik, artık net ücret çarpılıyor:
-    const monthlyFee = Math.round(hourlyFee * weeklyLessons * 4.3);
+    const monthlyFee = Math.round(hourlyFee * (lessonDuration / 60) * weeklyLessons * 4.3);
 
     const student = await base44.entities.Student.create({
-      name: form.name, 
-      grade: form.grade, 
-      subject: form.subject,
-      hourlyFee, 
-      lessonDuration, 
-      weeklyLessons, 
-      monthlyFee,
+      name: form.name, grade: form.grade, subject: form.subject,
+      hourlyFee, lessonDuration, weeklyLessons, monthlyFee,
       schedule: form.schedule,
-      parentName: form.parentName, 
-      parentPhone: form.parentPhone, 
-      parentEmail: form.parentEmail,
-      resourceName: form.resourceName, 
-      notes: form.notes,
+      parentName: form.parentName, parentPhone: form.parentPhone, parentEmail: form.parentEmail,
+      resourceName: form.resourceName, notes: form.notes,
       initialBalance: Number(form.initialBalance) || 0,
       initialBalanceType: form.initialBalanceType,
       teacherEmail: me.email,
-      inviteCode: generateCode(), 
-      inviteAccepted: false, 
-      status: 'active',
+      inviteCode: generateCode(), inviteAccepted: false, status: 'active',
     });
-    // Düzenlenen Kısım Bitişi
 
-    // Başlangıç bakiyesi varsa ödeme kaydı oluştur (Bu kısım aynı kalıyor)
+    // Başlangıç bakiyesi varsa ödeme kaydı oluştur
     if (form.initialBalance && Number(form.initialBalance) > 0) {
       await base44.entities.Payment.create({
         studentId: student.id,
@@ -130,8 +115,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
     }
 
     setLoading(false);
-    onSaved(); 
-    onClose();
+    onSaved(); onClose();
   };
 
   const canNext = () => {
@@ -229,7 +213,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
               </div>
               {form.hourlyFee > 0 && (
                 <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', color: '#34d399', fontSize: '0.78rem', fontWeight: '600' }}>
-                  Tahmini aylık gelir: ₺{Math.round(Number(form.hourlyFee) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
+                  Tahmini aylık gelir: ₺{Math.round(Number(form.hourlyFee) * (Number(form.lessonDuration || 60) / 60) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
                 </div>
               )}
             </div>
