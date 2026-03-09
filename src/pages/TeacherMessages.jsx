@@ -81,10 +81,10 @@ export default function TeacherMessages() {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#111b21', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#0f0c29', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── LEFT PANEL ── */}
-      <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#111b21', borderRight: '1px solid #2a3942' }}>
+      <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0c29', borderRight: '1px solid rgba(99,102,241,0.2)' }}>
 
         {/* Header */}
         <div style={{ padding: '1rem 1.25rem', background: '#202c33', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
