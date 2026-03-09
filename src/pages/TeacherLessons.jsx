@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO, differenceInMinutes } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil, ClipboardList } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
-import LessonEvaluationModal from '../components/teacher/LessonEvaluationModal';
 
 export default function TeacherLessons() {
   const [lessons, setLessons] = useState([]);
@@ -12,7 +11,6 @@ export default function TeacherLessons() {
   const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editLesson, setEditLesson] = useState(null);
-  const [evalLesson, setEvalLesson] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
 
@@ -228,23 +226,14 @@ export default function TeacherLessons() {
                 {isPaid && !isCancelled && (
                   <ActionBtn label="Ödenmedi" color="#dc2626" onClick={() => markUnpaid(lesson)} />
                 )}
-                {isCompleted && (
-                  <ActionBtn icon={<ClipboardList size={13} />} label={lesson.evaluationRating ? 'Değerlendirmeyi Düzenle' : 'Değerlendir'} color="#7c3aed" onClick={() => setEvalLesson(lesson)} />
-                )}
+                <button style={{ background: 'none', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.3rem' }}
+                  title="Not ekle"><MessageCircle size={15} /></button>
                 <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#6b7280" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
               </div>
             </div>
           );
         })}
       </div>
-
-      {evalLesson && (
-        <LessonEvaluationModal
-          lesson={evalLesson}
-          onClose={() => setEvalLesson(null)}
-          onSaved={loadData}
-        />
-      )}
 
       {showModal && (
         <LessonModal
