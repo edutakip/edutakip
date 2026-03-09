@@ -104,7 +104,7 @@ export default function ParentHomework() {
                     {dueDateStr && <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.15rem' }}>Son Tarih: {dueDateStr}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '6px', background: cfg.bg, color: cfg.color' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '6px', background: cfg.bg, color: cfg.color }}>
                       {cfg.label}
                     </span>
                     <button onClick={() => { setNoteHwId(isEditingNote ? null : hw.id); setNote(hw.parentNote || ''); }}
