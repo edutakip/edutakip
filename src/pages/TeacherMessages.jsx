@@ -87,7 +87,7 @@ export default function TeacherMessages() {
       <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0c29', borderRight: '1px solid rgba(99,102,241,0.2)' }}>
 
         {/* Header */}
-        <div style={{ padding: '1rem 1.25rem', background: '#202c33', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '1rem 1.25rem', background: '#1e1b4b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {avatar(me?.full_name || 'T', 40, '#00a884')}
             <div>
