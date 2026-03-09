@@ -52,6 +52,26 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
     } else {
       await base44.entities.LessonReport.create(data);
     }
+
+    // Rapordaki ödev alanı doluysa Homework entity'sine de kaydet
+    if (form.homework && form.homework.trim()) {
+      // Bu ders için daha önce oluşturulmuş ödev var mı?
+      const existingHws = await base44.entities.Homework.filter({ lessonId: lesson.id });
+      if (existingHws.length > 0) {
+        await base44.entities.Homework.update(existingHws[0].id, { title: form.homework, description: form.homework });
+      } else {
+        await base44.entities.Homework.create({
+          lessonId: lesson.id,
+          studentId: lesson.studentId,
+          studentName: lesson.studentName,
+          teacherEmail: me.email,
+          title: form.homework,
+          description: form.homework,
+          status: 'verildi',
+        });
+      }
+    }
+
     setLoading(false);
     onSaved?.();
     onClose();
