@@ -6,6 +6,7 @@ import { Users, CalendarCheck, CheckCircle, DollarSign, ChevronRight, MessageCir
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import LessonModal from '../components/teacher/LessonModal';
+import PendingLessonsPrompt from '../components/teacher/PendingLessonsPrompt';
 
 export default function TeacherDashboard() {
   const [lessons, setLessons] = useState([]);
