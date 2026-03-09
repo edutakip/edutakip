@@ -207,8 +207,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                     <input style={inp} value={form.phone || ''} onChange={e => u('phone', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Saatlik Ücret (₺)">
-                    <input style={inp} type="number" value={form.hourlyFee || ''} onChange={e => u('hourlyFee', e.target.value)}
+                  <Field label="Ders Saat Ücreti (₺)">
+                    <input style={inp} type="number" value={form.feePerLesson || ''} onChange={e => u('feePerLesson', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                   <Field label="Ders Süresi (dk)">
