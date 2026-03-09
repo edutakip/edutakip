@@ -84,9 +84,9 @@ export default function AddStudentModal({ onClose, onSaved }) {
     setLoading(true);
     const me = await base44.auth.me();
     const weeklyLessons = form.schedule.length || 1;
-    const hourlyFee = Number(form.hourlyFee) || 0;
+    const feePerLesson = Number(form.hourlyFee) || 0;
     const lessonDuration = Number(form.lessonDuration) || 60;
-    const monthlyFee = Math.round(hourlyFee * (lessonDuration / 60) * weeklyLessons * 4.3);
+    const monthlyFee = Math.round(feePerLesson * weeklyLessons * 4.3);
 
     const student = await base44.entities.Student.create({
       name: form.name, grade: form.grade, subject: form.subject,
