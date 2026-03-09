@@ -80,12 +80,12 @@ export default function ParentHomework() {
       </div>
 
       {filtered.length === 0 ? (
-        <div style={{ background: 'white', borderRadius: '16px', padding: '4rem', textAlign: 'center', color: '#9ca3af', border: '1px solid #f1f5f9' }}>
-          <BookOpen size={36} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
+        <div style={{ background: 'white', borderRadius: '12px', padding: '3rem 1.5rem', textAlign: 'center', color: '#9ca3af', border: '1px solid #f1f5f9' }}>
+          <BookOpen size={32} style={{ margin: '0 auto 0.75rem', opacity: 0.3 }} />
           <p>Ödev bulunamadı</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           {filtered.map(hw => {
             const cfg = statusCfg[hw.status] || statusCfg.verildi;
             const Icon = cfg.icon;
@@ -93,23 +93,25 @@ export default function ParentHomework() {
             try { dueDateStr = hw.dueDate ? format(parseISO(hw.dueDate), 'd MMMM yyyy', { locale: tr }) : ''; } catch {}
             const isEditingNote = noteHwId === hw.id;
             return (
-              <div key={hw.id} style={{ background: 'white', borderRadius: '14px', border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon size={19} color={cfg.color} />
+              <div key={hw.id} style={{ background: 'white', borderRadius: '12px', border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={17} color={cfg.color} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.9rem' }}>{hw.title}</div>
-                    {hw.description && <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.2rem' }}>{hw.description}</div>}
-                    {dueDateStr && <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>Son Tarih: {dueDateStr}</div>}
+                    <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.85rem' }}>{hw.title}</div>
+                    {hw.description && <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.15rem' }}>{hw.description}</div>}
+                    {dueDateStr && <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.15rem' }}>Son Tarih: {dueDateStr}</div>}
                   </div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px', background: cfg.bg, color: cfg.color, flexShrink: 0 }}>
-                    {cfg.label}
-                  </span>
-                  <button onClick={() => { setNoteHwId(isEditingNote ? null : hw.id); setNote(hw.parentNote || ''); }}
-                    title="Not ekle" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d1d5db', padding: '0.3rem' }}>
-                    <MessageSquare size={16} color={hw.parentNote ? '#6366f1' : '#d1d5db'} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '6px', background: cfg.bg, color: cfg.color' }}>
+                      {cfg.label}
+                    </span>
+                    <button onClick={() => { setNoteHwId(isEditingNote ? null : hw.id); setNote(hw.parentNote || ''); }}
+                      title="Not ekle" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d1d5db', padding: '0.2rem' }}>
+                      <MessageSquare size={14} color={hw.parentNote ? '#6366f1' : '#d1d5db'} />
+                    </button>
+                  </div>
                 </div>
                 {hw.parentNote && !isEditingNote && (
                   <div style={{ borderTop: '1px solid #f1f5f9', padding: '0.75rem 1.25rem', background: '#fafafe', fontSize: '0.82rem', color: '#6366f1' }}>
