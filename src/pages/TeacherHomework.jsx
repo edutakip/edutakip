@@ -103,7 +103,7 @@ export default function TeacherHomework() {
           <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Ödevler</h1>
           <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{homeworks.length} ödev toplam</p>
         </div>
-        <button onClick={() => setShowForm(true)}
+        <button onClick={() => { setEditingHw(null); setForm({ studentId: '', title: '', description: '', dueDate: '' }); setShowForm(true); }}
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
           <Plus size={16} /> Ödev Ver
         </button>
