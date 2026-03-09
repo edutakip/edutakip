@@ -32,18 +32,6 @@ export default function ParentDashboard() {
       ]);
       setLessons(l.sort((a, b) => new Date(a.date) - new Date(b.date)));
       setPayments(p);
-    } else {
-      // Auto-link if there's a stored invite code from the landing page
-      const storedCode = localStorage.getItem('tilki_invite_code');
-      if (storedCode) {
-        localStorage.removeItem('tilki_invite_code');
-        const students = await base44.entities.Student.filter({ inviteCode: storedCode });
-        if (students.length > 0) {
-          const s = students[0];
-          await base44.entities.Student.update(s.id, { inviteAccepted: true, parentEmail: email });
-          loadStudentData(email);
-        }
-      }
     }
   };
 
