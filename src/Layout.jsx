@@ -9,7 +9,7 @@ const TEACHER_NAV = [
   { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Veli Görünümü', icon: Baby, page: 'ParentDashboard' },
+  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
 ];
 
 const PARENT_NAV = [
