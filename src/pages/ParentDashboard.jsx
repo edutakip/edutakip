@@ -47,7 +47,6 @@ export default function ParentDashboard() {
     loadStudentData(user?.email || '');
   };
 
-  const upcomingLessons = lessons.filter(l => l.date && isAfter(new Date(l.date + 'T23:59:59'), new Date())).slice(0, 5);
   const totalPaid = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
   const pendingAmount = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
 
