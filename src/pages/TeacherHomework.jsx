@@ -8,6 +8,7 @@ export default function TeacherHomework() {
   const [homeworks, setHomeworks] = useState([]);
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingHw, setEditingHw] = useState(null);
   const [filter, setFilter] = useState('all');
   const [form, setForm] = useState({ studentId: '', title: '', description: '', dueDate: '' });
   const [me, setMe] = useState(null);
