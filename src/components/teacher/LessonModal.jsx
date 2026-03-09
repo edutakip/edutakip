@@ -40,8 +40,9 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
     const start = new Date(`${form.date}T${form.startTime}`);
     const end = new Date(`${form.date}T${form.endTime}`);
     const duration = Math.round((end - start) / 60000);
+    const lessonFee = Number(form.lessonFee) || (student?.feePerLesson || 0);
     const groupId = recurring ? `group_${Date.now()}` : undefined;
-    const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: (await base44.auth.me()).email, meetingLink, duration, recurringGroupId: groupId };
+    const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: (await base44.auth.me()).email, meetingLink, duration, lessonFee, recurringGroupId: groupId };
     const dates = [form.date];
     if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
     for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
