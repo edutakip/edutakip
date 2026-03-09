@@ -75,94 +75,136 @@ export default function ParentDashboard() {
     );
   }
 
+  const menuItems = [
+    {
+      label: 'Dersler & Ödemeler',
+      desc: 'Toplam ders sayısı ve ödeme geçmişini görüntüle',
+      icon: DollarSign,
+      gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+      shadow: 'rgba(99,102,241,0.35)',
+      page: 'ParentLessonsPayments',
+      stats: [
+        { label: 'Toplam Ders', value: lessons.length },
+        { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}` },
+      ],
+    },
+    {
+      label: 'Ödevler',
+      desc: 'Öğretmenin verdiği ödevleri takip et',
+      icon: BookOpen,
+      gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+      shadow: 'rgba(245,158,11,0.35)',
+      page: 'ParentHomework',
+      stats: [],
+    },
+    {
+      label: 'Ders Performansı',
+      desc: 'Gelişim grafikleri ve değerlendirme notları',
+      icon: BarChart2,
+      gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+      shadow: 'rgba(16,185,129,0.35)',
+      page: 'ParentPerformance',
+      stats: [
+        { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length },
+      ],
+    },
+    {
+      label: 'Ders Talebi',
+      desc: 'İptal, erteleme veya değişim talebinde bulun',
+      icon: RefreshCw,
+      gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+      shadow: 'rgba(59,130,246,0.35)',
+      page: 'ParentLessonRequests',
+      stats: [],
+    },
+    {
+      label: 'Ayarlar',
+      desc: 'Bildirim ve hesap tercihlerini yönet',
+      icon: Settings,
+      gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
+      shadow: 'rgba(100,116,139,0.35)',
+      page: 'ParentSettings',
+      stats: [],
+    },
+  ];
+
   return (
     <div style={{ padding: '2rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
       {/* Welcome */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ color: 'var(--text-primary)', fontSize: '1.8rem', fontWeight: '800' }}>Merhaba 👋</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-          {student.name} için ders takip paneli
+          {student.name} için veli paneli
         </p>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      {/* Quick Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
         {[
-          { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: 'var(--info)' },
-          { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: 'var(--success)' },
-          { label: 'Toplam Ödeme', value: `₺${totalPaid.toLocaleString('tr-TR')}`, icon: DollarSign, color: 'var(--accent)' },
-          { label: 'Bekleyen Ödeme', value: `₺${pendingAmount.toLocaleString('tr-TR')}`, icon: AlertCircle, color: 'var(--warning)' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} style={{ background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>{label}</p>
-                <p style={{ color: 'var(--text-primary)', fontSize: '1.5rem', fontWeight: '800' }}>{value}</p>
-              </div>
-              <div style={{ padding: '0.6rem', borderRadius: '12px', background: color + '20' }}>
-                <Icon size={20} color={color} />
-              </div>
+          { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
+          { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}`, icon: DollarSign, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+          { label: 'Bekleyen', value: `₺${pendingAmount.toLocaleString('tr-TR')}`, icon: AlertCircle, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.5rem', borderRadius: '10px', background: bg, flexShrink: 0 }}>
+              <Icon size={18} color={color} />
+            </div>
+            <div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</p>
+              <p style={{ color: 'var(--text-primary)', fontSize: '1.15rem', fontWeight: '800', marginTop: '0.1rem' }}>{value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Upcoming lessons */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <div style={{ background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1rem', marginBottom: '1rem' }}>Yaklaşan Dersler</h3>
-          {upcomingLessons.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem', fontSize: '0.875rem' }}>Planlanmış ders yok</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {upcomingLessons.map(lesson => (
-                <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: 'var(--bg-hover)', borderRadius: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: lesson.type === 'online' ? 'rgba(59,130,246,0.2)' : 'rgba(249,115,22,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {lesson.type === 'online' ? <Video size={18} color='var(--info)' /> : <MapPin size={18} color='var(--accent)' />}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.875rem' }}>
-                      {lesson.subject || 'Özel Ders'}
-                    </div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                      {lesson.date && format(parseISO(lesson.date), 'd MMMM yyyy', { locale: tr })} · {lesson.startTime}–{lesson.endTime}
-                    </div>
-                  </div>
-                  {lesson.meetingLink && (
-                    <a href={lesson.meetingLink} target='_blank' rel='noreferrer'
-                      style={{ background: 'var(--info)', color: 'white', padding: '0.3rem 0.7rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '600', textDecoration: 'none' }}>
-                      Katıl
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Menu Cards */}
+      <h2 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '700', marginBottom: '1rem' }}>Menü</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+        {menuItems.map(({ label, desc, icon: Icon, gradient, shadow, page, stats }) => (
+          <a key={label} href={createPageUrl(page)}
+            style={{
+              background: gradient,
+              borderRadius: '20px',
+              padding: '1.5rem',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              display: 'block',
+              boxShadow: `0 8px 32px ${shadow}`,
+              transition: 'transform 0.15s, box-shadow 0.15s',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 14px 40px ${shadow}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 8px 32px ${shadow}`; }}
+          >
+            {/* Decorative circle */}
+            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ position: 'absolute', bottom: '-30px', right: '30px', width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
 
-        {/* Payments Summary */}
-        <div style={{ background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1rem', marginBottom: '1rem' }}>Ödeme Özeti</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {[
-              { label: 'Ödenen', value: totalPaid, color: 'var(--success)', bg: 'rgba(16,185,129,0.12)' },
-              { label: 'Bekleyen', value: pendingAmount, color: 'var(--warning)', bg: 'rgba(245,158,11,0.12)' },
-              { label: 'Geç Kalan', value: payments.filter(p => p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0), color: 'var(--danger)', bg: 'rgba(239,68,68,0.12)' },
-            ].map(({ label, value, color, bg }) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.65rem 0.85rem', borderRadius: '10px', background: bg }}>
-                <span style={{ color, fontSize: '0.82rem', fontWeight: '600' }}>{label}</span>
-                <span style={{ color, fontSize: '1rem', fontWeight: '800' }}>₺{value.toLocaleString('tr-TR')}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', position: 'relative' }}>
+              <div style={{ padding: '0.6rem', borderRadius: '14px', background: 'rgba(255,255,255,0.25)' }}>
+                <Icon size={22} color='white' />
               </div>
-            ))}
-            {payments.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center', marginTop: '0.5rem' }}>Ödeme kaydı yok</p>}
-          </div>
-        </div>
+              <ChevronRight size={18} color='rgba(255,255,255,0.7)' />
+            </div>
+
+            <h3 style={{ color: 'white', fontSize: '1.05rem', fontWeight: '800', marginBottom: '0.3rem', position: 'relative' }}>{label}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', lineHeight: '1.5', position: 'relative', marginBottom: stats.length > 0 ? '1rem' : '0' }}>{desc}</p>
+
+            {stats.length > 0 && (
+              <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+                {stats.map(s => (
+                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '10px', padding: '0.4rem 0.7rem' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.65rem', fontWeight: '600', marginBottom: '0.1rem' }}>{s.label}</p>
+                    <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '800' }}>{s.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </a>
+        ))}
       </div>
-
-      {/* Full Payment History */}
-      <PaymentHistory payments={payments} />
-
-
     </div>
   );
 }
