@@ -89,7 +89,7 @@ export default function TeacherMessages() {
         {/* Header */}
         <div style={{ padding: '1rem 1.25rem', background: '#1e1b4b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {avatar(me?.full_name || 'T', 40, '#00a884')}
+            {avatar(me?.full_name || 'T', 40, '#6366f1')}
             <div>
               <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '0.95rem', margin: 0 }}>{me?.full_name || 'Öğretmen'}</p>
               <p style={{ color: '#8696a0', fontSize: '0.72rem', margin: 0 }}>Veli İletişim</p>
