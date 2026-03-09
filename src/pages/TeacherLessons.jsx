@@ -92,9 +92,9 @@ export default function TeacherLessons() {
   };
 
   const getLessonFee = (lesson) => {
+    if (lesson.lessonFee) return lesson.lessonFee;
     const student = students.find(s => s.id === lesson.studentId);
-    if (!student?.monthlyFee || !student?.weeklyLessons) return 0;
-    return Math.round(student.monthlyFee / (student.weeklyLessons * 4.3));
+    return student?.feePerLesson || 0;
   };
 
   const isLessonPaid = (lesson) => {
