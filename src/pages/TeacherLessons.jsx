@@ -220,7 +220,10 @@ export default function TeacherLessons() {
                   </>
                 )}
                 {isCompleted && (
-                  <ActionBtn label="Tamamlanmadı" color="#6b7280" onClick={() => markUndone(lesson)} />
+                  <>
+                    <ActionBtn label="Tamamlanmadı" color="#6b7280" onClick={() => markUndone(lesson)} />
+                    <ActionBtn icon={<ClipboardList size={13} />} label="Değerlendir" color="#7c3aed" onClick={() => setReportLesson(lesson)} />
+                  </>
                 )}
                 {!isPaid && !isCancelled && (
                   <ActionBtn label="Ödendi İşaretle" color="#4f46e5" onClick={() => markPaid(lesson)} />
