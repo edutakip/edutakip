@@ -196,6 +196,7 @@ export default function TeacherDashboard() {
       {showModal && (
         <LessonModal students={students} defaultDate={format(new Date(), 'yyyy-MM-dd')} onClose={() => setShowModal(false)} onSaved={loadData} />
       )}
+      <PendingLessonsPrompt onDone={loadData} />
     </div>
   );
 }
