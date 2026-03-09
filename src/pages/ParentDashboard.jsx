@@ -126,6 +126,15 @@ export default function ParentDashboard() {
       page: 'ParentSettings',
       stats: [],
     },
+    {
+      label: 'Çıkış Yap',
+      desc: 'Hesabınızdan çıkış yapın',
+      icon: LogOut,
+      gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+      shadow: 'rgba(239,68,68,0.35)',
+      page: 'logout',
+      stats: [],
+    },
   ];
 
   return (
