@@ -114,16 +114,16 @@ export default function ParentHomework() {
                   </div>
                 </div>
                 {hw.parentNote && !isEditingNote && (
-                  <div style={{ borderTop: '1px solid #f1f5f9', padding: '0.75rem 1.25rem', background: '#fafafe', fontSize: '0.82rem', color: '#6366f1' }}>
+                  <div style={{ borderTop: '1px solid #f1f5f9', padding: '0.65rem 1rem', background: '#fafafe', fontSize: '0.77rem', color: '#6366f1' }}>
                     💬 {hw.parentNote}
                   </div>
                 )}
                 {isEditingNote && (
-                  <div style={{ borderTop: '1px solid #f1f5f9', padding: '1rem 1.25rem', background: '#fafafe', display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ borderTop: '1px solid #f1f5f9', padding: '0.75rem 1rem', background: '#fafafe', display: 'flex', gap: '0.4rem' }}>
                     <input value={note} onChange={e => setNote(e.target.value)} placeholder="Notunuzu yazın..."
-                      style={{ flex: 1, border: '1.5px solid #e5e7eb', borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.82rem', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                      style={{ flex: 1, border: '1.5px solid #e5e7eb', borderRadius: '6px', padding: '0.4rem 0.6rem', fontSize: '0.75rem', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
                     <button onClick={() => submitNote(hw)}
-                      style={{ background: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      style={{ background: '#4f46e5', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                       Kaydet
                     </button>
                   </div>
