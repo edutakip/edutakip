@@ -145,9 +145,9 @@ export default function TeacherMessages() {
 
       {/* ── RIGHT PANEL ── */}
       {!selectedStudent ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.25rem', background: '#222e35' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#2a3942', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MessageCircle size={36} color='#8696a0' strokeWidth={1.5} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.25rem', background: '#13103a' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <MessageCircle size={36} color='#6366f1' strokeWidth={1.5} />
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>EduTrack Mesajlaşma</p>
