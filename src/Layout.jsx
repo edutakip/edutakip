@@ -32,9 +32,7 @@ export default function Layout({ children, currentPageName }) {
     <>
       {/* Logo */}
       <div style={{ padding: '1.25rem 1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-        <div style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(99,102,241,0.4)' }}>
-          <GraduationCap size={20} color='white' />
-        </div>
+        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTrack" style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px' }} />
         {!collapsed && (
           <div>
             <h1 style={{ color: 'white', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.3px', lineHeight: 1 }}>EduTrack</h1>
