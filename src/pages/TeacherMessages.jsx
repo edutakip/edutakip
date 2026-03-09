@@ -122,8 +122,8 @@ export default function TeacherMessages() {
             const isSelected = selectedStudent?.id === s.id;
             return (
               <div key={s.id} onClick={() => setSelectedStudent(s)}
-                style={{ padding: '0.7rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.85rem', background: isSelected ? '#2a3942' : 'transparent', borderBottom: '1px solid rgba(42,57,66,0.5)', transition: 'background 0.1s' }}
-                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#1f2d34'; }}
+                style={{ padding: '0.7rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.85rem', background: isSelected ? 'rgba(99,102,241,0.18)' : 'transparent', borderBottom: '1px solid rgba(99,102,241,0.1)', borderLeft: isSelected ? '3px solid #6366f1' : '3px solid transparent', transition: 'background 0.1s' }}
+                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
                 onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
                 {avatar(s.parentName || s.name, 48, getColor(s.id))}
                 <div style={{ flex: 1, minWidth: 0 }}>
