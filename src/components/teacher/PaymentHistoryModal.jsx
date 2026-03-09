@@ -228,6 +228,23 @@ export default function PaymentHistoryModal({ student, onClose }) {
                                 <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.78rem' }}>{payment.description}</div>
                               </div>
                             )}
+                            {payment.status !== 'alındı' && (
+                              <button
+                                onClick={() => {
+                                  base44.entities.Payment.update(payment.id, { status: 'alındı' });
+                                  setPayments(payments.map(p => p.id === payment.id ? { ...p, status: 'alındı' } : p));
+                                  setExpandedId(null);
+                                }}
+                                style={{
+                                  marginTop: '0.85rem', width: '100%', background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                                  border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem',
+                                  fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                ✓ Tahsil Et
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
