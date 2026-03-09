@@ -103,12 +103,20 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
             ))}
           </div>
 
-          {/* Subject */}
-          <div>
-            <label style={lbl}>Konu</label>
-            <input style={inp} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)}
-              onFocus={e => e.target.style.borderColor = '#4f46e5'}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+          {/* Subject & Fee */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.8fr', gap: '0.75rem' }}>
+            <div>
+              <label style={lbl}>Konu</label>
+              <input style={inp} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)}
+                onFocus={e => e.target.style.borderColor = '#4f46e5'}
+                onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+            </div>
+            <div>
+              <label style={lbl}>Ders Ücreti (₺)</label>
+              <input style={inp} type='number' placeholder={students.find(s => s.id === form.studentId)?.feePerLesson || '0'} value={form.lessonFee} onChange={e => u('lessonFee', e.target.value)}
+                onFocus={e => e.target.style.borderColor = '#4f46e5'}
+                onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+            </div>
           </div>
 
           {/* Type */}
