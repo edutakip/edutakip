@@ -261,5 +261,5 @@ export default function TeacherMessages() {
   );
 }
 
-const COLORS = ['#00a884', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899'];
+const COLORS = ['#6366f1', '#8b5cf6', '#4f46e5', '#7c3aed', '#a78bfa', '#818cf8', '#c084fc', '#6d28d9'];
 function getColor(id) { if (!id) return COLORS[0]; let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % COLORS.length; return COLORS[Math.abs(h)]; }
