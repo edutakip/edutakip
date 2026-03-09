@@ -247,10 +247,10 @@ export default function TeacherMessages() {
             <button onClick={sendMessage} disabled={!newMsg.trim()}
               style={{
                 width: '46px', height: '46px', borderRadius: '50%', border: 'none', flexShrink: 0,
-                background: newMsg.trim() ? '#00a884' : '#2a3942',
+                background: newMsg.trim() ? '#4f46e5' : 'rgba(255,255,255,0.07)',
                 cursor: newMsg.trim() ? 'pointer' : 'default',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.2s', boxShadow: newMsg.trim() ? '0 2px 8px rgba(0,168,132,0.4)' : 'none',
+                transition: 'background 0.2s', boxShadow: newMsg.trim() ? '0 2px 12px rgba(79,70,229,0.5)' : 'none',
               }}>
               <Send size={18} color="white" style={{ marginLeft: '2px' }} />
             </button>
