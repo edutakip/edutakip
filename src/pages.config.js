@@ -48,27 +48,29 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Landing from './pages/Landing';
+import ParentDashboard from './pages/ParentDashboard';
+import ParentMessages from './pages/ParentMessages';
 import TeacherCalendar from './pages/TeacherCalendar';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherFinance from './pages/TeacherFinance';
-import TeacherLessons from './pages/TeacherLessons';
 import TeacherMessages from './pages/TeacherMessages';
 import TeacherStudents from './pages/TeacherStudents';
-import ParentDashboard from './pages/ParentDashboard';
-import ParentMessages from './pages/ParentMessages';
+import TeacherLessons from './pages/TeacherLessons';
+import ParentPerformance from './pages/ParentPerformance';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Landing": Landing,
+    "ParentDashboard": ParentDashboard,
+    "ParentMessages": ParentMessages,
     "TeacherCalendar": TeacherCalendar,
     "TeacherDashboard": TeacherDashboard,
     "TeacherFinance": TeacherFinance,
-    "TeacherLessons": TeacherLessons,
     "TeacherMessages": TeacherMessages,
     "TeacherStudents": TeacherStudents,
-    "ParentDashboard": ParentDashboard,
-    "ParentMessages": ParentMessages,
+    "TeacherLessons": TeacherLessons,
+    "ParentPerformance": ParentPerformance,
 }
 
 export const pagesConfig = {
