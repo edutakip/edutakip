@@ -175,39 +175,40 @@ export default function ParentDashboard() {
           <a key={label} href={createPageUrl(page)}
             style={{
               background: gradient,
-              borderRadius: '20px',
-              padding: '1.5rem',
+              borderRadius: '14px',
+              padding: '1rem',
               cursor: 'pointer',
               textDecoration: 'none',
-              display: 'block',
-              boxShadow: `0 8px 32px ${shadow}`,
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: `0 4px 16px ${shadow}`,
               transition: 'transform 0.15s, box-shadow 0.15s',
               position: 'relative',
               overflow: 'hidden',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 14px 40px ${shadow}`; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 8px 32px ${shadow}`; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${shadow}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${shadow}`; }}
           >
             {/* Decorative circle */}
-            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
-            <div style={{ position: 'absolute', bottom: '-30px', right: '30px', width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ position: 'absolute', bottom: '-20px', right: '15px', width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', position: 'relative' }}>
-              <div style={{ padding: '0.6rem', borderRadius: '14px', background: 'rgba(255,255,255,0.25)' }}>
-                <Icon size={22} color='white' />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem', position: 'relative' }}>
+              <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(255,255,255,0.25)' }}>
+                <Icon size={18} color='white' />
               </div>
-              <ChevronRight size={18} color='rgba(255,255,255,0.7)' />
+              <ChevronRight size={14} color='rgba(255,255,255,0.7)' />
             </div>
 
-            <h3 style={{ color: 'white', fontSize: '1.05rem', fontWeight: '800', marginBottom: '0.3rem', position: 'relative' }}>{label}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', lineHeight: '1.5', position: 'relative', marginBottom: stats.length > 0 ? '1rem' : '0' }}>{desc}</p>
+            <h3 style={{ color: 'white', fontSize: '0.9rem', fontWeight: '800', marginBottom: '0.2rem', position: 'relative' }}>{label}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.7rem', lineHeight: '1.3', position: 'relative', marginBottom: stats.length > 0 ? '0.6rem' : '0' }}>{desc}</p>
 
             {stats.length > 0 && (
-              <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+              <div style={{ display: 'flex', gap: '0.6rem', position: 'relative', flexWrap: 'wrap' }}>
                 {stats.map(s => (
-                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '10px', padding: '0.4rem 0.7rem' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.65rem', fontWeight: '600', marginBottom: '0.1rem' }}>{s.label}</p>
-                    <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '800' }}>{s.value}</p>
+                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '8px', padding: '0.3rem 0.6rem' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.6rem', fontWeight: '600', marginBottom: '0.05rem' }}>{s.label}</p>
+                    <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>{s.value}</p>
                   </div>
                 ))}
               </div>
