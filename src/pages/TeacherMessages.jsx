@@ -228,9 +228,9 @@ export default function TeacherMessages() {
           </div>
 
           {/* Input */}
-          <div style={{ padding: '0.75rem 1rem', background: '#202c33', display: 'flex', alignItems: 'flex-end', gap: '0.6rem', zIndex: 1 }}>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8696a0', padding: '0.5rem', borderRadius: '50%', flexShrink: 0 }}><Smile size={22} /></button>
-            <div style={{ flex: 1, background: '#2a3942', borderRadius: '12px', display: 'flex', alignItems: 'flex-end', padding: '0.5rem 0.75rem', gap: '0.5rem' }}>
+          <div style={{ padding: '0.75rem 1rem', background: '#1e1b4b', display: 'flex', alignItems: 'flex-end', gap: '0.6rem', zIndex: 1 }}>
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: '0.5rem', borderRadius: '50%', flexShrink: 0 }}><Smile size={22} /></button>
+            <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: '12px', display: 'flex', alignItems: 'flex-end', padding: '0.5rem 0.75rem', gap: '0.5rem', border: '1px solid rgba(99,102,241,0.2)' }}>
               <textarea
                 value={newMsg}
                 onChange={e => setNewMsg(e.target.value)}
