@@ -129,19 +129,19 @@ export default function ParentDashboard() {
   ];
 
   return (
-    <div style={{ padding: '2rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
+    <div style={{ padding: '1rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
       {/* Welcome */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ color: 'var(--text-primary)', fontSize: '1.8rem', fontWeight: '800' }}>Merhaba 👋</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h1 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: '800' }}>Merhaba 👋</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
           {student.name} için veli paneli
         </p>
       </div>
 
       {/* Quick Stats Row */}
-      <div style={{ background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '1.25rem' }}>Genel Özet</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1px', background: 'var(--border)' }}>
+      <div style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '1rem', marginBottom: '1.5rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '1rem' }}>Genel Özet</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: 'var(--border)' }}>
           {[
             { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: '#6366f1', bg: 'rgba(99,102,241,0.12)', emoji: '📚' },
             { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: '#10b981', bg: 'rgba(16,185,129,0.12)', emoji: '✅' },
@@ -150,30 +150,27 @@ export default function ParentDashboard() {
           ].map(({ label, value, color, bg, emoji }, i, arr) => (
             <div key={label} style={{
               background: 'var(--bg-card)',
-              padding: '1.25rem 1.5rem',
+              padding: '0.85rem 1rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.5rem',
-              borderRadius: i === 0 ? '12px 0 0 12px' : i === arr.length - 1 ? '0 12px 12px 0' : '0',
+              gap: '0.4rem',
+              borderRadius: i === 0 ? '10px 0 0 10px' : i === arr.length - 1 ? '0 10px 10px 0' : '0',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
                   {emoji}
                 </div>
               </div>
-              <p style={{ color: 'var(--text-primary)', fontSize: '1.6rem', fontWeight: '900', lineHeight: 1 }}>{value}</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>{label}</p>
-              <div style={{ height: '3px', borderRadius: '99px', background: bg, marginTop: '0.25rem' }}>
-                <div style={{ height: '100%', width: '60%', borderRadius: '99px', background: color }} />
-              </div>
+              <p style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: '900', lineHeight: 1 }}>{value}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '600' }}>{label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Menu Cards */}
-      <h2 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '700', marginBottom: '1rem' }}>Menü</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+      <h2 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.85rem' }}>Menü</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.85rem' }}>
         {menuItems.map(({ label, desc, icon: Icon, gradient, shadow, page, stats }) => (
           <a key={label} href={createPageUrl(page)}
             style={{
