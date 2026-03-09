@@ -45,7 +45,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
   const [loading, setLoading] = useState(false);
   const [existingLessons, setExistingLessons] = useState([]);
   const [form, setForm] = useState({
-    name: '', grade: '', subject: '', hourlyFee: '', lessonDuration: 60,
+    name: '', grade: '', subject: '', feePerLesson: '', lessonDuration: 60,
     parentName: '', parentPhone: '', parentEmail: '',
     schedule: [], // [{day: 0, time: '16:00'}]
     notes: '',
