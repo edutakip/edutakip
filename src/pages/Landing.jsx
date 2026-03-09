@@ -150,7 +150,7 @@ export default function Landing() {
               subtitle: 'Matematik',
               messages: [
                 { text: 'Merhaba, bu haftanın dersi Perşembe 16:00\'de', sender: 'right', time: '14:30' },
-                { text: 'Lütfen önemdeki 3. bölümü çalışın', sender: 'right', time: '14:31' },
+                { text: 'Lütfen sayfa 56 yı yapalım', sender: 'right', time: '14:31' },
                 { text: 'Teşekkürler ✓✓', sender: 'left', time: '14:45' },
               ]
             },
@@ -158,10 +158,10 @@ export default function Landing() {
               name: 'Emre\'nin Velisi',
               subtitle: 'Veli',
               messages: [
-                { text: 'Hocam bu ay ödemeyi yapabilirim', sender: 'left', time: '09:15' },
+                { text: 'Hocam bu ay ödemeyi geciktirdim kusura bakmayın', sender: 'left', time: '09:15' },
                 { text: 'Emre\'nin başarısından çok memnunum', sender: 'left', time: '09:16' },
-                { text: 'Tamamdır, ödeme alındı ✓✓', sender: 'right', time: '09:20' },
-                { text: 'Emre çok başarılı gidiyor 🎉', sender: 'right', time: '09:21' },
+                { text: 'Ödemeniz sisteme işlendi teşekkürler ✓✓', sender: 'right', time: '09:20' },
+                { text: 'Evet Emre çok başarılı gidiyor 🎉', sender: 'right', time: '09:21' },
               ]
             },
           ].map((conv, idx) => (
