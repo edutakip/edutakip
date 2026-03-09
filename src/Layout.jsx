@@ -14,6 +14,7 @@ const TEACHER_NAV = [
 
 const PARENT_NAV = [
   { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
+  { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
 export default function Layout({ children, currentPageName }) {
