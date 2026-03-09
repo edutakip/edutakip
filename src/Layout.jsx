@@ -113,7 +113,7 @@ export default function Layout({ children, currentPageName }) {
         background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
         display: 'flex', flexDirection: 'column',
         position: 'fixed', top: 0, left: 0, height: '100vh',
-        zIndex: 50, overflowX: 'hidden', overflowY: 'auto', transition: 'width 0.2s ease',
+        zIndex: 50, overflowX: 'hidden', overflowY: 'hidden', transition: 'width 0.2s ease',
         boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
       }}>
         <SidebarContent />
