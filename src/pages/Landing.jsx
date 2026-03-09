@@ -71,7 +71,10 @@ export default function Landing() {
 
         <div style={{ position: 'relative', maxWidth: '750px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTrack" style={{ width: '90px', height: '90px', borderRadius: '24px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTrack" style={{ width: '90px', height: '90px', borderRadius: '24px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }} />
+              <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '-0.5px' }}>EduTrack</span>
+            </div>
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', padding: '0.4rem 1rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.95)', marginBottom: '2rem', fontWeight: '600', backdropFilter: 'blur(10px)', boxShadow: '0 4px 30px rgba(0,0,0,0.1)' }}>
             <Zap size={13} fill='currentColor' color='#fbbf24' /> Türkiye'nin En Güvenilir Özel Ders Platformu
