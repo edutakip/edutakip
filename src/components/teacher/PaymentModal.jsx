@@ -41,6 +41,13 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           </button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {student?.parentPhone && (
+            <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '10px', padding: '0.55rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Veli Tel:</span>
+              <a href={`tel:${student.parentPhone}`} style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: '600', textDecoration: 'none' }}>{student.parentPhone}</a>
+              {student.parentName && <span style={{ color: '#86efac', fontSize: '0.78rem' }}>({student.parentName})</span>}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
               <label style={labelStyle}>Tutar (₺)</label>
