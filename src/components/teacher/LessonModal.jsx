@@ -287,7 +287,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
                 ))}
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Submit */}
           <button onClick={save} disabled={loading || !form.studentId} style={{
