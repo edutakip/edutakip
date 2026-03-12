@@ -113,6 +113,11 @@ export default function Layout({ children, currentPageName }) {
     </>
   );
 
+  const handleLogout = () => {
+    localStorage.removeItem('tilki_role');
+    window.location.href = createPageUrl('Landing');
+  };
+
   // Veli için alt navigation layout
   if (isParent) {
     return (
@@ -148,6 +153,18 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             );
           })}
+          {/* Logout button */}
+          <button onClick={handleLogout}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
+              color: 'rgba(255,150,150,0.7)', background: 'none', border: 'none', flex: 1, height: '100%',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.7)'}>
+            <LogOut size={19} />
+            <span style={{ fontSize: '0.6rem', fontWeight: '600', whiteSpace: 'nowrap' }}>Çıkış</span>
+          </button>
         </nav>
       </div>
     );
