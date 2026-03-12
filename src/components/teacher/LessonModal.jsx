@@ -47,17 +47,69 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
   const save = async () => {
     if (!form.studentId || !form.date || !form.startTime) return;
+    if (isEditing) {
+      setConfirmStep(true);
+      return;
+    }
+    await doSave(false);
+  };
+
+  const doSave = async (updateFuture) => {
     setLoading(true);
     const student = students.find(s => s.id === form.studentId);
     const start = new Date(`${form.date}T${form.startTime}`);
     const end = new Date(`${form.date}T${form.endTime}`);
     const duration = Math.round((end - start) / 60000);
     const lessonFee = Number(form.lessonFee) || (student?.feePerLesson || 0);
-    const groupId = recurring ? `group_${Date.now()}` : undefined;
-    const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: (await base44.auth.me()).email, meetingLink, duration, lessonFee, recurringGroupId: groupId };
-    const dates = [form.date];
-    if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
-    for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
+
+    if (isEditing) {
+      await base44.entities.Lesson.update(existingLesson.id, {
+        ...form, studentName: student?.name || existingLesson.studentName,
+        meetingLink, duration, lessonFee,
+      });
+
+      if (updateFuture) {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const allLessons = await base44.entities.Lesson.filter({ studentId: existingLesson.studentId });
+        const futureLessons = allLessons.filter(l => {
+          if (l.id === existingLesson.id || !l.date || l.date <= today) return false;
+          try {
+            const d = parseISO(l.date);
+            const dow = (d.getDay() + 6) % 7;
+            const origDate = parseISO(existingLesson.date);
+            const origDow = (origDate.getDay() + 6) % 7;
+            return dow === origDow && l.startTime === existingLesson.startTime;
+          } catch { return false; }
+        });
+
+        for (const l of futureLessons) {
+          const lDate = parseISO(l.date);
+          const origDate = parseISO(existingLesson.date);
+          const newDate = parseISO(form.date);
+          const dayDiff = newDate.getDay() - origDate.getDay();
+          const shifted = new Date(lDate);
+          shifted.setDate(shifted.getDate() + dayDiff);
+
+          await base44.entities.Lesson.update(l.id, {
+            date: format(shifted, 'yyyy-MM-dd'),
+            startTime: form.startTime,
+            endTime: form.endTime,
+            subject: form.subject,
+            location: form.location,
+            lessonFee,
+            duration,
+          });
+        }
+      }
+    } else {
+      const me = await base44.auth.me();
+      const groupId = recurring ? `group_${Date.now()}` : undefined;
+      const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: me.email, meetingLink, duration, lessonFee, recurringGroupId: groupId };
+      const dates = [form.date];
+      if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
+      for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
+    }
+
     setLoading(false);
     onSaved();
     onClose();
