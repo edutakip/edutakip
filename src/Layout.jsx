@@ -40,6 +40,11 @@ export default function Layout({ children, currentPageName }) {
   const sideW = collapsed ? '64px' : '224px';
   const isParent = role === 'parent';
 
+  const handleLogout = () => {
+    localStorage.removeItem('tilki_role');
+    window.location.href = createPageUrl('Landing');
+  };
+
   const SidebarContent = () => (
     <>
       {/* Logo */}
