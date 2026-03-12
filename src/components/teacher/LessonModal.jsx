@@ -265,31 +265,30 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
               onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
 
-          {/* Recurring - only for new lessons */}
-          {!isEditing && <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
-              <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
-              <RefreshCw size={14} color='#4f46e5' />
-              <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
-            </label>
-            {recurring && (
-              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
-                {[2, 4, 8, 12].map(w => (
-                  <button key={w} onClick={() => setRecurringWeeks(w)} style={{
-                    padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
-                    borderColor: recurringWeeks === w ? '#4f46e5' : '#e5e7eb',
-                    background: recurringWeeks === w ? '#eef2ff' : 'white',
-                    color: recurringWeeks === w ? '#4f46e5' : '#6b7280',
-                    cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
-                  }}>{w}</button>
-                ))}
-              </div>
-            )}
-          </div>}
-
-          {/* Submit */}
+          {!isEditing && (
+            <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+                <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
+                  style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
+                <RefreshCw size={14} color='#4f46e5' />
+                <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
+              </label>
+              {recurring && (
+                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
+                  {[2, 4, 8, 12].map(w => (
+                    <button key={w} onClick={() => setRecurringWeeks(w)} style={{
+                      padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
+                      borderColor: recurringWeeks === w ? '#4f46e5' : '#e5e7eb',
+                      background: recurringWeeks === w ? '#eef2ff' : 'white',
+                      color: recurringWeeks === w ? '#4f46e5' : '#6b7280',
+                      cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                    }}>{w}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <button onClick={save} disabled={loading || !form.studentId} style={{
             padding: '0.8rem', borderRadius: '12px', border: 'none',
             background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700',
