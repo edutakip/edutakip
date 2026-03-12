@@ -16,6 +16,9 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     setLoading(true);
     const me = await base44.auth.me();
     const paidAmount = Number(form.amount);
+    // Güncel öğrenci verisini DB'den al (parentPhone dahil)
+    const freshStudents = await base44.entities.Student.filter({ id: student.id });
+    const freshStudent = freshStudents[0] || student;
 
     if (form.status === 'alındı') {
       // Bekleyen kayıtlardan düş
@@ -43,7 +46,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           ...form, amount: remaining,
           studentId: student.id, studentName: student.name,
           teacherEmail: me.email,
-          parentPhone: student.parentPhone || '', parentName: student.parentName || '',
+          parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
         });
       }
     } else {
@@ -51,7 +54,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
         ...form, amount: paidAmount,
         studentId: student.id, studentName: student.name,
         teacherEmail: me.email,
-        parentPhone: student.parentPhone || '', parentName: student.parentName || '',
+        parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
       });
     }
 

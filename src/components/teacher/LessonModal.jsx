@@ -56,7 +56,10 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
   const doSave = async (updateFuture) => {
     setLoading(true);
-    const student = students.find(s => s.id === form.studentId);
+    const studentLocal = students.find(s => s.id === form.studentId);
+    // Güncel öğrenci verisini DB'den al (parentPhone dahil)
+    const freshStudents = form.studentId ? await base44.entities.Student.filter({ id: form.studentId }) : [];
+    const student = freshStudents[0] || studentLocal;
     const start = new Date(`${form.date}T${form.startTime}`);
     const end = new Date(`${form.date}T${form.endTime}`);
     const duration = Math.round((end - start) / 60000);
