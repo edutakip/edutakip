@@ -177,10 +177,15 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
 
                 {student.schedule?.length > 0 && (
                   <Section title="Ders Programı" icon={Calendar}>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem', marginBottom: '0.6rem' }}>Saate tıklayarak düzenleyebilirsiniz</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {student.schedule.map((s, i) => (
-                        <span key={i} style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fdba74', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600' }}>
-                          {DAYS_FULL[s.day]} {s.time}
+                        <span key={i}
+                          onClick={() => setEditingSlot({ slot: s, slotIndex: i })}
+                          style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fdba74', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(249,115,22,0.3)'; e.currentTarget.style.borderColor = '#f97316'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(249,115,22,0.15)'; e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)'; }}>
+                          ✏️ {DAYS_FULL[s.day]} {s.time}
                         </span>
                       ))}
                     </div>
