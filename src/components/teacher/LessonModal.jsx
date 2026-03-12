@@ -123,14 +123,46 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   };
   const lbl = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
+  if (confirmStep) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+        <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '420px', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <CalendarDays size={26} color='#4f46e5' />
+            </div>
+            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1rem', marginBottom: '0.5rem' }}>Gelecek Dersler Güncellensin mi?</h3>
+            <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: '1.6' }}>
+              Bu dersin değişiklikleri aynı öğrencinin ilerleyen haftalardaki planlanmış derslerine de uygulanacak mı?
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <button onClick={() => doSave(true)} disabled={loading}
+              style={{ padding: '0.75rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              {loading ? <Loader2 size={14} className='animate-spin' /> : null} Evet, Gelecek Dersleri de Güncelle
+            </button>
+            <button onClick={() => doSave(false)} disabled={loading}
+              style={{ padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>
+              Hayır, Sadece Bu Dersi Güncelle
+            </button>
+            <button onClick={() => setConfirmStep(false)} disabled={loading}
+              style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: 'none', color: '#9ca3af', fontWeight: '500', fontSize: '0.8rem', cursor: 'pointer' }}>
+              Geri Dön
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
       <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '500px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
-            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Ders Planla</h2>
-            <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>Yeni ders oluştur</p>
+            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>{isEditing ? 'Dersi Düzenle' : 'Ders Planla'}</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>{isEditing ? 'Ders bilgilerini güncelle' : 'Yeni ders oluştur'}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
