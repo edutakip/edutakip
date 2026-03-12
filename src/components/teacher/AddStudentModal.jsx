@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign, Check, CalendarDays } from 'lucide-react';
+import { format, addDays } from 'date-fns';
+import { parseISO } from 'date-fns';
 
 const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
 const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const DAY_FULL = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
-
 const GRADES = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
 
 const STEPS = [
@@ -30,7 +29,6 @@ const selStyle = { ...inp, appearance: 'none', cursor: 'pointer' };
 function Field({ label, children }) {
   return <div><label style={lbl}>{label}</label>{children}</div>;
 }
-
 function SectionTitle({ icon: Icon, title }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.25rem' }}>
@@ -40,16 +38,36 @@ function SectionTitle({ icon: Icon, title }) {
   );
 }
 
+// Get next N occurrences of a weekday (0=Mon,...,6=Sun)
+function getNextOccurrences(dayIdx, weeksCount = 4) {
+  const today = new Date();
+  const todayMon = (today.getDay() + 6) % 7; // Mon=0
+  let daysUntil = (dayIdx - todayMon + 7) % 7;
+  if (daysUntil === 0) daysUntil = 0;
+  const dates = [];
+  for (let w = 0; w < weeksCount; w++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + daysUntil + w * 7);
+    dates.push(d);
+  }
+  return dates;
+}
+
 export default function AddStudentModal({ onClose, onSaved }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [existingLessons, setExistingLessons] = useState([]);
+  const [timePicker, setTimePicker] = useState(null); // {day, hourTime, rect}
+  const [calendarPrompt, setCalendarPrompt] = useState(false);
+  const [savedStudent, setSavedStudent] = useState(null);
+  const [addingToCalendar, setAddingToCalendar] = useState(false);
+  const timePickerRef = useRef(null);
+
   const [form, setForm] = useState({
     name: '', grade: '', subject: '', feePerLesson: '', lessonDuration: 60,
     parentName: '', parentPhone: '', parentEmail: '',
-    schedule: [], // [{day: 0, time: '16:00'}]
-    notes: '',
-    resourceName: '', initialBalance: '', initialBalanceType: 'borc',
+    schedule: [],
+    notes: '', resourceName: '', initialBalance: '', initialBalanceType: 'borc',
   });
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -60,23 +78,58 @@ export default function AddStudentModal({ onClose, onSaved }) {
     );
   }, []);
 
-  const toggleScheduleSlot = (day, time) => {
-    const exists = form.schedule.find(s => s.day === day && s.time === time);
-    if (exists) {
-      u('schedule', form.schedule.filter(s => !(s.day === day && s.time === time)));
-    } else {
-      u('schedule', [...form.schedule, { day, time }]);
-    }
+  // Close time picker on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (timePickerRef.current && !timePickerRef.current.contains(e.target)) {
+        setTimePicker(null);
+      }
+    };
+    if (timePicker) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [timePicker]);
+
+  const getSelectedForCell = (dayIdx, hourTime) => {
+    const hour = hourTime.slice(0, 3); // e.g. "15:"
+    return form.schedule.find(s => s.day === dayIdx && s.time.startsWith(hour));
   };
 
-  const getLessonsForSlot = (dayIdx, time) => {
+  const getLessonsForSlot = (dayIdx, hourTime) => {
     return existingLessons.filter(l => {
       try {
         const d = parseISO(l.date);
-        const dow = (d.getDay() + 6) % 7; // Mon=0
-        return dow === dayIdx && l.startTime?.startsWith(time.slice(0, 5));
+        const dow = (d.getDay() + 6) % 7;
+        return dow === dayIdx && l.startTime?.startsWith(hourTime.slice(0, 3));
       } catch { return false; }
     });
+  };
+
+  const handleCellClick = (dayIdx, hourTime, e) => {
+    const existing = getSelectedForCell(dayIdx, hourTime);
+    if (existing) {
+      // deselect
+      u('schedule', form.schedule.filter(s => !(s.day === dayIdx && s.time === existing.time)));
+      return;
+    }
+    const occupied = getLessonsForSlot(dayIdx, hourTime);
+    if (occupied.length) return;
+    // Open time picker
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTimePicker({ day: dayIdx, hourTime, rect });
+  };
+
+  const selectTime = (exactTime) => {
+    const { day, hourTime } = timePicker;
+    // Remove any existing selection in that hour for that day
+    const hour = hourTime.slice(0, 3);
+    const filtered = form.schedule.filter(s => !(s.day === day && s.time.startsWith(hour)));
+    u('schedule', [...filtered, { day, time: exactTime }]);
+    setTimePicker(null);
+  };
+
+  const getTimeOptions = (hourTime) => {
+    const hour = parseInt(hourTime.slice(0, 2));
+    return ['00','10','20','30','40','50'].map(m => `${String(hour).padStart(2,'0')}:${m}`);
   };
 
   const save = async () => {
@@ -100,12 +153,9 @@ export default function AddStudentModal({ onClose, onSaved }) {
       inviteCode: generateCode(), inviteAccepted: false, status: 'active',
     });
 
-    // Başlangıç bakiyesi varsa ödeme kaydı oluştur
     if (form.initialBalance && Number(form.initialBalance) > 0) {
       await base44.entities.Payment.create({
-        studentId: student.id,
-        studentName: form.name,
-        teacherEmail: me.email,
+        studentId: student.id, studentName: form.name, teacherEmail: me.email,
         amount: Number(form.initialBalance),
         date: format(new Date(), 'yyyy-MM-dd'),
         status: form.initialBalanceType === 'kredi' ? 'alındı' : 'bekliyor',
@@ -115,7 +165,49 @@ export default function AddStudentModal({ onClose, onSaved }) {
     }
 
     setLoading(false);
-    onSaved(); onClose();
+    setSavedStudent({ ...student, teacherEmail: me.email });
+    onSaved();
+
+    if (form.schedule.length > 0) {
+      setCalendarPrompt(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const addToCalendar = async () => {
+    if (!savedStudent) return;
+    setAddingToCalendar(true);
+    const me = await base44.auth.me();
+    const lessonDuration = Number(form.lessonDuration) || 60;
+
+    for (const slot of form.schedule) {
+      const dates = getNextOccurrences(slot.day, 4);
+      for (const date of dates) {
+        const startH = parseInt(slot.time.slice(0, 2));
+        const startM = parseInt(slot.time.slice(3, 5));
+        const endTotalMin = startH * 60 + startM + lessonDuration;
+        const endH = Math.floor(endTotalMin / 60);
+        const endM = endTotalMin % 60;
+        const endTime = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
+
+        await base44.entities.Lesson.create({
+          studentId: savedStudent.id,
+          studentName: form.name,
+          teacherEmail: me.email,
+          date: format(date, 'yyyy-MM-dd'),
+          startTime: slot.time,
+          endTime,
+          subject: form.subject,
+          status: 'planlandı',
+          duration: lessonDuration,
+          lessonFee: Number(form.feePerLesson) || 0,
+        });
+      }
+    }
+
+    setAddingToCalendar(false);
+    onClose();
   };
 
   const canNext = () => {
@@ -123,9 +215,72 @@ export default function AddStudentModal({ onClose, onSaved }) {
     return true;
   };
 
+  // Calendar confirmation dialog
+  if (calendarPrompt) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
+        <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '440px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <CalendarDays size={26} color='#a5b4fc' />
+            </div>
+            <h3 style={{ color: 'white', fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.5rem' }}>Dersler Takvime Eklensin mi?</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', lineHeight: '1.6' }}>
+              Seçilen {form.schedule.length} ders saati için önümüzdeki 4 haftanın dersleri takvime eklenecek.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+            {form.schedule.map((s, i) => (
+              <span key={i} style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(165,180,252,0.4)', color: '#c7d2fe', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600' }}>
+                {DAY_FULL[s.day]} {s.time}
+              </span>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button onClick={onClose}
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer' }}>
+              Hayır, Atla
+            </button>
+            <button onClick={addToCalendar} disabled={addingToCalendar}
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              {addingToCalendar ? <><Loader2 size={15} className='animate-spin' /> Ekleniyor...</> : <><Check size={15} /> Evet, Ekle</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
-      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative' }}>
+
+        {/* Time Picker Popup */}
+        {timePicker && (
+          <div ref={timePickerRef} style={{
+            position: 'fixed', zIndex: 2000,
+            background: 'linear-gradient(145deg, #1a1535, #2a1f5e)',
+            border: '1.5px solid rgba(165,180,252,0.3)',
+            borderRadius: '12px', padding: '0.6rem',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+            top: Math.min(timePicker.rect.bottom + 4, window.innerHeight - 200),
+            left: Math.min(timePicker.rect.left, window.innerWidth - 140),
+          }}>
+            <div style={{ color: 'rgba(165,180,252,0.7)', fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', paddingLeft: '0.25rem' }}>
+              {DAY_FULL[timePicker.day]} — Saat Seçin
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.3rem' }}>
+              {getTimeOptions(timePicker.hourTime).map(t => (
+                <button key={t} onClick={() => selectTime(t)}
+                  style={{ padding: '0.4rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(165,180,252,0.2)', background: 'rgba(99,102,241,0.15)', color: '#c7d2fe', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.12s', whiteSpace: 'nowrap' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.4)'; e.currentTarget.style.borderColor = '#818cf8'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.borderColor = 'rgba(165,180,252,0.2)'; }}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -159,7 +314,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
           ))}
         </div>
 
-        {/* Step 1: Temel Bilgiler */}
+        {/* Step 1 */}
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
@@ -187,18 +342,17 @@ export default function AddStudentModal({ onClose, onSaved }) {
               <SectionTitle icon={CreditCard} title="Ders & Ücret" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <Field label="Ders Saat Ücreti (₺)">
-                    <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
-                      onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                    <p style={{ marginTop: '0.3rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Belirlenen ders süresi başına</p>
-                    <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
-                      {[500, 750, 1000].map(v => (
-                        <button key={v} onClick={() => u('feePerLesson', v)}
-                          style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c', borderRadius: '6px', padding: '0.2rem 0.55rem', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer' }}>
-                          {v}₺
-                        </button>
-                      ))}
-                    </div>
-                  </Field>
+                  <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
+                    onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                  <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
+                    {[500, 750, 1000].map(v => (
+                      <button key={v} onClick={() => u('feePerLesson', v)}
+                        style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c', borderRadius: '6px', padding: '0.2rem 0.55rem', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer' }}>
+                        {v}₺
+                      </button>
+                    ))}
+                  </div>
+                </Field>
                 <Field label="Ders Süresi (dk)">
                   <input style={inp} type="number" placeholder="60" value={form.lessonDuration} onChange={e => u('lessonDuration', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
@@ -221,7 +375,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
           </div>
         )}
 
-        {/* Step 2: Veli & İletişim */}
+        {/* Step 2 */}
         {step === 2 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
@@ -252,13 +406,14 @@ export default function AddStudentModal({ onClose, onSaved }) {
           </div>
         )}
 
-        {/* Step 3: Ders Programı ve Finansal Bilgiler */}
+        {/* Step 3: Ders Programı */}
         {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Schedule Section */}
             <div>
               <SectionTitle icon={Calendar} title="Haftalık Ders Programı" />
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginTop: '-0.75rem', marginBottom: '1rem' }}>Seçili günler yeni öğrencinin ders saatleri. Mavi hücreler mevcut derslerinizi gösterir.</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginTop: '-0.75rem', marginBottom: '1rem' }}>
+                Bir saate tıklayarak tam başlangıç saatini seçin. Mavi hücreler dolu saatleri gösterir.
+              </p>
               <div style={{ overflowX: 'auto', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
                   <thead>
@@ -270,24 +425,28 @@ export default function AddStudentModal({ onClose, onSaved }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {TIMES.map(time => (
-                      <tr key={time}>
-                        <td style={{ color: 'rgba(255,255,255,0.35)', padding: '0.35rem 0.4rem', whiteSpace: 'nowrap' }}>{time}</td>
+                    {TIMES.map(hourTime => (
+                      <tr key={hourTime}>
+                        <td style={{ color: 'rgba(255,255,255,0.35)', padding: '0.35rem 0.4rem', whiteSpace: 'nowrap' }}>{hourTime}</td>
                         {DAYS.map((_, di) => {
-                          const occupied = getLessonsForSlot(di, time);
-                          const selected = form.schedule.find(s => s.day === di && s.time === time);
+                          const occupied = getLessonsForSlot(di, hourTime);
+                          const selected = getSelectedForCell(di, hourTime);
+                          const isOpen = timePicker?.day === di && timePicker?.hourTime === hourTime;
                           return (
                             <td key={di} style={{ padding: '0.25rem' }}>
-                              <div onClick={() => !occupied.length && toggleScheduleSlot(di, time)}
-                                title={occupied.length ? occupied.map(l => l.studentName).join(', ') : ''}
+                              <div
+                                onClick={(e) => handleCellClick(di, hourTime, e)}
+                                title={occupied.length ? occupied.map(l => l.studentName).join(', ') : 'Tıkla ve saat seç'}
                                 style={{
-                                  width: '100%', minWidth: '38px', height: '32px', borderRadius: '8px', cursor: occupied.length ? 'not-allowed' : 'pointer',
-                                  background: selected ? 'linear-gradient(135deg, #6366f1, #818cf8)' : occupied.length ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.03)',
-                                  border: selected ? '1.5px solid #818cf8' : occupied.length ? '1px solid rgba(99,102,241,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                  width: '100%', minWidth: '38px', height: '32px', borderRadius: '8px',
+                                  cursor: occupied.length ? 'not-allowed' : 'pointer',
+                                  background: selected ? 'linear-gradient(135deg, #6366f1, #818cf8)' : occupied.length ? 'rgba(99,102,241,0.3)' : isOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
+                                  border: selected ? '1.5px solid #818cf8' : occupied.length ? '1px solid rgba(99,102,241,0.4)' : isOpen ? '1.5px solid rgba(99,102,241,0.5)' : '1px solid rgba(255,255,255,0.08)',
                                   transition: 'all 0.15s',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: '0.6rem', fontWeight: '800', color: 'white',
                                 }}>
-                                {occupied.length > 0 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.6)' }} />}
+                                {selected ? selected.time.slice(3) : occupied.length ? <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.6)' }} /> : null}
                               </div>
                             </td>
                           );
@@ -302,8 +461,9 @@ export default function AddStudentModal({ onClose, onSaved }) {
                   <div style={{ color: '#a5b4fc', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem' }}>✓ Seçilen saatler:</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                     {form.schedule.map((s, i) => (
-                      <span key={i} style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(165,180,252,0.4)', color: '#c7d2fe', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600' }}>
-                        {DAY_FULL[s.day]} {s.time}
+                      <span key={i} onClick={() => u('schedule', form.schedule.filter((_, idx) => idx !== i))}
+                        style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(165,180,252,0.4)', color: '#c7d2fe', fontSize: '0.72rem', padding: '0.25rem 0.6rem', borderRadius: '7px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        {DAY_FULL[s.day]} {s.time} <X size={10} />
                       </span>
                     ))}
                   </div>
@@ -339,7 +499,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
           </div>
         )}
 
-        {/* Step 4: Kaynaklar & Bakiye */}
+        {/* Step 4 */}
         {step === 4 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
@@ -393,11 +553,20 @@ export default function AddStudentModal({ onClose, onSaved }) {
                   <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: '600' }}>{value || '-'}</span>
                 </div>
               ))}
+              {form.schedule.length > 0 && (
+                <div style={{ marginTop: '0.6rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                  {form.schedule.map((s, i) => (
+                    <span key={i} style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(165,180,252,0.3)', color: '#c7d2fe', fontSize: '0.68rem', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: '600' }}>
+                      {DAY_FULL[s.day]} {s.time}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Footer Buttons */}
+        {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', gap: '0.75rem' }}>
           <button onClick={step === 1 ? onClose : () => setStep(s => s - 1)}
             style={{ padding: '0.75rem 1.5rem', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer' }}>
