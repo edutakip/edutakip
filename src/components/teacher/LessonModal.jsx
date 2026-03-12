@@ -297,7 +297,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
             boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s',
           }}>
-            {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : 'Dersi Kaydet'}
+            {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : isEditing ? 'Güncelle' : 'Dersi Kaydet'}
           </button>
         </div>
       </div>
