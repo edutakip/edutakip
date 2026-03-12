@@ -43,6 +43,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           ...form, amount: remaining,
           studentId: student.id, studentName: student.name,
           teacherEmail: me.email,
+          parentPhone: student.parentPhone || '', parentName: student.parentName || '',
         });
       }
     } else {
@@ -50,6 +51,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
         ...form, amount: paidAmount,
         studentId: student.id, studentName: student.name,
         teacherEmail: me.email,
+        parentPhone: student.parentPhone || '', parentName: student.parentName || '',
       });
     }
 

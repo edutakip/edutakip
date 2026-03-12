@@ -66,6 +66,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
       await base44.entities.Lesson.update(existingLesson.id, {
         ...form, studentName: student?.name || existingLesson.studentName,
         meetingLink, duration, lessonFee,
+        parentPhone: student?.parentPhone || '', parentName: student?.parentName || '',
       });
 
       if (updateFuture) {
@@ -104,7 +105,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     } else {
       const me = await base44.auth.me();
       const groupId = recurring ? `group_${Date.now()}` : undefined;
-      const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: me.email, meetingLink, duration, lessonFee, recurringGroupId: groupId };
+      const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: me.email, meetingLink, duration, lessonFee, recurringGroupId: groupId, parentPhone: student?.parentPhone || '', parentName: student?.parentName || '' };
       const dates = [form.date];
       if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
       for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
