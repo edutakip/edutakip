@@ -183,6 +183,18 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
             </select>
           </div>
 
+          {/* Parent Phone */}
+          {form.studentId && (() => {
+            const s = students.find(st => st.id === form.studentId);
+            return s?.parentPhone ? (
+              <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '10px', padding: '0.55rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Veli Tel:</span>
+                <a href={`tel:${s.parentPhone}`} style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: '600', textDecoration: 'none' }}>{s.parentPhone}</a>
+                {s.parentName && <span style={{ color: '#86efac', fontSize: '0.78rem' }}>({s.parentName})</span>}
+              </div>
+            ) : null;
+          })()}
+
           {/* Date + Time */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
             {[
