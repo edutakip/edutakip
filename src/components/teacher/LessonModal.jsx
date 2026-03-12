@@ -265,8 +265,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
               onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
 
-          {/* Recurring */}
-          <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
+          {/* Recurring - only for new lessons */}
+          {!isEditing && <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
               <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
