@@ -166,6 +166,9 @@ export default function TeacherLessons() {
           const isPaid = isLessonPaid(lesson);
           const fee = getLessonFee(lesson);
           const duration = getDuration(lesson.startTime, lesson.endTime);
+          const student = students.find(s => s.id === lesson.studentId);
+          const parentPhone = student?.parentPhone;
+          const parentName = student?.parentName;
           const isScheduled = lesson.status === 'planlandı';
           const isCompleted = lesson.status === 'tamamlandı';
           const isCancelled = lesson.status === 'iptal';
