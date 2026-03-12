@@ -312,6 +312,15 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             {showPaymentHistory && (
             <PaymentHistoryModal student={student} onClose={() => setShowPaymentHistory(false)} />
             )}
+            {editingSlot && (
+            <ScheduleSlotEditor
+              student={student}
+              slot={editingSlot.slot}
+              slotIndex={editingSlot.slotIndex}
+              onClose={() => setEditingSlot(null)}
+              onSaved={() => { setEditingSlot(null); onSaved(); onClose(); }}
+            />
+            )}
             </div>
             );
             }
