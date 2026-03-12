@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Video, MapPin, RefreshCw, Loader2 } from 'lucide-react';
-import { format, addWeeks } from 'date-fns';
+import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays } from 'lucide-react';
+import { format, addWeeks, parseISO } from 'date-fns';
 
-export default function LessonModal({ students, defaultDate, onClose, onSaved }) {
-  const [form, setForm] = useState({
+export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
+  const isEditing = !!existingLesson;
+  const [form, setForm] = useState(isEditing ? {
+    studentId: existingLesson.studentId || '',
+    date: existingLesson.date || defaultDate || format(new Date(), 'yyyy-MM-dd'),
+    startTime: existingLesson.startTime || '09:00',
+    endTime: existingLesson.endTime || '10:00',
+    subject: existingLesson.subject || '',
+    type: existingLesson.type || 'yuzyuze',
+    location: existingLesson.location || '',
+    notes: existingLesson.notes || '',
+    lessonFee: existingLesson.lessonFee || 0,
+  } : {
     studentId: '', date: defaultDate || format(new Date(), 'yyyy-MM-dd'),
     startTime: '09:00', endTime: '10:00', subject: '', type: 'yuzyuze',
     location: '', notes: '', lessonFee: 0,
@@ -13,7 +24,8 @@ export default function LessonModal({ students, defaultDate, onClose, onSaved })
   const [recurringWeeks, setRecurringWeeks] = useState(4);
   const [loading, setLoading] = useState(false);
   const [zoomLoading, setZoomLoading] = useState(false);
-  const [meetingLink, setMeetingLink] = useState('');
+  const [meetingLink, setMeetingLink] = useState(existingLesson?.meetingLink || '');
+  const [confirmStep, setConfirmStep] = useState(false);
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
