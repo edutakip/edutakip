@@ -187,6 +187,14 @@ export default function TeacherLessons() {
                 <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.15rem' }}>
                   {[lesson.subject, duration && `${duration}`, fee > 0 && `₺${fee}`].filter(Boolean).join(' · ')}
                 </div>
+                {(() => {
+                  const student = students.find(s => s.id === lesson.studentId);
+                  return student?.parentPhone ? (
+                    <a href={`tel:${student.parentPhone}`} style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '600', textDecoration: 'none', marginTop: '0.2rem', display: 'inline-block' }}>
+                      📞 {student.parentPhone}{student.parentName ? ` (${student.parentName})` : ''}
+                    </a>
+                  ) : null;
+                })()}
               </div>
 
               {/* Badges */}
