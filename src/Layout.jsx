@@ -118,11 +118,6 @@ export default function Layout({ children, currentPageName }) {
     </>
   );
 
-  const handleLogout = () => {
-    localStorage.removeItem('tilki_role');
-    window.location.href = createPageUrl('Landing');
-  };
-
   // Veli için alt navigation layout
   if (isParent) {
     return (
