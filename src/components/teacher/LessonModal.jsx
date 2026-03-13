@@ -128,7 +128,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
          '',
          `📚 ${student?.name || 'Öğrencimiz'} için yeni bir ders planlandı.`,
          '',
-         `🗓 Dersimiz *${formatDate(form.date)}* tarihinde`,
+         `🗓 Dersimiz *${form.date}* tarihinde`,
          `⏰ *${form.startTime} – ${form.endTime}* saatleri arasında`,
          `📍 *${typeLabel}* olarak gerçekleştirilecektir.`,
       ];
