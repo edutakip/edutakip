@@ -83,11 +83,12 @@ export default function TeacherFinance() {
     total: payments.filter(p => p.studentId === s.id && p.status === 'alındı').reduce((sum, p) => sum + (p.amount || 0), 0),
   })).sort((a, b) => b.total - a.total);
 
-  // Pending by student (for donut)
-  const pendingByStudent = students.map(s => ({
-    student: s,
-    amount: payments.filter(p => p.studentId === s.id && (p.status === 'bekliyor' || p.status === 'gecikmiş')).reduce((sum, p) => sum + (p.amount || 0), 0),
-  })).filter(x => x.amount > 0);
+  // Pending by student (for donut) — borç - tahsil = net bekleyen
+  const pendingByStudent = students.map(s => {
+    const debt = payments.filter(p => p.studentId === s.id && (p.status === 'bekliyor' || p.status === 'gecikmiş')).reduce((sum, p) => sum + (p.amount || 0), 0);
+    const collected = payments.filter(p => p.studentId === s.id && p.status === 'alındı').reduce((sum, p) => sum + (p.amount || 0), 0);
+    return { student: s, amount: Math.max(0, debt - collected) };
+  }).filter(x => x.amount > 0);
 
   const maxStudentIncome = studentIncome[0]?.total || 1;
 
