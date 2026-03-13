@@ -123,7 +123,20 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     const phone = student?.parentPhone;
     if (phone && !isEditing) {
       const typeLabel = form.type === 'online' ? 'Online' : 'Yüz yüze';
-      const msg = `Merhaba ${student?.parentName || ''},\n\n*Ders Planlandı*\nOgrenci: ${student?.name || ''}\nKonu: ${form.subject || '-'}\nTarih: ${form.date}\nSaat: ${form.startTime} - ${form.endTime}\nTur: ${typeLabel}${form.location ? '\nKonum: ' + form.location : ''}${meetingLink ? '\nLink: ' + meetingLink : ''}\n\nIyi dersler dileriz!`;
+      const msgParts = [
+        `Merhaba ${student?.parentName || ''},`,
+        '',
+        `*Ders Planland${'\u0131'}*`,
+        `Ogrenci: ${student?.name || ''}`,
+        `Konu: ${form.subject || '-'}`,
+        `Tarih: ${form.date}`,
+        `Saat: ${form.startTime} - ${form.endTime}`,
+        `Tur: ${typeLabel}`,
+      ];
+      if (form.location) msgParts.push(`Konum: ${form.location}`);
+      if (meetingLink) msgParts.push(`Link: ${meetingLink}`);
+      msgParts.push('', 'Iyi dersler dileriz!');
+      const msg = msgParts.join('\n');
       setWhatsapp({ phone, message: msg });
     } else {
       onClose();
