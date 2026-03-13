@@ -120,7 +120,13 @@ export default function TeacherLessons() {
   const filtered = lessons.filter(l => {
     const statusOk = statusFilter === 'all' || l.status === statusFilter;
     const studentOk = studentFilter === 'all' || l.studentId === studentFilter;
-    return statusOk && studentOk;
+    const fromOk = !dateFrom || l.date >= dateFrom;
+    const toOk = !dateTo || l.date <= dateTo;
+    return statusOk && studentOk && fromOk && toOk;
+  }).sort((a, b) => {
+    const da = new Date(`${a.date}T${a.startTime || '00:00'}`);
+    const db = new Date(`${b.date}T${b.startTime || '00:00'}`);
+    return da - db;
   });
 
   const selStyle = { padding: '0.5rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#ffffff', color: '#374151', fontSize: '0.82rem', fontWeight: '500', cursor: 'pointer', outline: 'none', appearance: 'none', paddingRight: '2rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.6rem center' };
