@@ -116,7 +116,7 @@ export default function ParentDashboard() {
       icon: RefreshCw,
       gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
       shadow: 'rgba(59,130,246,0.35)',
-      page: 'ParentLessonRequests',
+      page: 'lessonRequest',
       stats: [],
     },
     {
