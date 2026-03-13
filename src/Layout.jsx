@@ -201,7 +201,9 @@ export default function Layout({ children, currentPageName }) {
 
       {/* MAIN */}
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
-        {children}
+        <div style={{ maxWidth: '1400px', width: '100%' }}>
+          {children}
+        </div>
       </main>
     </div>
   );
