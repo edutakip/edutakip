@@ -99,7 +99,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   };
 
   if (whatsapp) {
-    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={() => { onSaved?.(); onClose(); }} />;
   }
 
   return (
