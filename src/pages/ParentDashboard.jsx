@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Calendar, CheckCircle, DollarSign, AlertCircle, BookOpen, BarChart2, Settings, RefreshCw, ChevronRight, LogOut } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import LessonRequestModal from '../components/parent/LessonRequestModal';
 
 export default function ParentDashboard() {
   const [student, setStudent] = useState(null);
