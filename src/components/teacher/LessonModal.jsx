@@ -138,6 +138,10 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   };
   const lbl = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
+  if (whatsapp) {
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+  }
+
   if (confirmStep) {
     return (
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>

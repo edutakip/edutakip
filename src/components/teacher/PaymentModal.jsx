@@ -46,6 +46,10 @@ export default function PaymentModal({ student, onClose, onSaved }) {
   const inputStyle = { width: '100%', padding: '0.6rem 0.85rem', borderRadius: '10px', background: '#f9fafb', border: '1.5px solid #e5e7eb', color: '#111827', fontSize: '0.875rem', outline: 'none' };
   const labelStyle = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
+  if (whatsapp) {
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
       <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>

@@ -98,6 +98,10 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
     resize: 'vertical',
   };
 
+  if (whatsapp) {
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div style={{ background: 'white', borderRadius: '20px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
