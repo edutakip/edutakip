@@ -75,7 +75,6 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
     }
 
     setLoading(false);
-    onSaved?.();
 
     // WhatsApp bildirimi - veliye ders değerlendirmesi gönder
     const students = await base44.entities.Student.filter({ id: lesson.studentId });
@@ -87,6 +86,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
       const msg = `Merhaba ${student?.parentName || ''},\n\n📋 *Ders Değerlendirmesi*\n👤 Öğrenci: ${lesson.studentName}\n📖 Konu: ${lesson.subject || '-'}\n🗓 Tarih: ${lesson.date}\n\n${starsStr} Performans: ${ratingLabels[data.rating] || ''}\n✅ Katılım: ${data.attendance}${data.topicsCovered ? '\n📚 İşlenen Konular: ' + data.topicsCovered : ''}${data.generalNote ? '\n📝 Genel Not: ' + data.generalNote : ''}${data.homework ? '\n📌 Ödev: ' + data.homework : ''}${data.nextGoal ? '\n🎯 Sonraki Hedef: ' + data.nextGoal : ''}\n\nİyi günler dileriz! 😊`;
       setWhatsapp({ phone, message: msg });
     } else {
+      onSaved?.();
       onClose();
     }
   };
