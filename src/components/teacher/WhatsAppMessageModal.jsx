@@ -17,9 +17,6 @@ export default function WhatsAppMessageModal({ phone, message: initialMessage, t
   }, []);
 
   const handleSend = () => {
-    alert(message);
-    console.log('WHATSAPP DEBUG 1', { phone, message });
-    alert('debug geldi');
     const cleaned = phone.replace(/\D/g, '');
     const formatted = cleaned.startsWith('0') ? '90' + cleaned.slice(1) : cleaned;
     const url = `https://wa.me/${formatted}?text=${encodeURIComponent(message)}`;
