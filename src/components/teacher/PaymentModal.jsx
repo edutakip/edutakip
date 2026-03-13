@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function PaymentModal({ student, onClose, onSaved }) {
   const [form, setForm] = useState({

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Star, Loader2, CheckCircle } from 'lucide-react';
+import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function LessonReportModal({ lesson, onClose, onSaved }) {
   const [form, setForm] = useState({

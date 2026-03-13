@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays } from 'lucide-react';
 import { format, addWeeks, parseISO } from 'date-fns';
+import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
   const isEditing = !!existingLesson;
