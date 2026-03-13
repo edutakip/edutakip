@@ -30,6 +30,34 @@ export default function PendingLessonsPrompt({ onDone }) {
 
   const markDone = async () => {
     await base44.entities.Lesson.update(current.id, { status: 'tamamlandı' });
+
+    // Ders ücretini hesapla
+    let fee = current.lessonFee || 0;
+    if (!fee) {
+      try {
+        const student = await base44.entities.Student.filter({ id: current.studentId });
+        fee = student?.[0]?.feePerLesson || 0;
+      } catch {}
+    }
+
+    // Bekliyor ödeme kaydı oluştur (yoksa)
+    if (fee > 0) {
+      const existing = await base44.entities.Payment.filter({ studentId: current.studentId, date: current.date });
+      const alreadyExists = existing.some(p => p.description?.includes('Ders') || p.date === current.date);
+      if (!alreadyExists) {
+        await base44.entities.Payment.create({
+          studentId: current.studentId,
+          studentName: current.studentName,
+          teacherEmail: current.teacherEmail,
+          amount: fee,
+          date: current.date,
+          status: 'bekliyor',
+          description: `${current.subject || 'Ders'} - ${current.date}`,
+          month: current.date?.slice(0, 7),
+        });
+      }
+    }
+
     setShowReport(true);
   };
 
