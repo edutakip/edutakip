@@ -30,7 +30,17 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
     });
 
-    setLoading(false); onSaved(); onClose();
+    setLoading(false);
+    onSaved();
+
+    const phone = freshStudent.parentPhone;
+    if (phone) {
+      const methodLabel = { nakit: 'Nakit', havale: 'Havale', diğer: 'Diğer' }[form.method] || form.method;
+      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n💰 *Ödeme Kaydedildi*\n👤 Öğrenci: ${student.name}\n💵 Tutar: ${paidAmount} ₺\n📅 Tarih: ${form.date}\n💳 Yöntem: ${methodLabel}${form.description ? '\n📝 Açıklama: ' + form.description : ''}\n\nTeşekkürler! 🙏`;
+      setWhatsapp({ phone, message: msg });
+    } else {
+      onClose();
+    }
   };
 
   const inputStyle = { width: '100%', padding: '0.6rem 0.85rem', borderRadius: '10px', background: '#f9fafb', border: '1.5px solid #e5e7eb', color: '#111827', fontSize: '0.875rem', outline: 'none' };
