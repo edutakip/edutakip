@@ -36,7 +36,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     const phone = freshStudent.parentPhone;
     if (phone) {
       const methodLabel = { nakit: 'Nakit', havale: 'Havale', diğer: 'Diğer' }[form.method] || form.method;
-      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n💰 *Ödeme Kaydedildi*\n👤 Öğrenci: ${student.name}\n💵 Tutar: ${paidAmount} ₺\n📅 Tarih: ${form.date}\n💳 Yöntem: ${methodLabel}${form.description ? '\n📝 Açıklama: ' + form.description : ''}\n\nTeşekkürler! 🙏`;
+      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n*Odeme Kaydedildi*\nOgrenci: ${student.name}\nTutar: ${paidAmount} TL\nTarih: ${form.date}\nYontem: ${methodLabel}${form.description ? '\nAciklama: ' + form.description : ''}\n\nTesekkurler!`;
       setWhatsapp({ phone, message: msg });
     } else {
       onClose();
