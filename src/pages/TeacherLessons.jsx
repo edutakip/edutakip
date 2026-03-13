@@ -15,6 +15,8 @@ export default function TeacherLessons() {
   const [reportLesson, setReportLesson] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => { loadData(); }, []);
 
