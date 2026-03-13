@@ -20,43 +20,13 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     const freshStudents = await base44.entities.Student.filter({ id: student.id });
     const freshStudent = freshStudents[0] || student;
 
-    if (form.status === 'alındı') {
-      // Bekleyen kayıtlardan düş
-      const allPayments = await base44.entities.Payment.filter({ studentId: student.id, teacherEmail: me.email });
-      const pendingPayments = allPayments
-        .filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş')
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      let remaining = paidAmount;
-      for (const p of pendingPayments) {
-        if (remaining <= 0) break;
-        if (p.amount <= remaining) {
-          await base44.entities.Payment.update(p.id, { status: 'alındı' });
-          remaining -= p.amount;
-        } else {
-          // Kısmen ödeme: bekleyeni azalt, alındı olarak yeni kayıt
-          await base44.entities.Payment.update(p.id, { amount: p.amount - remaining });
-          remaining = 0;
-        }
-      }
-
-      // Eğer bekleyenden fazla ödendiyse veya hiç bekleyen yoksa yeni kayıt oluştur
-      if (remaining > 0) {
-        await base44.entities.Payment.create({
-          ...form, amount: remaining,
-          studentId: student.id, studentName: student.name,
-          teacherEmail: me.email,
-          parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
-        });
-      }
-    } else {
-      await base44.entities.Payment.create({
-        ...form, amount: paidAmount,
-        studentId: student.id, studentName: student.name,
-        teacherEmail: me.email,
-        parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
-      });
-    }
+    // Her zaman yeni ayrı kayıt oluştur, mevcut borç kayıtlarına dokunma
+    await base44.entities.Payment.create({
+      ...form, amount: paidAmount,
+      studentId: student.id, studentName: student.name,
+      teacherEmail: me.email,
+      parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
+    });
 
     setLoading(false); onSaved(); onClose();
   };
