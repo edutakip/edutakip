@@ -52,7 +52,7 @@ export default function Layout({ children, currentPageName }) {
         <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTrack" style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px' }} />
         {!collapsed && (
           <div>
-            <h1 style={{ color: 'white', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.3px', lineHeight: 1 }}>EduTrack</h1>
+            <h1 style={{ color: 'white', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.3px', lineHeight: 1 }}>EduTakip</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
               {role === 'teacher' ? 'Öğretmen Paneli' : 'Veli Paneli'}
             </p>
