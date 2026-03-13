@@ -60,6 +60,9 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/ParentLessonsPayments" element={<LayoutWrapper currentPageName="ParentLessonsPayments"><ParentLessonsPayments /></LayoutWrapper>} />
+      <Route path="/ParentLessonRequests" element={<LayoutWrapper currentPageName="ParentLessonRequests"><ParentLessonRequests /></LayoutWrapper>} />
+      <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
