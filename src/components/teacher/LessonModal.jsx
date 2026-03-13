@@ -27,6 +27,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   const [zoomLoading, setZoomLoading] = useState(false);
   const [meetingLink, setMeetingLink] = useState(existingLesson?.meetingLink || '');
   const [confirmStep, setConfirmStep] = useState(false);
+  const [whatsapp, setWhatsapp] = useState(null); // { phone, message }
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 

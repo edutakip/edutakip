@@ -11,6 +11,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     status: 'alındı', method: 'nakit', description: '', month: format(new Date(), 'yyyy-MM'),
   });
   const [loading, setLoading] = useState(false);
+  const [whatsapp, setWhatsapp] = useState(null);
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const save = async () => {

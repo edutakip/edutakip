@@ -16,6 +16,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   });
   const [loading, setLoading] = useState(false);
   const [existing, setExisting] = useState(null);
+  const [whatsapp, setWhatsapp] = useState(null);
 
   useEffect(() => {
     base44.entities.LessonReport.filter({ lessonId: lesson.id }).then(reports => {
