@@ -303,26 +303,52 @@ export default function TeacherFinance() {
 
           {/* Geçmiş Ödeme İşlemleri */}
           <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1.5px solid #f3f4f6' }}>
-           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '1rem' }}>Geçmiş Ödeme İşlemleri</h3>
+           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.75rem' }}>Geçmiş Ödeme İşlemleri</h3>
+
+           {/* Filtreler */}
+           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
+             <select value={txFilter.type} onChange={e => setTxFilter(f => ({ ...f, type: e.target.value }))}
+               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
+               <option value="all">Tüm İşlemler</option>
+               <option value="debt">Borç Eklendi</option>
+               <option value="payment">Ödeme Alındı</option>
+             </select>
+             <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
+               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
+               <option value="all">Tüm Öğrenciler</option>
+               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+             </select>
+             <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
+               placeholder="Başlangıç"
+               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
+             <input type="date" value={txFilter.dateTo} onChange={e => setTxFilter(f => ({ ...f, dateTo: e.target.value }))}
+               placeholder="Bitiş"
+               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
+             {(txFilter.type !== 'all' || txFilter.studentId !== 'all' || txFilter.dateFrom || txFilter.dateTo) && (
+               <button onClick={() => setTxFilter({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' })}
+                 style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer' }}>
+                 Temizle
+               </button>
+             )}
+           </div>
+
            {(() => {
-             // Tamamlanan dersler → "Borç Eklendi"
              const debtRows = lessons
                .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
-               .map(l => ({
-                 id: 'lesson-' + l.id,
-                 type: 'debt',
-                 studentId: l.studentId,
-                 amount: l.lessonFee,
-                 date: l.date,
-               }));
-             // Sadece alındı ödemeleri → "Ödeme Alındı"
+               .map(l => ({ id: 'lesson-' + l.id, type: 'debt', studentId: l.studentId, amount: l.lessonFee, date: l.date }));
              const receivedRows = payments
                .filter(p => p.status === 'alındı')
                .map(p => ({ ...p, type: 'payment' }));
 
              const allRows = [...debtRows, ...receivedRows]
                .sort((a, b) => new Date(b.date) - new Date(a.date))
-               .slice(0, 30);
+               .filter(row => {
+                 if (txFilter.type !== 'all' && row.type !== txFilter.type) return false;
+                 if (txFilter.studentId !== 'all' && row.studentId !== txFilter.studentId) return false;
+                 if (txFilter.dateFrom && row.date < txFilter.dateFrom) return false;
+                 if (txFilter.dateTo && row.date > txFilter.dateTo) return false;
+                 return true;
+               });
 
              return (
                <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
@@ -339,7 +365,7 @@ export default function TeacherFinance() {
                      {allRows.length === 0 ? (
                        <tr>
                          <td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
-                           Henüz işlem kaydı yok
+                           Kayıt bulunamadı
                          </td>
                        </tr>
                      ) : allRows.map(row => (
@@ -357,13 +383,9 @@ export default function TeacherFinance() {
                          </td>
                          <td style={{ padding: '0.85rem 1rem' }}>
                            {row.type === 'debt' ? (
-                             <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
-                               Borç Eklendi
-                             </span>
+                             <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>Borç Eklendi</span>
                            ) : (
-                             <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
-                               Ödeme Alındı
-                             </span>
+                             <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>Ödeme Alındı</span>
                            )}
                          </td>
                        </tr>
