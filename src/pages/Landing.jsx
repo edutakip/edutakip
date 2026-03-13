@@ -47,7 +47,7 @@ export default function Landing() {
         backdropFilter: 'blur(20px)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTrack" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
           <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTrack</span>
         </div>
         <button onClick={() => selectRole('teacher')}
