@@ -23,7 +23,7 @@ export default function TeacherLessons() {
   const loadData = async () => {
     const me = await base44.auth.me();
     const [l, s, p] = await Promise.all([
-      base44.entities.Lesson.filter({ teacherEmail: me.email }, '-date'),
+      base44.entities.Lesson.filter({ teacherEmail: me.email }, 'date'),
       base44.entities.Student.filter({ teacherEmail: me.email }),
       base44.entities.Payment.filter({ teacherEmail: me.email }),
     ]);
