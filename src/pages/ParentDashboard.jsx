@@ -12,6 +12,7 @@ export default function ParentDashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [showLessonRequest, setShowLessonRequest] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
