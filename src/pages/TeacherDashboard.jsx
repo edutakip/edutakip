@@ -185,7 +185,7 @@ export default function TeacherDashboard() {
                     <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.1rem' }}>{format(new Date(), 'MMMM yyyy', { locale: tr })}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#f59e0b' }}>₺{Math.abs(balance).toLocaleString('tr-TR')}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#f59e0b' }}>₺{balance.toLocaleString('tr-TR')}</span>
                     <MessageCircle size={16} color='#d1d5db' />
                   </div>
                 </div>
