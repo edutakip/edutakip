@@ -124,38 +124,22 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     if (phone && !isEditing) {
       const typeLabel = form.type === 'online' ? 'Online' : 'Yüz yüze';
       const msgParts = [
-    `Merhaba ${student?.parentName || 'Velimiz'} 👋😊`,
-    '',
-    `📚 ${student?.name || 'Öğrencimiz'} için yeni bir ders planlandı.`,
-    '',
-    `🗓 Dersimiz *${formatDate(form.date)}* tarihinde`,
-    `⏰ *${form.startTime} – ${form.endTime}* saatleri arasında`,
-    `📍 *${typeLabel}* olarak gerçekleştirilecektir.`,
-  ];
-
-  if (form.subject) {
-    msgParts.push(`📖 Konu: *${form.subject}*`);
-  }
-
-  if (form.location) {
-    msgParts.push(`📌 Konum: ${form.location}`);
-  }
-
-  if (meetingLink) {
-    msgParts.push(`🔗 Ders Linki: ${meetingLink}`);
-  }
-
-  msgParts.push(
-    '',
-    '✨ Öğrencimizin gelişimini desteklemek ve verimli bir ders geçirmek için sabırsızlanıyoruz.',
-    '',
-    'Şimdiden güzel ve verimli bir ders olmasını dileriz. 🎓📖'
-  );
-
-  const msg = msgParts.join('\n');
-  setWhatsapp({ phone, message: msg });
-} else {
-  onClose();
+        `Merhaba ${student?.parentName || ''},`,
+        '',
+        `*Ders Planland${'\u0131'}*`,
+        `Ogrenci: ${student?.name || ''}`,
+        `Konu: ${form.subject || '-'}`,
+        `Tarih: ${form.date}`,
+        `Saat: ${form.startTime} - ${form.endTime}`,
+        `Tur: ${typeLabel}`,
+      ];
+      if (form.location) msgParts.push(`Konum: ${form.location}`);
+      if (meetingLink) msgParts.push(`Link: ${meetingLink}`);
+      msgParts.push('', 'Iyi dersler dileriz!');
+      const msg = msgParts.join('\n');
+      setWhatsapp({ phone, message: msg });
+    } else {
+      onClose();
     }
   };
 
