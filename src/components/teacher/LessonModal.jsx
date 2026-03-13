@@ -118,7 +118,16 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
     setLoading(false);
     onSaved();
-    onClose();
+
+    // WhatsApp bildirimi
+    const phone = student?.parentPhone;
+    if (phone && !isEditing) {
+      const typeLabel = form.type === 'online' ? 'Online' : 'Yüz yüze';
+      const msg = `Merhaba ${student?.parentName || ''},\n\n📅 *Ders Planlandı*\n👤 Öğrenci: ${student?.name || ''}\n📖 Konu: ${form.subject || '-'}\n🗓 Tarih: ${form.date}\n⏰ Saat: ${form.startTime} - ${form.endTime}\n📍 Tür: ${typeLabel}${form.location ? '\n📌 Konum: ' + form.location : ''}${meetingLink ? '\n🔗 Link: ' + meetingLink : ''}\n\nİyi dersler dileriz! 🎓`;
+      setWhatsapp({ phone, message: msg });
+    } else {
+      onClose();
+    }
   };
 
   const inp = {
