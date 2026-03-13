@@ -301,56 +301,75 @@ export default function TeacherFinance() {
           {/* Geçmiş Ödeme İşlemleri */}
           <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1.5px solid #f3f4f6' }}>
            <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '1rem' }}>Geçmiş Ödeme İşlemleri</h3>
-           <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
-             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-               <thead>
-                 <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                   <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Öğrenci</th>
-                   <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tutar</th>
-                   <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tarih</th>
-                   <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Durum</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 {payments.length === 0 ? (
-                   <tr>
-                     <td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
-                       Henüz ödeme kaydı yok
-                     </td>
-                   </tr>
-                 ) : (
-                   payments.slice(0, 20).map(p => {
-                     const cfg = { 'alındı': { bg: '#d1fae5', color: '#065f46' }, 'bekliyor': { bg: '#fef3c7', color: '#92400e' }, 'gecikmiş': { bg: '#fee2e2', color: '#b91c1c' } }[p.status] || { bg: '#f3f4f6', color: '#6b7280' };
-                     return (
-                       <tr key={p.id} style={{ borderBottom: '1px solid #f3f4f6', transition: 'background 0.15s' }}
+           {(() => {
+             // Tamamlanan dersler → "Borç Eklendi"
+             const debtRows = lessons
+               .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
+               .map(l => ({
+                 id: 'lesson-' + l.id,
+                 type: 'debt',
+                 studentId: l.studentId,
+                 amount: l.lessonFee,
+                 date: l.date,
+               }));
+             // Sadece alındı ödemeleri → "Ödeme Alındı"
+             const receivedRows = payments
+               .filter(p => p.status === 'alındı')
+               .map(p => ({ ...p, type: 'payment' }));
+
+             const allRows = [...debtRows, ...receivedRows]
+               .sort((a, b) => new Date(b.date) - new Date(a.date))
+               .slice(0, 30);
+
+             return (
+               <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
+                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                   <thead>
+                     <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Öğrenci</th>
+                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tutar</th>
+                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tarih</th>
+                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>İşlem</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     {allRows.length === 0 ? (
+                       <tr>
+                         <td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
+                           Henüz işlem kaydı yok
+                         </td>
+                       </tr>
+                     ) : allRows.map(row => (
+                       <tr key={row.id} style={{ borderBottom: '1px solid #f3f4f6', transition: 'background 0.15s' }}
                          onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                          <td style={{ padding: '0.85rem 1rem', color: '#374151', fontSize: '0.85rem', fontWeight: '600' }}>
-                           {students.find(s => s.id === p.studentId)?.name || '—'}
+                           {students.find(s => s.id === row.studentId)?.name || '—'}
                          </td>
-                         <td style={{ padding: '0.85rem 1rem', color: '#111827', fontSize: '0.9rem', fontWeight: '700' }}>
-                           ₺{(p.amount || 0).toLocaleString('tr-TR')}
+                         <td style={{ padding: '0.85rem 1rem', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.9rem', fontWeight: '700' }}>
+                           {row.type === 'debt' ? '-' : '+'}₺{(row.amount || 0).toLocaleString('tr-TR')}
                          </td>
                          <td style={{ padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.82rem' }}>
-                           {p.date ? new Date(p.date).toLocaleDateString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '—'}
+                           {row.date ? new Date(row.date).toLocaleDateString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '—'}
                          </td>
                          <td style={{ padding: '0.85rem 1rem' }}>
-                           <span style={{ background: cfg.bg, color: cfg.color, fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
-                             {p.status === 'alındı' ? 'Alındı' : p.status === 'bekliyor' ? 'Bekleniyor' : 'Gecikmişi'}
-                           </span>
+                           {row.type === 'debt' ? (
+                             <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
+                               Borç Eklendi
+                             </span>
+                           ) : (
+                             <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
+                               Ödeme Alındı
+                             </span>
+                           )}
                          </td>
                        </tr>
-                     );
-                   })
-                 )}
-               </tbody>
-             </table>
-           </div>
-           {payments.length > 20 && (
-             <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.75rem', textAlign: 'center' }}>
-               Son 20 işlem gösteriliyor
-             </p>
-           )}
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+             );
+           })()}
           </div>
           </div>
           </div>
