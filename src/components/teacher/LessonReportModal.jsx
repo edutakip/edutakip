@@ -82,8 +82,8 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
     const phone = student?.parentPhone || lesson.parentPhone;
     if (phone) {
       const ratingLabels = ['', 'Zayıf', 'Orta', 'İyi', 'Çok İyi', 'Mükemmel'];
-      const starsStr = '⭐'.repeat(data.rating || 4);
-      const msg = `Merhaba ${student?.parentName || ''},\n\n📋 *Ders Değerlendirmesi*\n👤 Öğrenci: ${lesson.studentName}\n📖 Konu: ${lesson.subject || '-'}\n🗓 Tarih: ${lesson.date}\n\n${starsStr} Performans: ${ratingLabels[data.rating] || ''}\n✅ Katılım: ${data.attendance}${data.topicsCovered ? '\n📚 İşlenen Konular: ' + data.topicsCovered : ''}${data.generalNote ? '\n📝 Genel Not: ' + data.generalNote : ''}${data.homework ? '\n📌 Ödev: ' + data.homework : ''}${data.nextGoal ? '\n🎯 Sonraki Hedef: ' + data.nextGoal : ''}\n\nİyi günler dileriz! 😊`;
+      const starsStr = '*'.repeat(data.rating || 4);
+      const msg = `Merhaba ${student?.parentName || ''},\n\n*Ders Degerlendirmesi*\nOgrenci: ${lesson.studentName}\nKonu: ${lesson.subject || '-'}\nTarih: ${lesson.date}\n\nPerformans (${data.rating}/5 - ${ratingLabels[data.rating] || ''})\nKatilim: ${data.attendance}${data.topicsCovered ? '\nIslenen Konular: ' + data.topicsCovered : ''}${data.generalNote ? '\nGenel Not: ' + data.generalNote : ''}${data.homework ? '\nOdev: ' + data.homework : ''}${data.nextGoal ? '\nSonraki Hedef: ' + data.nextGoal : ''}\n\nIyi gunler.`;
       setWhatsapp({ phone, message: msg });
     } else {
       onSaved?.();
