@@ -130,7 +130,7 @@ export default function Landing() {
         
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>💬 Gerçek Konuşmalar</span>
-          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>EduTrack ile Bağlantıda Kalın</h2>
+          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>EduTakip ile Bağlantıda Kalın</h2>
           <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Öğretmen ve veliler bilgilerini anında paylaşıyor</p>
         </div>
 
