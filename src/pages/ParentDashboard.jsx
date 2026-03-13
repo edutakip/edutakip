@@ -150,34 +150,96 @@ export default function ParentDashboard() {
       </div>
 
       {/* Quick Stats Row */}
-      <div style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '1rem', marginBottom: '1.5rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '1rem' }}>Genel Özet</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: 'var(--border)' }}>
-          {[
-            { label: 'Toplam Ders', value: lessons.length, icon: Calendar, color: '#6366f1', bg: 'rgba(99,102,241,0.12)', emoji: '📚' },
-            { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length, icon: CheckCircle, color: '#10b981', bg: 'rgba(16,185,129,0.12)', emoji: '✅' },
-            { label: 'Toplam Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}`, icon: DollarSign, color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', emoji: '💰' },
-            { label: 'Bekleyen Ödeme', value: `₺${pendingAmount.toLocaleString('tr-TR')}`, icon: AlertCircle, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', emoji: '⏳' },
-          ].map(({ label, value, color, bg, emoji }, i, arr) => (
-            <div key={label} style={{
-              background: 'var(--bg-card)',
-              padding: '0.85rem 1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.4rem',
-              borderRadius: i === 0 ? '10px 0 0 10px' : i === arr.length - 1 ? '0 10px 10px 0' : '0',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
-                  {emoji}
-                </div>
+      {(() => {
+        const today = new Date();
+        const upcomingLesson = lessons.filter(l => l.status === 'planlandı' && new Date(l.date) >= new Date(today.toDateString())).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+        const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+        const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+        // Build schedule map by day index (0=Sun..6=Sat)
+        const scheduleMap = {};
+        (student.schedule || []).forEach(slot => {
+          const idx = dayNames.indexOf(slot.day);
+          if (idx >= 0) scheduleMap[idx] = slot.time;
+          // also try full names
+        });
+        // Also try matching by full name
+        (student.schedule || []).forEach(slot => {
+          const idx = dayNamesLong.indexOf(slot.day);
+          if (idx >= 0) scheduleMap[idx] = slot.time;
+        });
+        const earnedTotal = lessons.filter(l => l.status === 'tamamlandı').reduce((s, l) => s + (l.lessonFee || 0), 0);
+        const bakiye = totalPaid - earnedTotal;
+        const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
+        return (
+          <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f0f0f0', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: '900', color: '#111' }}>{student.name.split(' ')[0]}</h2>
+                <span style={{ fontSize: '0.85rem', color: '#888', fontWeight: '500' }}>{student.grade || ''}</span>
               </div>
-              <p style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: '900', lineHeight: 1 }}>{value}</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '600' }}>{label}</p>
+              <span style={{ background: '#ecfdf5', color: '#10b981', fontSize: '0.72rem', fontWeight: '700', padding: '0.3rem 0.7rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                Aktif
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
+
+            {/* Next Lesson */}
+            {upcomingLesson ? (
+              <div style={{ background: '#fff7ed', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                  <Calendar size={13} color='#f97316' />
+                  <span style={{ color: '#f97316', fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.5px' }}>SONRAKİ DERS</span>
+                </div>
+                <p style={{ color: '#111', fontSize: '1rem', fontWeight: '700' }}>
+                  {dayNamesLong[new Date(upcomingLesson.date).getDay()]}, {new Date(upcomingLesson.date).getDate()} {monthNames[new Date(upcomingLesson.date).getMonth()]}
+                  <span style={{ color: '#555', fontWeight: '500' }}> · {upcomingLesson.startTime} - {upcomingLesson.endTime}</span>
+                </p>
+              </div>
+            ) : (
+              <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+                <p style={{ color: '#aaa', fontSize: '0.85rem' }}>Planlanmış ders yok</p>
+              </div>
+            )}
+
+            {/* Weekly Schedule */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.35rem', marginBottom: '1rem' }}>
+              {[1,2,3,4,5,6,0].map(dayIdx => {
+                const time = scheduleMap[dayIdx];
+                const label = dayNames[dayIdx];
+                const hasLesson = !!time;
+                return (
+                  <div key={dayIdx} style={{
+                    background: hasLesson ? '#fff3e0' : 'transparent',
+                    border: hasLesson ? '1.5px solid #f97316' : '1.5px solid #e5e7eb',
+                    borderRadius: '10px',
+                    padding: '0.4rem 0.2rem',
+                    textAlign: 'center',
+                  }}>
+                    <p style={{ fontSize: '0.62rem', fontWeight: '700', color: hasLesson ? '#f97316' : '#aaa', marginBottom: '0.15rem' }}>{label}</p>
+                    <p style={{ fontSize: '0.62rem', color: hasLesson ? '#333' : '#ccc', fontWeight: hasLesson ? '600' : '400' }}>{time || '—'}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Balance Row */}
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>BAKİYE</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: '800', color: bakiye < 0 ? '#ef4444' : '#10b981' }}>
+                  {bakiye < 0 ? '-' : ''}₺{Math.abs(bakiye).toLocaleString('tr-TR')}
+                </span>
+              </div>
+              <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>AYLIK</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#111' }}>₺{monthlyFee.toLocaleString('tr-TR')}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Menu Cards */}
       <h2 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.85rem' }}>Menü</h2>
