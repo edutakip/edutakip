@@ -11,6 +11,7 @@ export default function LessonRequestModal({ student, onClose }) {
   const [sent, setSent] = useState(false);
 
   const handleSend = async () => {
+    console.log(message);
     if (!message.trim() || !student) return;
     setSending(true);
     await base44.entities.Message.create({
