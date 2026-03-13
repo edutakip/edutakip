@@ -188,10 +188,14 @@ export default function ParentDashboard() {
               e.preventDefault();
               localStorage.removeItem('tilki_role');
               base44.auth.logout(createPageUrl('Landing'));
+            } else if (page === 'lessonRequest') {
+              e.preventDefault();
+              setShowLessonRequest(true);
             }
           };
+          const href = (page === 'logout' || page === 'lessonRequest') ? '#' : createPageUrl(page);
           return (
-          <a key={label} href={page === 'logout' ? '#' : createPageUrl(page)} onClick={handleClick}
+          <a key={label} href={href} onClick={handleClick}
             style={{
               background: gradient,
               borderRadius: '14px',
