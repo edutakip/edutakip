@@ -244,7 +244,7 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer style={{ padding: '1.75rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.8rem' }}>
-        © 2026 EduTrack · Özel Ders Yönetim Platformu
+        © 2026 EduTakip · Özel Ders Yönetim Platformu
       </footer>
     </div>
   );
