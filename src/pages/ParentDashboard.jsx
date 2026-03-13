@@ -185,7 +185,7 @@ export default function ParentDashboard() {
             if (page === 'logout') {
               e.preventDefault();
               localStorage.removeItem('tilki_role');
-              base44.auth.logout();
+              base44.auth.logout(createPageUrl('Landing'));
             }
           };
           return (
