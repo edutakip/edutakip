@@ -16,6 +16,7 @@ export default function TeacherFinance() {
   const [lessons, setLessons] = useState([]);
   const [payModalStudent, setPayModalStudent] = useState(null);
   const [showStudentPicker, setShowStudentPicker] = useState(false);
+  const [txFilter, setTxFilter] = useState({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' });
 
   useEffect(() => { loadAll(); }, []);
 
