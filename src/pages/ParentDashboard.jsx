@@ -172,14 +172,14 @@ export default function ParentDashboard() {
         const bakiye = totalPaid - earnedTotal;
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
         return (
-          <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f0f0f0', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+          <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1b6e 100%)', borderRadius: '20px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 32px rgba(99,102,241,0.25)' }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: '900', color: '#111' }}>{student.name.split(' ')[0]}</h2>
-                <span style={{ fontSize: '0.85rem', color: '#888', fontWeight: '500' }}>{student.grade || ''}</span>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: '900', color: 'white' }}>{student.name.split(' ')[0]}</h2>
+                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>{student.grade || ''}</span>
               </div>
-              <span style={{ background: '#ecfdf5', color: '#10b981', fontSize: '0.72rem', fontWeight: '700', padding: '0.3rem 0.7rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <span style={{ background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', fontSize: '0.72rem', fontWeight: '700', padding: '0.3rem 0.7rem', borderRadius: '20px', border: '1px solid rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
                 Aktif
               </span>
@@ -187,19 +187,19 @@ export default function ParentDashboard() {
 
             {/* Next Lesson */}
             {upcomingLesson ? (
-              <div style={{ background: '#fff7ed', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+              <div style={{ background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                  <Calendar size={13} color='#f97316' />
-                  <span style={{ color: '#f97316', fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.5px' }}>SONRAKİ DERS</span>
+                  <Calendar size={13} color='#a5b4fc' />
+                  <span style={{ color: '#a5b4fc', fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.5px' }}>SONRAKİ DERS</span>
                 </div>
-                <p style={{ color: '#111', fontSize: '1rem', fontWeight: '700' }}>
+                <p style={{ color: 'white', fontSize: '1rem', fontWeight: '700' }}>
                   {dayNamesLong[new Date(upcomingLesson.date).getDay()]}, {new Date(upcomingLesson.date).getDate()} {monthNames[new Date(upcomingLesson.date).getMonth()]}
-                  <span style={{ color: '#555', fontWeight: '500' }}> · {upcomingLesson.startTime} - {upcomingLesson.endTime}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}> · {upcomingLesson.startTime} - {upcomingLesson.endTime}</span>
                 </p>
               </div>
             ) : (
-              <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
-                <p style={{ color: '#aaa', fontSize: '0.85rem' }}>Planlanmış ders yok</p>
+              <div style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>Planlanmış ders yok</p>
               </div>
             )}
 
@@ -211,14 +211,14 @@ export default function ParentDashboard() {
                 const hasLesson = !!time;
                 return (
                   <div key={dayIdx} style={{
-                    background: hasLesson ? '#fff3e0' : 'transparent',
-                    border: hasLesson ? '1.5px solid #f97316' : '1.5px solid #e5e7eb',
+                    background: hasLesson ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.05)',
+                    border: hasLesson ? '1.5px solid rgba(99,102,241,0.6)' : '1.5px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px',
                     padding: '0.4rem 0.2rem',
                     textAlign: 'center',
                   }}>
-                    <p style={{ fontSize: '0.62rem', fontWeight: '700', color: hasLesson ? '#f97316' : '#aaa', marginBottom: '0.15rem' }}>{label}</p>
-                    <p style={{ fontSize: '0.62rem', color: hasLesson ? '#333' : '#ccc', fontWeight: hasLesson ? '600' : '400' }}>{time || '—'}</p>
+                    <p style={{ fontSize: '0.62rem', fontWeight: '700', color: hasLesson ? '#a5b4fc' : 'rgba(255,255,255,0.3)', marginBottom: '0.15rem' }}>{label}</p>
+                    <p style={{ fontSize: '0.62rem', color: hasLesson ? 'white' : 'rgba(255,255,255,0.2)', fontWeight: hasLesson ? '600' : '400' }}>{time || '—'}</p>
                   </div>
                 );
               })}
@@ -226,15 +226,15 @@ export default function ParentDashboard() {
 
             {/* Balance Row */}
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>BAKİYE</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: '800', color: bakiye < 0 ? '#ef4444' : '#10b981' }}>
+              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>BAKİYE</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: '800', color: bakiye < 0 ? '#fca5a5' : '#6ee7b7' }}>
                   {bakiye < 0 ? '-' : ''}₺{Math.abs(bakiye).toLocaleString('tr-TR')}
                 </span>
               </div>
-              <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>AYLIK</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#111' }}>₺{monthlyFee.toLocaleString('tr-TR')}</span>
+              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>AYLIK</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: '800', color: 'white' }}>₺{monthlyFee.toLocaleString('tr-TR')}</span>
               </div>
             </div>
           </div>
