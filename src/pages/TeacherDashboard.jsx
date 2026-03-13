@@ -38,16 +38,19 @@ export default function TeacherDashboard() {
     try { return l.date?.startsWith(thisMonth) && l.status === 'tamamlandı'; } catch { return false; }
   }).length;
 
-  // Unpaid balance per student
+  // Unpaid balance per student — aynı mantık TeacherFinance ile
   const studentBalances = students.map(s => {
-    const sPayments = payments.filter(p => p.studentId === s.id);
-    const earned = sPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-    const collected = sPayments.filter(p => p.status === 'alındı').reduce((sum, p) => sum + (p.amount || 0), 0);
-    const balance = collected - earned;
+    const totalDebt = lessons
+      .filter(l => l.studentId === s.id && l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
+      .reduce((sum, l) => sum + (l.lessonFee || 0), 0);
+    const totalCollected = payments
+      .filter(p => p.studentId === s.id && p.status === 'alındı')
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+    const balance = totalDebt - totalCollected;
     return { student: s, balance };
-  }).filter(x => x.balance < 0);
+  }).filter(x => x.balance > 0);
 
-  const totalUnpaid = studentBalances.reduce((sum, x) => sum + Math.abs(x.balance), 0);
+  const totalUnpaid = studentBalances.reduce((sum, x) => sum + x.balance, 0);
 
   // Upcoming lessons sorted
   const upcomingLessons = lessons
