@@ -31,7 +31,8 @@ export default function TeacherFinance() {
 
   // --- Calculations ---
   const totalIncome = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const pendingIncome = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+  const pendingIncome = Math.max(0, totalDebt - totalIncome);
 
   const monthlyRecurring = students.reduce((s, st) => s + (st.monthlyFee || 0), 0);
 
