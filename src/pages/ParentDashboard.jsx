@@ -244,5 +244,6 @@ export default function ParentDashboard() {
       {showLessonRequest && student && (
         <LessonRequestModal student={student} onClose={() => setShowLessonRequest(false)} />
       )}
-            );
-            }
+    </div>
+  );
+}
