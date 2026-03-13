@@ -160,6 +160,16 @@ export default function TeacherLessons() {
           <option value="all">Tüm Öğrenciler</option>
           {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+          style={{ ...selStyle, paddingRight: '0.85rem', backgroundImage: 'none' }} />
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+          style={{ ...selStyle, paddingRight: '0.85rem', backgroundImage: 'none' }} />
+        {(statusFilter !== 'all' || studentFilter !== 'all' || dateFrom || dateTo) && (
+          <button onClick={() => { setStatusFilter('all'); setStudentFilter('all'); setDateFrom(''); setDateTo(''); }}
+            style={{ padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer', fontWeight: '600' }}>
+            Temizle
+          </button>
+        )}
       </div>
 
       {/* Lesson List */}
