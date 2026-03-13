@@ -48,7 +48,7 @@ export default function Landing() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
-          <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTrack</span>
+          <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTakip</span>
         </div>
         <button onClick={() => selectRole('teacher')}
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)', transition: 'all 0.2s' }}
@@ -73,7 +73,7 @@ export default function Landing() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
               <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '90px', height: '90px', borderRadius: '24px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }} />
-              <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '-0.5px' }}>EduTrack</span>
+              <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '-0.5px' }}>EduTakip</span>
             </div>
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', padding: '0.4rem 1rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.95)', marginBottom: '2rem', fontWeight: '600', backdropFilter: 'blur(10px)', boxShadow: '0 4px 30px rgba(0,0,0,0.1)' }}>
