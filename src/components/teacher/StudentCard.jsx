@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check } from 'lucide-react';
 
 export default function StudentCard({ student, onAddPayment, onCardClick }) {
@@ -12,17 +12,27 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  useEffect(() => {
+  const fetchPayments = useCallback(() => {
     import('@/api/base44Client').then(({ base44 }) => {
       base44.entities.Payment.filter({ studentId: student.id }).then(setPayments);
     });
   }, [student.id]);
 
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
+
+  const handleAddPayment = async (e) => {
+    e.stopPropagation();
+    await onAddPayment();
+    fetchPayments();
+  };
+
   const monthlyFee = student.monthlyFee || 0;
   const weeklyLessons = student.weeklyLessons || 1;
   const lessonFee = student.feePerLesson || 0;
 
-  const earned = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);;
+  const earned = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
   const collected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
   const balance = collected - earned; // negative = owes
 
@@ -132,7 +142,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
           </div>
         </div>
         <button
-          onClick={(e) => { e.stopPropagation(); onAddPayment(); }}
+          onClick={handleAddPayment}
           style={{
             background: 'linear-gradient(135deg, #16a34a, #22c55e)',
             border: 'none', color: 'white', borderRadius: '10px',
