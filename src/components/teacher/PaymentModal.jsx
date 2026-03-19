@@ -105,8 +105,10 @@ export default function PaymentModal({ student, onClose, onSaved }) {
             <input style={inputStyle} placeholder='Açıklama...' value={form.description} onChange={e => u('description', e.target.value)} />
           </div>
           <button onClick={save} disabled={loading || !form.amount}
-            style={{ padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: (!form.amount || loading) ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : 'Ödeme Kaydet'}
+            style={{ padding: '0.85rem', borderRadius: '12px', border: 'none', background: loading || !form.amount ? '#86efac' : 'linear-gradient(135deg, #16a34a, #22c55e)', color: 'white', fontWeight: '800', fontSize: '0.95rem', cursor: loading || !form.amount ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(34,197,94,0.4)', transition: 'all 0.15s', letterSpacing: '0.3px' }}
+            onMouseEnter={e => { if (!loading && form.amount) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+            {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : '💰 Ödeme Kaydet'}
           </button>
         </div>
       </div>
