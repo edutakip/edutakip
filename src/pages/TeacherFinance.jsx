@@ -3,13 +3,199 @@ import { base44 } from '@/api/base44Client';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { Users, DollarSign, Clock, TrendingUp, AlertCircle, Plus, RefreshCw, ChevronDown } from 'lucide-react';
-import { format, subMonths, startOfMonth, endOfMonth, subWeeks, startOfWeek, endOfWeek, differenceInMinutes } from 'date-fns';
+import { Users, DollarSign, Clock, TrendingUp, AlertCircle, Plus, RefreshCw, ChevronDown, X } from 'lucide-react';
+import { format, subMonths, startOfMonth, endOfMonth, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import PaymentModal from '../components/teacher/PaymentModal';
 
 const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6'];
 
+// ── Detail Modal ──────────────────────────────────────────────
+function DetailModal({ type, students, payments, lessons, onClose }) {
+  const now = new Date();
+
+  const content = () => {
+    if (type === 'students') {
+      return (
+        <>
+          <h2 style={mTitle}>Aktif Öğrenciler</h2>
+          <p style={mSub}>{students.length} öğrenci kayıtlı</p>
+          <div style={mList}>
+            {students.map((s, i) => (
+              <div key={s.id} style={mRow(i)}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: COLORS[i % COLORS.length] + '22', border: `2px solid ${COLORS[i % COLORS.length]}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: COLORS[i % COLORS.length], fontWeight: 800, fontSize: '0.85rem' }}>
+                    {s.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{s.name}</div>
+                    <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{s.subject || '—'} · {s.grade || '—'}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: '#111827', fontWeight: 800, fontSize: '0.9rem' }}>₺{(s.monthlyFee || 0).toLocaleString('tr-TR')}</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.72rem' }}>aylık</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (type === 'income') {
+      const received = payments.filter(p => p.status === 'alındı').sort((a, b) => new Date(b.date) - new Date(a.date));
+      const total = received.reduce((s, p) => s + (p.amount || 0), 0);
+      return (
+        <>
+          <h2 style={mTitle}>Toplam Gelir Detayı</h2>
+          <p style={mSub}>Toplam tahsil edilen: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
+          <div style={mList}>
+            {received.length === 0 && <p style={mEmpty}>Henüz ödeme alınmamış</p>}
+            {received.map((p, i) => (
+              <div key={p.id} style={mRow(i)}>
+                <div>
+                  <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{p.studentName}</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{p.date} · {p.method}</div>
+                </div>
+                <div style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.9rem' }}>+₺{(p.amount || 0).toLocaleString('tr-TR')}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (type === 'hours') {
+      const completedLessons = lessons.filter(l => l.status === 'tamamlandı');
+      const totalMins = completedLessons.reduce((s, l) => s + (l.duration || 60), 0);
+      const byStudent = students.map(s => ({
+        name: s.name,
+        lessons: completedLessons.filter(l => l.studentId === s.id).length,
+        hours: Math.round(completedLessons.filter(l => l.studentId === s.id).reduce((sum, l) => sum + (l.duration || 60), 0) / 60 * 10) / 10,
+        weekly: (s.weeklyLessons || 1),
+      })).filter(x => x.lessons > 0).sort((a, b) => b.hours - a.hours);
+
+      return (
+        <>
+          <h2 style={mTitle}>Ders Saatleri Detayı</h2>
+          <p style={mSub}>Toplam tamamlanan: <strong>{Math.round(totalMins / 60 * 10) / 10} saat</strong> ({completedLessons.length} ders)</p>
+          <div style={mList}>
+            {byStudent.length === 0 && <p style={mEmpty}>Henüz tamamlanan ders yok</p>}
+            {byStudent.map((s, i) => (
+              <div key={i} style={mRow(i)}>
+                <div>
+                  <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{s.name}</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{s.lessons} ders · Haftalık plan: {s.weekly} ders</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: '#6366f1', fontWeight: 800, fontSize: '0.9rem' }}>{s.hours} saat</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (type === 'mrr') {
+      const sorted = [...students].sort((a, b) => (b.monthlyFee || 0) - (a.monthlyFee || 0));
+      const total = sorted.reduce((s, st) => s + (st.monthlyFee || 0), 0);
+      return (
+        <>
+          <h2 style={mTitle}>Düzenli Gelir (MRR) Detayı</h2>
+          <p style={mSub}>Aylık toplam: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
+          <div style={mList}>
+            {sorted.map((s, i) => (
+              <div key={s.id} style={mRow(i)}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: COLORS[i % COLORS.length] }} />
+                  <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{s.name}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 80, height: 6, background: '#f3f4f6', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: COLORS[i % COLORS.length], width: `${total > 0 ? (s.monthlyFee || 0) / total * 100 : 0}%`, borderRadius: 3 }} />
+                  </div>
+                  <div style={{ color: '#111827', fontWeight: 800, fontSize: '0.9rem', minWidth: 70, textAlign: 'right' }}>₺{(s.monthlyFee || 0).toLocaleString('tr-TR')}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (type === 'thismonth') {
+      const thisMonthPayments = payments.filter(p => {
+        if (p.status !== 'alındı' || !p.date) return false;
+        const d = new Date(p.date);
+        return d >= startOfMonth(now) && d <= endOfMonth(now);
+      }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const thisMonthDebts = payments.filter(p => {
+        if ((p.status !== 'bekliyor' && p.status !== 'gecikmiş') || !p.date) return false;
+        const d = new Date(p.date);
+        return d >= startOfMonth(now) && d <= endOfMonth(now);
+      });
+
+      const collected = thisMonthPayments.reduce((s, p) => s + (p.amount || 0), 0);
+      const pending = thisMonthDebts.reduce((s, p) => s + (p.amount || 0), 0);
+
+      return (
+        <>
+          <h2 style={mTitle}>Bu Ay — {format(now, 'MMMM yyyy', { locale: tr })}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 12, padding: '0.85rem' }}>
+              <div style={{ color: '#16a34a', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>TAHSİL EDİLEN</div>
+              <div style={{ color: '#15803d', fontSize: '1.3rem', fontWeight: 800 }}>₺{collected.toLocaleString('tr-TR')}</div>
+            </div>
+            <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: 12, padding: '0.85rem' }}>
+              <div style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>BEKLEYEN</div>
+              <div style={{ color: '#b45309', fontSize: '1.3rem', fontWeight: 800 }}>₺{pending.toLocaleString('tr-TR')}</div>
+            </div>
+          </div>
+          <div style={mList}>
+            {thisMonthPayments.length === 0 && <p style={mEmpty}>Bu ay henüz ödeme alınmamış</p>}
+            {thisMonthPayments.map((p, i) => (
+              <div key={p.id} style={mRow(i)}>
+                <div>
+                  <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{p.studentName}</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{p.date} · {p.method}</div>
+                </div>
+                <div style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.9rem' }}>+₺{(p.amount || 0).toLocaleString('tr-TR')}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.55)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={onClose}>
+      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.18)', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0' }}>
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#6b7280'; }}>
+            <X size={16} />
+          </button>
+        </div>
+        <div style={{ padding: '0 1.5rem 1.5rem', overflowY: 'auto' }}>
+          {content()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const mTitle = { color: '#111827', fontSize: '1.15rem', fontWeight: 800, marginBottom: '0.2rem' };
+const mSub = { color: '#9ca3af', fontSize: '0.82rem', marginBottom: '1rem' };
+const mList = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
+const mEmpty = { color: '#9ca3af', textAlign: 'center', padding: '1.5rem 0', fontSize: '0.875rem' };
+const mRow = (i) => ({ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.7rem 0.85rem', borderRadius: 10, background: i % 2 === 0 ? '#f9fafb' : 'white', border: '1px solid #f3f4f6' });
+
+// ── Main Page ─────────────────────────────────────────────────
 export default function TeacherFinance() {
   const [payments, setPayments] = useState([]);
   const [students, setStudents] = useState([]);
@@ -17,6 +203,7 @@ export default function TeacherFinance() {
   const [payModalStudent, setPayModalStudent] = useState(null);
   const [showStudentPicker, setShowStudentPicker] = useState(false);
   const [txFilter, setTxFilter] = useState({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' });
+  const [detailType, setDetailType] = useState(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -30,14 +217,11 @@ export default function TeacherFinance() {
     setPayments(p); setStudents(s); setLessons(l);
   };
 
-  // --- Calculations ---
   const totalIncome = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
   const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
   const pendingIncome = Math.max(0, totalDebt - totalIncome);
-
   const monthlyRecurring = students.reduce((s, st) => s + (st.monthlyFee || 0), 0);
 
-  // This month earned
   const now = new Date();
   const thisMonthIncome = payments.filter(p => {
     if (p.status !== 'alındı' || !p.date) return false;
@@ -45,10 +229,8 @@ export default function TeacherFinance() {
     return d >= startOfMonth(now) && d <= endOfMonth(now);
   }).reduce((s, p) => s + (p.amount || 0), 0);
 
-  // Weekly planned hours
   const totalWeeklyHours = students.reduce((s, st) => s + ((st.weeklyLessons || 1) * 1), 0);
 
-  // Monthly chart (last 6 months)
   const monthlyData = Array.from({ length: 6 }, (_, i) => {
     const m = subMonths(now, 5 - i);
     const income = payments.filter(p => {
@@ -64,7 +246,6 @@ export default function TeacherFinance() {
     return { month: format(m, 'MMM yy', { locale: tr }), gelir: income, hakedilen: earned };
   });
 
-  // Weekly hours chart (last 8 weeks)
   const weeklyHoursData = Array.from({ length: 8 }, (_, i) => {
     const weekStart = startOfWeek(subWeeks(now, 7 - i), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(subWeeks(now, 7 - i), { weekStartsOn: 1 });
@@ -73,19 +254,14 @@ export default function TeacherFinance() {
       const d = new Date(l.date);
       return d >= weekStart && d <= weekEnd && l.status !== 'iptal';
     }).reduce((s, l) => s + (l.duration || 60), 0);
-    return {
-      week: format(weekStart, 'd MMM', { locale: tr }),
-      saat: Math.round(mins / 60 * 10) / 10,
-    };
+    return { week: format(weekStart, 'd MMM', { locale: tr }), saat: Math.round(mins / 60 * 10) / 10 };
   });
 
-  // Student income (for horizontal bars)
   const studentIncome = students.map(s => ({
     name: s.name.split(' ').slice(0, 2).join(' '),
     total: payments.filter(p => p.studentId === s.id && p.status === 'alındı').reduce((sum, p) => sum + (p.amount || 0), 0),
   })).sort((a, b) => b.total - a.total);
 
-  // Pending by student (for donut) — borç - tahsil = net bekleyen
   const pendingByStudent = students.map(s => {
     const debt = payments.filter(p => p.studentId === s.id && (p.status === 'bekliyor' || p.status === 'gecikmiş')).reduce((sum, p) => sum + (p.amount || 0), 0);
     const collected = payments.filter(p => p.studentId === s.id && p.status === 'alındı').reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -93,7 +269,6 @@ export default function TeacherFinance() {
   }).filter(x => x.amount > 0);
 
   const maxStudentIncome = studentIncome[0]?.total || 1;
-
   const card = { background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' };
 
   return (
@@ -109,8 +284,7 @@ export default function TeacherFinance() {
             <RefreshCw size={14} />
           </button>
           <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowStudentPicker(v => !v)}
+            <button onClick={() => setShowStudentPicker(v => !v)}
               style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.25rem', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
               <Plus size={16} /> Ödeme Ekle <ChevronDown size={14} />
             </button>
@@ -119,7 +293,7 @@ export default function TeacherFinance() {
                 {students.length === 0 && <p style={{ color: '#9ca3af', padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}>Öğrenci yok</p>}
                 {students.map(s => (
                   <button key={s.id} onClick={() => { setPayModalStudent(s); setShowStudentPicker(false); }}
-                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.55rem 0.75rem', borderRadius: '9px', border: 'none', background: 'transparent', color: '#111827', fontSize: '0.875rem', cursor: 'pointer', transition: 'all 0.1s' }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.55rem 0.75rem', borderRadius: '9px', border: 'none', background: 'transparent', color: '#111827', fontSize: '0.875rem', cursor: 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {s.name}
@@ -133,22 +307,15 @@ export default function TeacherFinance() {
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-        {/* Aktif Öğrenci */}
-        <StatCard icon={Users} iconColor='#ec4899' label='Aktif Öğrenci' value={students.length} sub='Tüm öğrenciler aktif' />
-        {/* Toplam Gelir */}
-        <StatCard icon={DollarSign} iconColor='#f97316' label='Toplam Gelir' value={`₺${totalIncome.toLocaleString('tr-TR')}`} sub={`Hakedilen: ₺${(totalIncome + pendingIncome).toLocaleString('tr-TR')}`} />
-        {/* Haftalık ders */}
-        <StatCard icon={Clock} iconColor='#6366f1' label='Haftalık Planlanan Ders' value={`${totalWeeklyHours} Saat`} sub='Aktif öğrencilere göre' />
-        {/* Düzenli gelir */}
-        <StatCard icon={TrendingUp} iconColor='#10b981' label='Düzenli Gelir' value={`₺${monthlyRecurring.toLocaleString('tr-TR')}`} sub='Aylık yinelenen' badge='Aylık' />
-        {/* Bu ay */}
-        <StatCard icon={TrendingUp} iconColor='#8b5cf6' label='Bu Ay (Hakedilen)' value={`₺${thisMonthIncome.toLocaleString('tr-TR')}`}
-          sub={`Tahsil: ₺${thisMonthIncome.toLocaleString('tr-TR')} | Tahmini: ₺${monthlyRecurring.toLocaleString('tr-TR')}`} />
+        <StatCard icon={Users} iconColor='#ec4899' label='Aktif Öğrenci' value={students.length} sub='Detay için tıkla' onClick={() => setDetailType('students')} />
+        <StatCard icon={DollarSign} iconColor='#f97316' label='Toplam Gelir' value={`₺${totalIncome.toLocaleString('tr-TR')}`} sub='Detay için tıkla' onClick={() => setDetailType('income')} />
+        <StatCard icon={Clock} iconColor='#6366f1' label='Haftalık Planlanan Ders' value={`${totalWeeklyHours} Saat`} sub='Detay için tıkla' onClick={() => setDetailType('hours')} />
+        <StatCard icon={TrendingUp} iconColor='#10b981' label='Düzenli Gelir' value={`₺${monthlyRecurring.toLocaleString('tr-TR')}`} sub='Detay için tıkla' badge='Aylık' onClick={() => setDetailType('mrr')} />
+        <StatCard icon={TrendingUp} iconColor='#8b5cf6' label='Bu Ay (Hakedilen)' value={`₺${thisMonthIncome.toLocaleString('tr-TR')}`} sub='Detay için tıkla' onClick={() => setDetailType('thismonth')} />
       </div>
 
       {/* Charts row */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
-        {/* Monthly income */}
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
@@ -156,11 +323,6 @@ export default function TeacherFinance() {
               <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.15rem' }}>
                 Ort. ₺{monthlyData.length > 0 ? Math.round(monthlyData.reduce((s, d) => s + d.gelir, 0) / 6).toLocaleString('tr-TR') : 0} (Son 6 ay)
               </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#6b7280' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#e5e7eb', display: 'inline-block' }} /> Hakedilen
-              </span>
             </div>
           </div>
           <ResponsiveContainer width='100%' height={200}>
@@ -184,7 +346,6 @@ export default function TeacherFinance() {
           </ResponsiveContainer>
         </div>
 
-        {/* Weekly hours */}
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
@@ -212,13 +373,11 @@ export default function TeacherFinance() {
 
       {/* Bottom row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
-        {/* Pending balance donut */}
         <div style={card}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1rem' }}>
             Öğrenci dağılımı · {pendingByStudent.length} öğrenci
           </p>
-          {/* Legend */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
             {pendingByStudent.slice(0, 4).map(({ student, amount }, i) => (
               <div key={student.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -234,7 +393,6 @@ export default function TeacherFinance() {
             ))}
             {pendingByStudent.length === 0 && <p style={{ color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>Bekleyen ödeme yok 🎉</p>}
           </div>
-          {/* Circle */}
           {pendingIncome > 0 && (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{ position: 'relative', width: '120px', height: '120px' }}>
@@ -253,7 +411,6 @@ export default function TeacherFinance() {
           )}
         </div>
 
-        {/* Student earnings horizontal bars */}
         <div style={card}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Öğrenci Bazlı Kazanç</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>Tüm öğrenciler · {students.length} öğrenci</p>
@@ -268,19 +425,13 @@ export default function TeacherFinance() {
                     <span style={{ color: '#111827', fontSize: '0.83rem', fontWeight: '700' }}>₺{s.total.toLocaleString('tr-TR')}</span>
                   </div>
                   <div style={{ height: '10px', background: '#f3f4f6', borderRadius: '5px', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', borderRadius: '5px',
-                      background: `linear-gradient(90deg, ${COLORS[i % COLORS.length]}, ${COLORS[i % COLORS.length]}cc)`,
-                      width: `${maxStudentIncome > 0 ? Math.max((s.total / maxStudentIncome) * 100, 2) : 0}%`,
-                      transition: 'width 0.4s ease',
-                    }} />
+                    <div style={{ height: '100%', borderRadius: '5px', background: `linear-gradient(90deg, ${COLORS[i % COLORS.length]}, ${COLORS[i % COLORS.length]}cc)`, width: `${maxStudentIncome > 0 ? Math.max((s.total / maxStudentIncome) * 100, 2) : 0}%`, transition: 'width 0.4s ease' }} />
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Pending payments quick actions */}
           {pendingByStudent.length > 0 && (
             <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1.5px solid #f3f4f6' }}>
               <h4 style={{ color: '#374151', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.75rem' }}>Bekleyen Ödemeler</h4>
@@ -301,123 +452,111 @@ export default function TeacherFinance() {
             </div>
           )}
 
-          {/* Geçmiş Ödeme İşlemleri */}
           <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1.5px solid #f3f4f6' }}>
-           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.75rem' }}>Geçmiş Ödeme İşlemleri</h3>
+            <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.75rem' }}>Geçmiş Ödeme İşlemleri</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
+              <select value={txFilter.type} onChange={e => setTxFilter(f => ({ ...f, type: e.target.value }))}
+                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
+                <option value="all">Tüm İşlemler</option>
+                <option value="debt">Borç Eklendi</option>
+                <option value="payment">Ödeme Alındı</option>
+              </select>
+              <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
+                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
+                <option value="all">Tüm Öğrenciler</option>
+                {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
+                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
+              <input type="date" value={txFilter.dateTo} onChange={e => setTxFilter(f => ({ ...f, dateTo: e.target.value }))}
+                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
+              {(txFilter.type !== 'all' || txFilter.studentId !== 'all' || txFilter.dateFrom || txFilter.dateTo) && (
+                <button onClick={() => setTxFilter({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' })}
+                  style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer' }}>
+                  Temizle
+                </button>
+              )}
+            </div>
 
-           {/* Filtreler */}
-           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
-             <select value={txFilter.type} onChange={e => setTxFilter(f => ({ ...f, type: e.target.value }))}
-               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
-               <option value="all">Tüm İşlemler</option>
-               <option value="debt">Borç Eklendi</option>
-               <option value="payment">Ödeme Alındı</option>
-             </select>
-             <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
-               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
-               <option value="all">Tüm Öğrenciler</option>
-               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-             </select>
-             <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
-               placeholder="Başlangıç"
-               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
-             <input type="date" value={txFilter.dateTo} onChange={e => setTxFilter(f => ({ ...f, dateTo: e.target.value }))}
-               placeholder="Bitiş"
-               style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
-             {(txFilter.type !== 'all' || txFilter.studentId !== 'all' || txFilter.dateFrom || txFilter.dateTo) && (
-               <button onClick={() => setTxFilter({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' })}
-                 style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer' }}>
-                 Temizle
-               </button>
-             )}
-           </div>
+            {(() => {
+              const debtRows = lessons
+                .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
+                .map(l => ({ id: 'lesson-' + l.id, type: 'debt', studentId: l.studentId, amount: l.lessonFee, date: l.date }));
+              const receivedRows = payments.filter(p => p.status === 'alındı').map(p => ({ ...p, type: 'payment' }));
+              const allRows = [...debtRows, ...receivedRows]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .filter(row => {
+                  if (txFilter.type !== 'all' && row.type !== txFilter.type) return false;
+                  if (txFilter.studentId !== 'all' && row.studentId !== txFilter.studentId) return false;
+                  if (txFilter.dateFrom && row.date < txFilter.dateFrom) return false;
+                  if (txFilter.dateTo && row.date > txFilter.dateTo) return false;
+                  return true;
+                });
 
-           {(() => {
-             const debtRows = lessons
-               .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
-               .map(l => ({ id: 'lesson-' + l.id, type: 'debt', studentId: l.studentId, amount: l.lessonFee, date: l.date }));
-             const receivedRows = payments
-               .filter(p => p.status === 'alındı')
-               .map(p => ({ ...p, type: 'payment' }));
-
-             const allRows = [...debtRows, ...receivedRows]
-               .sort((a, b) => new Date(b.date) - new Date(a.date))
-               .filter(row => {
-                 if (txFilter.type !== 'all' && row.type !== txFilter.type) return false;
-                 if (txFilter.studentId !== 'all' && row.studentId !== txFilter.studentId) return false;
-                 if (txFilter.dateFrom && row.date < txFilter.dateFrom) return false;
-                 if (txFilter.dateTo && row.date > txFilter.dateTo) return false;
-                 return true;
-               });
-
-             return (
-               <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
-                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                   <thead>
-                     <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Öğrenci</th>
-                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tutar</th>
-                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Tarih</th>
-                       <th style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>İşlem</th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     {allRows.length === 0 ? (
-                       <tr>
-                         <td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
-                           Kayıt bulunamadı
-                         </td>
-                       </tr>
-                     ) : allRows.map(row => (
-                       <tr key={row.id} style={{ borderBottom: '1px solid #f3f4f6', transition: 'background 0.15s' }}
-                         onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
-                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                         <td style={{ padding: '0.85rem 1rem', color: '#374151', fontSize: '0.85rem', fontWeight: '600' }}>
-                           {students.find(s => s.id === row.studentId)?.name || '—'}
-                         </td>
-                         <td style={{ padding: '0.85rem 1rem', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.9rem', fontWeight: '700' }}>
-                           {row.type === 'debt' ? '-' : '+'}₺{(row.amount || 0).toLocaleString('tr-TR')}
-                         </td>
-                         <td style={{ padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.82rem' }}>
-                           {row.date ? new Date(row.date).toLocaleDateString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '—'}
-                         </td>
-                         <td style={{ padding: '0.85rem 1rem' }}>
-                           {row.type === 'debt' ? (
-                             <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>Borç Eklendi</span>
-                           ) : (
-                             <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>Ödeme Alındı</span>
-                           )}
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-             );
-           })()}
+              return (
+                <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                        {['Öğrenci', 'Tutar', 'Tarih', 'İşlem'].map(h => (
+                          <th key={h} style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allRows.length === 0 ? (
+                        <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>Kayıt bulunamadı</td></tr>
+                      ) : allRows.map(row => (
+                        <tr key={row.id} style={{ borderBottom: '1px solid #f3f4f6' }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '0.85rem 1rem', color: '#374151', fontSize: '0.85rem', fontWeight: '600' }}>
+                            {students.find(s => s.id === row.studentId)?.name || '—'}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.9rem', fontWeight: '700' }}>
+                            {row.type === 'debt' ? '-' : '+'}₺{(row.amount || 0).toLocaleString('tr-TR')}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.82rem' }}>
+                            {row.date ? new Date(row.date).toLocaleDateString('tr-TR') : '—'}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <span style={{ background: row.type === 'debt' ? '#fee2e2' : '#d1fae5', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
+                              {row.type === 'debt' ? 'Borç Eklendi' : 'Ödeme Alındı'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
           </div>
-          </div>
-          </div>
+        </div>
+      </div>
 
-          {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={loadAll} />}
+      {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={loadAll} />}
+      {detailType && <DetailModal type={detailType} students={students} payments={payments} lessons={lessons} onClose={() => setDetailType(null)} />}
     </div>
   );
 }
 
-function StatCard({ icon: Icon, iconColor, label, value, sub, badge }) {
+function StatCard({ icon: Icon, iconColor, label, value, sub, badge, onClick }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{ background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '16px', padding: '1.1rem 1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+    <div onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ background: 'white', border: `1.5px solid ${hovered ? iconColor + '55' : '#e5e7eb'}`, borderRadius: '16px', padding: '1.1rem 1.25rem', boxShadow: hovered ? `0 4px 20px ${iconColor}22` : '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s', transform: hovered ? 'translateY(-2px)' : 'translateY(0)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
         <div style={{ padding: '0.5rem', borderRadius: '10px', background: iconColor + '18' }}>
           <Icon size={18} color={iconColor} />
         </div>
-        {badge && (
-          <span style={{ background: '#f0fdf4', color: '#15803d', fontSize: '0.65rem', fontWeight: '700', padding: '0.15rem 0.5rem', borderRadius: '20px' }}>{badge}</span>
-        )}
+        {badge && <span style={{ background: '#f0fdf4', color: '#15803d', fontSize: '0.65rem', fontWeight: '700', padding: '0.15rem 0.5rem', borderRadius: '20px' }}>{badge}</span>}
       </div>
       <p style={{ color: '#6b7280', fontSize: '0.72rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '0.3rem' }}>{label}</p>
       <p style={{ color: '#111827', fontSize: '1.5rem', fontWeight: '800', lineHeight: 1, marginBottom: '0.3rem' }}>{value}</p>
-      {sub && <p style={{ color: '#9ca3af', fontSize: '0.72rem', lineHeight: 1.4 }}>{sub}</p>}
+      {sub && <p style={{ color: hovered ? iconColor : '#9ca3af', fontSize: '0.72rem', lineHeight: 1.4, transition: 'color 0.2s' }}>{sub}</p>}
     </div>
   );
 }
