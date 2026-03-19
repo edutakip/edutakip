@@ -22,7 +22,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const weeklyLessons = student.weeklyLessons || 1;
   const lessonFee = student.feePerLesson || 0;
 
-  const earned = payments.reduce((s, p) => s + (p.amount || 0), 0);
+  const earned = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);;
   const collected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
   const balance = collected - earned; // negative = owes
 
