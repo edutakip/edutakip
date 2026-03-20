@@ -193,17 +193,16 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
   };
 
   return ReactDOM.createPortal(
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: visible ? 'rgba(17,24,39,0.45)' : 'rgba(17,24,39,0)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', backdropFilter: visible ? 'blur(3px)' : 'blur(0px)', transition: 'background 0.3s ease' }} onClick={handleClose}>
-      <div style={{ background: 'white', borderRadius: '0 0 24px 24px', width: '100%', maxWidth: 520, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', transform: visible ? 'translateY(0)' : 'translateY(-110%)', transition: 'transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem 0.75rem', borderBottom: '1px solid #f3f4f6' }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: '#e5e7eb' }} />
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: visible ? 'rgba(17,24,39,0.55)' : 'rgba(17,24,39,0)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', paddingTop: '8vh', backdropFilter: visible ? 'blur(4px)' : 'blur(0px)', transition: 'background 0.22s ease, backdrop-filter 0.22s ease' }} onClick={handleClose}>
+      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.18)', overflow: 'hidden', transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)', opacity: visible ? 1 : 0, transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0' }}>
           <button onClick={handleClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#6b7280'; }}>
             <X size={16} />
           </button>
         </div>
-        <div style={{ padding: '1rem 1.5rem 1.5rem', overflowY: 'auto' }}>
+        <div style={{ padding: '0 1.5rem 1.5rem', overflowY: 'auto' }}>
           {content()}
         </div>
       </div>
