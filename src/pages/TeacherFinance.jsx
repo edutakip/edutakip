@@ -372,42 +372,87 @@ export default function TeacherFinance() {
       </div>
 
       {/* Bottom row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
-        <div style={card}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', alignItems: 'start' }}>
+        <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
-          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1rem' }}>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>
             Öğrenci dağılımı · {pendingByStudent.length} öğrenci
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-            {pendingByStudent.slice(0, 4).map(({ student, amount }, i) => (
-              <div key={student.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block', flexShrink: 0 }} />
-                  <span style={{ color: '#374151', fontSize: '0.8rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '110px' }}>{student.name}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#111827', fontSize: '0.8rem', fontWeight: '600' }}>₺{amount.toLocaleString('tr-TR')}</span>
-                  {pendingIncome > 0 && <span style={{ color: '#9ca3af', fontSize: '0.72rem' }}>{Math.round(amount / pendingIncome * 100)}%</span>}
-                </div>
-              </div>
-            ))}
-            {pendingByStudent.length === 0 && <p style={{ color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>Bekleyen ödeme yok 🎉</p>}
-          </div>
-          {pendingIncome > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-                <svg width='120' height='120' viewBox='0 0 120 120'>
-                  <circle cx='60' cy='60' r='50' fill='none' stroke='#f3f4f6' strokeWidth='12' />
-                  <circle cx='60' cy='60' r='50' fill='none' stroke='#f97316' strokeWidth='12'
-                    strokeDasharray={`${2 * Math.PI * 50}`} strokeDashoffset='0'
-                    strokeLinecap='round' transform='rotate(-90 60 60)' />
-                </svg>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: '600', textTransform: 'uppercase' }}>TOPLAM</div>
-                  <div style={{ color: '#111827', fontSize: '1.1rem', fontWeight: '800' }}>₺{pendingIncome.toLocaleString('tr-TR')}</div>
-                </div>
-              </div>
+
+          {pendingByStudent.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+              <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Bekleyen ödeme yok</p>
             </div>
+          ) : (
+            <>
+              {/* Donut chart */}
+              {(() => {
+                const R = 70;
+                const STROKE = 16;
+                const CIRC = 2 * Math.PI * R;
+                const SIZE = 200;
+                const total = pendingByStudent.reduce((s, x) => s + x.amount, 0);
+                let cumulative = 0;
+                const slices = pendingByStudent.slice(0, 5).map((x, i) => {
+                  const pct = x.amount / total;
+                  const dash = pct * CIRC;
+                  const gap = CIRC - dash;
+                  const offset = CIRC - cumulative * CIRC;
+                  cumulative += pct;
+                  return { ...x, dash, gap, offset, color: COLORS[i % COLORS.length] };
+                });
+                return (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ position: 'relative', width: SIZE, height: SIZE }}>
+                      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+                        {/* Background circle */}
+                        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill='none' stroke='#f3f4f6' strokeWidth={STROKE} />
+                        {/* Colored slices */}
+                        {slices.map((s, i) => (
+                          <circle key={i}
+                            cx={SIZE/2} cy={SIZE/2} r={R}
+                            fill='none'
+                            stroke={s.color}
+                            strokeWidth={STROKE}
+                            strokeDasharray={`${s.dash - 2} ${s.gap + 2}`}
+                            strokeDashoffset={s.offset}
+                            strokeLinecap='round'
+                            transform={`rotate(-90 ${SIZE/2} ${SIZE/2})`}
+                            style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                          />
+                        ))}
+                      </svg>
+                      {/* Center text */}
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TOPLAM</div>
+                        <div style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800', lineHeight: 1.2 }}>₺{total.toLocaleString('tr-TR')}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Legend */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {pendingByStudent.slice(0, 5).map(({ student, amount }, i) => {
+                  const total = pendingByStudent.reduce((s, x) => s + x.amount, 0);
+                  const pct = total > 0 ? Math.round(amount / total * 100) : 0;
+                  return (
+                    <div key={student.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.6rem', borderRadius: 8, background: '#f9fafb' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ color: '#374151', fontSize: '0.78rem', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '100px' }}>{student.name}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ color: '#111827', fontSize: '0.78rem', fontWeight: 700 }}>₺{amount.toLocaleString('tr-TR')}</span>
+                        <span style={{ background: COLORS[i % COLORS.length] + '22', color: COLORS[i % COLORS.length], fontSize: '0.65rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: 20 }}>{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
 
