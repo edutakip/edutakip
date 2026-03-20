@@ -193,7 +193,7 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
   };
 
   return ReactDOM.createPortal(
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: visible ? 'rgba(17,24,39,0.55)' : 'rgba(17,24,39,0)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: visible ? 'blur(4px)' : 'blur(0px)', transition: 'background 0.22s ease, backdrop-filter 0.22s ease' }} onClick={handleClose}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: visible ? 'rgba(17,24,39,0.55)' : 'rgba(17,24,39,0)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', paddingTop: '8vh', backdropFilter: visible ? 'blur(4px)' : 'blur(0px)', transition: 'background 0.22s ease, backdrop-filter 0.22s ease' }} onClick={handleClose}>
       <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.18)', overflow: 'hidden', transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)', opacity: visible ? 1 : 0, transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0' }}>
           <button onClick={handleClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -334,7 +334,6 @@ export default function TeacherFinance() {
   );
 
   return (
-    <>
     <div style={{ padding: '2rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
@@ -669,9 +668,8 @@ export default function TeacherFinance() {
       </div>
 
       {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={loadAll} />}
+      {detailType && <DetailModal type={detailType} students={students} payments={payments} lessons={lessons} onClose={() => setDetailType(null)} />}
     </div>
-    {detailType && <DetailModal type={detailType} students={students} payments={payments} lessons={lessons} onClose={() => setDetailType(null)} />}
-    </>
   );
 }
 
