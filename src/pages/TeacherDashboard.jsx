@@ -221,6 +221,23 @@ export default function TeacherDashboard() {
             <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}>{briefCards[briefSlide].detail}</div>
           </div>
 
+          {/* Dikey ayraç */}
+          <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+
+          {/* Sağ: Özet metin */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '0.95rem', color: 'white', fontWeight: '600', marginBottom: '0.4rem', lineHeight: 1.5 }}>
+              {todayLessons.length > 0
+                ? `Bugün ${todayLessons.length} dersiniz var${firstLesson ? `, ilki saat ${firstLesson.startTime?.slice(0,5)}'de.` : '.'}`
+                : 'Bugün planlanmış dersiniz yok.'}
+            </p>
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', fontWeight: '500', lineHeight: 1.5 }}>
+              {studentBalances.length > 0
+                ? `${studentBalances.length} öğrencinizin bekleyen ödemesi var.`
+                : 'Tüm ödemeler güncel, harika!'}
+            </p>
+          </div>
+
           {/* Nokta göstergeler */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
             {briefCards.map((_, i) => (
