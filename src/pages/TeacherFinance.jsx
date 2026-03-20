@@ -497,87 +497,138 @@ export default function TeacherFinance() {
             </div>
           )}
 
-          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1.5px solid #f3f4f6' }}>
-            <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.75rem' }}>Geçmiş Ödeme İşlemleri</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
-              <select value={txFilter.type} onChange={e => setTxFilter(f => ({ ...f, type: e.target.value }))}
-                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
-                <option value="all">Tüm İşlemler</option>
-                <option value="debt">Borç Eklendi</option>
-                <option value="payment">Ödeme Alındı</option>
-              </select>
+        </div>
+      </div>
+
+      {/* ── Geçmiş İşlemler ─────────────────────────────────── */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+        {/* Başlık */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1.5px solid #f3f4f6', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: 4, height: 22, borderRadius: 4, background: '#f97316' }} />
+            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1.05rem', margin: 0 }}>Geçmiş İşlemler</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Öğrenci filtresi */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.4rem 0.75rem', cursor: 'pointer' }}>
+              <span style={{ fontSize: '0.82rem', color: '#374151', fontWeight: '500' }}>👤</span>
               <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
-                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white', cursor: 'pointer' }}>
+                style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: '#374151', fontWeight: '600', cursor: 'pointer', outline: 'none' }}>
                 <option value="all">Tüm Öğrenciler</option>
                 {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-              <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
-                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
-              <input type="date" value={txFilter.dateTo} onChange={e => setTxFilter(f => ({ ...f, dateTo: e.target.value }))}
-                style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '0.8rem', color: '#374151', background: 'white' }} />
-              {(txFilter.type !== 'all' || txFilter.studentId !== 'all' || txFilter.dateFrom || txFilter.dateTo) && (
-                <button onClick={() => setTxFilter({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' })}
-                  style={{ padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer' }}>
-                  Temizle
-                </button>
-              )}
             </div>
-
-            {(() => {
-              const debtRows = lessons
-                .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
-                .map(l => ({ id: 'lesson-' + l.id, type: 'debt', studentId: l.studentId, amount: l.lessonFee, date: l.date }));
-              const receivedRows = payments.filter(p => p.status === 'alındı').map(p => ({ ...p, type: 'payment' }));
-              const allRows = [...debtRows, ...receivedRows]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .filter(row => {
-                  if (txFilter.type !== 'all' && row.type !== txFilter.type) return false;
-                  if (txFilter.studentId !== 'all' && row.studentId !== txFilter.studentId) return false;
-                  if (txFilter.dateFrom && row.date < txFilter.dateFrom) return false;
-                  if (txFilter.dateTo && row.date > txFilter.dateTo) return false;
-                  return true;
-                });
-
-              return (
-                <div style={{ background: 'white', borderRadius: '14px', border: '1.5px solid #e5e7eb', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                        {['Öğrenci', 'Tutar', 'Tarih', 'İşlem'].map(h => (
-                          <th key={h} style={{ textAlign: 'left', padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allRows.length === 0 ? (
-                        <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>Kayıt bulunamadı</td></tr>
-                      ) : allRows.map(row => (
-                        <tr key={row.id} style={{ borderBottom: '1px solid #f3f4f6' }}
-                          onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <td style={{ padding: '0.85rem 1rem', color: '#374151', fontSize: '0.85rem', fontWeight: '600' }}>
-                            {students.find(s => s.id === row.studentId)?.name || '—'}
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.9rem', fontWeight: '700' }}>
-                            {row.type === 'debt' ? '-' : '+'}₺{(row.amount || 0).toLocaleString('tr-TR')}
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem', color: '#6b7280', fontSize: '0.82rem' }}>
-                            {row.date ? new Date(row.date).toLocaleDateString('tr-TR') : '—'}
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem' }}>
-                            <span style={{ background: row.type === 'debt' ? '#fee2e2' : '#d1fae5', color: row.type === 'debt' ? '#b91c1c' : '#065f46', fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '6px', display: 'inline-block' }}>
-                              {row.type === 'debt' ? 'Borç Eklendi' : 'Ödeme Alındı'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })()}
+            {/* Tarih filtresi */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.4rem 0.75rem' }}>
+              <span style={{ fontSize: '0.82rem' }}>📅</span>
+              <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
+                placeholder="Tarih Seçin"
+                style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: txFilter.dateFrom ? '#374151' : '#9ca3af', fontWeight: '500', cursor: 'pointer', outline: 'none' }} />
+            </div>
+            {/* Tip toggle */}
+            <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: '0.2rem' }}>
+              {[['all','Tümü'],['payment','Ödeme'],['debt','Borç']].map(([v,l]) => (
+                <button key={v} onClick={() => setTxFilter(f => ({ ...f, type: v }))}
+                  style={{ padding: '0.3rem 0.7rem', borderRadius: 8, border: 'none', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s', background: txFilter.type === v ? 'white' : 'transparent', color: txFilter.type === v ? '#111827' : '#9ca3af', boxShadow: txFilter.type === v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            {(txFilter.type !== 'all' || txFilter.studentId !== 'all' || txFilter.dateFrom || txFilter.dateTo) && (
+              <button onClick={() => setTxFilter({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' })}
+                style={{ padding: '0.4rem 0.75rem', borderRadius: 10, border: '1.5px solid #fca5a5', fontSize: '0.78rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer', fontWeight: '600' }}>
+                ✕
+              </button>
+            )}
           </div>
         </div>
+
+        {/* Satırlar */}
+        {(() => {
+          const debtRows = lessons
+            .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
+            .map(l => ({ id: 'lesson-' + l.id, type: 'debt', studentId: l.studentId, studentName: students.find(s => s.id === l.studentId)?.name || l.studentName, amount: l.lessonFee, date: l.date, method: 'Ders', description: l.subject || 'Ders tamamlandı' }));
+          const receivedRows = payments.filter(p => p.status === 'alındı').map(p => ({ ...p, type: 'payment' }));
+          const allRows = [...debtRows, ...receivedRows]
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .filter(row => {
+              if (txFilter.type !== 'all' && row.type !== txFilter.type) return false;
+              if (txFilter.studentId !== 'all' && row.studentId !== txFilter.studentId) return false;
+              if (txFilter.dateFrom && row.date < txFilter.dateFrom) return false;
+              if (txFilter.dateTo && row.date > txFilter.dateTo) return false;
+              return true;
+            });
+
+          const totalAmount = allRows.filter(r => r.type === 'payment').reduce((s, r) => s + (r.amount || 0), 0);
+
+          if (allRows.length === 0) return (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</div>
+              <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>Kayıt bulunamadı</p>
+            </div>
+          );
+
+          return (
+            <>
+              {allRows.map((row, i) => {
+                const isPayment = row.type === 'payment';
+                const dateStr = row.date ? new Date(row.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+                const methodLabel = row.method ? (row.method === 'havale' ? 'Havale/EFT' : row.method === 'nakit' ? 'Nakit' : row.method) : '—';
+                const studentName = row.studentName || students.find(s => s.id === row.studentId)?.name || '—';
+
+                return (
+                  <div key={row.id}
+                    style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderBottom: i < allRows.length - 1 ? '1px solid #f3f4f6' : 'none', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+
+                    {/* Sol renk çizgi + ikon */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
+                      <div style={{ width: 3, height: 40, borderRadius: 4, background: isPayment ? '#10b981' : '#f97316' }} />
+                      <div style={{ width: 38, height: 38, borderRadius: 10, background: isPayment ? '#ecfdf5' : '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                        {isPayment ? '💰' : '📚'}
+                      </div>
+                    </div>
+
+                    {/* Öğrenci adı + detay */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.95rem', marginBottom: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {studentName}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <span style={{ background: '#f3f4f6', color: '#6b7280', fontSize: '0.72rem', fontWeight: '600', padding: '0.15rem 0.5rem', borderRadius: 6 }}>
+                          {isPayment ? methodLabel : 'Ders Ücreti'}
+                        </span>
+                        <span style={{ color: '#9ca3af', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          📅 {dateStr}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Tutar */}
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontWeight: '800', fontSize: '1rem', color: isPayment ? '#059669' : '#dc2626' }}>
+                        {isPayment ? '+' : '-'}₺{(row.amount || 0).toLocaleString('tr-TR')}
+                      </div>
+                      {!isPayment && row.description && (
+                        <div style={{ fontSize: '0.7rem', color: '#f97316', marginTop: '0.1rem' }}>{row.description}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Alt toplam */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.5rem', background: '#f8fafc', borderTop: '1.5px solid #f3f4f6' }}>
+                <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{allRows.length} işlem gösteriliyor</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: '500' }}>Toplam Tahsilat</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>₺{totalAmount.toLocaleString('tr-TR')}</div>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={loadAll} />}
