@@ -1,7 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Calculator } from 'lucide-react';
+
+// ── Page transition wrapper ───────────────────────────────────
+function PageTransition({ children, pageKey }) {
+  const [visible, setVisible] = useState(false);
+  const [displayChildren, setDisplayChildren] = useState(children);
+  const prevKey = useRef(pageKey);
+
+  useEffect(() => {
+    if (prevKey.current !== pageKey) {
+      // Yeni sayfa geldi: önce gizle, sonra içeriği değiştir, sonra göster
+      setVisible(false);
+      const t1 = setTimeout(() => {
+        setDisplayChildren(children);
+        prevKey.current = pageKey;
+        const t2 = setTimeout(() => setVisible(true), 30);
+        return () => clearTimeout(t2);
+      }, 150);
+      return () => clearTimeout(t1);
+    } else {
+      // İlk yükleme
+      const t = setTimeout(() => setVisible(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [pageKey]);
+
+  // children değişince (data yüklenince) displayChildren'ı güncelle
+  useEffect(() => {
+    if (prevKey.current === pageKey) {
+      setDisplayChildren(children);
+    }
+  }, [children]);
+
+  return (
+    <div style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(12px)',
+      transition: 'opacity 0.22s ease, transform 0.22s ease',
+      willChange: 'opacity, transform',
+    }}>
+      {displayChildren}
+    </div>
+  );
+}
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -11,6 +54,7 @@ const TEACHER_NAV = [
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
+  { label: 'Hesap Makinesi', icon: Calculator, page: 'Calculator' },
 ];
 
 const PARENT_NAV = [
@@ -20,11 +64,68 @@ const PARENT_NAV = [
   { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
+// ── Top loading bar ──────────────────────────────────────────
+function LoadingBar({ active }) {
+  const [width, setWidth] = useState(0);
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    if (active) {
+      setWidth(0);
+      setOpacity(1);
+      const t1 = setTimeout(() => setWidth(70), 30);
+      const t2 = setTimeout(() => setWidth(90), 800);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    } else {
+      setWidth(100);
+      const t = setTimeout(() => setOpacity(0), 200);
+      return () => clearTimeout(t);
+    }
+  }, [active]);
+
+  useEffect(() => {
+    if (!active) {
+      const t = setTimeout(() => { setWidth(0); setOpacity(1); }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [active]);
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, height: 3,
+      zIndex: 9999, pointerEvents: 'none', opacity,
+      transition: 'opacity 0.2s ease',
+    }}>
+      <div style={{
+        height: '100%',
+        width: `${width}%`,
+        background: 'linear-gradient(90deg, #6366f1, #a78bfa)',
+        borderRadius: '0 3px 3px 0',
+        boxShadow: '0 0 10px rgba(99,102,241,0.6)',
+        transition: width === 0 ? 'none' : width === 100 ? 'width 0.2s ease' : 'width 0.8s ease',
+      }} />
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [navigating, setNavigating] = useState(false);
+  const prevPage = useRef(currentPageName);
+
+  useEffect(() => {
+    if (prevPage.current !== currentPageName) {
+      setNavigating(true);
+      const t = setTimeout(() => {
+        setNavigating(false);
+        prevPage.current = currentPageName;
+      }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [currentPageName]);
 
   React.useEffect(() => {
     import('@/api/base44Client').then(({ base44 }) => {
@@ -122,9 +223,10 @@ export default function Layout({ children, currentPageName }) {
   if (isParent) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+        <LoadingBar active={navigating} />
         {/* MAIN */}
         <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
-          {children}
+          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
         {/* BOTTOM NAV */}
@@ -173,6 +275,7 @@ export default function Layout({ children, currentPageName }) {
   // Öğretmen için sol sidebar layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <LoadingBar active={navigating} />
 
       {/* SIDEBAR */}
       <aside style={{
@@ -202,7 +305,7 @@ export default function Layout({ children, currentPageName }) {
       {/* MAIN */}
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
         <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
-          {children}
+          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
       </main>
     </div>
