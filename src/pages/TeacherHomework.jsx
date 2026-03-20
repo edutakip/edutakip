@@ -138,14 +138,19 @@ export default function TeacherHomework() {
       {/* Özet kartlar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
         {[
-          { key: 'verildi',    label: 'Aktif',        color: '#4338ca', bg: '#e0e7ff', icon: '📚' },
-          { key: 'gecikmiş',   label: 'Gecikmiş',     color: '#b91c1c', bg: '#fee2e2', icon: '⚠️' },
-          { key: 'tamamlandı', label: 'Tamamlandı',   color: '#065f46', bg: '#d1fae5', icon: '✅' },
-          { key: 'all',        label: 'Toplam Ödev',  color: '#374151', bg: '#f3f4f6', icon: '📋' },
+          { key: 'verildi',    label: 'Aktif',        color: '#4338ca', bg: '#e0e7ff', icon: 'book' },
+          { key: 'gecikmiş',   label: 'Gecikmiş',     color: '#b91c1c', bg: '#fee2e2', icon: 'alert' },
+          { key: 'tamamlandı', label: 'Tamamlandı',   color: '#065f46', bg: '#d1fae5', icon: 'check' },
+          { key: 'all',        label: 'Toplam Ödev',  color: '#374151', bg: '#f3f4f6', icon: 'list' },
         ].map(({ key, label, color, bg, icon }) => (
           <div key={key} onClick={() => setFilter(key)}
             style={{ background: filter === key ? bg : 'white', borderRadius: 14, padding: '1rem 1.25rem', border: `1.5px solid ${filter === key ? color + '40' : '#f1f5f9'}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: filter === key ? `0 4px 14px ${color}20` : '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '1.4rem', marginBottom: '0.4rem' }}>{icon}</div>
+            <div style={{ marginBottom: '0.5rem' }}>
+              {icon === 'book' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>}
+              {icon === 'alert' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>}
+              {icon === 'check' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+              {icon === 'list' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>}
+            </div>
             <div style={{ fontSize: '1.6rem', fontWeight: '800', color, lineHeight: 1 }}>{counts[key]}</div>
             <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '600', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{label}</div>
           </div>
@@ -155,7 +160,7 @@ export default function TeacherHomework() {
       {/* Liste */}
       {filtered.length === 0 ? (
         <div style={{ background: 'white', borderRadius: 20, padding: '4rem 2rem', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 4.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 11a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 18z"/></svg></div>
           <p style={{ color: '#9ca3af', fontWeight: '600', fontSize: '1rem' }}>Ödev bulunamadı</p>
         </div>
       ) : (
@@ -211,19 +216,19 @@ export default function TeacherHomework() {
                     {student?.parentPhone && (
                       <a href={`tel:${student.parentPhone}`}
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#16a34a', fontWeight: '600', textDecoration: 'none', marginBottom: '0.85rem' }}>
-                        📞 {student.parentPhone}
+                        {student.parentPhone}
                       </a>
                     )}
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                       {/* Durum değiştir */}
                       {hw.status !== 'tamamlandı' && (
-                        <ActionBtn label="✓ Tamamlandı" color="#059669" bg="#d1fae5" onClick={() => changeStatus(hw, 'tamamlandı')} />
+                        <ActionBtn label="Tamamlandı" color="#059669" bg="#d1fae5" onClick={() => changeStatus(hw, 'tamamlandı')} />
                       )}
                       {hw.status === 'tamamlandı' && (
-                        <ActionBtn label="↩ Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => changeStatus(hw, 'verildi')} />
+                        <ActionBtn label="Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => changeStatus(hw, 'verildi')} />
                       )}
                       {hw.status !== 'gecikmiş' && hw.status !== 'tamamlandı' && (
-                        <ActionBtn label="⚠ Gecikmiş" color="#b91c1c" bg="#fee2e2" onClick={() => changeStatus(hw, 'gecikmiş')} />
+                        <ActionBtn label="Gecikmiş" color="#b91c1c" bg="#fee2e2" onClick={() => changeStatus(hw, 'gecikmiş')} />
                       )}
                       <div style={{ flex: 1 }} />
                       <button onClick={() => openEdit(hw)}
@@ -249,7 +254,7 @@ export default function TeacherHomework() {
           <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', maxWidth: '480px', width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,0.2)', animation: 'fadeUp 0.2s ease' }}>
             <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }`}</style>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#111827' }}>{editingHw ? 'Ödevi Düzenle' : '📚 Ödev Ver'}</h2>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#111827' }}>{editingHw ? 'Ödevi Düzenle' : 'Ödev Ver'}</h2>
               <button onClick={() => setShowForm(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
                 <X size={16} color='#6b7280' />
               </button>
@@ -276,7 +281,7 @@ export default function TeacherHomework() {
               </div>
               <button onClick={handleSave} disabled={!form.studentId || !form.title}
                 style={{ background: (!form.studentId || !form.title) ? '#e5e7eb' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: (!form.studentId || !form.title) ? '#9ca3af' : 'white', border: 'none', borderRadius: '12px', padding: '0.875rem', fontWeight: '800', fontSize: '0.9rem', cursor: (!form.studentId || !form.title) ? 'default' : 'pointer', marginTop: '0.25rem', transition: 'all 0.15s' }}>
-                {editingHw ? '💾 Kaydet' : '📚 Ödev Ver'}
+                {editingHw ? 'Kaydet' : '📚 Ödev Ver'}
               </button>
             </div>
           </div>
