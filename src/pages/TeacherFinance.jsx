@@ -172,9 +172,11 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.55)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.18)', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.45)', zIndex: 2000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', backdropFilter: 'blur(3px)', transition: 'background 0.3s ease' }} onClick={onClose}>
+      <div style={{ background: 'white', borderRadius: '0 0 24px 24px', width: '100%', maxWidth: 520, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideDown 0.35s cubic-bezier(0.32,0.72,0,1)' }} onClick={e => e.stopPropagation()}>
+        <style>{`@keyframes slideDown { from { transform: translateY(-100%) } to { transform: translateY(0) } }`}</style>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.25rem', borderBottom: '1px solid #f3f4f6' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: '#e5e7eb' }} />
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#6b7280'; }}>
