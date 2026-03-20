@@ -1,7 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Calculator } from 'lucide-react';
+import { dataCache } from '@/lib/dataCache';
+
+// Her sayfa için hangi verilerin prefetch edileceği
+const PAGE_PREFETCH = {
+  TeacherFinance:   (base44, me) => Promise.all([
+    base44.entities.Payment.filter({ teacherEmail: me.email }).then(d => dataCache.set('payments', d)),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(d => dataCache.set('students', d)),
+    base44.entities.Lesson.filter({ teacherEmail: me.email }).then(d => dataCache.set('lessons', d)),
+  ]),
+  TeacherCalendar:  (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }).then(d => dataCache.set('lessons', d)),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(d => dataCache.set('students', d)),
+  ]),
+  TeacherStudents:  (base44, me) => Promise.all([
+    base44.entities.Student.filter({ teacherEmail: me.email }).then(d => dataCache.set('students_all', d)),
+    base44.entities.Payment.filter({ teacherEmail: me.email }).then(d => dataCache.set('payments', d)),
+  ]),
+  TeacherDashboard: (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }).then(d => dataCache.set('lessons', d)),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(d => dataCache.set('students', d)),
+    base44.entities.Payment.filter({ teacherEmail: me.email }).then(d => dataCache.set('payments', d)),
+  ]),
+  TeacherLessons:   (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }).then(d => dataCache.set('lessons', d)),
+    base44.entities.Student.filter({ teacherEmail: me.email }).then(d => dataCache.set('students_all', d)),
+    base44.entities.Payment.filter({ teacherEmail: me.email }).then(d => dataCache.set('payments', d)),
+  ]),
+};
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -54,7 +82,6 @@ const TEACHER_NAV = [
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
-  { label: 'Hesap Makinesi', icon: Calculator, page: 'Calculator' },
 ];
 
 const PARENT_NAV = [
@@ -132,9 +159,21 @@ export default function Layout({ children, currentPageName }) {
     if (page === currentPageName) return;
     e.preventDefault();
     setNavigating(true);
-    setTimeout(() => {
+    const prefetch = PAGE_PREFETCH[page];
+    if (prefetch) {
+      import('@/api/base44Client').then(({ base44 }) => {
+        base44.auth.me().then(me => {
+          // Prefetch başlat, max 1.2sn bekle — data gelmese de geç
+          const timeout = new Promise(res => setTimeout(res, 1200));
+          Promise.race([prefetch(base44, me), timeout]).finally(() => {
+            navigate(createPageUrl(page));
+          });
+        }).catch(() => navigate(createPageUrl(page)));
+      });
+    } else {
+      // Prefetch tanımsız sayfa — direkt geç
       navigate(createPageUrl(page));
-    }, 900);
+    }
   };
 
   React.useEffect(() => {
