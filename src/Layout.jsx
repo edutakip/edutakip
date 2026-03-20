@@ -339,7 +339,7 @@ export default function Layout({ children, currentPageName }) {
 
       {/* MAIN */}
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
-        <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
       </main>
