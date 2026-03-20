@@ -643,7 +643,7 @@ export default function TeacherFinance() {
                         {studentName}
                       </div>
                       <div style={{ color: '#6b7280', fontSize: '0.85rem' }}>
-                        {isDebt ? (row.description || 'Ders tamamlandı') : (row.description || 'Ödeme alındı')} · {row.method ? row.method.charAt(0).toUpperCase() + row.method.slice(1) : ''}
+                        {isDebt ? (row.description || 'Ders tamamlanmıştır') : (row.description || 'Ödeme alındı')} · {row.method ? row.method.charAt(0).toUpperCase() + row.method.slice(1) : ''}
                       </div>
                     </div>
                     {/* Tarih */}
