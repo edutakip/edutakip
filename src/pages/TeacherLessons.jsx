@@ -126,7 +126,7 @@ export default function TeacherLessons() {
     const fromOk = !dateFrom || l.date >= dateFrom;
     const toOk = !dateTo || l.date <= dateTo;
     return statusOk && studentOk && fromOk && toOk;
-  }).sort((a, b) => new Date(`${b.date}T${b.startTime||'00:00'}`) - new Date(`${a.date}T${a.startTime||'00:00'}`));
+  }).sort((a, b) => new Date(`${a.date}T${a.startTime||'00:00'}`) - new Date(`${b.date}T${b.startTime||'00:00'}`));
 
   // Tarihe göre grupla
   const grouped = filtered.reduce((acc, lesson) => {
@@ -209,7 +209,7 @@ export default function TeacherLessons() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {Object.entries(grouped).sort(([a],[b]) => b.localeCompare(a)).map(([date, dayLessons]) => {
+          {Object.entries(grouped).sort(([a],[b]) => a.localeCompare(b)).map(([date, dayLessons]) => {
             let dayLabel = '';
             try {
               const d = parseISO(date);
