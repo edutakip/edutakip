@@ -372,7 +372,7 @@ export default function TeacherFinance() {
       </div>
 
       {/* Bottom row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', alignItems: 'start', marginBottom: '1rem' }}>
         <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>
@@ -511,7 +511,7 @@ export default function TeacherFinance() {
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Öğrenci filtresi */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.4rem 0.75rem', cursor: 'pointer' }}>
-              <span style={{ fontSize: '0.82rem', color: '#374151', fontWeight: '500' }}>👤</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
                 style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: '#374151', fontWeight: '600', cursor: 'pointer', outline: 'none' }}>
                 <option value="all">Tüm Öğrenciler</option>
@@ -520,7 +520,7 @@ export default function TeacherFinance() {
             </div>
             {/* Tarih filtresi */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.4rem 0.75rem' }}>
-              <span style={{ fontSize: '0.82rem' }}>📅</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <input type="date" value={txFilter.dateFrom} onChange={e => setTxFilter(f => ({ ...f, dateFrom: e.target.value }))}
                 placeholder="Tarih Seçin"
                 style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: txFilter.dateFrom ? '#374151' : '#9ca3af', fontWeight: '500', cursor: 'pointer', outline: 'none' }} />
@@ -563,7 +563,9 @@ export default function TeacherFinance() {
 
           if (allRows.length === 0) return (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</div>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
               <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>Kayıt bulunamadı</p>
             </div>
           );
@@ -585,8 +587,16 @@ export default function TeacherFinance() {
                     {/* Sol renk çizgi + ikon */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
                       <div style={{ width: 3, height: 40, borderRadius: 4, background: isPayment ? '#10b981' : '#f97316' }} />
-                      <div style={{ width: 38, height: 38, borderRadius: 10, background: isPayment ? '#ecfdf5' : '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
-                        {isPayment ? '💰' : '📚'}
+                      <div style={{ width: 38, height: 38, borderRadius: 10, background: isPayment ? '#ecfdf5' : '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {isPayment ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                          </svg>
+                        )}
                       </div>
                     </div>
 
@@ -622,7 +632,7 @@ export default function TeacherFinance() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.5rem', background: '#f8fafc', borderTop: '1.5px solid #f3f4f6' }}>
                 <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{allRows.length} işlem gösteriliyor</span>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: '500' }}>Toplam Tahsilat</div>
+                  <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Toplam Tahsilat</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>₺{totalAmount.toLocaleString('tr-TR')}</div>
                 </div>
               </div>
