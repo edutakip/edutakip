@@ -82,6 +82,35 @@ export default function TeacherDashboard() {
   };
 
   const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  // ── Now Brief ────────────────────────────────────────────────
+  const getBriefing = () => {
+    const hour = new Date().getHours();
+    const firstName = ''; // kullanıcı adı varsa buraya
+    const todayCount = todayLessons.length;
+    const firstLesson = todayLessons.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))[0];
+    const unpaidCount = studentBalances.length;
+    const tomorrowLessons = lessons.filter(l => {
+      try { return isTomorrow(parseISO(l.date)) && l.status !== 'iptal'; } catch { return false; }
+    });
+
+    if (hour >= 5 && hour < 12) {
+      // Sabah
+      if (todayCount === 0) return { greeting: 'Günaydın! ☀️', message: 'Bugün planlanmış dersiniz yok.', sub: unpaidCount > 0 ? `${unpaidCount} öğrencinizin bekleyen ödemesi var.` : 'Harika bir gün olsun!', color: '#f97316', gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)' };
+      return { greeting: 'Günaydın! ☀️', message: `Bugün ${todayCount} dersiniz var${firstLesson ? `, ilki saat ${firstLesson.startTime?.slice(0,5)}'de` : ''}.`, sub: unpaidCount > 0 ? `${unpaidCount} öğrencinizin bekleyen ödemesi bulunuyor.` : 'Tüm ödemeler güncel, harika!', color: '#f97316', gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)' };
+    } else if (hour >= 12 && hour < 18) {
+      // Öğle
+      const remaining = todayLessons.filter(l => (l.startTime || '') > format(new Date(), 'HH:mm'));
+      if (remaining.length === 0) return { greeting: 'İyi öğleler! 🌤', message: 'Bugünkü derslerinizi tamamladınız.', sub: tomorrowLessons.length > 0 ? `Yarın ${tomorrowLessons.length} dersiniz var.` : 'Yarın için planlanmış ders yok.', color: '#6366f1', gradient: 'linear-gradient(135deg, #eef2ff, #e0e7ff)' };
+      return { greeting: 'İyi öğleler! 🌤', message: `Bugün ${remaining.length} dersiniz kaldı.`, sub: `Bu ay toplam ${completedThisMonth} ders tamamladınız.`, color: '#6366f1', gradient: 'linear-gradient(135deg, #eef2ff, #e0e7ff)' };
+    } else {
+      // Akşam
+      const completedToday = todayLessons.filter(l => l.status === 'tamamlandı').length;
+      return { greeting: 'İyi akşamlar! 🌙', message: completedToday > 0 ? `Bugün ${completedToday} ders tamamladınız.` : 'Bugünkü dersler bitti.', sub: tomorrowLessons.length > 0 ? `Yarın ${tomorrowLessons.length} dersiniz var, hazır olun!` : 'Yarın için planlanmış ders yok, dinlenin!', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #f5f3ff, #ede9fe)' };
+    }
+  };
+
+  const briefing = getBriefing();
   const avatarColors = ['#fbbf24', '#34d399', '#60a5fa', '#f87171', '#a78bfa', '#fb923c'];
   const getAvatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || '#fbbf24';
 
@@ -93,7 +122,7 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <div style={{ padding: '2rem', minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ padding: '2rem', height: '100vh', overflowY: 'auto', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
@@ -104,6 +133,22 @@ export default function TeacherDashboard() {
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
           <Plus size={16} /> Ders Ekle
         </button>
+      </div>
+
+      {/* ── Now Brief ────────────────────────────────────── */}
+      <div style={{ background: briefing.gradient, borderRadius: 20, padding: '1.5rem 1.75rem', marginBottom: '1.5rem', border: `1.5px solid ${briefing.color}22`, position: 'relative', overflow: 'hidden' }}>
+        {/* Dekoratif daire */}
+        <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: briefing.color + '12' }} />
+        <div style={{ position: 'absolute', right: 40, bottom: -40, width: 100, height: 100, borderRadius: '50%', background: briefing.color + '08' }} />
+        <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: briefing.color, animation: 'pulse 2s infinite' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: '700', color: briefing.color, textTransform: 'uppercase', letterSpacing: '1px' }}>Günün Özeti</span>
+          </div>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#111827', marginBottom: '0.4rem' }}>{briefing.greeting}</h2>
+          <p style={{ fontSize: '0.95rem', color: '#374151', fontWeight: '600', marginBottom: '0.25rem' }}>{briefing.message}</p>
+          <p style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{briefing.sub}</p>
+        </div>
       </div>
 
       {/* Stat Cards */}
