@@ -27,6 +27,22 @@ export default function TeacherLessons() {
 
   useEffect(() => { loadData(); }, []);
 
+  // Modal açıkken body scroll'u kilitle
+  useEffect(() => {
+    if (showModal || reportLesson) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showModal, reportLesson]);
+
   const loadData = async () => {
     const me = await base44.auth.me();
     const [l, s, p] = await Promise.all([
