@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { format, parseISO, differenceInMinutes } from 'date-fns';
+import { format, parseISO, differenceInMinutes, isToday, isPast } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Plus, CheckCircle, XCircle, MessageCircle, Filter, BookOpen, Pencil, ClipboardList } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, Filter, BookOpen, Pencil, ClipboardList, Clock, Phone, ChevronDown } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
 import LessonReportModal from '../components/teacher/LessonReportModal';
+
+const STATUS_CONFIG = {
+  planlandı:  { bg: '#e0e7ff', color: '#4338ca', dot: '#6366f1', label: 'Planlandı' },
+  tamamlandı: { bg: '#d1fae5', color: '#065f46', dot: '#10b981', label: 'Tamamlandı' },
+  iptal:      { bg: '#fee2e2', color: '#b91c1c', dot: '#ef4444', label: 'İptal' },
+};
 
 export default function TeacherLessons() {
   const [lessons, setLessons] = useState([]);
@@ -17,6 +23,7 @@ export default function TeacherLessons() {
   const [studentFilter, setStudentFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -32,18 +39,13 @@ export default function TeacherLessons() {
 
   const markDone = async (lesson) => {
     await base44.entities.Lesson.update(lesson.id, { status: 'tamamlandı' });
-    // Otomatik olarak hak edilen (bekliyor) kaydı oluştur
     const fee = getLessonFee(lesson);
     const existing = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.description?.includes('Ders'));
     if (!existing && fee > 0) {
       await base44.entities.Payment.create({
-        studentId: lesson.studentId,
-        studentName: lesson.studentName,
-        teacherEmail: lesson.teacherEmail,
-        amount: fee,
-        date: lesson.date,
-        status: 'bekliyor',
-        description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
+        studentId: lesson.studentId, studentName: lesson.studentName,
+        teacherEmail: lesson.teacherEmail, amount: fee, date: lesson.date,
+        status: 'bekliyor', description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
         month: lesson.date?.slice(0, 7),
       });
     }
@@ -52,7 +54,6 @@ export default function TeacherLessons() {
 
   const markUndone = async (lesson) => {
     await base44.entities.Lesson.update(lesson.id, { status: 'planlandı' });
-    // Otomatik eklenen bekliyor kaydını sil
     const autoPayment = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'bekliyor');
     if (autoPayment) await base44.entities.Payment.delete(autoPayment.id);
     loadData();
@@ -64,20 +65,15 @@ export default function TeacherLessons() {
   };
 
   const markPaid = async (lesson) => {
-    // bekliyor kaydını alındı'ya güncelle, yoksa yeni oluştur
     const pending = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'bekliyor');
     if (pending) {
       await base44.entities.Payment.update(pending.id, { status: 'alındı' });
     } else {
       const fee = getLessonFee(lesson);
       await base44.entities.Payment.create({
-        studentId: lesson.studentId,
-        studentName: lesson.studentName,
-        teacherEmail: lesson.teacherEmail,
-        amount: fee,
-        date: lesson.date,
-        status: 'alındı',
-        description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
+        studentId: lesson.studentId, studentName: lesson.studentName,
+        teacherEmail: lesson.teacherEmail, amount: fee, date: lesson.date,
+        status: 'alındı', description: `${lesson.subject || 'Ders'} - ${lesson.date}`,
         month: lesson.date?.slice(0, 7),
       });
     }
@@ -86,11 +82,7 @@ export default function TeacherLessons() {
 
   const markUnpaid = async (lesson) => {
     const paid = payments.find(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'alındı');
-    if (paid) {
-      // Geri al: bekliyor'a döndür
-      await base44.entities.Payment.update(paid.id, { status: 'bekliyor' });
-      loadData();
-    }
+    if (paid) { await base44.entities.Payment.update(paid.id, { status: 'bekliyor' }); loadData(); }
   };
 
   const getLessonFee = (lesson) => {
@@ -99,13 +91,8 @@ export default function TeacherLessons() {
     return student?.feePerLesson || 0;
   };
 
-  const isLessonPaid = (lesson) => {
-    return payments.some(p =>
-      p.studentId === lesson.studentId &&
-      p.date === lesson.date &&
-      p.status === 'alındı'
-    );
-  };
+  const isLessonPaid = (lesson) =>
+    payments.some(p => p.studentId === lesson.studentId && p.date === lesson.date && p.status === 'alındı');
 
   const getDuration = (start, end) => {
     if (!start || !end) return null;
@@ -123,156 +110,199 @@ export default function TeacherLessons() {
     const fromOk = !dateFrom || l.date >= dateFrom;
     const toOk = !dateTo || l.date <= dateTo;
     return statusOk && studentOk && fromOk && toOk;
-  }).sort((a, b) => {
-    const da = new Date(`${a.date}T${a.startTime || '00:00'}`);
-    const db = new Date(`${b.date}T${b.startTime || '00:00'}`);
-    return da - db;
-  });
+  }).sort((a, b) => new Date(`${b.date}T${b.startTime||'00:00'}`) - new Date(`${a.date}T${a.startTime||'00:00'}`));
 
-  const selStyle = { padding: '0.5rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#ffffff', color: '#374151', fontSize: '0.82rem', fontWeight: '500', cursor: 'pointer', outline: 'none', appearance: 'none', paddingRight: '2rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.6rem center' };
+  // Tarihe göre grupla
+  const grouped = filtered.reduce((acc, lesson) => {
+    const key = lesson.date;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(lesson);
+    return acc;
+  }, {});
+
+  const selStyle = {
+    padding: '0.5rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb',
+    background: '#fff', color: '#374151', fontSize: '0.83rem', fontWeight: '500',
+    cursor: 'pointer', outline: 'none',
+  };
+
+  const hasFilter = statusFilter !== 'all' || studentFilter !== 'all' || dateFrom || dateTo;
 
   return (
-    <div style={{ padding: '2rem', minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: '#f8fafc' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Dersler</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{filtered.length} ders toplam</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.2rem' }}>Dersler</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{filtered.length} ders · {lessons.filter(l => l.status === 'tamamlandı').length} tamamlandı</p>
         </div>
         <button onClick={() => { setEditLesson(null); setShowModal(true); }}
-          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.7rem 1.4rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
           <Plus size={16} /> Ders Planla
         </button>
       </div>
 
-      {/* Filters */}
-      <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1rem 1.25rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+      {/* Özet kutucuklar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
+        {[
+          { label: 'Toplam Ders', value: lessons.length, color: '#6366f1', bg: '#eef2ff' },
+          { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#4338ca', bg: '#e0e7ff' },
+          { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#059669', bg: '#d1fae5' },
+          { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#dc2626', bg: '#fee2e2' },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} style={{ background: 'white', borderRadius: 14, padding: '1rem 1.25rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '0.4rem' }}>{label}</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: '800', color }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filtreler */}
+      <div style={{ background: '#fff', borderRadius: '14px', padding: '0.85rem 1.25rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.82rem', fontWeight: '600' }}>
           <Filter size={14} /> Filtre:
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={selStyle}>
-          <option value="all">Tüm Durumlar</option>
-          <option value="planlandı">Planlandı</option>
-          <option value="tamamlandı">Tamamlandı</option>
-          <option value="iptal">İptal</option>
-        </select>
+        {/* Status toggle */}
+        <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: '0.2rem', gap: '0.1rem' }}>
+          {[['all','Tümü'],['planlandı','Planlandı'],['tamamlandı','Tamamlandı'],['iptal','İptal']].map(([v,l]) => (
+            <button key={v} onClick={() => setStatusFilter(v)}
+              style={{ padding: '0.35rem 0.75rem', borderRadius: 8, border: 'none', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s', background: statusFilter === v ? 'white' : 'transparent', color: statusFilter === v ? '#111827' : '#9ca3af', boxShadow: statusFilter === v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
+              {l}
+            </button>
+          ))}
+        </div>
         <select value={studentFilter} onChange={e => setStudentFilter(e.target.value)} style={selStyle}>
           <option value="all">Tüm Öğrenciler</option>
           {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-          style={{ ...selStyle, paddingRight: '0.85rem', backgroundImage: 'none' }} />
-        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-          style={{ ...selStyle, paddingRight: '0.85rem', backgroundImage: 'none' }} />
-        {(statusFilter !== 'all' || studentFilter !== 'all' || dateFrom || dateTo) && (
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={selStyle} />
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={selStyle} />
+        {hasFilter && (
           <button onClick={() => { setStatusFilter('all'); setStudentFilter('all'); setDateFrom(''); setDateTo(''); }}
-            style={{ padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer', fontWeight: '600' }}>
-            Temizle
+            style={{ padding: '0.45rem 0.85rem', borderRadius: '10px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer', fontWeight: '600' }}>
+            ✕ Temizle
           </button>
         )}
       </div>
 
-      {/* Lesson List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
-            <BookOpen size={36} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-            <p>Ders kaydı bulunamadı</p>
-          </div>
-        )}
-        {filtered.map(lesson => {
-          const isPaid = isLessonPaid(lesson);
-          const fee = getLessonFee(lesson);
-          const duration = getDuration(lesson.startTime, lesson.endTime);
-          const student = students.find(s => s.id === lesson.studentId);
-          const parentPhone = student?.parentPhone;
-          const parentName = student?.parentName;
-          const isScheduled = lesson.status === 'planlandı';
-          const isCompleted = lesson.status === 'tamamlandı';
-          const isCancelled = lesson.status === 'iptal';
+      {/* Ders listesi — tarihe göre gruplu */}
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+          <BookOpen size={40} style={{ margin: '0 auto 1rem', opacity: 0.25 }} />
+          <p style={{ fontWeight: '600', fontSize: '1rem' }}>Ders kaydı bulunamadı</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {Object.entries(grouped).sort(([a],[b]) => b.localeCompare(a)).map(([date, dayLessons]) => {
+            let dayLabel = '';
+            try {
+              const d = parseISO(date);
+              dayLabel = isToday(d) ? 'Bugün' : format(d, 'd MMMM yyyy, EEEE', { locale: tr });
+            } catch {}
 
-          let dateStr = '';
-          try { dateStr = format(parseISO(lesson.date), 'd MMM', { locale: tr }); } catch {}
-
-          return (
-            <div key={lesson.id} style={{ background: '#ffffff', borderRadius: '14px', border: '1px solid #f1f5f9', padding: '1.1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', flexWrap: 'wrap' }}>
-              {/* Date/Time */}
-              <div style={{ minWidth: '52px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '500', textTransform: 'capitalize' }}>{dateStr}</div>
-                <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1e1b4b', marginTop: '0.1rem' }}>{lesson.startTime?.slice(0, 5)}</div>
-              </div>
-
-              {/* Student + info */}
-              <div style={{ flex: 1, minWidth: '160px' }}>
-                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>{lesson.studentName}</div>
-                <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.15rem' }}>
-                  {[lesson.subject, duration && `${duration}`, fee > 0 && `₺${fee}`].filter(Boolean).join(' · ')}
+            return (
+              <div key={date}>
+                {/* Tarih başlığı */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div style={{ color: isToday(parseISO(date)) ? '#4f46e5' : '#374151', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{dayLabel}</div>
+                  <div style={{ flex: 1, height: 1, background: '#f1f5f9' }} />
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{dayLessons.length} ders</div>
                 </div>
-                {parentPhone && (
-                  <a href={`tel:${parentPhone}`} style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '600', textDecoration: 'none', marginTop: '0.2rem', display: 'inline-block' }}>
-                    📞 {parentPhone}{parentName ? ` (${parentName})` : ''}
-                  </a>
-                )}
-              </div>
 
-              {/* Badges */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {/* Status badge */}
-                <span style={{
-                  fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px',
-                  background: isScheduled ? '#e0e7ff' : isCompleted ? '#d1fae5' : '#fee2e2',
-                  color: isScheduled ? '#4338ca' : isCompleted ? '#065f46' : '#b91c1c',
-                }}>
-                  {isScheduled ? 'planlandı' : isCompleted ? 'tamamlandı' : 'iptal'}
-                </span>
-                {/* Payment badge */}
-                {!isCancelled && (
-                  <span style={{
-                    fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.65rem', borderRadius: '8px',
-                    background: isPaid ? '#d1fae5' : '#fef3c7',
-                    color: isPaid ? '#065f46' : '#92400e',
-                  }}>
-                    {isPaid ? 'ödendi' : 'ödenmedi'}
-                  </span>
-                )}
-              </div>
+                {/* O güne ait dersler */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {dayLessons.map(lesson => {
+                    const isPaid = isLessonPaid(lesson);
+                    const fee = getLessonFee(lesson);
+                    const duration = getDuration(lesson.startTime, lesson.endTime);
+                    const student = students.find(s => s.id === lesson.studentId);
+                    const isScheduled = lesson.status === 'planlandı';
+                    const isCompleted = lesson.status === 'tamamlandı';
+                    const isCancelled = lesson.status === 'iptal';
+                    const sc = STATUS_CONFIG[lesson.status] || STATUS_CONFIG['planlandı'];
+                    const isExpanded = expandedId === lesson.id;
 
-              {/* Actions */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', flexWrap: 'wrap' }}>
-                {isScheduled && (
-                  <>
-                    <ActionBtn icon={<CheckCircle size={13} />} label="Tamamlandı" color="#059669" onClick={() => markDone(lesson)} />
-                    <ActionBtn icon={<XCircle size={13} />} label="İptal" color="#dc2626" onClick={() => markCancel(lesson)} />
-                  </>
-                )}
-                {isCompleted && (
-                  <>
-                    <ActionBtn label="Tamamlanmadı" color="#6b7280" onClick={() => markUndone(lesson)} />
-                    <ActionBtn icon={<ClipboardList size={13} />} label="Değerlendir" color="#7c3aed" onClick={() => setReportLesson(lesson)} />
-                  </>
-                )}
-                {!isPaid && !isCancelled && (
-                  <ActionBtn label="Ödendi İşaretle" color="#4f46e5" onClick={() => markPaid(lesson)} />
-                )}
-                {isPaid && !isCancelled && (
-                  <ActionBtn label="Ödenmedi" color="#dc2626" onClick={() => markUnpaid(lesson)} />
-                )}
-                <button style={{ background: 'none', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.3rem' }}
-                  title="Not ekle"><MessageCircle size={15} /></button>
-                <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#6b7280" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                    return (
+                      <div key={lesson.id} style={{ background: 'white', borderRadius: 16, border: `1.5px solid ${isExpanded ? '#c7d2fe' : '#f1f5f9'}`, boxShadow: isExpanded ? '0 4px 16px rgba(99,102,241,0.1)' : '0 1px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s', overflow: 'hidden' }}>
+                        {/* Ana satır */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', cursor: 'pointer', flexWrap: 'wrap' }}
+                          onClick={() => setExpandedId(isExpanded ? null : lesson.id)}>
 
-      {reportLesson && (
-        <LessonReportModal
-          lesson={reportLesson}
-          onClose={() => setReportLesson(null)}
-          onSaved={loadData}
-        />
+                          {/* Sol renk çizgisi */}
+                          <div style={{ width: 4, height: 44, borderRadius: 4, background: sc.dot, flexShrink: 0 }} />
+
+                          {/* Saat */}
+                          <div style={{ textAlign: 'center', minWidth: 44 }}>
+                            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#1e1b4b', lineHeight: 1 }}>{lesson.startTime?.slice(0, 5)}</div>
+                            {duration && <div style={{ fontSize: '0.65rem', color: '#9ca3af', marginTop: '0.15rem' }}>{duration}</div>}
+                          </div>
+
+                          {/* Öğrenci + konu */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '1rem', fontWeight: '700', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lesson.studentName}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.1rem' }}>
+                              {[lesson.subject, fee > 0 && `₺${fee.toLocaleString('tr-TR')}`].filter(Boolean).join(' · ')}
+                            </div>
+                          </div>
+
+                          {/* Badge'ler */}
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.25rem 0.65rem', borderRadius: 20, background: sc.bg, color: sc.color }}>
+                              {sc.label}
+                            </span>
+                            {!isCancelled && (
+                              <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.25rem 0.65rem', borderRadius: 20, background: isPaid ? '#d1fae5' : '#fef9c3', color: isPaid ? '#065f46' : '#854d0e' }}>
+                                {isPaid ? '✓ Ödendi' : 'Bekliyor'}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Expand ikonu */}
+                          <ChevronDown size={16} color="#9ca3af" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                        </div>
+
+                        {/* Genişletilmiş aksiyonlar */}
+                        {isExpanded && (
+                          <div style={{ padding: '0.75rem 1rem 1rem', borderTop: '1px solid #f3f4f6', background: '#fafafa', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                            {student?.parentPhone && (
+                              <a href={`tel:${student.parentPhone}`}
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.45rem 0.85rem', borderRadius: 10, background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a', fontSize: '0.82rem', fontWeight: '600', textDecoration: 'none' }}>
+                                <Phone size={13} /> {student.parentPhone}
+                              </a>
+                            )}
+                            <div style={{ flex: 1 }} />
+                            {isScheduled && (
+                              <>
+                                <ActionBtn icon={<CheckCircle size={13} />} label="Tamamlandı" color="#059669" bg="#d1fae5" onClick={() => markDone(lesson)} />
+                                <ActionBtn icon={<XCircle size={13} />} label="İptal Et" color="#dc2626" bg="#fee2e2" onClick={() => markCancel(lesson)} />
+                              </>
+                            )}
+                            {isCompleted && (
+                              <>
+                                <ActionBtn label="Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => markUndone(lesson)} />
+                                <ActionBtn icon={<ClipboardList size={13} />} label="Değerlendir" color="#7c3aed" bg="#ede9fe" onClick={() => setReportLesson(lesson)} />
+                              </>
+                            )}
+                            {!isPaid && !isCancelled && (
+                              <ActionBtn label="Ödendi İşaretle" color="#4f46e5" bg="#eef2ff" onClick={() => markPaid(lesson)} />
+                            )}
+                            {isPaid && !isCancelled && (
+                              <ActionBtn label="Ödemeyi Geri Al" color="#dc2626" bg="#fee2e2" onClick={() => markUnpaid(lesson)} />
+                            )}
+                            <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#374151" bg="#f3f4f6" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
+
+      {reportLesson && <LessonReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} onSaved={loadData} />}
       {showModal && (
         <LessonModal
           students={students}
@@ -286,19 +316,19 @@ export default function TeacherLessons() {
   );
 }
 
-function ActionBtn({ icon, label, color, onClick }) {
+function ActionBtn({ icon, label, color, bg, onClick }) {
   const [hover, setHover] = React.useState(false);
   return (
     <button onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        background: hover ? `${color}15` : 'none',
-        border: 'none', color, cursor: 'pointer',
-        padding: '0.3rem 0.55rem', borderRadius: '8px',
-        fontSize: '0.78rem', fontWeight: '600',
-        display: 'flex', alignItems: 'center', gap: '0.25rem',
-        transition: 'background 0.15s', whiteSpace: 'nowrap',
+        background: hover ? color : bg,
+        border: 'none', color: hover ? 'white' : color,
+        cursor: 'pointer', padding: '0.45rem 0.9rem',
+        borderRadius: '10px', fontSize: '0.82rem', fontWeight: '700',
+        display: 'flex', alignItems: 'center', gap: '0.35rem',
+        transition: 'all 0.15s', whiteSpace: 'nowrap',
       }}>
       {icon}{label}
     </button>
