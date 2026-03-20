@@ -84,33 +84,77 @@ export default function TeacherDashboard() {
   const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   // ── Now Brief ────────────────────────────────────────────────
-  const getBriefing = () => {
-    const hour = new Date().getHours();
-    const firstName = ''; // kullanıcı adı varsa buraya
-    const todayCount = todayLessons.length;
-    const firstLesson = todayLessons.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))[0];
-    const unpaidCount = studentBalances.length;
-    const tomorrowLessons = lessons.filter(l => {
-      try { return isTomorrow(parseISO(l.date)) && l.status !== 'iptal'; } catch { return false; }
-    });
+  const [briefSlide, setBriefSlide] = React.useState(0);
+  const [briefVisible, setBriefVisible] = React.useState(true);
 
-    if (hour >= 5 && hour < 12) {
-      // Sabah
-      if (todayCount === 0) return { greeting: 'Günaydın! ☀️', message: 'Bugün planlanmış dersiniz yok.', sub: unpaidCount > 0 ? `${unpaidCount} öğrencinizin bekleyen ödemesi var.` : 'Harika bir gün olsun!', color: '#f97316', gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)' };
-      return { greeting: 'Günaydın! ☀️', message: `Bugün ${todayCount} dersiniz var${firstLesson ? `, ilki saat ${firstLesson.startTime?.slice(0,5)}'de` : ''}.`, sub: unpaidCount > 0 ? `${unpaidCount} öğrencinizin bekleyen ödemesi bulunuyor.` : 'Tüm ödemeler güncel, harika!', color: '#f97316', gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)' };
-    } else if (hour >= 12 && hour < 18) {
-      // Öğle
-      const remaining = todayLessons.filter(l => (l.startTime || '') > format(new Date(), 'HH:mm'));
-      if (remaining.length === 0) return { greeting: 'İyi öğleler! 🌤', message: 'Bugünkü derslerinizi tamamladınız.', sub: tomorrowLessons.length > 0 ? `Yarın ${tomorrowLessons.length} dersiniz var.` : 'Yarın için planlanmış ders yok.', color: '#6366f1', gradient: 'linear-gradient(135deg, #eef2ff, #e0e7ff)' };
-      return { greeting: 'İyi öğleler! 🌤', message: `Bugün ${remaining.length} dersiniz kaldı.`, sub: `Bu ay toplam ${completedThisMonth} ders tamamladınız.`, color: '#6366f1', gradient: 'linear-gradient(135deg, #eef2ff, #e0e7ff)' };
-    } else {
-      // Akşam
-      const completedToday = todayLessons.filter(l => l.status === 'tamamlandı').length;
-      return { greeting: 'İyi akşamlar! 🌙', message: completedToday > 0 ? `Bugün ${completedToday} ders tamamladınız.` : 'Bugünkü dersler bitti.', sub: tomorrowLessons.length > 0 ? `Yarın ${tomorrowLessons.length} dersiniz var, hazır olun!` : 'Yarın için planlanmış ders yok, dinlenin!', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #f5f3ff, #ede9fe)' };
-    }
-  };
+  const tomorrowLessons = lessons.filter(l => {
+    try { return isTomorrow(parseISO(l.date)) && l.status !== 'iptal'; } catch { return false; }
+  });
 
-  const briefing = getBriefing();
+  const completedToday = todayLessons.filter(l => l.status === 'tamamlandı').length;
+  const remainingToday = todayLessons.filter(l => (l.startTime || '') > format(new Date(), 'HH:mm') && l.status !== 'iptal');
+  const firstLesson = [...todayLessons].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))[0];
+  const nextLesson = remainingToday[0];
+  const thisWeekLessons = lessons.filter(l => {
+    try {
+      const d = parseISO(l.date);
+      const now = new Date();
+      const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1);
+      const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+      return d >= weekStart && d <= weekEnd && l.status === 'tamamlandı';
+    } catch { return false; }
+  }).length;
+
+  const hour = new Date().getHours();
+  const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
+
+  const greetings = { morning: 'Günaydın', afternoon: 'İyi Öğleler', evening: 'İyi Akşamlar' };
+  const colors = { morning: { primary: '#f97316', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #1a1035 100%)', accent: '#fb923c' }, afternoon: { primary: '#6366f1', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f1035 100%)', accent: '#818cf8' }, evening: { primary: '#8b5cf6', gradient: 'linear-gradient(135deg, #0f0f1a 0%, #1a1035 60%, #1a0f2e 100%)', accent: '#a78bfa' } };
+  const theme = colors[timeOfDay];
+
+  const briefCards = [
+    {
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      title: 'Bugün',
+      main: todayLessons.length === 0 ? 'Ders yok' : `${todayLessons.length} ders`,
+      detail: nextLesson ? `Sıradaki: ${nextLesson.startTime?.slice(0,5)} — ${nextLesson.studentName}` : completedToday > 0 ? `${completedToday} ders tamamlandı` : firstLesson ? `İlk ders ${firstLesson.startTime?.slice(0,5)}'de` : 'Bugün ders planlanmamış',
+    },
+    {
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+      title: 'Öğrenciler',
+      main: `${students.length} aktif`,
+      detail: studentBalances.length > 0 ? `${studentBalances.length} öğrencide bekleyen ödeme` : 'Tüm ödemeler güncel',
+    },
+    {
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+      title: 'Bu Hafta',
+      main: `${thisWeekLessons} ders`,
+      detail: `Bu ay ${completedThisMonth} ders tamamlandı`,
+    },
+    {
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+      title: 'Bekleyen',
+      main: `₺${totalUnpaid.toLocaleString('tr-TR')}`,
+      detail: studentBalances.length > 0 ? `${studentBalances.length} öğrenciden tahsil edilecek` : 'Bekleyen ödeme yok',
+    },
+    {
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+      title: 'Yarın',
+      main: tomorrowLessons.length === 0 ? 'Ders yok' : `${tomorrowLessons.length} ders`,
+      detail: tomorrowLessons[0] ? `İlk ders: ${tomorrowLessons.sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''))[0].startTime?.slice(0,5)} — ${tomorrowLessons[0].studentName}` : 'Dinlenme günü!',
+    },
+  ];
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setBriefVisible(false);
+      setTimeout(() => {
+        setBriefSlide(s => (s + 1) % briefCards.length);
+        setBriefVisible(true);
+      }, 400);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [briefCards.length]);
   const avatarColors = ['#fbbf24', '#34d399', '#60a5fa', '#f87171', '#a78bfa', '#fb923c'];
   const getAvatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || '#fbbf24';
 
@@ -136,18 +180,54 @@ export default function TeacherDashboard() {
       </div>
 
       {/* ── Now Brief ────────────────────────────────────── */}
-      <div style={{ background: briefing.gradient, borderRadius: 20, padding: '1.5rem 1.75rem', marginBottom: '1.5rem', border: `1.5px solid ${briefing.color}22`, position: 'relative', overflow: 'hidden' }}>
-        {/* Dekoratif daire */}
-        <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: briefing.color + '12' }} />
-        <div style={{ position: 'absolute', right: 40, bottom: -40, width: 100, height: 100, borderRadius: '50%', background: briefing.color + '08' }} />
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: briefing.color, animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: '700', color: briefing.color, textTransform: 'uppercase', letterSpacing: '1px' }}>Günün Özeti</span>
+      <div style={{ background: theme.gradient, borderRadius: 20, padding: '1.5rem 1.75rem', marginBottom: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: `0 8px 32px ${theme.primary}30` }}>
+        <style>{`
+          @keyframes briefFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes briefFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+          @keyframes shimmer { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+          @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        `}</style>
+
+        {/* Dekoratif arka plan */}
+        <div style={{ position: 'absolute', right: -40, top: -40, width: 180, height: 180, borderRadius: '50%', background: theme.primary + '18', animation: 'float 6s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', right: 60, bottom: -50, width: 120, height: 120, borderRadius: '50%', background: theme.accent + '12', animation: 'float 8s ease-in-out infinite reverse' }} />
+        <div style={{ position: 'absolute', left: -20, bottom: -30, width: 100, height: 100, borderRadius: '50%', background: theme.primary + '10' }} />
+
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          {/* Sol: Selam + saat */}
+          <div style={{ flexShrink: 0, minWidth: 200 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'shimmer 2s ease-in-out infinite' }} />
+              <span style={{ fontSize: '0.68rem', fontWeight: '700', color: theme.accent, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Günün Özeti</span>
+            </div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem', lineHeight: 1.2 }}>
+              {greetings[timeOfDay]}!
+            </h2>
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>
+              {format(new Date(), 'EEEE, d MMMM', { locale: tr })} · {format(new Date(), 'HH:mm')}
+            </p>
           </div>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#111827', marginBottom: '0.4rem' }}>{briefing.greeting}</h2>
-          <p style={{ fontSize: '0.95rem', color: '#374151', fontWeight: '600', marginBottom: '0.25rem' }}>{briefing.message}</p>
-          <p style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{briefing.sub}</p>
+
+          {/* Dikey ayraç */}
+          <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+
+          {/* Sağ: Animasyonlu slide */}
+          <div style={{ flex: 1, animation: briefVisible ? 'briefFadeIn 0.4s ease forwards' : 'briefFadeOut 0.4s ease forwards' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              {briefCards[briefSlide].icon}
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{briefCards[briefSlide].title}</span>
+            </div>
+            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', marginBottom: '0.2rem', lineHeight: 1.2 }}>{briefCards[briefSlide].main}</div>
+            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}>{briefCards[briefSlide].detail}</div>
+          </div>
+
+          {/* Nokta göstergeler */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
+            {briefCards.map((_, i) => (
+              <div key={i} onClick={() => { setBriefVisible(false); setTimeout(() => { setBriefSlide(i); setBriefVisible(true); }, 300); }}
+                style={{ width: i === briefSlide ? 6 : 4, height: i === briefSlide ? 20 : 6, borderRadius: 10, background: i === briefSlide ? theme.accent : 'rgba(255,255,255,0.25)', cursor: 'pointer', transition: 'all 0.3s ease' }} />
+            ))}
+          </div>
         </div>
       </div>
 
