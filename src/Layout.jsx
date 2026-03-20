@@ -10,7 +10,7 @@ const TEACHER_NAV = [
   { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
+  { label: 'Veli İletişimi', icon: MessageCircle, page: 'TeacherMessages' },
 ];
 
 const PARENT_NAV = [
