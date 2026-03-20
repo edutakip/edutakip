@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Calculator } from 'lucide-react';
 
@@ -113,6 +113,7 @@ export default function Layout({ children, currentPageName }) {
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const [navigating, setNavigating] = useState(false);
   const prevPage = useRef(currentPageName);
 
@@ -126,6 +127,15 @@ export default function Layout({ children, currentPageName }) {
       return () => clearTimeout(t);
     }
   }, [currentPageName]);
+
+  const handleNav = (e, page) => {
+    if (page === currentPageName) return;
+    e.preventDefault();
+    setNavigating(true);
+    setTimeout(() => {
+      navigate(createPageUrl(page));
+    }, 900);
+  };
 
   React.useEffect(() => {
     import('@/api/base44Client').then(({ base44 }) => {
@@ -185,6 +195,7 @@ export default function Layout({ children, currentPageName }) {
           const isActive = item.page === currentPageName;
           return (
             <Link key={i} to={createPageUrl(item.page)}
+              onClick={(e) => handleNav(e, item.page)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.6rem 0.75rem', borderRadius: '10px',
@@ -242,6 +253,7 @@ export default function Layout({ children, currentPageName }) {
             const isActive = item.page === currentPageName;
             return (
               <Link key={i} to={createPageUrl(item.page)}
+                onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
