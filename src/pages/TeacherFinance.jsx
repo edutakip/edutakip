@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
@@ -182,7 +183,7 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
     }
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: visible ? 'rgba(17,24,39,0.55)' : 'rgba(17,24,39,0)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: visible ? 'blur(4px)' : 'blur(0px)', transition: 'background 0.22s ease, backdrop-filter 0.22s ease' }} onClick={handleClose}>
       <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.18)', overflow: 'hidden', transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)', opacity: visible ? 1 : 0, transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0' }}>
@@ -196,7 +197,8 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
           {content()}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
