@@ -211,18 +211,7 @@ export default function TeacherDashboard() {
           {/* Dikey ayraç */}
           <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
 
-          {/* Sağ: Animasyonlu slide */}
-          <div style={{ flex: 1, animation: briefVisible ? 'briefFadeIn 0.4s ease forwards' : 'briefFadeOut 0.4s ease forwards' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              {briefCards[briefSlide].icon}
-              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{briefCards[briefSlide].title}</span>
-            </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', marginBottom: '0.2rem', lineHeight: 1.2 }}>{briefCards[briefSlide].main}</div>
-            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}>{briefCards[briefSlide].detail}</div>
-          </div>
 
-          {/* Dikey ayraç */}
-          <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
 
           {/* Sağ: Özet metin */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -236,6 +225,19 @@ export default function TeacherDashboard() {
                 ? `${studentBalances.length} öğrencinizin bekleyen ödemesi var.`
                 : 'Tüm ödemeler güncel, harika!'}
             </p>
+          </div>
+
+          {/* Dikey ayraç */}
+          <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+
+          {/* Animasyonlu kart */}
+          <div style={{ minWidth: 220, animation: briefVisible ? 'briefFadeIn 0.4s ease forwards' : 'briefFadeOut 0.4s ease forwards' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+              {briefCards[briefSlide].icon}
+              <span style={{ fontSize: '0.68rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{briefCards[briefSlide].title}</span>
+            </div>
+            <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'white', marginBottom: '0.15rem', lineHeight: 1.2 }}>{briefCards[briefSlide].main}</div>
+            <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', fontWeight: '500' }}>{briefCards[briefSlide].detail}</div>
           </div>
 
           {/* Nokta göstergeler */}
