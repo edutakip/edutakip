@@ -8,9 +8,9 @@ const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
 const RATING_LABELS = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
 
 const CHOICES = {
-  understood:   [{ v: 'tam',    l: 'Tam Anladı',        icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',     icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli',    icon: '🔁' }],
-  participation:[{ v: 'aktif',  l: 'Aktif Katılım',     icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',      icon: '😐' }, { v: 'pasif',  l: 'Pasif',             icon: '😶' }],
-  motivation:   [{ v: 'yuksek',l: 'Yüksek',             icon: '🔥' }, { v: 'normal', l: 'Normal',            icon: '👍' }, { v: 'dusuk',  l: 'Düşük',             icon: '😞' }],
+  understood:   [{ v: 'tam',    l: 'Tam Anladı',     icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',  icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli', icon: '🔁' }],
+  participation:[{ v: 'aktif',  l: 'Aktif Katılım',  icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',   icon: '😐' }, { v: 'pasif',  l: 'Pasif',          icon: '😶' }],
+  motivation:   [{ v: 'yuksek',l: 'Yüksek',          icon: '🔥' }, { v: 'normal', l: 'Normal',          icon: '👍' }, { v: 'dusuk',  l: 'Düşük',          icon: '😞' }],
 };
 
 function ChoiceGroup({ label, field, value, onChange }) {
@@ -79,7 +79,6 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
           rating: r.rating || 4,
           attendance: r.attendance || 'katıldı',
           challenge: r.improvements || '',
-          generalNote: r.generalNote || '',
         }));
         if (r.generalNote) {
           setGeneratedReport(r.generalNote);
@@ -175,13 +174,18 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
 
     setLoading(false);
 
-    const students = await base44.entities.Student.filter({ id: lesson.studentId });
-    const student = students[0];
-    const phone = student?.parentPhone || lesson.parentPhone;
-
+    const phone = lesson.parentPhone;
     if (phone) {
       setWhatsapp({ phone, message: generatedReport });
     } else {
+      try {
+        const students = await base44.entities.Student.filter({ id: lesson.studentId });
+        const studentPhone = students[0]?.parentPhone;
+        if (studentPhone) {
+          setWhatsapp({ phone: studentPhone, message: generatedReport });
+          return;
+        }
+      } catch (e) {}
       onSaved?.();
       onClose();
     }
