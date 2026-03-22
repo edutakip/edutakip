@@ -124,18 +124,8 @@ Raporu şu formatta yaz:
 
 Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akıcı paragraflar halinde yaz.`;
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await response.json();
-      const text = data.content?.[0]?.text || '';
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      const text = typeof result === 'string' ? result : result?.text || result?.content || JSON.stringify(result);
       setGeneratedReport(text);
       setStep(3);
     } catch (err) {
