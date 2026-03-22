@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { X, Loader2, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
-const STEPS = ['Ders Bilgisi', 'Sayfalar', 'Performans', 'Detaylar', 'Rapor'];
+const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
 
 const RATING_LABELS = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
 
@@ -65,7 +65,6 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   const [generatedReport, setGeneratedReport] = useState('');
   const [existing, setExisting] = useState(null);
   const [whatsapp, setWhatsapp] = useState(null);
-  const [pageImages, setPageImages] = useState([]); // base64 resimler
 
   useEffect(() => {
     base44.entities.LessonReport.filter({ lessonId: lesson.id }).then(reports => {
@@ -196,9 +195,8 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
 
   const canNext = () => {
     if (step === 0) return form.topics.trim() && form.attendance;
-    if (step === 1) return true; // Sayfalar opsiyonel
-    if (step === 2) return form.understood && form.participation && form.motivation && form.rating;
-    if (step === 3) return true;
+    if (step === 1) return form.understood && form.participation && form.motivation && form.rating;
+    if (step === 2) return true;
     return true;
   };
 
@@ -259,45 +257,8 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
             </>
           )}
 
-          {/* Step 1: Sayfalar */}
+          {/* Step 1: Performans */}
           {step === 1 && (
-            <>
-              <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1rem', border: '1.5px dashed #e5e7eb', textAlign: 'center' }}>
-                <label htmlFor="pageImgInput" style={{ cursor: 'pointer' }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📷</div>
-                  <div style={{ fontWeight: 700, color: '#374151', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Sayfa Fotoğrafı Ekle</div>
-                  <div style={{ color: '#9ca3af', fontSize: '0.78rem' }}>İşlenen sayfaların fotoğraflarını ekleyin (opsiyonel). AI rapor yazarken bu sayfaları da analiz eder.</div>
-                  <input id="pageImgInput" type="file" accept="image/*" multiple style={{ display: 'none' }}
-                    onChange={async e => {
-                      const files = Array.from(e.target.files);
-                      const b64s = await Promise.all(files.map(f => new Promise((res) => {
-                        const reader = new FileReader();
-                        reader.onload = ev => res(ev.target.result);
-                        reader.readAsDataURL(f);
-                      })));
-                      setPageImages(prev => [...prev, ...b64s].slice(0, 4));
-                    }} />
-                </label>
-              </div>
-              {pageImages.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem' }}>{pageImages.length} fotoğraf eklendi</div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {pageImages.map((img, i) => (
-                      <div key={i} style={{ position: 'relative' }}>
-                        <img src={img} alt={`Sayfa ${i+1}`} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1.5px solid #e5e7eb' }} />
-                        <button onClick={() => setPageImages(prev => prev.filter((_, pi) => pi !== i))}
-                          style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: 'white', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Step 2: Performans */}
-          {step === 2 && (
             <>
               <StarRating value={form.rating} onChange={v => u('rating', v)} />
               <ChoiceGroup label="Konuyu Anladı mı?" field="understood" value={form.understood} onChange={v => u('understood', v)} />
@@ -306,8 +267,8 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
             </>
           )}
 
-          {/* Step 3: Detaylar */}
-          {step === 3 && (
+          {/* Step 2: Detaylar */}
+          {step === 2 && (
             <>
               <div>
                 <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Zorlandığı Nokta <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
@@ -327,8 +288,8 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
             </>
           )}
 
-          {/* Step 4: Rapor */}
-          {step === 4 && (
+          {/* Step 3: Rapor */}
+          {step === 3 && (
             <>
               <div style={{ background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', borderRadius: 14, padding: '1rem', border: '1.5px solid #c7d2fe', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={18} color='#4f46e5' />
@@ -352,14 +313,14 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
             </button>
           ) : <div />}
 
-          {step < 3 && (
+          {step < 2 && (
             <button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
               style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: canNext() ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#e5e7eb', color: canNext() ? 'white' : '#9ca3af', fontWeight: 700, fontSize: '0.85rem', cursor: canNext() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               İleri <ChevronRight size={15} />
             </button>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <button onClick={generateReport} disabled={generating}
               style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
               {generating ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={15} />}
@@ -367,7 +328,7 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
             </button>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <button onClick={handleSave} disabled={loading || !generatedReport}
               style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
               {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
