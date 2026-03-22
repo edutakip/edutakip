@@ -273,7 +273,7 @@ export default function TeacherCalendar() {
     .slice(0, 6);
 
   return (
-    <div style={{ padding: '1.75rem', minHeight: '100vh', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div style={{ padding: '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
