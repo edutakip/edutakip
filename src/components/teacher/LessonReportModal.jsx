@@ -125,32 +125,7 @@ Raporu şu formatta yaz:
 
 Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akıcı paragraflar halinde yaz.`;
 
-      // Önce resimleri analiz et (varsa), sonra rapor oluştur
-      let imageContext = '';
-      if (pageImages.length > 0) {
-        try {
-          for (const img of pageImages) {
-            const imgResult = await base44.integrations.Core.InvokeLLM({
-              prompt: 'Bu ders kitabı sayfasında ne görüyorsun? Kısaca Türkçe özetle: konu başlıkları, alıştırma türleri, görseller. 2-3 cümle yeterli.',
-              image_url: img,
-            });
-            const imgText = typeof imgResult === 'string' ? imgResult : imgResult?.text || '';
-            if (imgText) imageContext += `
-Sayfa içeriği: ${imgText}`;
-          }
-        } catch (e) {
-          console.log('Resim analizi başarısız, devam ediliyor:', e);
-        }
-      }
-
-      const finalPrompt = imageContext
-        ? prompt + `
-
-Ders sayfası içerikleri:
-${imageContext}`
-        : prompt;
-
-      const result = await base44.integrations.Core.InvokeLLM({ prompt: finalPrompt });
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const text = typeof result === 'string' ? result : result?.text || result?.content || JSON.stringify(result);
       setGeneratedReport(text);
       setStep(3);
