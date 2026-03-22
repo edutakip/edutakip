@@ -350,7 +350,7 @@ export default function TeacherDashboard() {
         const isAchieved = completedThisMonth >= monthlyGoal;
 
         return (
-          <div style={{ background: 'white', borderRadius: 20, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginTop: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
               <div>
                 <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '0.2rem' }}>Aylık Hedef Takibi</h2>
