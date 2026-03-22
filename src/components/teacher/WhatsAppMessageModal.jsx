@@ -1,167 +1,357 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, Send, BookmarkPlus, ChevronDown, Trash2, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { X, Loader2, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
+import WhatsAppMessageModal from './WhatsAppMessageModal';
 
-export default function WhatsAppMessageModal({ phone, message: initialMessage, templateType = 'genel', onClose }) {
-  const [message, setMessage] = useState(initialMessage);
-  const [templates, setTemplates] = useState([]);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [saveName, setSaveName] = useState('');
-  const [showSaveForm, setShowSaveForm] = useState(false);
-  const [saved, setSaved] = useState(false);
+const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
+
+const RATING_LABELS = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
+
+const CHOICES = {
+  understood:   [{ v: 'tam',    l: 'Tam Anladı',        icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',     icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli',    icon: '🔁' }],
+  participation:[{ v: 'aktif',  l: 'Aktif Katılım',     icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',      icon: '😐' }, { v: 'pasif',  l: 'Pasif',             icon: '😶' }],
+  motivation:   [{ v: 'yuksek',l: 'Yüksek',             icon: '🔥' }, { v: 'normal', l: 'Normal',            icon: '👍' }, { v: 'dusuk',  l: 'Düşük',             icon: '😞' }],
+};
+
+function ChoiceGroup({ label, field, value, onChange }) {
+  return (
+    <div>
+      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {CHOICES[field].map(opt => (
+          <button key={opt.v} onClick={() => onChange(opt.v)}
+            style={{ padding: '0.5rem 1rem', borderRadius: 10, border: `1.5px solid ${value === opt.v ? '#4f46e5' : '#e5e7eb'}`, background: value === opt.v ? '#eef2ff' : 'white', color: value === opt.v ? '#4338ca' : '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            {opt.icon} {opt.l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StarRating({ value, onChange }) {
+  return (
+    <div>
+      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Genel Performans Puanı</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+        {[1,2,3,4,5].map(n => (
+          <button key={n} onClick={() => onChange(n)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.1rem', fontSize: '1.75rem', lineHeight: 1, transition: 'transform 0.1s' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+            {n <= value ? '⭐' : '☆'}
+          </button>
+        ))}
+        {value > 0 && <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginLeft: '0.25rem' }}>{RATING_LABELS[value]}</span>}
+      </div>
+    </div>
+  );
+}
+
+export default function LessonReportModal({ lesson, onClose, onSaved }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({
+    topics: '',
+    understood: '',
+    participation: '',
+    motivation: '',
+    challenge: '',
+    homework: '',
+    nextGoal: '',
+    rating: 4,
+    attendance: 'katıldı',
+  });
+  const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generatedReport, setGeneratedReport] = useState('');
+  const [existing, setExisting] = useState(null);
+  const [whatsapp, setWhatsapp] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(me => {
-      base44.entities.MessageTemplate.filter({ teacherEmail: me.email }).then(setTemplates);
+    base44.entities.LessonReport.filter({ lessonId: lesson.id }).then(reports => {
+      if (reports.length > 0) {
+        const r = reports[0];
+        setExisting(r);
+        setForm(f => ({
+          ...f,
+          topics: r.topicsCovered || '',
+          homework: r.homework || '',
+          nextGoal: r.nextGoal || '',
+          rating: r.rating || 4,
+          attendance: r.attendance || 'katıldı',
+          challenge: r.improvements || '',
+          generalNote: r.generalNote || '',
+        }));
+        // Eski raporu yükleme — kullanıcı yeniden oluştursun
+      }
     });
-  }, []);
+  }, [lesson.id]);
 
-  const handleSend = () => {
-    const cleaned = phone.replace(/\D/g, '');
-    const formatted = cleaned.startsWith('0') ? '90' + cleaned.slice(1) : cleaned;
-    const normalizedMessage = message.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
-    // api.whatsapp.com emoji'leri daha iyi destekliyor
-    const url = 'https://api.whatsapp.com/send?phone=' + formatted + '&text=' + encodeURIComponent(normalizedMessage);
-    window.open(url, '_blank');
-    onClose();
+  const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const generateReport = async () => {
+    setGenerating(true);
+    try {
+      const understoodMap = { tam: 'tam olarak anladı', kismen: 'konuyu kısmen anladı', tekrar: 'konuyu tekrar gözden geçirmesi gerekiyor' };
+      const participationMap = { aktif: 'aktif bir katılım gösterdi', orta: 'orta düzeyde katılım gösterdi', pasif: 'derse pasif olarak katıldı' };
+      const motivationMap = { yuksek: 'yüksek', normal: 'normal', dusuk: 'düşük' };
+      const ratingStars = '⭐'.repeat(form.rating) + '☆'.repeat(5 - form.rating);
+
+      const prompt = `Sen deneyimli ve pedagojik açıdan güçlü bir özel öğretmensin. Aşağıdaki ders bilgilerine dayanarak veliye gönderilecek profesyonel, sıcak ve pedagojik bir ders değerlendirme raporu yaz.
+
+Ders Bilgileri:
+- Öğrenci: ${lesson.studentName}
+- Konu: ${lesson.subject || 'Belirtilmemiş'}
+- Tarih: ${lesson.date}
+- İşlenen Konular: ${form.topics}
+- Anlama Düzeyi: ${understoodMap[form.understood] || form.understood}
+- Katılım: ${participationMap[form.participation] || form.participation}
+- Motivasyon: ${motivationMap[form.motivation] || form.motivation} seviyedeydi
+- Performans Puanı: ${form.rating}/5 ${ratingStars}
+- Katılım Durumu: ${form.attendance}
+${form.challenge ? `- Zorlandığı Nokta: ${form.challenge}` : ''}
+${form.homework ? `- Verilen Ödev: ${form.homework}` : ''}
+${form.nextGoal ? `- Sonraki Ders Hedefi: ${form.nextGoal}` : ''}
+
+Raporu şu formatta yaz:
+1. Giriş cümlesi (bugünkü dersi özetle)
+2. Öğrencinin performansını ve katılımını açıkla
+3. Varsa zorlandığı noktayı pedagojik bir dille açıkla ve nasıl çalışacağını belirt
+4. Ödevi ve sonraki ders hedefini belirt (📚 ve ➡️ emojileriyle)
+5. Teşekkür cümlesiyle bitir
+
+Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akıcı paragraflar halinde yaz.
+
+ZORUNLU KURALLAR:
+- Asla [İsim], [Pozisyon], [Okul] gibi placeholder yazma
+- Saygılarımla satırından sonra hiçbir şey ekleme
+- Mesajı "Saygılarımla," ile bitir, imza ekleme`;
+
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      const text = typeof result === 'string' ? result : result?.text || result?.content || JSON.stringify(result);
+      setGeneratedReport(text);
+      setStep(3);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  const handleSaveTemplate = async () => {
-    if (!saveName.trim()) return;
+  const handleSave = async () => {
+    setLoading(true);
     const me = await base44.auth.me();
-    const newTpl = await base44.entities.MessageTemplate.create({
-      name: saveName.trim(),
-      content: message,
-      type: templateType,
+    const data = {
+      lessonId: lesson.id,
+      studentId: lesson.studentId,
+      studentName: lesson.studentName,
       teacherEmail: me.email,
-    });
-    setTemplates(t => [...t, newTpl]);
-    setSaveName('');
-    setShowSaveForm(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+      date: lesson.date,
+      subject: lesson.subject,
+      rating: form.rating,
+      attendance: form.attendance,
+      topicsCovered: form.topics,
+      generalNote: generatedReport,
+      improvements: form.challenge,
+      homework: form.homework,
+      nextGoal: form.nextGoal,
+    };
+
+    if (existing) {
+      await base44.entities.LessonReport.update(existing.id, data);
+    } else {
+      await base44.entities.LessonReport.create(data);
+    }
+
+    if (form.homework?.trim()) {
+      const existingHws = await base44.entities.Homework.filter({ lessonId: lesson.id });
+      if (existingHws.length > 0) {
+        await base44.entities.Homework.update(existingHws[0].id, { title: form.homework, description: form.homework });
+      } else {
+        await base44.entities.Homework.create({
+          lessonId: lesson.id, studentId: lesson.studentId,
+          studentName: lesson.studentName, teacherEmail: me.email,
+          title: form.homework, description: form.homework, status: 'verildi',
+        });
+      }
+    }
+
+    setLoading(false);
+
+    // Placeholder imzaları temizle
+    const cleanReport = generatedReport
+      .replace(/\[İsim\]/g, '').replace(/\[Pozisyon\]/g, '')
+      .replace(/\[Okul\/Öğretim Kurumu\]/g, '').replace(/\[Okul\]/g, '')
+      .replace(/\[İmza\]/g, '').replace(/\[Signature\]/g, '')
+      .replace(/\[\w+\]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+
+    const phone = lesson.parentPhone;
+    if (phone) {
+      setWhatsapp({ phone, message: cleanReport });
+    } else {
+      try {
+        const students = await base44.entities.Student.filter({ id: lesson.studentId });
+        const studentPhone = students[0]?.parentPhone;
+        if (studentPhone) {
+          setWhatsapp({ phone: studentPhone, message: cleanReport });
+          return;
+        }
+      } catch (e) {}
+      onSaved?.();
+      onClose();
+    }
   };
 
-  const handleDeleteTemplate = async (id, e) => {
-    e.stopPropagation();
-    await base44.entities.MessageTemplate.delete(id);
-    setTemplates(t => t.filter(x => x.id !== id));
+  const inp = {
+    width: '100%', background: '#f8fafc', border: '1.5px solid #e5e7eb',
+    borderRadius: 10, padding: '0.65rem 0.875rem', fontSize: '0.875rem',
+    color: '#111827', outline: 'none', boxSizing: 'border-box', resize: 'vertical',
   };
 
-  const handleLoadTemplate = (tpl) => {
-    setMessage(tpl.content);
-    setShowTemplates(false);
+  const canNext = () => {
+    if (step === 0) return form.topics.trim() && form.attendance;
+    if (step === 1) return form.understood && form.participation && form.motivation && form.rating;
+    if (step === 2) return true;
+    return true;
   };
 
-  const relevantTemplates = templates.filter(t => t.type === templateType || t.type === 'genel');
+  if (whatsapp) {
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={() => { onSaved?.(); onClose(); }} />;
+  }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.65)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '480px', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb', maxHeight: '92vh', overflowY: 'auto' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(17,24,39,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 580, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <MessageCircle size={20} color='#16a34a' />
-            </div>
-            <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#111827', margin: 0 }}>WhatsApp Mesajı</h3>
-              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{phone}</p>
-            </div>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.15rem' }}>Ders Değerlendirmesi</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>{lesson.studentName} · {lesson.date} · {lesson.startTime?.slice(0,5)}</p>
           </div>
-          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#6b7280'; }}>
-            <X size={16} />
+          <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: 8, padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
+            <X size={16} color='#6b7280' />
           </button>
         </div>
 
-        {/* Templates dropdown */}
-        <div style={{ marginBottom: '0.75rem', position: 'relative' }}>
-          <button onClick={() => setShowTemplates(v => !v)}
-            style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#374151', fontWeight: '600', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span>📂 Kayıtlı Şablonlar {relevantTemplates.length > 0 && `(${relevantTemplates.length})`}</span>
-            <ChevronDown size={14} style={{ transform: showTemplates ? 'rotate(180deg)' : 'rotate(0)', transition: '0.2s' }} />
-          </button>
-
-          {showTemplates && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
-              {relevantTemplates.length === 0 ? (
-                <div style={{ padding: '0.85rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.82rem' }}>Henüz kayıtlı şablon yok</div>
-              ) : relevantTemplates.map(tpl => (
-                <div key={tpl.id} onClick={() => handleLoadTemplate(tpl)}
-                  style={{ padding: '0.65rem 0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', transition: 'background 0.1s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-                  <div>
-                    <p style={{ margin: 0, fontWeight: '600', fontSize: '0.83rem', color: '#111827' }}>{tpl.name}</p>
-                    <p style={{ margin: 0, fontSize: '0.72rem', color: '#9ca3af', marginTop: '0.1rem' }}>{tpl.content.slice(0, 50)}...</p>
-                  </div>
-                  <button onClick={(e) => handleDeleteTemplate(tpl.id, e)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', borderRadius: '6px', color: '#d1d5db', flexShrink: 0 }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#d1d5db'}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
+        {/* Step indicator */}
+        <div style={{ display: 'flex', padding: '1rem 1.5rem 0' }}>
+          {STEPS.map((s, i) => (
+            <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: i <= step ? '#4f46e5' : '#f3f4f6', color: i <= step ? 'white' : '#9ca3af', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}>
+                {i < step ? '✓' : i + 1}
+              </div>
+              <span style={{ fontSize: '0.72rem', fontWeight: i === step ? 700 : 500, color: i === step ? '#4f46e5' : '#9ca3af', whiteSpace: 'nowrap' }}>{s}</span>
+              {i < STEPS.length - 1 && <div style={{ flex: 1, height: 1, background: i < step ? '#4f46e5' : '#f3f4f6', margin: '0 0.5rem', transition: 'all 0.2s' }} />}
             </div>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+          {/* Step 0: Ders Bilgisi */}
+          {step === 0 && (
+            <>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>İşlenen Konular</label>
+                <textarea value={form.topics} onChange={e => u('topics', e.target.value)}
+                  placeholder="Örn: Present Simple zamanı + Çiftlik hayvanları..." rows={3} style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Katılım Durumu</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {['katıldı', 'geç kaldı', 'katılmadı'].map(opt => (
+                    <button key={opt} onClick={() => u('attendance', opt)}
+                      style={{ border: `1.5px solid ${form.attendance === opt ? '#4f46e5' : '#e5e7eb'}`, background: form.attendance === opt ? '#eef2ff' : 'white', color: form.attendance === opt ? '#4338ca' : '#6b7280', borderRadius: 10, padding: '0.45rem 0.85rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Step 1: Performans */}
+          {step === 1 && (
+            <>
+              <StarRating value={form.rating} onChange={v => u('rating', v)} />
+              <ChoiceGroup label="Konuyu Anladı mı?" field="understood" value={form.understood} onChange={v => u('understood', v)} />
+              <ChoiceGroup label="Katılım Seviyesi" field="participation" value={form.participation} onChange={v => u('participation', v)} />
+              <ChoiceGroup label="Motivasyon" field="motivation" value={form.motivation} onChange={v => u('motivation', v)} />
+            </>
+          )}
+
+          {/* Step 2: Detaylar */}
+          {step === 2 && (
+            <>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Zorlandığı Nokta <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <textarea value={form.challenge} onChange={e => u('challenge', e.target.value)}
+                  placeholder="Öğrencinin zorlandığı veya dikkat edilmesi gereken bir alan..." rows={3} style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Verilen Ödev <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <textarea value={form.homework} onChange={e => u('homework', e.target.value)}
+                  placeholder="Aktivite kitabı sayfa 63..." rows={2} style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sonraki Ders Hedefi <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <textarea value={form.nextGoal} onChange={e => u('nextGoal', e.target.value)}
+                  placeholder="Sayfa 52'den devam, telaffuza odaklanacağız..." rows={2} style={inp} />
+              </div>
+            </>
+          )}
+
+          {/* Step 3: Rapor */}
+          {step === 3 && (
+            <>
+              <div style={{ background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', borderRadius: 14, padding: '1rem', border: '1.5px solid #c7d2fe', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <Sparkles size={18} color='#4f46e5' />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#4338ca' }}>AI tarafından oluşturuldu</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6366f1' }}>Metni düzenleyebilir veya olduğu gibi kullanabilirsiniz</div>
+                </div>
+              </div>
+              <textarea value={generatedReport} onChange={e => setGeneratedReport(e.target.value)}
+                rows={14} style={{ ...inp, lineHeight: 1.7, fontSize: '0.88rem' }} />
+            </>
           )}
         </div>
 
-        {/* Message */}
-        <div style={{ marginBottom: '0.75rem' }}>
-          <label style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Mesajı Düzenle
-          </label>
-          <textarea
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            rows={9}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#111827', fontSize: '0.875rem', outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif', lineHeight: '1.6', boxSizing: 'border-box' }}
-            onFocus={e => e.target.style.borderColor = '#25d366'}
-            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-          />
-        </div>
-
-        {/* Save as template */}
-        {!showSaveForm ? (
-          <button onClick={() => setShowSaveForm(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0', marginBottom: '1rem' }}>
-            {saved ? <><Check size={13} color='#16a34a' /><span style={{ color: '#16a34a' }}>Şablon kaydedildi!</span></> : <><BookmarkPlus size={13} /> Bu mesajı şablon olarak kaydet</>}
-          </button>
-        ) : (
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-            <input
-              autoFocus
-              placeholder='Şablon adı...'
-              value={saveName}
-              onChange={e => setSaveName(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSaveTemplate(); if (e.key === 'Escape') setShowSaveForm(false); }}
-              style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '9px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#111827', fontSize: '0.83rem', outline: 'none' }}
-            />
-            <button onClick={handleSaveTemplate} disabled={!saveName.trim()}
-              style={{ padding: '0.5rem 0.85rem', borderRadius: '9px', border: 'none', background: '#4f46e5', color: 'white', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', opacity: saveName.trim() ? 1 : 0.5 }}>
-              Kaydet
+        {/* Footer */}
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
+          {step > 0 ? (
+            <button onClick={() => setStep(s => s - 1)}
+              style={{ padding: '0.6rem 1.1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>
+              Geri
             </button>
-            <button onClick={() => setShowSaveForm(false)}
-              style={{ padding: '0.5rem', borderRadius: '9px', border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', cursor: 'pointer' }}>
-              <X size={14} />
-            </button>
-          </div>
-        )}
+          ) : <div />}
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: '0.6rem' }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}>
-            Vazgeç
-          </button>
-          <button onClick={handleSend} disabled={!message.trim()} style={{ flex: 2, padding: '0.7rem', borderRadius: '10px', border: 'none', background: '#25d366', color: 'white', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', opacity: !message.trim() ? 0.6 : 1 }}>
-            <Send size={15} /> WhatsApp ile Gönder
-          </button>
+          {step < 2 && (
+            <button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
+              style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: canNext() ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#e5e7eb', color: canNext() ? 'white' : '#9ca3af', fontWeight: 700, fontSize: '0.85rem', cursor: canNext() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              İleri <ChevronRight size={15} />
+            </button>
+          )}
+
+          {step === 2 && (
+            <button onClick={generateReport} disabled={generating}
+              style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
+              {generating ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={15} />}
+              {generating ? 'Rapor Oluşturuluyor...' : 'AI ile Rapor Oluştur'}
+            </button>
+          )}
+
+          {step === 3 && (
+            <button onClick={handleSave} disabled={loading || !generatedReport}
+              style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
+              {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
+              Kaydet ve Veliye Gönder
+            </button>
+          )}
         </div>
       </div>
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
   );
 }
