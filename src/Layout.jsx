@@ -36,7 +36,6 @@ function PageTransition({ children, pageKey }) {
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(12px)',
       transition: 'opacity 0.22s ease, transform 0.22s ease',
-      willChange: 'opacity, transform',
     }}>
       {displayChildren}
     </div>
