@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus } from 'lucide-react';
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -216,57 +216,35 @@ function FAB({ navigate }) {
   const [open, setOpen] = useState(false);
 
   const actions = [
-    {
-      label: 'Ders Ekle',
-      color: '#4f46e5',
-      bg: '#eef2ff',
-      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>,
-      onClick: () => { navigate(createPageUrl('TeacherLessons')); setOpen(false); },
-    },
-    {
-      label: 'Ödeme Al',
-      color: '#10b981',
-      bg: '#ecfdf5',
-      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>,
-      onClick: () => { navigate(createPageUrl('TeacherFinance')); setOpen(false); },
-    },
-    {
-      label: 'Ödev Ver',
-      color: '#f97316',
-      bg: '#fff7ed',
-      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-      onClick: () => { navigate(createPageUrl('TeacherHomework')); setOpen(false); },
-    },
+    { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', icon: CalendarDays,  page: 'TeacherLessons'  },
+    { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', icon: DollarSign,    page: 'TeacherFinance'  },
+    { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', icon: BookOpen,      page: 'TeacherHomework' },
   ];
 
   return (
     <>
-      {open && (
-        <div onClick={() => setOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 998 }} />
-      )}
+      {open && <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
       <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
         <style>{`@keyframes fabIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }`}</style>
-        {open && actions.map((action, i) => (
-          <div key={i} onClick={action.onClick}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', animation: `fabIn 0.2s ease ${i * 0.06}s both` }}>
-            <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: '700', padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>
-              {action.label}
-            </span>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: action.bg, border: `2px solid ${action.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)', transition: 'transform 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-              {action.icon}
+        {open && actions.map((action, i) => {
+          const Icon = action.icon;
+          return (
+            <div key={i} onClick={() => { navigate(createPageUrl(action.page)); setOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', animation: `fabIn 0.2s ease ${i * 0.06}s both` }}>
+              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: '700', padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>
+                {action.label}
+              </span>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: action.bg, border: `2px solid ${action.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)', transition: 'transform 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <Icon size={18} color={action.color} />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <button onClick={() => setOpen(o => !o)}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s, box-shadow 0.2s', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}
-          onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 24px rgba(79,70,229,0.6)'}
-          onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(79,70,229,0.45)'}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+          <Plus size={22} color="white" />
         </button>
       </div>
     </>
