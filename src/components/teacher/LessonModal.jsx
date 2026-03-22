@@ -5,6 +5,18 @@ import { format, addWeeks, parseISO } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
+  React.useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
   const isEditing = !!existingLesson;
   const [form, setForm] = useState(isEditing ? {
     studentId: existingLesson.studentId || '',
@@ -117,9 +129,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     }
 
     setLoading(false);
-    onSaved();
 
-    // WhatsApp bildirimi
+    // WhatsApp bildirimi — onSaved'den önce çağır
     const phone = student?.parentPhone;
     if (phone && !isEditing) {
       const typeLabel = form.type === 'online' ? 'Online' : 'Yüz yüze';
@@ -151,12 +162,12 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   const lbl = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
   if (whatsapp) {
-    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={() => { onSaved?.(); onClose(); }} />;
   }
 
   if (confirmStep) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
         <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '420px', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
@@ -187,7 +198,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
       <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '500px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
