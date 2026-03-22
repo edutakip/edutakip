@@ -1,7 +1,113 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
+
+// ── Page transition wrapper ───────────────────────────────────
+function PageTransition({ children, pageKey }) {
+  const [visible, setVisible] = useState(false);
+  const [displayChildren, setDisplayChildren] = useState(children);
+  const prevKey = useRef(pageKey);
+
+  useEffect(() => {
+    if (prevKey.current !== pageKey) {
+      setVisible(false);
+      const t1 = setTimeout(() => {
+        setDisplayChildren(children);
+        prevKey.current = pageKey;
+        const t2 = setTimeout(() => setVisible(true), 30);
+        return () => clearTimeout(t2);
+      }, 150);
+      return () => clearTimeout(t1);
+    } else {
+      const t = setTimeout(() => setVisible(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [pageKey]);
+
+  useEffect(() => {
+    if (prevKey.current === pageKey) {
+      setDisplayChildren(children);
+    }
+  }, [children]);
+
+  return (
+    <div style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(12px)',
+      transition: 'opacity 0.22s ease, transform 0.22s ease',
+      willChange: 'opacity, transform',
+    }}>
+      {displayChildren}
+    </div>
+  );
+}
+
+// ── Top loading bar ───────────────────────────────────────────
+function LoadingBar({ active }) {
+  const [width, setWidth] = useState(0);
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    if (active) {
+      setWidth(0);
+      setOpacity(1);
+      const t1 = setTimeout(() => setWidth(70), 30);
+      const t2 = setTimeout(() => setWidth(90), 800);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    } else {
+      setWidth(100);
+      const t = setTimeout(() => setOpacity(0), 200);
+      return () => clearTimeout(t);
+    }
+  }, [active]);
+
+  useEffect(() => {
+    if (!active) {
+      const t = setTimeout(() => { setWidth(0); setOpacity(1); }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [active]);
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, zIndex: 9999, pointerEvents: 'none', opacity, transition: 'opacity 0.2s ease' }}>
+      <div style={{
+        height: '100%', width: `${width}%`,
+        background: 'linear-gradient(90deg, #6366f1, #a78bfa)',
+        borderRadius: '0 3px 3px 0',
+        boxShadow: '0 0 10px rgba(99,102,241,0.6)',
+        transition: width === 0 ? 'none' : width === 100 ? 'width 0.2s ease' : 'width 0.8s ease',
+      }} />
+    </div>
+  );
+}
+
+// ── Prefetch config ───────────────────────────────────────────
+const PAGE_PREFETCH = {
+  TeacherFinance:   (base44, me) => Promise.all([
+    base44.entities.Payment.filter({ teacherEmail: me.email }),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+    base44.entities.Lesson.filter({ teacherEmail: me.email }),
+  ]),
+  TeacherCalendar:  (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+  ]),
+  TeacherStudents:  (base44, me) => Promise.all([
+    base44.entities.Student.filter({ teacherEmail: me.email }),
+    base44.entities.Payment.filter({ teacherEmail: me.email }),
+  ]),
+  TeacherDashboard: (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }),
+    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+    base44.entities.Payment.filter({ teacherEmail: me.email }),
+  ]),
+  TeacherLessons:   (base44, me) => Promise.all([
+    base44.entities.Lesson.filter({ teacherEmail: me.email }),
+    base44.entities.Student.filter({ teacherEmail: me.email }),
+    base44.entities.Payment.filter({ teacherEmail: me.email }),
+  ]),
+};
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -25,6 +131,34 @@ export default function Layout({ children, currentPageName }) {
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [navigating, setNavigating] = useState(false);
+  const navigate = useNavigate();
+  const prevPage = useRef(currentPageName);
+
+  useEffect(() => {
+    if (prevPage.current !== currentPageName) {
+      setNavigating(true);
+      const t = setTimeout(() => { setNavigating(false); prevPage.current = currentPageName; }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [currentPageName]);
+
+  const handleNav = (e, page) => {
+    if (page === currentPageName) return;
+    e.preventDefault();
+    setNavigating(true);
+    const prefetch = PAGE_PREFETCH[page];
+    if (prefetch) {
+      import('@/api/base44Client').then(({ base44 }) => {
+        base44.auth.me().then(me => {
+          const timeout = new Promise(res => setTimeout(res, 1200));
+          Promise.race([prefetch(base44, me), timeout]).finally(() => navigate(createPageUrl(page)));
+        }).catch(() => navigate(createPageUrl(page)));
+      });
+    } else {
+      setTimeout(() => navigate(createPageUrl(page)), 300);
+    }
+  };
 
   React.useEffect(() => {
     import('@/api/base44Client').then(({ base44 }) => {
@@ -84,6 +218,7 @@ export default function Layout({ children, currentPageName }) {
           const isActive = item.page === currentPageName;
           return (
             <Link key={i} to={createPageUrl(item.page)}
+              onClick={(e) => handleNav(e, item.page)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.6rem 0.75rem', borderRadius: '10px',
@@ -122,9 +257,10 @@ export default function Layout({ children, currentPageName }) {
   if (isParent) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+        <LoadingBar active={navigating} />
         {/* MAIN */}
-        <main style={{ flex: 1, minHeight: '100vh', paddingBottom: '70px' }}>
-          {children}
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
+          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
         {/* BOTTOM NAV */}
@@ -140,6 +276,7 @@ export default function Layout({ children, currentPageName }) {
             const isActive = item.page === currentPageName;
             return (
               <Link key={i} to={createPageUrl(item.page)}
+                onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
@@ -173,6 +310,7 @@ export default function Layout({ children, currentPageName }) {
   // Öğretmen için sol sidebar layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <LoadingBar active={navigating} />
 
       {/* SIDEBAR */}
       <aside style={{
@@ -200,33 +338,11 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* MAIN */}
-      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', transition: 'margin-left 0.2s ease' }}>
-        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
-          {children}
+      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
+        <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
+          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
       </main>
-
-      {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
-      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-        {fabOpen && [
-          { label: 'Ders Ekle', color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, page: 'TeacherLessons' },
-          { label: 'Ödeme Al',  color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   page: 'TeacherFinance' },
-          { label: 'Ödev Ver',  color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     page: 'TeacherHomework' },
-        ].map((a, i) => (
-          <div key={i} onClick={() => { navigate(createPageUrl(a.page)); setFabOpen(false); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-            <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <a.Icon size={18} color={a.color} />
-            </div>
-          </div>
-        ))}
-        <button onClick={() => setFabOpen(o => !o)}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-          <Plus size={22} color="white" />
-        </button>
-      </div>
-
     </div>
   );
 }
