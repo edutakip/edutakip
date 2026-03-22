@@ -19,11 +19,9 @@ export default function WhatsAppMessageModal({ phone, message: initialMessage, t
   const handleSend = () => {
     const cleaned = phone.replace(/\D/g, '');
     const formatted = cleaned.startsWith('0') ? '90' + cleaned.slice(1) : cleaned;
-    // \n kaçış karakterlerini gerçek newline'a çevir, sonra encode et
-    const normalizedMessage = message
-      .replace(/\\n/g, '\n')
-      .replace(/\r\n/g, '\n');
-    const url = 'https://wa.me/' + formatted + '?text=' + encodeURIComponent(normalizedMessage);
+    const normalizedMessage = message.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+    // api.whatsapp.com emoji'leri daha iyi destekliyor
+    const url = 'https://api.whatsapp.com/send?phone=' + formatted + '&text=' + encodeURIComponent(normalizedMessage);
     window.open(url, '_blank');
     onClose();
   };
