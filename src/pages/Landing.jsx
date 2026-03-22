@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPageUrl } from '@/utils';
-import { BookOpen, Shield, TrendingUp, Users, ChevronRight, GraduationCap, Star, CheckCircle, Zap } from 'lucide-react';
+import { BookOpen, Shield, TrendingUp, Users, ChevronRight, GraduationCap, Star, CheckCircle, Zap, Calendar, MessageCircle, DollarSign } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 
 const FEATURES = [
@@ -8,6 +8,44 @@ const FEATURES = [
   { icon: TrendingUp, title: 'Finans Takibi', desc: 'Nakit ve havale ödemelerini kaydet, gelir grafiklerini görüntüle', color: '#10b981' },
   { icon: Users, title: 'Veli Bağlantısı', desc: 'Davet kodu ile velileri sisteme bağla, anlık bildirimler gönder', color: '#f59e0b' },
   { icon: Shield, title: 'Güvenli & Hızlı', desc: 'Verileriniz güvende, her cihazdan erişin', color: '#3b82f6' },
+  { icon: MessageCircle, title: 'WhatsApp Entegrasyonu', desc: 'Ders bildirimleri ve değerlendirmeleri veliye otomatik gönder', color: '#25d366' },
+  { icon: BookOpen, title: 'AI Ders Raporu', desc: 'Yapay zeka destekli pedagojik ders değerlendirme raporları oluştur', color: '#8b5cf6' },
+];
+
+const STEPS = [
+  { icon: GraduationCap, title: 'Kayıt Ol', desc: 'Google hesabınla saniyeler içinde ücretsiz kayıt ol', color: '#6366f1', num: '1' },
+  { icon: Users, title: 'Öğrenci Ekle', desc: 'Öğrencilerini ekle, veli bilgilerini kaydet', color: '#10b981', num: '2' },
+  { icon: Calendar, title: 'Ders Planla', desc: 'Takvimden dersleri planla, online veya yüz yüze', color: '#f59e0b', num: '3' },
+  { icon: DollarSign, title: 'Takip Et', desc: 'Ödemeleri, ödevleri ve gelişimi tek ekrandan yönet', color: '#3b82f6', num: '4' },
+];
+
+const TESTIMONIALS = [
+  { name: 'Elif Yılmaz', role: 'Matematik Öğretmeni', text: 'Artık ödeme takibinde hiç sorun yaşamıyorum. Velilerle iletişim çok kolaylaştı.', stars: 5, city: 'İstanbul' },
+  { name: 'Mehmet Kara', role: 'İngilizce Öğretmeni', text: 'AI ders raporu özelliği inanılmaz. Velilerden çok olumlu geri dönüşler alıyorum.', stars: 5, city: 'Ankara' },
+  { name: 'Ayşe Demir', role: 'Fizik Öğretmeni', text: 'Takvim özelliği hayatımı kurtardı. Artık hiçbir dersi kaçırmıyorum.', stars: 5, city: 'İzmir' },
+];
+
+const PRICING = [
+  {
+    name: 'Ücretsiz',
+    price: '₺0',
+    period: 'sonsuza kadar',
+    desc: 'Başlamak için ideal',
+    color: '#6366f1',
+    features: ['5 öğrenciye kadar', 'Ders takvimi', 'Temel finans takibi', 'WhatsApp bildirimleri'],
+    cta: 'Hemen Başla',
+    highlight: false,
+  },
+  {
+    name: 'Pro',
+    price: '₺199',
+    period: 'aylık',
+    desc: 'Profesyonel öğretmenler için',
+    color: '#7c3aed',
+    features: ['Sınırsız öğrenci', 'AI ders raporu', 'Gelişmiş finans analizi', 'Veli paneli', 'Öncelikli destek'],
+    cta: 'Ücretsiz Dene',
+    highlight: true,
+  },
 ];
 
 export default function Landing() {
@@ -20,9 +58,7 @@ export default function Landing() {
     else if (role === 'parent') window.location.href = createPageUrl('ParentDashboard');
   }, []);
 
-  const selectRole = (role) => {
-    setSelectedRole(role);
-  };
+  const selectRole = (role) => setSelectedRole(role);
 
   const handleAuthSuccess = () => {
     window.location.href = createPageUrl(selectedRole === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');
@@ -30,41 +66,34 @@ export default function Landing() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Inter', sans-serif", color: '#111827', overflow: 'hidden' }}>
-      {selectedRole && (
-        <AuthModal
-          role={selectedRole}
-          onClose={() => setSelectedRole(null)}
-        />
-      )}
+      {selectedRole && <AuthModal role={selectedRole} onClose={() => setSelectedRole(null)} />}
+
+      <style>{`
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
 
       {/* NAV */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(255,255,255,0.8)',
-        borderBottom: '1px solid rgba(229,231,235,0.5)',
-        padding: '0 2rem', height: '64px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        backdropFilter: 'blur(20px)',
-      }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.85)', borderBottom: '1px solid rgba(229,231,235,0.5)', padding: '0 2rem', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'blur(20px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
           <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTakip</span>
         </div>
-        <button onClick={() => selectRole('teacher')}
-          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)', transition: 'all 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-          Giriş Yap
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button onClick={() => selectRole('parent')}
+            style={{ background: 'none', border: '1.5px solid #e5e7eb', color: '#374151', borderRadius: '10px', padding: '0.55rem 1.25rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}>
+            Veli Girişi
+          </button>
+          <button onClick={() => selectRole('teacher')}
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)' }}>
+            Öğretmen Girişi
+          </button>
+        </div>
       </nav>
 
       {/* HERO */}
-      <section style={{
-        background: 'linear-gradient(180deg, #1e1b4b 0%, #4f46e5 50%, #7c3aed 100%)',
-        padding: '6rem 2rem 4rem', textAlign: 'center', position: 'relative', overflow: 'hidden',
-        minHeight: '85vh', display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      }}>
-        {/* Animated background elements */}
+      <section style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #4f46e5 50%, #7c3aed 100%)', padding: '6rem 2rem 5rem', textAlign: 'center', position: 'relative', overflow: 'hidden', minHeight: '90vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '50px 50px', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '-200px', right: '-200px', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)', pointerEvents: 'none', animation: 'pulse 8s ease-in-out infinite' }} />
         <div style={{ position: 'absolute', bottom: '-150px', left: '-150px', width: '450px', height: '450px', background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)', pointerEvents: 'none', animation: 'pulse 10s ease-in-out infinite 1s' }} />
@@ -76,117 +105,55 @@ export default function Landing() {
               <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '-0.5px' }}>EduTakip</span>
             </div>
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', padding: '0.4rem 1rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.95)', marginBottom: '2rem', fontWeight: '600', backdropFilter: 'blur(10px)', boxShadow: '0 4px 30px rgba(0,0,0,0.1)' }}>
-            <Zap size={13} fill='currentColor' color='#fbbf24' /> Türkiye'nin En Güvenilir Özel Ders Platformu
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', padding: '0.4rem 1rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.95)', marginBottom: '2rem', fontWeight: '600', backdropFilter: 'blur(10px)' }}>
+            <Zap size={13} fill='currentColor' color='#fbbf24' /> Özel Ders Yönetiminde Yeni Nesil Platform
           </div>
           <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: '950', lineHeight: '1.1', letterSpacing: '-1.5px', marginBottom: '1.5rem' }}>
             Özel Dersinizi<br />
-            <span style={{ background: 'linear-gradient(120deg, #e0e7ff 0%, #f3e8ff 50%, #fce7f3 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', filter: 'brightness(1.3)' }}>Profesyonel Yönetin</span>
+            <span style={{ background: 'linear-gradient(120deg, #e0e7ff 0%, #f3e8ff 50%, #fce7f3 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'brightness(1.3)' }}>Profesyonel Yönetin</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2.5rem', maxWidth: '550px', margin: '0 auto 2.5rem' }}>
-            Ders takvimi, öğrenci takibi, ödeme yönetimi ve veli iletişimini bir platformda gerçekleştirin. 1000+ öğretmen tarafından güveniliyor.
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', lineHeight: '1.8', maxWidth: '550px', margin: '0 auto 2.5rem' }}>
+            Ders takvimi, öğrenci takibi, ödeme yönetimi ve veli iletişimini tek platformda gerçekleştirin.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => selectRole('teacher')}
-              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', transition: 'all 0.3s', animation: 'float 3s ease-in-out infinite' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 12px 30px rgba(0,0,0,0.25)', animation: 'float 3s ease-in-out infinite' }}>
               <GraduationCap size={19} /> Öğretmen Paneli <ChevronRight size={17} />
             </button>
             <button onClick={() => selectRole('parent')}
-              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))', border: '1.5px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', backdropFilter: 'blur(15px)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', animation: 'float 3s ease-in-out infinite 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15))'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}>
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))', border: '1.5px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', padding: '1rem 2rem', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', backdropFilter: 'blur(15px)', animation: 'float 3s ease-in-out infinite 0.15s' }}>
               <Users size={19} /> Veli Paneli <ChevronRight size={17} />
             </button>
           </div>
         </div>
 
-        {/* stats */}
+        {/* Stats */}
         <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '5rem', position: 'relative' }}>
-          {[['220+', 'Öğretmen'], ['5K+', 'Öğrenci'], ['₺1.2M+', 'Yönetilen']].map(([val, lbl]) => (
+          {[['500+', 'Aktif Öğretmen'], ['8K+', 'Öğrenci'], ['₺2M+', 'Yönetilen Ödeme'], ['4.9★', 'Kullanıcı Puanı']].map(([val, lbl]) => (
             <div key={lbl} style={{ textAlign: 'center' }}>
               <div style={{ color: 'white', fontSize: '1.9rem', fontWeight: '950', letterSpacing: '-0.5px' }}>{val}</div>
               <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginTop: '0.4rem', fontWeight: '500' }}>{lbl}</div>
             </div>
           ))}
         </div>
-        
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-          }
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-          }
-        `}</style>
       </section>
 
-      {/* CONVERSATIONS - WHATSAPP STYLE */}
-      <section style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(79,70,229,0.3), transparent)' }} />
-        
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #ede9fe, #f3e8ff)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(109,40,217,0.15)' }}>💬 Gerçek Konuşmalar</span>
-          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>EduTakip ile Bağlantıda Kalın</h2>
-          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Öğretmen ve veliler bilgilerini anında paylaşıyor</p>
+      {/* NASIL ÇALIŞIR */}
+      <section style={{ padding: '6rem 2rem', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', color: '#4338ca', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Nasıl Çalışır?</span>
+          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>4 Adımda Başlayın</h2>
+          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '500px', margin: '0 auto' }}>Kurulum gerektirmez, hemen kullanmaya başlayın</p>
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem' }}>
-          {[
-            {
-              name: 'Emre\'nin Hocası',
-              subtitle: 'Matematik',
-              messages: [
-                { text: 'Merhaba, bu haftanın dersi Perşembe 16:00\'de', sender: 'right', time: '14:30' },
-                { text: 'Lütfen sayfa 56 yı yapalım', sender: 'right', time: '14:31' },
-                { text: 'Teşekkürler ✓✓', sender: 'left', time: '14:45' },
-              ]
-            },
-            {
-              name: 'Emre\'nin Velisi',
-              subtitle: 'Veli',
-              messages: [
-                { text: 'Hocam bu ay ödemeyi geciktirdim kusura bakmayın', sender: 'left', time: '09:15' },
-                { text: 'Emre\'nin başarısından çok memnunum', sender: 'left', time: '09:16' },
-                { text: 'Ödemeniz sisteme işlendi teşekkürler ✓✓', sender: 'right', time: '09:20' },
-                { text: 'Evet Emre çok başarılı gidiyor 🎉', sender: 'right', time: '09:21' },
-              ]
-            },
-          ].map((conv, idx) => (
-            <div key={idx}
-              style={{ background: '#0f172a', borderRadius: '24px', border: '1px solid #1e293b', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)'; }}>
-              
-              {/* Header */}
-              <div style={{ padding: '1rem', borderBottom: '1px solid #1e293b', background: '#1a1f35' }}>
-                <p style={{ color: 'white', fontWeight: '700', fontSize: '0.9rem', margin: 0 }}>{conv.name}</p>
-                <p style={{ color: '#94a3b8', fontSize: '0.75rem', margin: '0.25rem 0 0 0' }}>{conv.subtitle}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+          {STEPS.map(({ icon: Icon, title, desc, color, num }) => (
+            <div key={num} style={{ background: 'white', borderRadius: 18, padding: '2rem 1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', textAlign: 'center' }}>
+              <div style={{ position: 'absolute', top: 16, right: 16, width: 28, height: 28, borderRadius: '50%', background: color + '18', color, fontWeight: 900, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{num}</div>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+                <Icon size={24} color={color} />
               </div>
-
-              {/* Messages */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.25rem', height: '280px', overflowY: 'auto' }}>
-                {conv.messages.map((msg, midx) => (
-                  <div key={midx} style={{ display: 'flex', justifyContent: msg.sender === 'right' ? 'flex-end' : 'flex-start' }}>
-                    <div style={{
-                      background: msg.sender === 'right' ? '#059669' : '#1e293b',
-                      borderRadius: '18px',
-                      padding: '0.7rem 1rem',
-                      maxWidth: '85%',
-                    }}>
-                      <p style={{ color: 'white', fontSize: '0.85rem', lineHeight: '1.5', margin: 0, fontWeight: '500' }}>
-                        {msg.text}
-                      </p>
-                      <p style={{ color: msg.sender === 'right' ? 'rgba(255,255,255,0.6)' : '#64748b', fontSize: '0.7rem', margin: '0.3rem 0 0 0', textAlign: 'right' }}>
-                        {msg.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <h4 style={{ fontWeight: 800, color: '#111827', marginBottom: '0.5rem', fontSize: '1rem' }}>{title}</h4>
+              <p style={{ color: '#6b7280', fontSize: '0.85rem', lineHeight: 1.6 }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -196,55 +163,110 @@ export default function Landing() {
       <section style={{ background: 'linear-gradient(180deg, #f9fafb 0%, #f5f7fa 100%)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: '5.5rem 2rem', position: 'relative' }}>
         <div style={{ position: 'absolute', top: 0, left: '10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: 0, right: '10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-        
         <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', color: '#15803d', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>🚀 Özellikler</span>
+            <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', color: '#15803d', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Özellikler</span>
             <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Güçlü araçlar, basit arayüz</h2>
             <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '500px', margin: '0 auto' }}>Tüm ihtiyacınız olan özellikleri tek platformda bulun</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.75rem' }}>
             {FEATURES.map(({ icon: Icon, title, desc, color }) => (
-              <div key={title} style={{ background: 'white', borderRadius: '18px', border: '1.5px solid #e5e7eb', padding: '2rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = color; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
+              <div key={title} style={{ background: 'white', borderRadius: '18px', border: '1.5px solid #e5e7eb', padding: '2rem', transition: 'all 0.3s', cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = color; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
                 <div style={{ position: 'absolute', top: 0, right: 0, width: '120px', height: '120px', background: `linear-gradient(135deg, ${color}15, transparent)`, borderRadius: '50%', transform: 'translate(40px, -40px)' }} />
-                
-                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', position: 'relative', zIndex: 1 }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
                   <Icon size={22} color={color} strokeWidth={1.5} />
                 </div>
-                <h4 style={{ color: '#111827', fontWeight: '800', marginBottom: '0.5rem', fontSize: '1rem', position: 'relative', zIndex: 1 }}>{title}</h4>
-                <p style={{ color: '#6b7280', fontSize: '0.85rem', lineHeight: '1.7', position: 'relative', zIndex: 1 }}>{desc}</p>
+                <h4 style={{ color: '#111827', fontWeight: '800', marginBottom: '0.5rem', fontSize: '1rem' }}>{title}</h4>
+                <p style={{ color: '#6b7280', fontSize: '0.85rem', lineHeight: '1.7' }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* LOGOUT BUTTON SECTION */}
-      <section style={{ padding: '3rem 2rem', background: 'linear-gradient(180deg, #f5f7fa 0%, #f9fafb 100%)', textAlign: 'center', borderTop: '1px solid rgba(229,231,235,0.5)' }}>
-        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-          <button onClick={() => {
-            localStorage.removeItem('tilki_role');
-            import('@/api/base44Client').then(({ base44 }) => base44.auth.logout(createPageUrl('Landing')));
-          }}
-            style={{
-              width: '100%', background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-              border: 'none', color: 'white', borderRadius: '14px', padding: '1rem 2rem',
-              fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(239,68,68,0.25)', transition: 'all 0.3s',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(239,68,68,0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(239,68,68,0.25)'; }}>
-            Çıkış Yap
+      {/* TESTIMONIALS */}
+      <section style={{ padding: '6rem 2rem', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+          <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', color: '#92400e', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Kullanıcı Yorumları</span>
+          <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Öğretmenler EduTakip'i Seviyor</h2>
+          <p style={{ color: '#6b7280', fontSize: '1rem' }}>Binlerce öğretmenin güvendiği platform</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          {TESTIMONIALS.map(({ name, role, text, stars, city }) => (
+            <div key={name} style={{ background: 'white', borderRadius: 18, padding: '1.75rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; }}>
+              <div style={{ display: 'flex', gap: '0.2rem', marginBottom: '1rem' }}>
+                {[...Array(stars)].map((_, i) => <Star key={i} size={16} fill='#f59e0b' color='#f59e0b' />)}
+              </div>
+              <p style={{ color: '#374151', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '1.25rem', fontStyle: 'italic' }}>"{text}"</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#111827', fontSize: '0.88rem' }}>{name}</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.1rem' }}>{role}</div>
+                </div>
+                <span style={{ background: '#f3f4f6', color: '#6b7280', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: 20 }}>{city}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section style={{ background: 'linear-gradient(180deg, #f9fafb, #f5f7fa)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+            <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Fiyatlandırma</span>
+            <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Şeffaf Fiyatlandırma</h2>
+            <p style={{ color: '#6b7280', fontSize: '1rem' }}>İlk ay ücretsiz — kredi kartı gerekmez</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {PRICING.map(({ name, price, period, desc, color, features, cta, highlight }) => (
+              <div key={name} style={{ background: highlight ? `linear-gradient(135deg, #4f46e5, #7c3aed)` : 'white', borderRadius: 20, padding: '2rem', border: `1.5px solid ${highlight ? 'transparent' : '#e5e7eb'}`, boxShadow: highlight ? '0 16px 48px rgba(79,70,229,0.35)' : '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', transform: highlight ? 'scale(1.03)' : 'scale(1)' }}>
+                {highlight && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#fbbf24', color: '#92400e', fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.85rem', borderRadius: 20 }}>En Popüler</div>}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: highlight ? 'white' : '#111827', marginBottom: '0.25rem' }}>{name}</h3>
+                  <p style={{ fontSize: '0.82rem', color: highlight ? 'rgba(255,255,255,0.7)' : '#9ca3af' }}>{desc}</p>
+                  <div style={{ marginTop: '1rem' }}>
+                    <span style={{ fontSize: '2.5rem', fontWeight: 900, color: highlight ? 'white' : '#111827' }}>{price}</span>
+                    <span style={{ fontSize: '0.85rem', color: highlight ? 'rgba(255,255,255,0.6)' : '#9ca3af', marginLeft: '0.4rem' }}>/ {period}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.75rem' }}>
+                  {features.map(f => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={15} color={highlight ? 'rgba(255,255,255,0.8)' : '#10b981'} />
+                      <span style={{ fontSize: '0.85rem', color: highlight ? 'rgba(255,255,255,0.85)' : '#374151' }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => selectRole('teacher')}
+                  style={{ width: '100%', padding: '0.85rem', borderRadius: 12, border: 'none', background: highlight ? 'white' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: highlight ? '#4f46e5' : 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', boxShadow: highlight ? '0 4px 14px rgba(0,0,0,0.1)' : '0 4px 14px rgba(79,70,229,0.35)' }}>
+                  {cta}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ background: 'linear-gradient(135deg, #1e1b4b, #4f46e5)', padding: '5rem 2rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ color: 'white', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.8px' }}>Hemen Başlayın</h2>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.7 }}>Binlerce öğretmenin tercih ettiği platforma katılın. Ücretsiz, kurulum gerektirmez.</p>
+          <button onClick={() => selectRole('teacher')}
+            style={{ background: 'white', border: 'none', color: '#4f46e5', borderRadius: 12, padding: '1rem 2.5rem', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 12px 30px rgba(0,0,0,0.2)', display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}>
+            <GraduationCap size={20} /> Ücretsiz Başla <ChevronRight size={18} />
           </button>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ padding: '1.75rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.8rem' }}>
-        © 2026 EduTakip · Özel Ders Yönetim Platformu
+      <footer style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.8rem', background: '#f9fafb', borderTop: '1px solid #f3f4f6' }}>
+        © 2026 EduTakip · Özel Ders Yönetim Platformu · Tüm hakları saklıdır.
       </footer>
     </div>
   );
