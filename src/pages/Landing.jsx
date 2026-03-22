@@ -49,103 +49,100 @@ const PRICING = [
 ];
 
 const MESSAGES = [
-  { from: 'Veli',        time: '08:47', text: 'Hocam bu hafta ders var mi? Programi unuttuk 😅', side: 'left',  color: '#3b82f6' },
-  { from: 'Ogrenci',     time: '10:32', text: 'Hocam hangi sayfadaydik? Defterimi kaybettim 😬', side: 'left',  color: '#22c55e' },
-  { from: 'Ic Sesiniz',  time: '13:40', text: '3 aydir odeme alamadim su aileden. Nasil soylecegim...', side: 'right', color: '#a855f7' },
-  { from: 'Veli',        time: '17:20', text: 'Bu ay toplam kac ders yaptik hocam? Hesaplayamadim.', side: 'left',  color: '#3b82f6' },
-  { from: 'Ogrenci',     time: '16:20', text: 'Hocam bu haftaya odev var miydi? 📝',              side: 'left',  color: '#22c55e' },
-  { from: 'Ic Sesiniz',  time: '21:45', text: 'Yine pazar aksami, yine saatlerce planlama...',    side: 'right', color: '#a855f7' },
-  { from: 'Veli',        time: '09:15', text: 'Gecen ayin odemesini yapmistik ya hocam?',          side: 'left',  color: '#3b82f6' },
-  { from: 'Ic Sesiniz',  time: '22:30', text: "Bir daha Excele girersem cildıracagim...",           side: 'right', color: '#a855f7' },
+  { from: 'Veli',       time: '08:47', text: 'Hocam bu hafta ders var mi? Programi unuttuk', side: 'left',  color: '#3b82f6' },
+  { from: 'Ogrenci',    time: '10:32', text: 'Hocam hangi sayfadaydik? Defterimi kaybettim', side: 'left',  color: '#22c55e' },
+  { from: 'Ic Sesiniz', time: '13:40', text: '3 aydir odeme alamadim su aileden...', side: 'right', color: '#a855f7' },
+  { from: 'Veli',       time: '17:20', text: 'Bu ay toplam kac ders yaptik hocam?', side: 'left',  color: '#3b82f6' },
+  { from: 'Ogrenci',    time: '16:20', text: 'Hocam bu haftaya odev var miydi?',    side: 'left',  color: '#22c55e' },
+  { from: 'Ic Sesiniz', time: '21:45', text: 'Yine pazar aksami, yine saatlerce planlama...', side: 'right', color: '#a855f7' },
+  { from: 'Veli',       time: '09:15', text: 'Gecen ayin odemesini yapmistik ya hocam?', side: 'left', color: '#3b82f6' },
+  { from: 'Ic Sesiniz', time: '22:30', text: 'Bir daha Excele girersem cildıracagim...', side: 'right', color: '#a855f7' },
 ];
 
 function SiradanGun() {
   const sectionRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const started = useRef(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const sectionH = sectionRef.current.offsetHeight;
-      const winH = window.innerHeight;
-      const scrolled = Math.max(0, -rect.top);
-      const scrollable = sectionH - winH;
-      const progress = scrollable > 0 ? Math.min(1, scrolled / scrollable) : 0;
-      setActiveIndex(Math.floor(progress * (MESSAGES.length + 1)) - 1);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        let i = 0;
+        const tick = () => {
+          if (i < MESSAGES.length) {
+            i++;
+            setVisibleCount(i);
+            setTimeout(tick, 650);
+          }
+        };
+        setTimeout(tick, 400);
+      }
+    }, { threshold: 0.2 });
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  const totalH = (MESSAGES.length + 3) * 120 + 200;
-
   return (
-    <section ref={sectionRef} style={{ background: '#080b14', position: 'relative', height: totalH + 'px' }}>
-      <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(99,102,241,0.07) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(168,85,247,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
+    <section ref={sectionRef} style={{ background: '#080b14', padding: '6rem 2rem', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(99,102,241,0.07) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(168,85,247,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: '1100px', width: '100%', padding: '0 2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', position: 'relative' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', position: 'relative' }}>
 
-          {/* Sol - Sabit baslik */}
-          <div>
-            <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.35rem 1rem', marginBottom: '1.5rem', border: '1px solid rgba(99,102,241,0.25)' }}>
-              Taniklik Geldi Mi?
+        <div>
+          <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.35rem 1rem', marginBottom: '1.5rem', border: '1px solid rgba(99,102,241,0.25)' }}>
+            Taniklik Geldi Mi?
+          </span>
+          <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
+            Bir Ogretmenin
+            <br />
+            <span style={{ background: 'linear-gradient(120deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Siradan Gunu
             </span>
-            <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
-              Bir Ogretmenin
-              <br />
-              <span style={{ background: 'linear-gradient(120deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Siradan Gunu
-              </span>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
-              Her gun ayni sorular, ayni stres. Siz yalniz degilsiniz.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {[['Veli Mesajlari', '#3b82f6'], ['Ogrenci Mesajlari', '#22c55e'], ['Ic Sesiniz', '#a855f7']].map(([label, color]) => (
-                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-                  <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{label}</span>
-                </div>
-              ))}
-            </div>
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
+            Her gun ayni sorular, ayni stres. Siz yalniz degilsiniz.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {[['Veli Mesajlari', '#3b82f6'], ['Ogrenci Mesajlari', '#22c55e'], ['Ic Sesiniz', '#a855f7']].map(([label, color]) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{label}</span>
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Sag - Mesajlar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {MESSAGES.map((msg, i) => {
-              const visible = i <= activeIndex;
-              const isRight = msg.side === 'right';
-              return (
-                <div key={i} style={{
-                  display: 'flex',
-                  justifyContent: isRight ? 'flex-end' : 'flex-start',
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? 'translateX(0)' : (isRight ? 'translateX(20px)' : 'translateX(-20px)'),
-                  transition: 'opacity 0.4s ease, transform 0.4s ease',
-                }}>
-                  <div style={{ maxWidth: '82%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem', justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: msg.color }}>{msg.from}</span>
-                      <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.2)' }}>{msg.time}</span>
-                    </div>
-                    <div style={{ background: isRight ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${msg.color}30`, borderRadius: isRight ? '16px 4px 16px 16px' : '4px 16px 16px 16px', padding: '0.7rem 1rem' }}>
-                      <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem', lineHeight: 1.55, margin: 0 }}>{msg.text}</p>
-                    </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minHeight: 480 }}>
+          {MESSAGES.map((msg, i) => {
+            const visible = i < visibleCount;
+            const isRight = msg.side === 'right';
+            return (
+              <div key={i} style={{
+                display: 'flex', justifyContent: isRight ? 'flex-end' : 'flex-start',
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateX(0)' : (isRight ? 'translateX(20px)' : 'translateX(-20px)'),
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
+              }}>
+                <div style={{ maxWidth: '82%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem', justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: msg.color }}>{msg.from}</span>
+                    <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.2)' }}>{msg.time}</span>
+                  </div>
+                  <div style={{ background: isRight ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.06)', border: '1px solid ' + msg.color + '30', borderRadius: isRight ? '16px 4px 16px 16px' : '4px 16px 16px 16px', padding: '0.7rem 1rem' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem', lineHeight: 1.55, margin: 0 }}>{msg.text}</p>
                   </div>
                 </div>
-              );
-            })}
-
-            {activeIndex >= MESSAGES.length - 1 && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.08))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 14, padding: '1rem 1.25rem', opacity: 1, transition: 'opacity 0.4s ease' }}>
-                <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '0.95rem', margin: '0 0 0.25rem' }}>Her Hafta Ayni Kaos</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: 0 }}>Peki ya bunlarin hepsini tek yerden cozebilseydiniz?</p>
               </div>
-            )}
-          </div>
+            );
+          })}
+
+          {visibleCount >= MESSAGES.length && (
+            <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.08))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 14, padding: '1rem 1.25rem', transition: 'opacity 0.4s ease' }}>
+              <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '0.95rem', margin: '0 0 0.25rem' }}>Her Hafta Ayni Kaos</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: 0 }}>Peki ya bunlarin hepsini tek yerden cozebilseydiniz?</p>
+            </div>
+          )}
         </div>
       </div>
     </section>
