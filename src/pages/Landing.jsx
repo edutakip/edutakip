@@ -56,7 +56,7 @@ const MESSAGES = [
   { from: 'İç Sesiniz',  time: '21:45', text: 'Yine pazar akşamı, yine saatlerce planlama...',                 color: '#f59e0b' },
   { from: 'Veli',        time: '13:40', text: '3 aydır ödeme alamadım şu aileden. Nasıl söyleyeceğim...',      color: '#3b82f6' },
   { from: 'Veli',        time: '17:20', text: 'Bu ay toplam kaç ders yaptık hocam? Hesaplayamadım.',           color: '#3b82f6' },
-  { from: 'İç Sesiniz',  time: '22:30', text: 'Bir daha Excel'e girersem çıldıracağım...',                    color: '#f59e0b' },
+  { from: 'İç Sesiniz',  time: '22:30', text: 'Bir daha Excel\'e girersem çıldıracağım...',                    color: '#f59e0b' },
 ];
 
 function SiradanGun() {
@@ -139,7 +139,7 @@ function SiradanGun() {
         {visibleCount >= MESSAGES.length && (
           <div style={{ textAlign: 'center', marginTop: '3rem', animation: 'msgIn 0.5s ease forwards' }}>
             <div style={{ display: 'inline-block', background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.1))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 14, padding: '1rem 2rem' }}>
-              <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>Her Hafta Aynı Kaos 😮‍💨</p>
+              <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>Her Hafta Aynı Kaos 😓</p>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginTop: '0.4rem', marginBottom: 0 }}>Peki ya bunların hepsini tek yerden çözebilseydiniz?</p>
             </div>
           </div>
