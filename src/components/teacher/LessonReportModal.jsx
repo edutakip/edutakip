@@ -8,9 +8,9 @@ const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
 const RATING_LABELS = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
 
 const CHOICES = {
-  understood:   [{ v: 'tam',    l: 'Tam Anladı',     icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',  icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli', icon: '🔁' }],
-  participation:[{ v: 'aktif',  l: 'Aktif Katılım',  icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',   icon: '😐' }, { v: 'pasif',  l: 'Pasif',          icon: '😶' }],
-  motivation:   [{ v: 'yuksek',l: 'Yüksek',          icon: '🔥' }, { v: 'normal', l: 'Normal',          icon: '👍' }, { v: 'dusuk',  l: 'Düşük',          icon: '😞' }],
+  understood:   [{ v: 'tam',    l: 'Tam Anladı',        icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',     icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli',    icon: '🔁' }],
+  participation:[{ v: 'aktif',  l: 'Aktif Katılım',     icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',      icon: '😐' }, { v: 'pasif',  l: 'Pasif',             icon: '😶' }],
+  motivation:   [{ v: 'yuksek',l: 'Yüksek',             icon: '🔥' }, { v: 'normal', l: 'Normal',            icon: '👍' }, { v: 'dusuk',  l: 'Düşük',             icon: '😞' }],
 };
 
 function ChoiceGroup({ label, field, value, onChange }) {
@@ -79,11 +79,9 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
           rating: r.rating || 4,
           attendance: r.attendance || 'katıldı',
           challenge: r.improvements || '',
+          generalNote: r.generalNote || '',
         }));
-        if (r.generalNote) {
-          setGeneratedReport(r.generalNote);
-          setStep(3);
-        }
+        // Eski raporu yükleme — kullanıcı yeniden oluştursun
       }
     });
   }, [lesson.id]);
@@ -121,7 +119,12 @@ Raporu şu formatta yaz:
 4. Ödevi ve sonraki ders hedefini belirt (📚 ve ➡️ emojileriyle)
 5. Teşekkür cümlesiyle bitir
 
-Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akıcı paragraflar halinde yaz.`;
+Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akıcı paragraflar halinde yaz.
+
+ZORUNLU KURALLAR:
+- Asla [İsim], [Pozisyon], [Okul] gibi placeholder yazma
+- Saygılarımla satırından sonra hiçbir şey ekleme
+- Mesajı "Saygılarımla," ile bitir, imza ekleme`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const text = typeof result === 'string' ? result : result?.text || result?.content || JSON.stringify(result);
@@ -174,15 +177,22 @@ Ton: Profesyonel ama sıcak. Türkçe. Veliye hitap et. Madde madde değil, akı
 
     setLoading(false);
 
+    // Placeholder imzaları temizle
+    const cleanReport = generatedReport
+      .replace(/\[İsim\]/g, '').replace(/\[Pozisyon\]/g, '')
+      .replace(/\[Okul\/Öğretim Kurumu\]/g, '').replace(/\[Okul\]/g, '')
+      .replace(/\[İmza\]/g, '').replace(/\[Signature\]/g, '')
+      .replace(/\[\w+\]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+
     const phone = lesson.parentPhone;
     if (phone) {
-      setWhatsapp({ phone, message: generatedReport });
+      setWhatsapp({ phone, message: cleanReport });
     } else {
       try {
         const students = await base44.entities.Student.filter({ id: lesson.studentId });
         const studentPhone = students[0]?.parentPhone;
         if (studentPhone) {
-          setWhatsapp({ phone: studentPhone, message: generatedReport });
+          setWhatsapp({ phone: studentPhone, message: cleanReport });
           return;
         }
       } catch (e) {}
