@@ -52,6 +52,17 @@ export default function TeacherHomework() {
     })();
   }, []);
 
+  // FAB'dan gelen event'i dinle
+  useEffect(() => {
+    const handler = () => {
+      setEditingHw(null);
+      setForm({ studentId: '', title: '', description: '', dueDate: '' });
+      setShowForm(true);
+    };
+    window.addEventListener('fab:openHomework', handler);
+    return () => window.removeEventListener('fab:openHomework', handler);
+  }, []);
+
   // Yaramaz popup fix
   useEffect(() => {
     if (showForm) {
