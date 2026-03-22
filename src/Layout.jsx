@@ -357,7 +357,7 @@ export default function Layout({ children, currentPageName }) {
           students={fabStudents}
           defaultDate={new Date().toISOString().slice(0, 10)}
           onClose={() => setShowLessonModal(false)}
-          onSaved={() => { setShowLessonModal(false); window.location.reload(); }}
+          onSaved={() => { setShowLessonModal(false); }}
         />
       )}
 
@@ -398,8 +398,7 @@ export default function Layout({ children, currentPageName }) {
             } else if (a.action === 'paymentModal') {
               setShowPaymentModal(true);
             } else if (a.action === 'homeworkModal') {
-              window.dispatchEvent(new CustomEvent('fab:openHomework'));
-              navigate(createPageUrl('TeacherHomework'));
+              navigate(createPageUrl('TeacherHomework') + '?openForm=true');
             }
             setFabOpen(false);
           };
