@@ -130,25 +130,32 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
     setLoading(false);
 
-    // WhatsApp bildirimi — onSaved'den önce çağır
-    const phone = student?.parentPhone;
-    if (phone && !isEditing) {
-      const typeLabel = form.type === 'online' ? 'Online' : 'Yüz yüze';
+    // WhatsApp bildirimi — telefon yoksa bile modalı aç
+    if (!isEditing) {
+      const phone = student?.parentPhone || '';
+      const typeLabel = form.type === 'online' ? 'Online 💻' : 'Yüz yüze 📍';
+      // Tarihi güzel formatla
+      const dateObj = new Date(form.date + 'T12:00:00');
+      const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+      const dateStr = `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
       const msgParts = [
-         `Merhaba ${student?.parentName || 'Velimiz'} 👋😊`,
-         '',
-         `📚 ${student?.name || 'Öğrencimiz'} için yeni bir ders planlandı.`,
-         '',
-         `🗓 Dersimiz *${form.date}* tarihinde`,
-         `⏰ *${form.startTime} – ${form.endTime}* saatleri arasında`,
-         `📍 *${typeLabel}* olarak gerçekleştirilecektir.`,
+        `Merhaba ${student?.parentName || 'Sayın Veli'} 👋`,
+        '',
+        `*${student?.name || 'Öğrencimiz'}* için yeni bir ders planlandı. Bilgilerinize sunarız.`,
+        '',
+        `📅 *Tarih:* ${dateStr}`,
+        `⏰ *Saat:* ${form.startTime} – ${form.endTime}`,
+        `📌 *Ders Türü:* ${typeLabel}`,
       ];
-      if (form.location) msgParts.push(`Konum: ${form.location}`);
-      if (meetingLink) msgParts.push(`Link: ${meetingLink}`);
-      msgParts.push('', 'Iyi dersler dileriz!');
+      if (form.subject) msgParts.push(`📖 *Konu:* ${form.subject}`);
+      if (form.location) msgParts.push(`🏠 *Konum:* ${form.location}`);
+      if (meetingLink) msgParts.push(`🔗 *Online Link:* ${meetingLink}`);
+      msgParts.push('', 'Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.', 'İyi dersler dileriz! 🌟', '', '─────────────────', 'EduTakip.com');
       const msg = msgParts.join('\n');
       setWhatsapp({ phone, message: msg });
     } else {
+      onSaved?.();
       onClose();
     }
   };
