@@ -206,47 +206,27 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </main>
 
-      {/* ── Hızlı Aksiyonlar FAB ─────────────────────────── */}
-      <FAB navigate={navigate} />
-    </div>
-  );
-}
-
-function FAB({ navigate }) {
-  const [open, setOpen] = useState(false);
-
-  const actions = [
-    { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', icon: CalendarDays,  page: 'TeacherLessons'  },
-    { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', icon: DollarSign,    page: 'TeacherFinance'  },
-    { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', icon: BookOpen,      page: 'TeacherHomework' },
-  ];
-
-  return (
-    <>
-      {open && <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
+      {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
       <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-        <style>{`@keyframes fabIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }`}</style>
-        {open && actions.map((action, i) => {
-          const Icon = action.icon;
-          return (
-            <div key={i} onClick={() => { navigate(createPageUrl(action.page)); setOpen(false); }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', animation: `fabIn 0.2s ease ${i * 0.06}s both` }}>
-              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: '700', padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>
-                {action.label}
-              </span>
-              <div style={{ width: 44, height: 44, borderRadius: '50%', background: action.bg, border: `2px solid ${action.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)', transition: 'transform 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                <Icon size={18} color={action.color} />
-              </div>
+        {fabOpen && [
+          { label: 'Ders Ekle', color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, page: 'TeacherLessons' },
+          { label: 'Ödeme Al',  color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   page: 'TeacherFinance' },
+          { label: 'Ödev Ver',  color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     page: 'TeacherHomework' },
+        ].map((a, i) => (
+          <div key={i} onClick={() => { navigate(createPageUrl(a.page)); setFabOpen(false); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+            <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <a.Icon size={18} color={a.color} />
             </div>
-          );
-        })}
-        <button onClick={() => setOpen(o => !o)}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+          </div>
+        ))}
+        <button onClick={() => setFabOpen(o => !o)}
+          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
           <Plus size={22} color="white" />
         </button>
       </div>
-    </>
+
+    </div>
   );
 }
