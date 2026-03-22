@@ -316,58 +316,66 @@ export default function TeacherCalendar() {
         </div>
       </div>
 
-      {/* Main layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: '1.25rem', alignItems: 'start' }}>
-        {/* Calendar */}
-        <div>
-          {view === 'daily' && <DailyView />}
-          {view === 'weekly' && <WeeklyView />}
-          {view === 'monthly' && <MonthlyView />}
-        </div>
-
-        {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Stats */}
-          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', padding: '1rem' }}>
-            <h3 style={{ color: '#374151', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.75rem' }}>Genel Bakış</h3>
-            {[
-              { label: 'Toplam Ders', value: lessons.length, color: '#4f46e5' },
-              { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#4f46e5' },
-              { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#10b981' },
-              { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#ef4444' },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.45rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#6b7280', fontSize: '0.78rem' }}>{label}</span>
-                <span style={{ color, fontWeight: 800, fontSize: '0.9rem' }}>{value}</span>
-              </div>
-            ))}
+      {/* Genel Bakış — takvimin üstünde */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+        {[
+          { label: 'Toplam Ders', value: lessons.length, color: '#4f46e5', bg: '#eef2ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
+          { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#6366f1', bg: '#e0e7ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+          { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#10b981', bg: '#d1fae5', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> },
+          { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#ef4444', bg: '#fee2e2', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> },
+        ].map(({ label, value, color, bg, icon }) => (
+          <div key={label} style={{ background: 'white', borderRadius: 14, padding: '0.85rem 1.1rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {icon}
+            </div>
+            <div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+              <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 600, marginTop: '0.15rem' }}>{label}</div>
+            </div>
           </div>
-
-          {/* Upcoming */}
-          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', padding: '1rem' }}>
-            <h3 style={{ color: '#374151', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Calendar size={14} color='#4f46e5' /> Yaklaşan Dersler
-            </h3>
-            {upcoming.length === 0 && <p style={{ color: '#9ca3af', fontSize: '0.78rem', textAlign: 'center', padding: '0.75rem 0' }}>Planlanmış ders yok</p>}
-            {upcoming.map(l => (
-              <div key={l.id} onClick={(e) => openEdit(l, e)}
-                style={{ padding: '0.65rem', borderRadius: 10, background: '#f8fafc', border: '1px solid #f1f5f9', marginBottom: '0.5rem', cursor: 'pointer', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#c7d2fe'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#f1f5f9'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ color: '#374151', fontWeight: 700, fontSize: '0.8rem' }}>{l.studentName}</div>
-                  <Edit2 size={11} color='#9ca3af' />
-                </div>
-                <div style={{ color: '#9ca3af', fontSize: '0.7rem', marginTop: '0.2rem', display: 'flex', gap: '0.5rem' }}>
-                  <span>{l.date}</span>
-                  <span>{l.startTime}</span>
-                </div>
-                {l.subject && <div style={{ color: '#6b7280', fontSize: '0.7rem', marginTop: '0.15rem' }}>{l.subject}</div>}
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
+
+      {/* Takvim — tam genişlik */}
+      <div>
+        {view === 'daily' && <DailyView />}
+        {view === 'weekly' && <WeeklyView />}
+        {view === 'monthly' && <MonthlyView />}
+      </div>
+
+      {/* Yaklaşan Dersler — takvimin altında */}
+      {upcoming.length > 0 && (
+        <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: '1.1rem 1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <h3 style={{ color: '#374151', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Calendar size={14} color='#4f46e5' /> Yaklaşan Dersler
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.6rem' }}>
+            {upcoming.map(l => {
+              try {
+                const d = parseISO(l.date);
+                const isTod = isToday(d);
+                const dateLabel = isTod ? 'Bugün' : format(d, 'd MMM', { locale: tr });
+                return (
+                  <div key={l.id} onClick={(e) => openEdit(l, e)}
+                    style={{ padding: '0.75rem', borderRadius: 12, background: isTod ? '#eef2ff' : '#f8fafc', border: `1.5px solid ${isToday(d) ? '#c7d2fe' : '#f1f5f9'}`, cursor: 'pointer', transition: 'all 0.15s', display: 'flex', gap: '0.75rem', alignItems: 'center' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#c7d2fe'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = isToday(d) ? '#eef2ff' : '#f8fafc'; e.currentTarget.style.borderColor = isToday(d) ? '#c7d2fe' : '#f1f5f9'; }}>
+                    <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.65rem', color: '#9ca3af', fontWeight: 600 }}>{dateLabel}</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#4f46e5' }}>{l.startTime?.slice(0,5)}</div>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.studentName}</div>
+                      {l.subject && <div style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '0.1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.subject}</div>}
+                    </div>
+                    <Edit2 size={12} color='#d1d5db' style={{ flexShrink: 0, marginLeft: 'auto' }} />
+                  </div>
+                );
+              } catch { return null; }
+            })}
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <LessonModal
