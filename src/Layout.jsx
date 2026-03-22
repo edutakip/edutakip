@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus } from 'lucide-react';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -126,12 +126,19 @@ const PARENT_NAV = [
   { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
+const FAB_ACTIONS = [
+  { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, page: 'TeacherLessons'  },
+  { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   page: 'TeacherFinance'  },
+  { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     page: 'TeacherHomework' },
+];
+
 export default function Layout({ children, currentPageName }) {
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [navigating, setNavigating] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
 
@@ -181,7 +188,6 @@ export default function Layout({ children, currentPageName }) {
 
   const SidebarContent = () => (
     <>
-      {/* Logo */}
       <div style={{ padding: '1.25rem 1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
         <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px' }} />
         {!collapsed && (
@@ -194,7 +200,6 @@ export default function Layout({ children, currentPageName }) {
         )}
       </div>
 
-      {/* User info */}
       {user && !collapsed && (
         <div style={{ margin: '0 0.75rem 0.75rem', padding: '0.65rem 0.75rem', background: 'rgba(255,255,255,0.07)', borderRadius: '10px' }}>
           <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: '700', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.full_name}</p>
@@ -208,10 +213,8 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
-      {/* Divider */}
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.75rem 1rem' }} />
 
-      {/* Nav */}
       <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
         {nav.map((item, i) => {
           const Icon = item.icon;
@@ -238,7 +241,6 @@ export default function Layout({ children, currentPageName }) {
         })}
       </nav>
 
-      {/* Bottom - only show logout icon when collapsed */}
       {collapsed && (
         <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
@@ -253,17 +255,13 @@ export default function Layout({ children, currentPageName }) {
     </>
   );
 
-  // Veli için alt navigation layout
   if (isParent) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
-        {/* MAIN */}
         <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
-
-        {/* BOTTOM NAV */}
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
           background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
@@ -290,7 +288,6 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             );
           })}
-          {/* Logout button */}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -307,12 +304,10 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // Öğretmen için sol sidebar layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <LoadingBar active={navigating} />
 
-      {/* SIDEBAR */}
       <aside style={{
         width: sideW, flexShrink: 0,
         background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
@@ -322,8 +317,6 @@ export default function Layout({ children, currentPageName }) {
         boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
       }}>
         <SidebarContent />
-
-        {/* Collapse toggle */}
         <button onClick={() => setCollapsed(c => !c)}
           style={{
             position: 'absolute', top: '50%', right: '-11px', transform: 'translateY(-50%)',
@@ -337,12 +330,31 @@ export default function Layout({ children, currentPageName }) {
         </button>
       </aside>
 
-      {/* MAIN */}
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
         <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
       </main>
+
+      {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
+      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+        {fabOpen && FAB_ACTIONS.map((a, i) => {
+          const Icon = a.Icon;
+          return (
+            <div key={i} onClick={() => { navigate(createPageUrl(a.page)); setFabOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                <Icon size={18} color={a.color} />
+              </div>
+            </div>
+          );
+        })}
+        <button onClick={() => setFabOpen(o => !o)}
+          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+          <Plus size={22} color="white" />
+        </button>
+      </div>
     </div>
   );
 }
