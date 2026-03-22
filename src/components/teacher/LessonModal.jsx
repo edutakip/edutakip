@@ -43,13 +43,20 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const generateZoom = async () => {
+  const generateZoom = () => {
     setZoomLoading(true);
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate a realistic fake Zoom meeting link for a tutoring session on ${form.date} at ${form.startTime}. Format: https://zoom.us/j/XXXXXXXXXX?pwd=XXXXXXXXX. Return only the URL.`,
-      });
-      setMeetingLink(res.trim());
+      // Jitsi Meet — ücretsiz, API gerekmez, anında çalışır
+      const studentName = form.studentId
+        ? (students.find(s => s.id === form.studentId)?.name || 'Ders')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-zA-Z0-9-]/g, '')
+        : 'Ders';
+      const dateStr = (form.date || '').replace(/-/g, '');
+      const timeStr = (form.startTime || '').replace(':', '');
+      const randomSuffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+      const roomName = `EduTakip-${studentName}-${dateStr}-${timeStr}-${randomSuffix}`;
+      setMeetingLink(`https://meet.jit.si/${roomName}`);
     } finally { setZoomLoading(false); }
   };
 
