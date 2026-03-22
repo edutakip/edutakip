@@ -91,7 +91,7 @@ function SiradanGun() {
 
         <div>
           <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.35rem 1rem', marginBottom: '1.5rem', border: '1px solid rgba(99,102,241,0.25)' }}>
-            Taniklik Geldi Mi?
+            Tanidik Geldi Mi?
           </span>
           <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
             Bir Ogretmenin
