@@ -13,6 +13,9 @@ export default function TeacherDashboard() {
   const [students, setStudents] = useState([]);
   const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [monthlyGoal, setMonthlyGoal] = useState(() => parseInt(localStorage.getItem('monthlyGoal') || '20'));
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState('');
 
   useEffect(() => { loadData(); }, []);
 
@@ -108,7 +111,7 @@ export default function TeacherDashboard() {
   const hour = new Date().getHours();
   const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
 
-  const greetings = { morning: 'Günaydın', afternoon: 'Tünaydın', evening: 'İyi Akşamlar' };
+  const greetings = { morning: 'Günaydın', afternoon: 'İyi Öğleler', evening: 'İyi Akşamlar' };
   const colors = { morning: { primary: '#f97316', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #1a1035 100%)', accent: '#fb923c' }, afternoon: { primary: '#6366f1', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f1035 100%)', accent: '#818cf8' }, evening: { primary: '#8b5cf6', gradient: 'linear-gradient(135deg, #0f0f1a 0%, #1a1035 60%, #1a0f2e 100%)', accent: '#a78bfa' } };
   const theme = colors[timeOfDay];
 
@@ -339,6 +342,101 @@ export default function TeacherDashboard() {
         </div>
 
       </div>
+
+      {/* ── Hedef Takibi ─────────────────────────────────── */}
+      {(() => {
+        const pct = Math.min(Math.round((completedThisMonth / monthlyGoal) * 100), 100);
+        const remaining = Math.max(monthlyGoal - completedThisMonth, 0);
+        const isAchieved = completedThisMonth >= monthlyGoal;
+
+        return (
+          <div style={{ background: 'white', borderRadius: 20, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '0.2rem' }}>Aylık Hedef Takibi</h2>
+                <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{format(new Date(), 'MMMM yyyy', { locale: tr })}</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {isAchieved && (
+                  <span style={{ background: '#d1fae5', color: '#059669', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: 20 }}>
+                    🎯 Hedefe Ulaşıldı!
+                  </span>
+                )}
+                {editingGoal ? (
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                    <input
+                      type="number" value={goalInput}
+                      onChange={e => setGoalInput(e.target.value)}
+                      style={{ width: 70, padding: '0.35rem 0.5rem', borderRadius: 8, border: '1.5px solid #6366f1', fontSize: '0.85rem', fontWeight: 700, color: '#111827', outline: 'none', textAlign: 'center' }}
+                      autoFocus
+                    />
+                    <button onClick={() => {
+                      const val = parseInt(goalInput);
+                      if (val > 0) { setMonthlyGoal(val); localStorage.setItem('monthlyGoal', val); }
+                      setEditingGoal(false);
+                    }} style={{ background: '#6366f1', border: 'none', color: 'white', borderRadius: 8, padding: '0.35rem 0.7rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+                      Kaydet
+                    </button>
+                    <button onClick={() => setEditingGoal(false)}
+                      style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 8, padding: '0.35rem 0.7rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+                      İptal
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => { setGoalInput(String(monthlyGoal)); setEditingGoal(true); }}
+                    style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 8, padding: '0.35rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Hedef Düzenle
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* İstatistikler */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.25rem' }}>
+              {[
+                { label: 'Tamamlanan', value: completedThisMonth, color: '#6366f1' },
+                { label: 'Hedef', value: monthlyGoal, color: '#374151' },
+                { label: 'Kalan', value: remaining, color: remaining === 0 ? '#10b981' : '#f59e0b' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ textAlign: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: 12 }}>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 600, marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress bar */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 600 }}>{completedThisMonth} / {monthlyGoal} ders</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isAchieved ? '#10b981' : '#6366f1' }}>{pct}%</span>
+              </div>
+              <div style={{ height: 12, background: '#f3f4f6', borderRadius: 10, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${pct}%`,
+                  borderRadius: 10,
+                  background: isAchieved
+                    ? 'linear-gradient(90deg, #10b981, #34d399)'
+                    : pct >= 70
+                    ? 'linear-gradient(90deg, #6366f1, #8b5cf6)'
+                    : pct >= 40
+                    ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
+                    : 'linear-gradient(90deg, #f97316, #fb923c)',
+                  transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: isAchieved ? '0 0 8px rgba(16,185,129,0.4)' : '0 0 8px rgba(99,102,241,0.3)',
+                }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem' }}>
+                {[0, 25, 50, 75, 100].map(mark => (
+                  <span key={mark} style={{ fontSize: '0.65rem', color: pct >= mark ? '#6366f1' : '#d1d5db', fontWeight: 600 }}>{mark}%</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {showModal && (
         <LessonModal students={students} defaultDate={format(new Date(), 'yyyy-MM-dd')} onClose={() => setShowModal(false)} onSaved={loadData} />
