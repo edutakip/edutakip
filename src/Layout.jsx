@@ -1,113 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home } from 'lucide-react';
-
-// ── Page transition wrapper ───────────────────────────────────
-function PageTransition({ children, pageKey }) {
-  const [visible, setVisible] = useState(false);
-  const [displayChildren, setDisplayChildren] = useState(children);
-  const prevKey = useRef(pageKey);
-
-  useEffect(() => {
-    if (prevKey.current !== pageKey) {
-      setVisible(false);
-      const t1 = setTimeout(() => {
-        setDisplayChildren(children);
-        prevKey.current = pageKey;
-        const t2 = setTimeout(() => setVisible(true), 30);
-        return () => clearTimeout(t2);
-      }, 150);
-      return () => clearTimeout(t1);
-    } else {
-      const t = setTimeout(() => setVisible(true), 50);
-      return () => clearTimeout(t);
-    }
-  }, [pageKey]);
-
-  useEffect(() => {
-    if (prevKey.current === pageKey) {
-      setDisplayChildren(children);
-    }
-  }, [children]);
-
-  return (
-    <div style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(12px)',
-      transition: 'opacity 0.22s ease, transform 0.22s ease',
-      willChange: 'opacity, transform',
-    }}>
-      {displayChildren}
-    </div>
-  );
-}
-
-// ── Top loading bar ───────────────────────────────────────────
-function LoadingBar({ active }) {
-  const [width, setWidth] = useState(0);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (active) {
-      setWidth(0);
-      setOpacity(1);
-      const t1 = setTimeout(() => setWidth(70), 30);
-      const t2 = setTimeout(() => setWidth(90), 800);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
-    } else {
-      setWidth(100);
-      const t = setTimeout(() => setOpacity(0), 200);
-      return () => clearTimeout(t);
-    }
-  }, [active]);
-
-  useEffect(() => {
-    if (!active) {
-      const t = setTimeout(() => { setWidth(0); setOpacity(1); }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [active]);
-
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, zIndex: 9999, pointerEvents: 'none', opacity, transition: 'opacity 0.2s ease' }}>
-      <div style={{
-        height: '100%', width: `${width}%`,
-        background: 'linear-gradient(90deg, #6366f1, #a78bfa)',
-        borderRadius: '0 3px 3px 0',
-        boxShadow: '0 0 10px rgba(99,102,241,0.6)',
-        transition: width === 0 ? 'none' : width === 100 ? 'width 0.2s ease' : 'width 0.8s ease',
-      }} />
-    </div>
-  );
-}
-
-// ── Prefetch config ───────────────────────────────────────────
-const PAGE_PREFETCH = {
-  TeacherFinance:   (base44, me) => Promise.all([
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherCalendar:  (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-  ]),
-  TeacherStudents:  (base44, me) => Promise.all([
-    base44.entities.Student.filter({ teacherEmail: me.email }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherDashboard: (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherLessons:   (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-};
 
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -131,34 +25,6 @@ export default function Layout({ children, currentPageName }) {
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [navigating, setNavigating] = useState(false);
-  const navigate = useNavigate();
-  const prevPage = useRef(currentPageName);
-
-  useEffect(() => {
-    if (prevPage.current !== currentPageName) {
-      setNavigating(true);
-      const t = setTimeout(() => { setNavigating(false); prevPage.current = currentPageName; }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [currentPageName]);
-
-  const handleNav = (e, page) => {
-    if (page === currentPageName) return;
-    e.preventDefault();
-    setNavigating(true);
-    const prefetch = PAGE_PREFETCH[page];
-    if (prefetch) {
-      import('@/api/base44Client').then(({ base44 }) => {
-        base44.auth.me().then(me => {
-          const timeout = new Promise(res => setTimeout(res, 1200));
-          Promise.race([prefetch(base44, me), timeout]).finally(() => navigate(createPageUrl(page)));
-        }).catch(() => navigate(createPageUrl(page)));
-      });
-    } else {
-      setTimeout(() => navigate(createPageUrl(page)), 300);
-    }
-  };
 
   React.useEffect(() => {
     import('@/api/base44Client').then(({ base44 }) => {
@@ -218,7 +84,6 @@ export default function Layout({ children, currentPageName }) {
           const isActive = item.page === currentPageName;
           return (
             <Link key={i} to={createPageUrl(item.page)}
-              onClick={(e) => handleNav(e, item.page)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.6rem 0.75rem', borderRadius: '10px',
@@ -257,10 +122,9 @@ export default function Layout({ children, currentPageName }) {
   if (isParent) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-        <LoadingBar active={navigating} />
         {/* MAIN */}
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+        <main style={{ flex: 1, minHeight: '100vh', paddingBottom: '70px' }}>
+          {children}
         </main>
 
         {/* BOTTOM NAV */}
@@ -276,7 +140,6 @@ export default function Layout({ children, currentPageName }) {
             const isActive = item.page === currentPageName;
             return (
               <Link key={i} to={createPageUrl(item.page)}
-                onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
@@ -310,7 +173,6 @@ export default function Layout({ children, currentPageName }) {
   // Öğretmen için sol sidebar layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <LoadingBar active={navigating} />
 
       {/* SIDEBAR */}
       <aside style={{
@@ -338,11 +200,75 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* MAIN */}
-      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
-        <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', transition: 'margin-left 0.2s ease' }}>
+        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
+          {children}
         </div>
       </main>
+
+      {/* ── Hızlı Aksiyonlar FAB ─────────────────────────── */}
+      <FAB navigate={navigate} />
     </div>
+  );
+}
+
+function FAB({ navigate }) {
+  const [open, setOpen] = useState(false);
+
+  const actions = [
+    {
+      label: 'Ders Ekle',
+      color: '#4f46e5',
+      bg: '#eef2ff',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>,
+      onClick: () => { navigate(createPageUrl('TeacherLessons')); setOpen(false); },
+    },
+    {
+      label: 'Ödeme Al',
+      color: '#10b981',
+      bg: '#ecfdf5',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>,
+      onClick: () => { navigate(createPageUrl('TeacherFinance')); setOpen(false); },
+    },
+    {
+      label: 'Ödev Ver',
+      color: '#f97316',
+      bg: '#fff7ed',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+      onClick: () => { navigate(createPageUrl('TeacherHomework')); setOpen(false); },
+    },
+  ];
+
+  return (
+    <>
+      {open && (
+        <div onClick={() => setOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 998 }} />
+      )}
+      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+        <style>{`@keyframes fabIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }`}</style>
+        {open && actions.map((action, i) => (
+          <div key={i} onClick={action.onClick}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', animation: `fabIn 0.2s ease ${i * 0.06}s both` }}>
+            <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: '700', padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>
+              {action.label}
+            </span>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: action.bg, border: `2px solid ${action.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)', transition: 'transform 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+              {action.icon}
+            </div>
+          </div>
+        ))}
+        <button onClick={() => setOpen(o => !o)}
+          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s, box-shadow 0.2s', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}
+          onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 24px rgba(79,70,229,0.6)'}
+          onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(79,70,229,0.45)'}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </>
   );
 }
