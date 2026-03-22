@@ -108,7 +108,7 @@ export default function TeacherDashboard() {
   const hour = new Date().getHours();
   const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
 
-  const greetings = { morning: 'Günaydın', afternoon: 'İyi Öğleler', evening: 'İyi Akşamlar' };
+  const greetings = { morning: 'Günaydın', afternoon: 'Tünaydın', evening: 'İyi Akşamlar' };
   const colors = { morning: { primary: '#f97316', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #1a1035 100%)', accent: '#fb923c' }, afternoon: { primary: '#6366f1', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f1035 100%)', accent: '#818cf8' }, evening: { primary: '#8b5cf6', gradient: 'linear-gradient(135deg, #0f0f1a 0%, #1a1035 60%, #1a0f2e 100%)', accent: '#a78bfa' } };
   const theme = colors[timeOfDay];
 
