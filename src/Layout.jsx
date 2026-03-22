@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus } from 'lucide-react';
+import LessonModal from './components/teacher/LessonModal';
+import PaymentModal from './components/teacher/PaymentModal';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -126,9 +128,9 @@ const PARENT_NAV = [
 ];
 
 const FAB_ACTIONS = [
-  { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, page: 'TeacherLessons'  },
-  { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   page: 'TeacherFinance'  },
-  { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     page: 'TeacherHomework' },
+  { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
+  { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
+  { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -138,6 +140,20 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [navigating, setNavigating] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [fabStudents, setFabStudents] = useState([]);
+  const [selectedPayStudent, setSelectedPayStudent] = useState(null);
+
+  useEffect(() => {
+    if (role === 'teacher') {
+      import('@/api/base44Client').then(({ base44 }) => {
+        base44.auth.me().then(me => {
+          base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(setFabStudents).catch(() => {});
+        }).catch(() => {});
+      });
+    }
+  }, [role]);
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
 
@@ -336,11 +352,59 @@ export default function Layout({ children, currentPageName }) {
       </main>
 
       {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
+      {showLessonModal && (
+        <LessonModal
+          students={fabStudents}
+          defaultDate={new Date().toISOString().slice(0, 10)}
+          onClose={() => setShowLessonModal(false)}
+          onSaved={() => { setShowLessonModal(false); window.location.reload(); }}
+        />
+      )}
+
+      {showPaymentModal && !selectedPayStudent && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowPaymentModal(false)}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 380, boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.4rem' }}>Ödeme Al</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginBottom: '1.25rem' }}>Öğrenci seçin</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 300, overflowY: 'auto' }}>
+              {fabStudents.map(s => (
+                <button key={s.id} onClick={() => setSelectedPayStudent(s)}
+                  style={{ padding: '0.75rem 1rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#111827', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#6366f1'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPaymentModal && selectedPayStudent && (
+        <PaymentModal
+          student={selectedPayStudent}
+          onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
+          onSaved={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
+        />
+      )}
       <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
         {fabOpen && FAB_ACTIONS.map((a, i) => {
           const Icon = a.Icon;
+          const handleClick = () => {
+            if (a.action === 'lessonModal') {
+              setShowLessonModal(true);
+            } else if (a.action === 'paymentModal') {
+              setShowPaymentModal(true);
+            } else if (a.action === 'homeworkModal') {
+              window.dispatchEvent(new CustomEvent('fab:openHomework'));
+              navigate(createPageUrl('TeacherHomework'));
+            }
+            setFabOpen(false);
+          };
           return (
-            <div key={i} onClick={() => { navigate(createPageUrl(a.page)); setFabOpen(false); }}
+            <div key={i} onClick={handleClick}
               style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
               <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
               <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
