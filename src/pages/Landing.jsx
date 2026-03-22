@@ -49,105 +49,109 @@ const PRICING = [
 ];
 
 const MESSAGES = [
-  { from: 'Veli',        time: '08:47', text: 'Hocam bu hafta ders var mı? Programı unuttuk 😅',                color: '#3b82f6' },
-  { from: 'Veli',        time: '09:15', text: 'Geçen ayın ödemesini yapmıştık ya hocam?',                      color: '#3b82f6' },
-  { from: 'Öğrenci',     time: '10:32', text: 'Hocam hangi sayfadaydık? Defterimi kaybettim 😬',               color: '#10b981' },
-  { from: 'Öğrenci',     time: '16:20', text: 'Hocam bu haftaya ödev var mıydı? 📝',                           color: '#10b981' },
-  { from: 'İç Sesiniz',  time: '21:45', text: 'Yine pazar akşamı, yine saatlerce planlama...',                 color: '#f59e0b' },
-  { from: 'Veli',        time: '13:40', text: '3 aydır ödeme alamadım şu aileden. Nasıl söyleyeceğim...',      color: '#3b82f6' },
-  { from: 'Veli',        time: '17:20', text: 'Bu ay toplam kaç ders yaptık hocam? Hesaplayamadım.',           color: '#3b82f6' },
-  { from: 'İç Sesiniz',  time: '22:30', text: 'Bir daha Excel\'e girersem çıldıracağım...',                    color: '#f59e0b' },
+  { from: 'Veli',        time: '08:47', text: 'Hocam bu hafta ders var mi? Programi unuttuk 😅', side: 'left',  color: '#3b82f6' },
+  { from: 'Ogrenci',     time: '10:32', text: 'Hocam hangi sayfadaydik? Defterimi kaybettim 😬', side: 'left',  color: '#22c55e' },
+  { from: 'Ic Sesiniz',  time: '13:40', text: '3 aydir odeme alamadim su aileden. Nasil soylecegim...', side: 'right', color: '#a855f7' },
+  { from: 'Veli',        time: '17:20', text: 'Bu ay toplam kac ders yaptik hocam? Hesaplayamadim.', side: 'left',  color: '#3b82f6' },
+  { from: 'Ogrenci',     time: '16:20', text: 'Hocam bu haftaya odev var miydi? 📝',              side: 'left',  color: '#22c55e' },
+  { from: 'Ic Sesiniz',  time: '21:45', text: 'Yine pazar aksami, yine saatlerce planlama...',    side: 'right', color: '#a855f7' },
+  { from: 'Veli',        time: '09:15', text: 'Gecen ayin odemesini yapmistik ya hocam?',          side: 'left',  color: '#3b82f6' },
+  { from: 'Ic Sesiniz',  time: '22:30', text: "Bir daha Excele girersem cildıracagim...",           side: 'right', color: '#a855f7' },
 ];
 
 function SiradanGun() {
-  const [visibleCount, setVisibleCount] = useState(0);
   const sectionRef = useRef(null);
-  const hasStarted = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasStarted.current) {
-          hasStarted.current = true;
-          let i = 0;
-          const interval = setInterval(() => {
-            i++;
-            setVisibleCount(i);
-            if (i >= MESSAGES.length) clearInterval(interval);
-          }, 600);
-        }
-      },
-      { threshold: 0.2 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const sectionH = sectionRef.current.offsetHeight;
+      const winH = window.innerHeight;
+      const scrolled = Math.max(0, -rect.top);
+      const scrollable = sectionH - winH;
+      const progress = scrollable > 0 ? Math.min(1, scrolled / scrollable) : 0;
+      setActiveIndex(Math.floor(progress * (MESSAGES.length + 1)) - 1);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const totalH = (MESSAGES.length + 3) * 120 + 200;
+
   return (
-    <section ref={sectionRef} style={{ padding: '6rem 2rem', background: '#0f172a', position: 'relative', overflow: 'hidden' }}>
-      <style>{`
-        @keyframes msgIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <section ref={sectionRef} style={{ background: '#080b14', position: 'relative', height: totalH + 'px' }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(99,102,241,0.07) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(168,85,247,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
-      {/* Arka plan */}
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '1100px', width: '100%', padding: '0 2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', position: 'relative' }}>
 
-      <div style={{ maxWidth: '680px', margin: '0 auto', position: 'relative' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem', border: '1px solid rgba(99,102,241,0.3)' }}>
-            Tanıdık Geldi Mi?
-          </span>
-          <h2 style={{ color: 'white', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>
-            Bir Öğretmenin Sıradan Günü
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>
-            Her gün aynı sorular, aynı kaos
-          </p>
-        </div>
-
-        {/* Mesajlar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {MESSAGES.map((msg, i) => (
-            <div key={i} style={{
-              opacity: i < visibleCount ? 1 : 0,
-              animation: i < visibleCount ? 'msgIn 0.5s ease forwards' : 'none',
-              display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
-            }}>
-              {/* Avatar */}
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: msg.color + '25', border: `1.5px solid ${msg.color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: msg.color }}>{msg.from[0]}</span>
-              </div>
-
-              {/* Bubble */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: msg.color }}>{msg.from}</span>
-                  <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)' }}>{msg.time}</span>
+          {/* Sol - Sabit baslik */}
+          <div>
+            <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.35rem 1rem', marginBottom: '1.5rem', border: '1px solid rgba(99,102,241,0.25)' }}>
+              Taniklik Geldi Mi?
+            </span>
+            <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
+              Bir Ogretmenin
+              <br />
+              <span style={{ background: 'linear-gradient(120deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Siradan Gunu
+              </span>
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
+              Her gun ayni sorular, ayni stres. Siz yalniz degilsiniz.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {[['Veli Mesajlari', '#3b82f6'], ['Ogrenci Mesajlari', '#22c55e'], ['Ic Sesiniz', '#a855f7']].map(([label, color]) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                  <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{label}</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '0 14px 14px 14px', padding: '0.75rem 1rem', maxWidth: '90%' }}>
-                  <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>{msg.text}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Son mesaj — Her Hafta Aynı Kaos */}
-        {visibleCount >= MESSAGES.length && (
-          <div style={{ textAlign: 'center', marginTop: '3rem', animation: 'msgIn 0.5s ease forwards' }}>
-            <div style={{ display: 'inline-block', background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.1))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 14, padding: '1rem 2rem' }}>
-              <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>Her Hafta Aynı Kaos 😓</p>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginTop: '0.4rem', marginBottom: 0 }}>Peki ya bunların hepsini tek yerden çözebilseydiniz?</p>
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Sag - Mesajlar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {MESSAGES.map((msg, i) => {
+              const visible = i <= activeIndex;
+              const isRight = msg.side === 'right';
+              return (
+                <div key={i} style={{
+                  display: 'flex',
+                  justifyContent: isRight ? 'flex-end' : 'flex-start',
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? 'translateX(0)' : (isRight ? 'translateX(20px)' : 'translateX(-20px)'),
+                  transition: 'opacity 0.4s ease, transform 0.4s ease',
+                }}>
+                  <div style={{ maxWidth: '82%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem', justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: msg.color }}>{msg.from}</span>
+                      <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.2)' }}>{msg.time}</span>
+                    </div>
+                    <div style={{ background: isRight ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${msg.color}30`, borderRadius: isRight ? '16px 4px 16px 16px' : '4px 16px 16px 16px', padding: '0.7rem 1rem' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem', lineHeight: 1.55, margin: 0 }}>{msg.text}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {activeIndex >= MESSAGES.length - 1 && (
+              <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.08))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 14, padding: '1rem 1.25rem', opacity: 1, transition: 'opacity 0.4s ease' }}>
+                <p style={{ color: '#fca5a5', fontWeight: 800, fontSize: '0.95rem', margin: '0 0 0.25rem' }}>Her Hafta Ayni Kaos</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: 0 }}>Peki ya bunlarin hepsini tek yerden cozebilseydiniz?</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
+
 
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
