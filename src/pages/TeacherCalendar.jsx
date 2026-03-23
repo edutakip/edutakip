@@ -37,14 +37,7 @@ export default function TeacherCalendar() {
   const isMobile = width < 640;
   const isTablet = width < 1024;
 
-  const touchStartX = React.useRef(null);
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 60) navigate(diff > 0 ? 1 : -1);
-    touchStartX.current = null;
-  }; // 'daily' | 'weekly' | 'monthly'
+ // 'daily' | 'weekly' | 'monthly'
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -296,8 +289,6 @@ export default function TeacherCalendar() {
 
   return (
     <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       style={{ padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -363,8 +354,8 @@ export default function TeacherCalendar() {
 
       {/* Takvim — sürüklenebilir wrapper */}
       <div
-        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', cursor: isTablet ? 'grab' : 'default', borderRadius: 16 }}
-        onMouseDown={isTablet ? (e) => {
+        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', cursor: 'grab', borderRadius: 16 }}
+        onMouseDown={(e) => {
           const el = e.currentTarget;
           el.style.cursor = 'grabbing';
           const startX = e.pageX - el.offsetLeft;
@@ -373,9 +364,9 @@ export default function TeacherCalendar() {
           const onUp = () => { el.style.cursor = 'grab'; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
           window.addEventListener('mousemove', onMove);
           window.addEventListener('mouseup', onUp);
-        } : undefined}
+        }}
       >
-        <div style={{ minWidth: isTablet ? (view === 'monthly' ? '900px' : view === 'weekly' ? '800px' : '600px') : 'auto' }}>
+        <div style={{ minWidth: view === 'monthly' ? '900px' : view === 'weekly' ? '800px' : '600px' }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
