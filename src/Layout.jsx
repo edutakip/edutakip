@@ -295,9 +295,10 @@ export default function Layout({ children, currentPageName }) {
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
           background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '70px', boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+          height: '70px', boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
           {nav.map((item, i) => {
             const Icon = item.icon;
@@ -307,27 +308,44 @@ export default function Layout({ children, currentPageName }) {
                 onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
-                  color: isActive ? '#6366f1' : 'rgba(255,255,255,0.5)',
-                  textDecoration: 'none', flex: 1, height: '100%',
-                }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
-                <Icon size={19} />
-                <span style={{ fontSize: '0.6rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{item.label}</span>
+                  gap: '0.25rem', padding: '0.35rem 0.9rem', cursor: 'pointer',
+                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
+                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.45)',
+                  transition: 'color 0.2s ease',
+                }}>
+                {isActive && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '58px', height: '48px',
+                    borderRadius: '18px',
+                    background: 'rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+                    zIndex: 0,
+                    transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                  }} />
+                )}
+                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
+                  <Icon size={19} />
+                  <span style={{ fontSize: '0.58rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>{item.label}</span>
+                </span>
               </Link>
             );
           })}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.25rem', padding: '0.5rem 0.75rem', cursor: 'pointer', transition: 'all 0.15s',
-              color: 'rgba(255,150,150,0.7)', background: 'none', border: 'none', flex: 1, height: '100%',
+              gap: '0.25rem', padding: '0.35rem 0.9rem', cursor: 'pointer', transition: 'color 0.2s ease',
+              color: 'rgba(255,150,150,0.6)', background: 'none', border: 'none', flex: 1, height: '100%',
             }}
             onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.7)'}>
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.6)'}>
             <LogOut size={19} />
-            <span style={{ fontSize: '0.6rem', fontWeight: '600', whiteSpace: 'nowrap' }}>Çıkış</span>
+            <span style={{ fontSize: '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>Çıkış</span>
           </button>
         </nav>
       </div>
@@ -347,10 +365,11 @@ export default function Layout({ children, currentPageName }) {
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
           background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '65px', boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+          height: '65px', boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
           overflowX: 'auto',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
           {nav.map((item, i) => {
             const Icon = item.icon;
@@ -360,25 +379,43 @@ export default function Layout({ children, currentPageName }) {
                 onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.2rem', padding: '0.4rem 0.5rem', cursor: 'pointer',
-                  color: isActive ? '#a5b4fc' : 'rgba(255,255,255,0.45)',
-                  textDecoration: 'none', flex: 1, height: '100%', transition: 'all 0.15s',
-                  borderTop: isActive ? '2px solid #6366f1' : '2px solid transparent',
+                  gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
+                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.4)',
+                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
+                  transition: 'color 0.2s ease',
                 }}>
-                <Icon size={18} />
-                <span style={{ fontSize: '0.55rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{item.label}</span>
+                {isActive && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '52px', height: '44px',
+                    borderRadius: '16px',
+                    background: 'rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+                    zIndex: 0,
+                    transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                  }} />
+                )}
+                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
+                  <Icon size={18} />
+                  <span style={{ fontSize: '0.55rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>{item.label}</span>
+                </span>
               </Link>
             );
           })}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.2rem', padding: '0.4rem 0.5rem', cursor: 'pointer',
-              color: 'rgba(255,150,150,0.6)', background: 'none', border: 'none', flex: 1, height: '100%',
-              borderTop: '2px solid transparent',
+              gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
+              color: 'rgba(255,150,150,0.55)', background: 'none', border: 'none', flex: 1, height: '100%',
+              transition: 'color 0.2s ease',
             }}>
             <LogOut size={18} />
-            <span style={{ fontSize: '0.55rem', fontWeight: 600 }}>Çıkış</span>
+            <span style={{ fontSize: '0.55rem', fontWeight: '500' }}>Çıkış</span>
           </button>
         </nav>
 
