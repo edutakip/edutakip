@@ -46,6 +46,8 @@ export default function Layout({ children, currentPageName }) {
     return <div>{children}</div>;
   }
 
+  const windowWidth = useWindowSize();
+  const isMobile = windowWidth < 1024;
   const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
   const sideW = collapsed ? '64px' : '224px';
   const isParent = role === 'parent';
