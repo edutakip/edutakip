@@ -138,6 +138,14 @@ const PARENT_NAV = [
   { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
+const TEACHER_MOBILE_NAV = [
+  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
+  { label: 'Dersler', icon: BookOpen, submenu: true },
+  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
+  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
+  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
+];
+
 const FAB_ACTIONS = [
   { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
   { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
@@ -154,6 +162,7 @@ export default function Layout({ children, currentPageName }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [fabStudents, setFabStudents] = useState([]);
   const [selectedPayStudent, setSelectedPayStudent] = useState(null);
+  const [derslerOpen, setDerslerOpen] = useState(false);
 
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
@@ -364,23 +373,74 @@ export default function Layout({ children, currentPageName }) {
         </main>
 
         {/* Alt nav — öğretmen mobil */}
+        {/* Dersler alt menü popup */}
+        {derslerOpen && (
+          <>
+            <div onClick={() => setDerslerOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+            <div style={{
+              position: 'fixed', bottom: '92px', left: '50%', transform: 'translateX(-50%)',
+              zIndex: 100, display: 'flex', flexDirection: 'column', gap: '0.5rem',
+              background: 'rgba(22,18,60,0.92)',
+              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '20px', padding: '0.6rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              minWidth: '160px',
+            }}>
+              {[
+                { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
+                { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
+                { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                const isActive = item.page === currentPageName;
+                return (
+                  <Link key={i} to={createPageUrl(item.page)}
+                    onClick={(e) => { handleNav(e, item.page); setDerslerOpen(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.65rem',
+                      padding: '0.55rem 0.85rem', borderRadius: '12px',
+                      color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.75)',
+                      textDecoration: 'none', fontSize: '0.85rem', fontWeight: isActive ? '700' : '500',
+                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      transition: 'all 0.15s',
+                    }}>
+                    <Icon size={16} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </>
+        )}
+
         <nav style={{
           position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '600px',
+          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
           background: 'rgba(22,18,60,0.78)',
           backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.13)',
           borderRadius: '28px',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
           height: '60px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-          overflowX: 'hidden',
         }}>
-          {nav.map((item, i) => {
+          {TEACHER_MOBILE_NAV.map((item, i) => {
             const Icon = item.icon;
-            const isActive = item.page === currentPageName;
+            const isActive = item.submenu
+              ? item.submenu.some(s => s.page === currentPageName)
+              : item.page === currentPageName;
+            const handleClick = (e) => {
+              if (item.submenu) {
+                e.preventDefault();
+                setDerslerOpen(o => !o);
+              } else {
+                handleNav(e, item.page);
+              }
+            };
             return (
-              <Link key={i} to={createPageUrl(item.page)}
-                onClick={(e) => handleNav(e, item.page)}
+              <Link key={i}
+                to={item.submenu ? '#' : createPageUrl(item.page)}
+                onClick={handleClick}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
@@ -390,23 +450,21 @@ export default function Layout({ children, currentPageName }) {
                 }}>
                 {isActive && (
                   <span style={{
-                    position: 'absolute',
-                    top: '50%', left: '50%',
+                    position: 'absolute', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '52px', height: '44px',
-                    borderRadius: '16px',
+                    width: '52px', height: '44px', borderRadius: '16px',
                     background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                     border: '1px solid rgba(255,255,255,0.18)',
                     boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                    zIndex: 0,
-                    transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                    zIndex: 0, transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
                   }} />
                 )}
                 <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
                   <Icon size={18} />
-                  <span style={{ fontSize: '0.55rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>{item.label}</span>
+                  <span style={{ fontSize: '0.55rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
+                    {item.label}{item.submenu ? ' ›' : ''}
+                  </span>
                 </span>
               </Link>
             );
