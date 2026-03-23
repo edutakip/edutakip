@@ -65,7 +65,7 @@ export default function ParentLessonsPayments() {
           {[
             { label: 'Toplam Ders', value: lessons.length, emoji: '📚' },
             { label: 'Tamamlanan', value: completedLessons, emoji: '✅' },
-            { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}`, emoji: '💰' },
+            { label: 'Bekleyen', value: `₺${totalPending.toLocaleString('tr-TR')}`, emoji: '🕐' },
           ].map(({ label, value, emoji }) => (
             <div key={label} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '14px', padding: '0.85rem 0.75rem', backdropFilter: 'blur(8px)', textAlign: 'center' }}>
               <div style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>{emoji}</div>
