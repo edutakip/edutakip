@@ -179,7 +179,7 @@ export default function TeacherCalendar() {
     return (
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Week day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '40px repeat(3, 1fr)' : '56px repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '56px repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
           <div style={{ borderRight: '1px solid #f1f5f9' }} />
           {weekDays.map((day, i) => {
             const today = isToday(day);
@@ -199,7 +199,7 @@ export default function TeacherCalendar() {
         {/* Time rows */}
         <div style={{ overflowY: 'auto', maxHeight: '65vh' }}>
           {HOURS.map(hour => (
-            <div key={hour} style={{ display: 'grid', gridTemplateColumns: isMobile ? '40px repeat(3, 1fr)' : '56px repeat(7, 1fr)', borderBottom: '1px solid #f1f5f9', minHeight: 60 }}>
+            <div key={hour} style={{ display: 'grid', gridTemplateColumns: '56px repeat(7, 1fr)', borderBottom: '1px solid #f1f5f9', minHeight: 60 }}>
               <div style={{ padding: '0.6rem 0.5rem 0', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 600, textAlign: 'right', borderRight: '1px solid #f1f5f9', fontVariantNumeric: 'tabular-nums' }}>
                 {String(hour).padStart(2, '0')}:00
               </div>
@@ -252,7 +252,7 @@ export default function TeacherCalendar() {
             const isLastRow = i >= days.length - 7;
             return (
               <div key={i} onClick={() => openAdd(day)}
-                style={{ minHeight: isMobile ? 60 : 110, padding: isMobile ? '0.25rem' : '0.5rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative' }}
+                style={{ minHeight: 90, padding: '0.4rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative' }}
                 onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = today ? '#fffbeb' : 'transparent'; }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: today ? '#4f46e5' : 'transparent', color: today ? 'white' : inMonth ? '#374151' : '#d1d5db', fontWeight: today ? 800 : 500, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
@@ -366,7 +366,7 @@ export default function TeacherCalendar() {
           window.addEventListener('mouseup', onUp);
         }}
       >
-        <div style={{ minWidth: view === 'monthly' ? '900px' : view === 'weekly' ? '800px' : '600px' }}>
+        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? '900px' : '650px' }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
