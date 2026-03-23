@@ -289,16 +289,18 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
         <nav style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-          background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
+          background: 'rgba(22,18,60,0.78)',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.13)',
+          borderRadius: '28px',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '70px', boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: '64px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}>
           {nav.map((item, i) => {
             const Icon = item.icon;
@@ -357,19 +359,21 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '70px' }}>
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
         {/* Alt nav — öğretmen mobil */}
         <nav style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-          background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '600px',
+          background: 'rgba(22,18,60,0.78)',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.13)',
+          borderRadius: '28px',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '65px', boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
-          overflowX: 'auto',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: '60px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          overflowX: 'hidden',
         }}>
           {nav.map((item, i) => {
             const Icon = item.icon;
