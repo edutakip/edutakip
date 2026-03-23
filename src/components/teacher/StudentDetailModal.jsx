@@ -58,6 +58,20 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
     );
   }, [student.id]);
 
+  // Yaramaz popup fix
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   const earned = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const collected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
   const balance = collected - earned;
