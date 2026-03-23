@@ -214,7 +214,8 @@ export default function Layout({ children, currentPageName }) {
     window.location.href = createPageUrl('Landing');
   };
 
-  const SidebarContent = () => (
+  // SidebarContent artık inline JSX olarak kullanılıyor (her render'da yeni component tanımlamayı önler)
+  const sidebarContent = (
     <>
       <div style={{ padding: '1.25rem 1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
         <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px' }} />
@@ -454,7 +455,7 @@ export default function Layout({ children, currentPageName }) {
         zIndex: 50, overflowX: 'hidden', overflowY: 'hidden', transition: 'width 0.2s ease',
         boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
       }}>
-        <SidebarContent />
+        {sidebarContent}
         <button onClick={() => setCollapsed(c => !c)}
           style={{
             position: 'absolute', top: '50%', right: '-11px', transform: 'translateY(-50%)',
