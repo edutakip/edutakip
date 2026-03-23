@@ -140,7 +140,7 @@ const PARENT_NAV = [
 
 const TEACHER_MOBILE_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Dersler', icon: BookOpen, submenu: true },
+  { label: 'Dersler', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherStudents', 'TeacherHomework'] },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
@@ -427,7 +427,7 @@ export default function Layout({ children, currentPageName }) {
           {TEACHER_MOBILE_NAV.map((item, i) => {
             const Icon = item.icon;
             const isActive = item.submenu
-              ? item.submenu.some(s => s.page === currentPageName)
+              ? item.submenu.some(s => s === currentPageName)
               : item.page === currentPageName;
             const handleClick = (e) => {
               if (item.submenu) {
