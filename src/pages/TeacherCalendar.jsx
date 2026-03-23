@@ -35,7 +35,17 @@ export default function TeacherCalendar() {
   const [view, setView] = useState('monthly');
   const width = useWindowSize();
   const isMobile = width < 640;
-  const isTablet = width < 1024; // 'daily' | 'weekly' | 'monthly'
+  const isTablet = width < 1024;
+
+  // Swipe (sürükleme) desteği
+  const touchStartX = React.useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { navigate(diff > 0 ? 1 : -1); }
+    touchStartX.current = null;
+  }; // 'daily' | 'weekly' | 'monthly'
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -286,7 +296,10 @@ export default function TeacherCalendar() {
     .slice(0, 6);
 
   return (
-    <div style={{ padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{ padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
@@ -351,9 +364,15 @@ export default function TeacherCalendar() {
 
       {/* Takvim — tam genişlik */}
       <div>
-        {view === 'daily' && <DailyView />}
-        {view === 'weekly' && <WeeklyView />}
-        {view === 'monthly' && <MonthlyView />}
+        {isMobile ? (
+          <MobileDayList />
+        ) : (
+          <>
+            {view === 'daily' && <DailyView />}
+            {view === 'weekly' && <WeeklyView />}
+            {view === 'monthly' && <MonthlyView />}
+          </>
+        )}
       </div>
 
       {/* Yaklaşan Dersler — takvimin altında */}
