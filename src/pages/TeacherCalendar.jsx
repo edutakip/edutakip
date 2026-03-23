@@ -37,13 +37,12 @@ export default function TeacherCalendar() {
   const isMobile = width < 640;
   const isTablet = width < 1024;
 
-  // Swipe (sürükleme) desteği
   const touchStartX = React.useRef(null);
   const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e) => {
     if (touchStartX.current === null) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) { navigate(diff > 0 ? 1 : -1); }
+    if (Math.abs(diff) > 60) navigate(diff > 0 ? 1 : -1);
     touchStartX.current = null;
   }; // 'daily' | 'weekly' | 'monthly'
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -362,17 +361,25 @@ export default function TeacherCalendar() {
         ))}
       </div>
 
-      {/* Takvim — tam genişlik */}
-      <div>
-        {isMobile ? (
-          <MobileDayList />
-        ) : (
-          <>
-            {view === 'daily' && <DailyView />}
-            {view === 'weekly' && <WeeklyView />}
-            {view === 'monthly' && <MonthlyView />}
-          </>
-        )}
+      {/* Takvim — sürüklenebilir wrapper */}
+      <div
+        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', cursor: isTablet ? 'grab' : 'default', borderRadius: 16 }}
+        onMouseDown={isTablet ? (e) => {
+          const el = e.currentTarget;
+          el.style.cursor = 'grabbing';
+          const startX = e.pageX - el.offsetLeft;
+          const scrollLeft = el.scrollLeft;
+          const onMove = (ev) => { el.scrollLeft = scrollLeft - (ev.pageX - el.offsetLeft - startX); };
+          const onUp = () => { el.style.cursor = 'grab'; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+          window.addEventListener('mousemove', onMove);
+          window.addEventListener('mouseup', onUp);
+        } : undefined}
+      >
+        <div style={{ minWidth: isTablet ? (view === 'monthly' ? '900px' : view === 'weekly' ? '800px' : '600px') : 'auto' }}>
+          {view === 'daily' && <DailyView />}
+          {view === 'weekly' && <WeeklyView />}
+          {view === 'monthly' && <MonthlyView />}
+        </div>
       </div>
 
       {/* Yaklaşan Dersler — takvimin altında */}
