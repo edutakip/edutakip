@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign, Check, CalendarDays } from 'lucide-react';
 import { format, addDays } from 'date-fns';
@@ -217,8 +218,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
 
   // Calendar confirmation dialog
   if (calendarPrompt) {
-    return (
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)', overflowY: 'auto' }}>
+    return createPortal(
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
         <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '440px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', margin: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
@@ -248,12 +249,12 @@ export default function AddStudentModal({ onClose, onSaved }) {
           </div>
         </div>
       </div>
-    );
+    , document.body);
   }
 
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)', overflowY: 'auto' }}>
-      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative', margin: 'auto' }}>
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative' }}>
 
         {/* Time Picker Popup */}
         {timePicker && (
@@ -586,5 +587,5 @@ export default function AddStudentModal({ onClose, onSaved }) {
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }
