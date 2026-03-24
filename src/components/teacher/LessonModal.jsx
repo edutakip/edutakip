@@ -5,6 +5,9 @@ import { format, addWeeks, parseISO } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const isMobile = windowWidth < 640;
+
   React.useEffect(() => {
     const scrollY = window.scrollY;
     document.body.style.position = 'fixed';
@@ -16,6 +19,11 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
       document.body.style.width = '';
       window.scrollTo(0, scrollY);
     };
+  }, []);
+  React.useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
   const isEditing = !!existingLesson;
   const [form, setForm] = useState(isEditing ? {
@@ -212,10 +220,10 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
   }
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', width: '100%', maxWidth: '500px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'center', padding: isMobile ? '0.5rem' : '1rem', backdropFilter: 'blur(4px)', overflowY: 'auto' }}>
+      <div style={{ background: 'white', borderRadius: isMobile ? '16px' : '20px', padding: isMobile ? '1rem' : '1.75rem', width: '100%', maxWidth: isMobile ? '100%' : '500px', maxHeight: isMobile ? 'calc(100dvh - 1rem)' : '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', border: '1px solid #e5e7eb', marginTop: isMobile ? '0.25rem' : 0 }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '1rem' : '1.5rem' }}>
           <div>
             <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>{isEditing ? 'Dersi Düzenle' : 'Ders Planla'}</h2>
             <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>{isEditing ? 'Ders bilgilerini güncelle' : 'Yeni ders oluştur'}</p>
@@ -227,7 +235,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.85rem' : '1rem' }}>
           {/* Student */}
           <div>
             <label style={lbl}>Öğrenci</label>
@@ -252,7 +260,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           })()}
 
           {/* Date + Time */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr 1fr', gap: '0.75rem' }}>
             {[
               { label: 'Tarih', type: 'date', val: form.date, key: 'date' },
               { label: 'Başlangıç', type: 'time', val: form.startTime, key: 'startTime' },
@@ -268,7 +276,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           </div>
 
           {/* Subject & Fee */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.8fr', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 0.8fr', gap: '0.75rem' }}>
             <div>
               <label style={lbl}>Konu</label>
               <input style={inp} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)}
@@ -306,9 +314,9 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           {form.type === 'online' && (
             <div>
               <label style={lbl}>Zoom Linki</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexDirection: isMobile ? 'column' : 'row' }}>
                 <input style={{ ...inp, flex: 1 }} placeholder='Oluşturuluyor...' value={meetingLink} onChange={e => setMeetingLink(e.target.value)} />
-                <button onClick={generateZoom} disabled={zoomLoading} style={{ padding: '0.6rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#6b7280', cursor: 'pointer' }}>
+                <button onClick={generateZoom} disabled={zoomLoading} style={{ padding: '0.6rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#6b7280', cursor: 'pointer', width: isMobile ? '100%' : 'auto' }}>
                   {zoomLoading ? <Loader2 size={14} className='animate-spin' /> : <RefreshCw size={14} />}
                 </button>
               </div>
@@ -342,7 +350,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
                 <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
               </label>
               {recurring && (
-                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
                   {[2, 4, 8, 12].map(w => (
                     <button key={w} onClick={() => setRecurringWeeks(w)} style={{
