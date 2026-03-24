@@ -235,7 +235,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.85rem' : '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.85rem' : '1rem', paddingBottom: isMobile ? '5.5rem' : 0 }}>
           {/* Student */}
           <div>
             <label style={lbl}>Öğrenci</label>
@@ -365,15 +365,17 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
               )}
             </div>
           )}
-          <button onClick={save} disabled={loading || !form.studentId} style={{
-            padding: '0.8rem', borderRadius: '12px', border: 'none',
-            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700',
-            fontSize: '0.9rem', cursor: 'pointer', opacity: (!form.studentId || loading) ? 0.6 : 1,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-            boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s',
-          }}>
-            {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : isEditing ? 'Güncelle' : 'Dersi Kaydet'}
-          </button>
+          <div style={isMobile ? { position: 'sticky', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', background: 'linear-gradient(180deg, rgba(255,255,255,0), white 24%)', paddingTop: '0.55rem', marginTop: '0.2rem' } : undefined}>
+            <button onClick={save} disabled={loading || !form.studentId} style={{
+              padding: '0.8rem', borderRadius: '12px', border: 'none',
+              background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700',
+              fontSize: '0.9rem', cursor: 'pointer', opacity: (!form.studentId || loading) ? 0.6 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+              boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s', width: '100%',
+            }}>
+              {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : isEditing ? 'Güncelle' : 'Dersi Kaydet'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
