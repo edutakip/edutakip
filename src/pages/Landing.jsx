@@ -146,10 +146,9 @@ function SiradanGun() {
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [studentCount, setStudentCount] = useState(20);
-  const VAT_RATE = 0.2;
-  const perStudentPrice = 50;
+  const perStudentPrice = 40;
   const baseTotal = studentCount * perStudentPrice;
-  const totalWithVat = Math.round(baseTotal * (1 + VAT_RATE));
+  const totalWithoutVat = Math.round(baseTotal);
   const timeSavedHours = Math.round(studentCount * 0.5);
   const sliderPct = ((studentCount - 1) / (60 - 1)) * 100;
 
@@ -361,10 +360,10 @@ export default function Landing() {
                 <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', marginBottom: '0.6rem' }}>Pro Paket Hesaplayıcı</h3>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.4rem' }}>
                   <span style={{ color: '#9ca3af', fontSize: '1.6rem', textDecoration: 'line-through', fontWeight: 600 }}>
-                    {Math.round(totalWithVat * 1.25).toLocaleString('tr-TR')}₺
+                    {Math.round(totalWithoutVat * 1.25).toLocaleString('tr-TR')}₺
                   </span>
                   <span style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
-                    {totalWithVat.toLocaleString('tr-TR')}₺
+                    {totalWithoutVat.toLocaleString('tr-TR')}₺
                   </span>
                 </div>
                 <span style={{ display: 'inline-block', marginTop: '0.55rem', padding: '0.2rem 0.7rem', borderRadius: 999, border: '1px solid #e5e7eb', fontSize: '0.82rem', color: '#6b7280' }}>
@@ -395,7 +394,7 @@ export default function Landing() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div style={{ background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
                   <div style={{ color: '#6b7280', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Aylık Toplam Tutar</div>
-                  <div style={{ color: '#111827', fontSize: '1.75rem', fontWeight: 900 }}>{totalWithVat.toLocaleString('tr-TR')}₺</div>
+                  <div style={{ color: '#111827', fontSize: '1.75rem', fontWeight: 900 }}>{totalWithoutVat.toLocaleString('tr-TR')}₺</div>
                 </div>
                 <div style={{ background: '#10b981', border: '1.5px solid #10b981', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
                   <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Kazancınız</div>
