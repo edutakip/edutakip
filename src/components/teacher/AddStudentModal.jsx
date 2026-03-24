@@ -78,27 +78,6 @@ export default function AddStudentModal({ onClose, onSaved }) {
     );
   }, []);
 
-  const [isMobileModal, setIsMobileModal] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const handler = () => setIsMobileModal(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
-  // Yaramaz popup fix
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   // Close time picker on outside click
   useEffect(() => {
     const handler = (e) => {
@@ -239,8 +218,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
   // Calendar confirmation dialog
   if (calendarPrompt) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
-        <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '440px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)', overflowY: 'auto' }}>
+        <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '440px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', margin: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
               <CalendarDays size={26} color='#a5b4fc' />
@@ -273,14 +252,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: isMobileModal ? 'flex-start' : 'center', justifyContent: 'center', padding: isMobileModal ? '0' : '1rem', backdropFilter: 'blur(6px)' }}>
-      <style>{`
-        @keyframes slideDown {
-          from { transform: translateY(-100%); opacity: 0; }
-          to   { transform: translateY(0);     opacity: 1; }
-        }
-      `}</style>
-      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: isMobileModal ? '0 0 24px 24px' : '20px', padding: isMobileModal ? '1.25rem' : '2rem', width: '100%', maxWidth: isMobileModal ? '100%' : '580px', maxHeight: isMobileModal ? '92vh' : '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative', animation: isMobileModal ? 'slideDown 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)', overflowY: 'auto' }}>
+      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative', margin: 'auto' }}>
 
         {/* Time Picker Popup */}
         {timePicker && (
