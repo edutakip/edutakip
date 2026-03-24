@@ -19,10 +19,25 @@ const DAYS_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumar
 const DAYS_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 07:00 - 20:00
 
+function useWindowSize() {
+  const [width, setWidth] = React.useState(window.innerWidth);
+  React.useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
+}
+
 export default function TeacherCalendar() {
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
-  const [view, setView] = useState('monthly'); // 'daily' | 'weekly' | 'monthly'
+  const [view, setView] = useState('monthly');
+  const width = useWindowSize();
+  const isMobile = width < 640;
+  const isTablet = width < 1024;
+
+ // 'daily' | 'weekly' | 'monthly'
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -116,7 +131,7 @@ export default function TeacherCalendar() {
   const DailyView = () => {
     const dayLessons = getLessonsForDay(currentDate);
     return (
-      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden', minWidth: 0 }}>
+      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Day header */}
         <div style={{ background: isToday(currentDate) ? '#4f46e5' : '#f8fafc', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -162,8 +177,7 @@ export default function TeacherCalendar() {
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     return (
-      <div style={{ overflowX: 'auto', borderRadius: 16, border: '1px solid #e2e8f0' }}>
-      <div style={{ background: 'white', borderRadius: 16, minWidth: '560px', overflow: 'hidden' }}>
+      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Week day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: '56px repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
           <div style={{ borderRight: '1px solid #f1f5f9' }} />
@@ -206,7 +220,6 @@ export default function TeacherCalendar() {
           ))}
         </div>
       </div>
-      </div>
     );
   };
 
@@ -221,79 +234,49 @@ export default function TeacherCalendar() {
       days.push(d); d = addDays(d, 1);
       if (days.length > 42) break;
     }
-    const weeks = [];
-    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
-
     return (
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Day name headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1.5px solid #e2e8f0', background: '#f8fafc' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
           {DAYS_SHORT.map(n => (
-            <div key={n} style={{ padding: '0.75rem 0', textAlign: 'center', color: '#64748b', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.5px' }}>{n}</div>
+            <div key={n} style={{ padding: '0.7rem 0', textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px' }}>{n}</div>
           ))}
         </div>
-        {/* Weeks — one row per week, full viewport height distributed */}
-        {weeks.map((week, wi) => (
-          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: wi < weeks.length - 1 ? '1px solid #f1f5f9' : 'none', minHeight: '18vw' }}>
-            {week.map((day, di) => {
-              const today = isToday(day);
-              const inMonth = isSameMonth(day, currentDate);
-              const dayLessons = getLessonsForDay(day);
-              const isLastCol = di === 6;
-              return (
-                <div key={di} onClick={() => openAdd(day)}
-                  style={{
-                    padding: '0.4rem 0.3rem',
-                    borderRight: isLastCol ? 'none' : '1px solid #f1f5f9',
-                    cursor: 'pointer',
-                    background: today ? '#eef2ff' : 'transparent',
-                    transition: 'background 0.15s',
-                    display: 'flex', flexDirection: 'column', gap: '0.2rem',
-                    overflow: 'hidden',
-                  }}
-                  onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = today ? '#eef2ff' : 'transparent'; }}>
-                  {/* Date number */}
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: today ? '#4f46e5' : 'transparent',
-                    color: today ? 'white' : inMonth ? '#111827' : '#d1d5db',
-                    fontWeight: today ? 800 : 600,
-                    fontSize: '0.88rem',
-                    alignSelf: 'flex-start',
-                  }}>
-                    {format(day, 'd')}
-                  </div>
-                  {/* Lesson dots/chips */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.18rem', overflow: 'hidden' }}>
-                    {dayLessons.slice(0, 2).map(l => {
-                      const s = STATUS[l.status] || STATUS['planlandı'];
-                      return (
-                        <div key={l.id}
-                          onClick={e => { e.stopPropagation(); openEdit(l, e); }}
-                          style={{
-                            background: s.bg, color: s.color,
-                            borderRadius: 6, padding: '0.18rem 0.3rem',
-                            fontSize: '0.6rem', fontWeight: 700,
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                            lineHeight: 1.3,
-                          }}>
-                          {l.startTime?.slice(0,5)} {l.studentName}
-                        </div>
-                      );
-                    })}
-                    {dayLessons.length > 2 && (
-                      <div style={{ fontSize: '0.58rem', color: '#94a3b8', fontWeight: 700, paddingLeft: '0.1rem' }}>
-                        +{dayLessons.length - 2}
-                      </div>
-                    )}
-                  </div>
+        {/* Days */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+          {days.map((day, i) => {
+            const today = isToday(day);
+            const inMonth = isSameMonth(day, currentDate);
+            const dayLessons = getLessonsForDay(day);
+            const isLastCol = (i + 1) % 7 === 0;
+            const isLastRow = i >= days.length - 7;
+            return (
+              <div key={i} onClick={() => openAdd(day)}
+                style={{ minHeight: 90, padding: '0.4rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative' }}
+                onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = today ? '#fffbeb' : 'transparent'; }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: today ? '#4f46e5' : 'transparent', color: today ? 'white' : inMonth ? '#374151' : '#d1d5db', fontWeight: today ? 800 : 500, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
+                  {format(day, 'd')}
                 </div>
-              );
-            })}
-          </div>
-        ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  {dayLessons.slice(0, 3).map(l => <LessonChip key={l.id} lesson={l} compact />)}
+                  {dayLessons.length > 3 && (
+                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', paddingLeft: '0.25rem', fontWeight: 600 }}>+{dayLessons.length - 3} daha</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: '1.25rem', padding: '0.85rem 1.5rem', borderTop: '1px solid #f1f5f9', alignItems: 'center' }}>
+          {Object.entries(STATUS).map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: v.bg }} />
+              {v.label}
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -305,7 +288,8 @@ export default function TeacherCalendar() {
     .slice(0, 6);
 
   return (
-    <div style={{ padding: '1rem 0.5rem 2rem', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div
+      style={{ padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
@@ -315,7 +299,7 @@ export default function TeacherCalendar() {
         <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* View toggle */}
           <div style={{ display: 'flex', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-            {[['daily', 'Günlük'], ['weekly', 'Haftalık'], ['monthly', 'Aylık']].map(([v, label]) => (
+            {(isMobile ? [['daily', 'Gün'], ['weekly', 'Hafta'], ['monthly', 'Ay']] : [['daily', 'Günlük'], ['weekly', 'Haftalık'], ['monthly', 'Aylık']]).map(([v, label]) => (
               <button key={v} onClick={() => setView(v)}
                 style={{ padding: '0.5rem 0.9rem', border: 'none', background: view === v ? '#4f46e5' : 'transparent', color: view === v ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s' }}>
                 {label}
@@ -329,17 +313,17 @@ export default function TeacherCalendar() {
               onMouseLeave={e => e.currentTarget.style.background = 'none'}>
               <ChevronLeft size={16} />
             </button>
-            <span style={{ color: '#374151', fontWeight: 700, fontSize: '0.85rem', minWidth: 160, textAlign: 'center' }}>{navLabel()}</span>
+            <span style={{ color: '#374151', fontWeight: 700, fontSize: isMobile ? '0.75rem' : '0.85rem', minWidth: isMobile ? 100 : 160, textAlign: 'center' }}>{navLabel()}</span>
             <button onClick={() => navigate(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: '0.2rem', borderRadius: 6 }}
               onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}>
               <ChevronRight size={16} />
             </button>
           </div>
-          <button onClick={() => setCurrentDate(new Date())}
+          {!isMobile && <button onClick={() => setCurrentDate(new Date())}
             style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#4f46e5', borderRadius: 10, padding: '0.5rem 0.85rem', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
             Bugün
-          </button>
+          </button>}
           {/* Add lesson */}
           <button onClick={() => openAdd(currentDate)}
             style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: 10, padding: '0.6rem 1.1rem', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(79,70,229,0.3)' }}>
@@ -349,30 +333,44 @@ export default function TeacherCalendar() {
       </div>
 
       {/* Genel Bakış — takvimin üstünde */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '0.75rem' }}>
         {[
           { label: 'Toplam Ders', value: lessons.length, color: '#4f46e5', bg: '#eef2ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
           { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#6366f1', bg: '#e0e7ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
           { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#10b981', bg: '#d1fae5', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> },
           { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#ef4444', bg: '#fee2e2', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> },
         ].map(({ label, value, color, bg, icon }) => (
-          <div key={label} style={{ background: 'white', borderRadius: 12, padding: '0.65rem 0.75rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div key={label} style={{ background: 'white', borderRadius: 14, padding: '0.85rem 1.1rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {icon}
             </div>
             <div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
               <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 600, marginTop: '0.15rem' }}>{label}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Takvim — tam genişlik */}
-      <div>
-        {view === 'daily' && <DailyView />}
-        {view === 'weekly' && <WeeklyView />}
-        {view === 'monthly' && <MonthlyView />}
+      {/* Takvim — sürüklenebilir wrapper */}
+      <div
+        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', cursor: 'grab', borderRadius: 16 }}
+        onMouseDown={(e) => {
+          const el = e.currentTarget;
+          el.style.cursor = 'grabbing';
+          const startX = e.pageX - el.offsetLeft;
+          const scrollLeft = el.scrollLeft;
+          const onMove = (ev) => { el.scrollLeft = scrollLeft - (ev.pageX - el.offsetLeft - startX); };
+          const onUp = () => { el.style.cursor = 'grab'; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+          window.addEventListener('mousemove', onMove);
+          window.addEventListener('mouseup', onUp);
+        }}
+      >
+        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? '900px' : '650px' }}>
+          {view === 'daily' && <DailyView />}
+          {view === 'weekly' && <WeeklyView />}
+          {view === 'monthly' && <MonthlyView />}
+        </div>
       </div>
 
       {/* Yaklaşan Dersler — takvimin altında */}
@@ -381,7 +379,7 @@ export default function TeacherCalendar() {
           <h3 style={{ color: '#374151', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Calendar size={14} color='#4f46e5' /> Yaklaşan Dersler
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.6rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.6rem' }}>
             {upcoming.map(l => {
               try {
                 const d = parseISO(l.date);
