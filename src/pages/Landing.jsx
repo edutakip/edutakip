@@ -146,7 +146,7 @@ function SiradanGun() {
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [studentCount, setStudentCount] = useState(20);
-  const perStudentPrice = 40;
+  const perStudentPrice = 50;
   const baseTotal = studentCount * perStudentPrice;
   const totalWithoutVat = Math.round(baseTotal);
   const timeSavedHours = Math.round(studentCount * 0.5);
