@@ -33,14 +33,14 @@ export default function TeacherCalendar() {
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
   const [view, setView] = useState('monthly');
+  const width = useWindowSize();
+  const isMobile = width < 640;
+  const isTablet = width < 1024;
 
   // Tablet/mobilde monthly view desteklenmez, daily'e düşür
   React.useEffect(() => {
     if (isTablet && view === 'monthly') setView('daily');
   }, [isTablet]);
-  const width = useWindowSize();
-  const isMobile = width < 640;
-  const isTablet = width < 1024;
 
  // 'daily' | 'weekly' | 'monthly'
   const [currentDate, setCurrentDate] = useState(new Date());
