@@ -78,6 +78,13 @@ export default function AddStudentModal({ onClose, onSaved }) {
     );
   }, []);
 
+  const [isMobileModal, setIsMobileModal] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobileModal(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   // Yaramaz popup fix
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -266,8 +273,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: window.innerWidth < 768 ? 'flex-start' : 'center', justifyContent: 'center', padding: window.innerWidth < 768 ? '0' : '1rem', backdropFilter: 'blur(6px)' }}>
-      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: window.innerWidth < 768 ? '0 0 20px 20px' : '20px', padding: window.innerWidth < 768 ? '1.25rem' : '2rem', width: '100%', maxWidth: '580px', height: window.innerWidth < 768 ? '100dvh' : 'auto', maxHeight: window.innerWidth < 768 ? '100dvh' : '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: isMobileModal ? 'flex-start' : 'center', justifyContent: 'center', padding: isMobileModal ? '0' : '1rem', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: isMobileModal ? '0 0 20px 20px' : '20px', padding: isMobileModal ? '1.25rem' : '2rem', width: '100%', maxWidth: '580px', height: isMobileModal ? '100dvh' : 'auto', maxHeight: isMobileModal ? '100dvh' : '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', position: 'relative' }}>
 
         {/* Time Picker Popup */}
         {timePicker && (
