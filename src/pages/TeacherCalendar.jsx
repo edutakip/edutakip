@@ -33,6 +33,11 @@ export default function TeacherCalendar() {
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
   const [view, setView] = useState('monthly');
+
+  // Tablet/mobilde monthly view desteklenmez, daily'e düşür
+  React.useEffect(() => {
+    if (isTablet && view === 'monthly') setView('daily');
+  }, [isTablet]);
   const width = useWindowSize();
   const isMobile = width < 640;
   const isTablet = width < 1024;
@@ -299,7 +304,7 @@ export default function TeacherCalendar() {
         <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* View toggle */}
           <div style={{ display: 'flex', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-            {(isMobile ? [['daily', 'Gün'], ['weekly', 'Hafta'], ['monthly', 'Ay']] : [['daily', 'Günlük'], ['weekly', 'Haftalık'], ['monthly', 'Aylık']]).map(([v, label]) => (
+            {(isTablet ? [['daily', 'Gün'], ['weekly', 'Hafta']] : [['daily', 'Günlük'], ['weekly', 'Haftalık'], ['monthly', 'Aylık']]).map(([v, label]) => (
               <button key={v} onClick={() => setView(v)}
                 style={{ padding: '0.5rem 0.9rem', border: 'none', background: view === v ? '#4f46e5' : 'transparent', color: view === v ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s' }}>
                 {label}
