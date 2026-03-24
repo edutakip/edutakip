@@ -179,10 +179,8 @@ export default function TeacherCalendar() {
 
   // ── Weekly View ──────────────────────────────────────────────
   const WeeklyView = () => {
-    // Mobilde 3 gün (önceki gün, bugün, sonraki gün), masaüstü/tablet 7 gün
-    const weekDays = isMobile
-      ? [currentDate, addDays(currentDate, 1)]
-      : Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), i));
+    // Tüm cihazlarda 7 gün — mobilde container kaydırılabilir
+    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), i));
     const colCount = weekDays.length;
     const gridCols = `48px repeat(${colCount}, 1fr)`;
     return (
@@ -364,7 +362,7 @@ export default function TeacherCalendar() {
 
       {/* Takvim — sürüklenebilir wrapper */}
       <div
-        style={{ overflowX: isTablet && !isMobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch', cursor: isTablet && !isMobile ? 'grab' : 'default', borderRadius: 16 }}
+        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', cursor: isTablet ? 'grab' : 'default', borderRadius: 16 }}
         onMouseDown={(e) => {
           const el = e.currentTarget;
           el.style.cursor = 'grabbing';
@@ -376,7 +374,7 @@ export default function TeacherCalendar() {
           window.addEventListener('mouseup', onUp);
         }}
       >
-        <div style={{ minWidth: isMobile ? 0 : isTablet && view === 'weekly' ? '700px' : view === 'monthly' ? '1000px' : view === 'weekly' ? '900px' : '650px' }}>
+        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? '700px' : '600px' }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
