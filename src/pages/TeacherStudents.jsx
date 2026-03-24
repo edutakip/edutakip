@@ -67,7 +67,7 @@ export default function TeacherStudents() {
         {filtered.map(s => (
           <StudentCard key={s.id} student={s} onAddPayment={() => setPayStudent(s)} onCardClick={() => setDetailStudent(s)} />
         ))}
-        <div onClick={() => setShowAdd(true)}
+        <div onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setShowAdd(true); }}
           style={{
             background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
             border: '2px dashed rgba(99,102,241,0.4)',
