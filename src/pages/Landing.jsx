@@ -385,9 +385,25 @@ export default function Landing() {
                     max={60}
                     value={studentCount}
                     onChange={(e) => setStudentCount(Number(e.target.value))}
-                    style={{ width: '100%', cursor: 'pointer', opacity: 0, position: 'relative', zIndex: 2 }}
+                    style={{ width: '100%', cursor: 'pointer', opacity: 0, position: 'relative', zIndex: 3 }}
                   />
-                  <div style={{ position: 'absolute', left: `calc(${sliderPct}% - 12px)`, width: 24, height: 24, borderRadius: '50%', background: 'white', border: '3px solid #f97316', transition: 'left 0.25s ease', animation: 'sliderGlow 2.2s ease-in-out infinite' }} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: `calc(${sliderPct}% - 12px)`,
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: 'white',
+                      border: '3px solid #f97316',
+                      transition: 'left 0.25s ease',
+                      animation: 'sliderGlow 2.2s ease-in-out infinite',
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                      WebkitUserDrag: 'none',
+                      zIndex: 2,
+                    }}
+                  />
                 </div>
               </div>
 
