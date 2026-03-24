@@ -25,28 +25,14 @@ const TESTIMONIALS = [
   { name: 'Ayşe Demir', role: 'Fizik Öğretmeni', text: 'Takvim özelliği hayatımı kurtardı. Artık hiçbir dersi kaçırmıyorum.', stars: 5, city: 'İzmir' },
 ];
 
-const PRICING = [
-  {
-    name: 'Ücretsiz',
-    price: '₺0',
-    period: 'sonsuza kadar',
-    desc: 'Başlamak için ideal',
-    color: '#6366f1',
-    features: ['5 öğrenciye kadar', 'Ders takvimi', 'Temel finans takibi', 'WhatsApp bildirimleri'],
-    cta: 'Hemen Başla',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: '₺199',
-    period: 'aylık',
-    desc: 'Profesyonel öğretmenler için',
-    color: '#7c3aed',
-    features: ['Sınırsız öğrenci', 'AI ders raporu', 'Gelişmiş finans analizi', 'Veli paneli', 'Öncelikli destek'],
-    cta: 'Ücretsiz Dene',
-    highlight: true,
-  },
-];
+const FREE_PLAN = {
+  name: 'Ücretsiz',
+  price: '₺0',
+  period: 'sonsuza kadar',
+  desc: 'Başlamak için ideal',
+  features: ['5 öğrenciye kadar', 'Ders takvimi', 'Temel finans takibi', 'WhatsApp bildirimleri'],
+  cta: 'Hemen Başla',
+};
 
 const MESSAGES = [
   { from: 'Veli',       time: '08:47', text: 'Hocam bu hafta ders var mi? Programi unuttuk', side: 'left',  color: '#3b82f6' },
@@ -159,6 +145,12 @@ function SiradanGun() {
 
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
+  const [studentCount, setStudentCount] = useState(20);
+  const VAT_RATE = 0.2;
+  const perStudentPrice = 50;
+  const baseTotal = studentCount * perStudentPrice;
+  const totalWithVat = Math.round(baseTotal * (1 + VAT_RATE));
+  const timeSavedHours = Math.round(studentCount * 0.5);
 
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
@@ -328,38 +320,97 @@ export default function Landing() {
 
       {/* PRICING */}
       <section style={{ background: 'linear-gradient(180deg, #f9fafb, #f5f7fa)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: '6rem 2rem' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '980px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
             <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Fiyatlandırma</span>
             <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Şeffaf Fiyatlandırma</h2>
             <p style={{ color: '#6b7280', fontSize: '1rem' }}>İlk ay ücretsiz — kredi kartı gerekmez</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {PRICING.map(({ name, price, period, desc, color, features, cta, highlight }) => (
-              <div key={name} style={{ background: highlight ? `linear-gradient(135deg, #4f46e5, #7c3aed)` : 'white', borderRadius: 20, padding: '2rem', border: `1.5px solid ${highlight ? 'transparent' : '#e5e7eb'}`, boxShadow: highlight ? '0 16px 48px rgba(79,70,229,0.35)' : '0 2px 12px rgba(0,0,0,0.04)', position: 'relative', transform: highlight ? 'scale(1.03)' : 'scale(1)' }}>
-                {highlight && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#fbbf24', color: '#92400e', fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.85rem', borderRadius: 20 }}>En Popüler</div>}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: highlight ? 'white' : '#111827', marginBottom: '0.25rem' }}>{name}</h3>
-                  <p style={{ fontSize: '0.82rem', color: highlight ? 'rgba(255,255,255,0.7)' : '#9ca3af' }}>{desc}</p>
-                  <div style={{ marginTop: '1rem' }}>
-                    <span style={{ fontSize: '2.5rem', fontWeight: 900, color: highlight ? 'white' : '#111827' }}>{price}</span>
-                    <span style={{ fontSize: '0.85rem', color: highlight ? 'rgba(255,255,255,0.6)' : '#9ca3af', marginLeft: '0.4rem' }}>/ {period}</span>
-                  </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'stretch' }}>
+            <div style={{ background: 'white', borderRadius: 20, padding: '2rem', border: '1.5px solid #e5e7eb', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', marginBottom: '0.25rem' }}>{FREE_PLAN.name}</h3>
+                <p style={{ fontSize: '0.82rem', color: '#9ca3af' }}>{FREE_PLAN.desc}</p>
+                <div style={{ marginTop: '1rem' }}>
+                  <span style={{ fontSize: '2.5rem', fontWeight: 900, color: '#111827' }}>{FREE_PLAN.price}</span>
+                  <span style={{ fontSize: '0.85rem', color: '#9ca3af', marginLeft: '0.4rem' }}>/ {FREE_PLAN.period}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.75rem' }}>
-                  {features.map(f => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <CheckCircle size={15} color={highlight ? 'rgba(255,255,255,0.8)' : '#10b981'} />
-                      <span style={{ fontSize: '0.85rem', color: highlight ? 'rgba(255,255,255,0.85)' : '#374151' }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={() => selectRole('teacher')}
-                  style={{ width: '100%', padding: '0.85rem', borderRadius: 12, border: 'none', background: highlight ? 'white' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: highlight ? '#4f46e5' : 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', boxShadow: highlight ? '0 4px 14px rgba(0,0,0,0.1)' : '0 4px 14px rgba(79,70,229,0.35)' }}>
-                  {cta}
-                </button>
               </div>
-            ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.75rem' }}>
+                {FREE_PLAN.features.map(f => (
+                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <CheckCircle size={15} color='#10b981' />
+                    <span style={{ fontSize: '0.85rem', color: '#374151' }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => selectRole('teacher')}
+                style={{ width: '100%', padding: '0.85rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
+                {FREE_PLAN.cta}
+              </button>
+            </div>
+
+            <div style={{ background: 'white', borderRadius: 22, padding: '1.8rem', border: '1.5px solid #ddd6fe', boxShadow: '0 16px 48px rgba(79,70,229,0.16)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontSize: '0.72rem', fontWeight: 800, padding: '0.35rem 0.9rem', borderRadius: 20, boxShadow: '0 6px 14px rgba(249,115,22,0.3)' }}>
+                İLK ÖĞRETMENLERE ÖZEL
+              </div>
+
+              <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', marginBottom: '0.6rem' }}>Pro Paket Hesaplayıcı</h3>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.4rem' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '1.6rem', textDecoration: 'line-through', fontWeight: 600 }}>
+                    {Math.round(totalWithVat * 1.25).toLocaleString('tr-TR')}₺
+                  </span>
+                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
+                    {totalWithVat.toLocaleString('tr-TR')}₺
+                  </span>
+                </div>
+                <span style={{ display: 'inline-block', marginTop: '0.55rem', padding: '0.2rem 0.7rem', borderRadius: 999, border: '1px solid #e5e7eb', fontSize: '0.82rem', color: '#6b7280' }}>
+                  {perStudentPrice}₺ / öğrenci / ay + KDV
+                </span>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 14, border: '1.5px solid #e5e7eb', padding: '0.95rem 1rem', marginBottom: '0.9rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                  <span style={{ color: '#1f2937', fontWeight: 700, fontSize: '0.95rem' }}>Aktif öğrenci sayısı</span>
+                  <span style={{ color: '#f97316', fontWeight: 900, fontSize: '1.25rem' }}>{studentCount}</span>
+                </div>
+                <input
+                  type='range'
+                  min={1}
+                  max={60}
+                  value={studentCount}
+                  onChange={(e) => setStudentCount(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: '#f97316', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{ background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
+                  <div style={{ color: '#6b7280', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Aylık Toplam Tutar</div>
+                  <div style={{ color: '#111827', fontSize: '1.75rem', fontWeight: 900 }}>{totalWithVat.toLocaleString('tr-TR')}₺</div>
+                </div>
+                <div style={{ background: '#10b981', border: '1.5px solid #10b981', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
+                  <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Kazancınız</div>
+                  <div style={{ color: 'white', fontSize: '1.75rem', fontWeight: 900 }}>~{timeSavedHours} saat</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.1rem' }}>
+                {['30 gün ücretsiz deneme', 'Tüm özellikler tam sürüm', 'Pasif öğrenciler ücretsiz', 'İstediğiniz zaman iptal edin'].map((f) => (
+                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <CheckCircle size={14} color='#10b981' />
+                    <span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button onClick={() => selectRole('teacher')}
+                style={{ width: '100%', padding: '0.95rem', borderRadius: 999, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 900, fontSize: '1.05rem', cursor: 'pointer', boxShadow: '0 10px 20px rgba(249,115,22,0.28)' }}>
+                30 Gün Ücretsiz Başlayın
+              </button>
+              <p style={{ margin: '0.6rem 0 0', textAlign: 'center', color: '#9ca3af', fontSize: '0.82rem', fontWeight: 600 }}>• Kredi kartı gerekmez</p>
+            </div>
           </div>
         </div>
       </section>
