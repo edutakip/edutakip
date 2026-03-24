@@ -151,6 +151,7 @@ export default function Landing() {
   const baseTotal = studentCount * perStudentPrice;
   const totalWithVat = Math.round(baseTotal * (1 + VAT_RATE));
   const timeSavedHours = Math.round(studentCount * 0.5);
+  const sliderPct = ((studentCount - 1) / (60 - 1)) * 100;
 
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
@@ -173,6 +174,7 @@ export default function Landing() {
         @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes sliderGlow { 0%, 100% { box-shadow: 0 0 0 rgba(249,115,22,0.35); } 50% { box-shadow: 0 0 14px rgba(249,115,22,0.45); } }
       `}</style>
 
       {/* NAV */}
@@ -375,14 +377,19 @@ export default function Landing() {
                   <span style={{ color: '#1f2937', fontWeight: 700, fontSize: '0.95rem' }}>Aktif öğrenci sayısı</span>
                   <span style={{ color: '#f97316', fontWeight: 900, fontSize: '1.25rem' }}>{studentCount}</span>
                 </div>
-                <input
-                  type='range'
-                  min={1}
-                  max={60}
-                  value={studentCount}
-                  onChange={(e) => setStudentCount(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: '#f97316', cursor: 'pointer' }}
-                />
+                <div style={{ position: 'relative', height: 30, display: 'flex', alignItems: 'center' }}>
+                  <div style={{ position: 'absolute', left: 0, right: 0, height: 8, borderRadius: 999, background: '#e5e7eb' }} />
+                  <div style={{ position: 'absolute', left: 0, width: `${sliderPct}%`, height: 8, borderRadius: 999, background: 'linear-gradient(90deg, #f59e0b, #f97316)', transition: 'width 0.25s ease' }} />
+                  <input
+                    type='range'
+                    min={1}
+                    max={60}
+                    value={studentCount}
+                    onChange={(e) => setStudentCount(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer', opacity: 0, position: 'relative', zIndex: 2 }}
+                  />
+                  <div style={{ position: 'absolute', left: `calc(${sliderPct}% - 12px)`, width: 24, height: 24, borderRadius: '50%', background: 'white', border: '3px solid #f97316', transition: 'left 0.25s ease', animation: 'sliderGlow 2.2s ease-in-out infinite' }} />
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -397,7 +404,16 @@ export default function Landing() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.1rem' }}>
-                {['30 gün ücretsiz deneme', 'Tüm özellikler tam sürüm', 'Pasif öğrenciler ücretsiz', 'İstediğiniz zaman iptal edin'].map((f) => (
+                {[
+                  '30 gün ücretsiz deneme',
+                  'Tüm özellikler tam sürüm',
+                  'Pasif öğrenciler ücretsiz',
+                  'İstediğiniz zaman iptal edin',
+                  'AI ders raporu',
+                  'Gelişmiş finans analizi',
+                  'Veli paneli',
+                  'Öncelikli destek',
+                ].map((f) => (
                   <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                     <CheckCircle size={14} color='#10b981' />
                     <span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>{f}</span>
