@@ -179,21 +179,26 @@ export default function TeacherCalendar() {
 
   // ── Weekly View ──────────────────────────────────────────────
   const WeeklyView = () => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    // Mobilde 3 gün (önceki gün, bugün, sonraki gün), masaüstü/tablet 7 gün
+    const weekDays = isMobile
+      ? [addDays(currentDate, -1), currentDate, addDays(currentDate, 1)]
+      : Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), i));
+    const colCount = weekDays.length;
+    const gridCols = `48px repeat(${colCount}, 1fr)`;
     return (
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Week day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '56px repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: gridCols, borderBottom: '1px solid #e2e8f0' }}>
           <div style={{ borderRight: '1px solid #f1f5f9' }} />
           {weekDays.map((day, i) => {
             const today = isToday(day);
+            const dayIndex = (day.getDay() + 6) % 7;
             return (
               <div key={i} onClick={() => openAdd(day)}
-                style={{ padding: '0.85rem 0.5rem', textAlign: 'center', borderRight: i < 6 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', background: today ? '#eef2ff' : 'transparent', transition: 'background 0.1s' }}
+                style={{ padding: '0.85rem 0.5rem', textAlign: 'center', borderRight: i < colCount - 1 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', background: today ? '#eef2ff' : 'transparent', transition: 'background 0.1s' }}
                 onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = today ? '#eef2ff' : 'transparent'; }}>
-                <div style={{ color: '#9ca3af', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>{DAYS_SHORT[i]}</div>
+                <div style={{ color: '#9ca3af', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>{DAYS_SHORT[dayIndex]}</div>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: today ? '#4f46e5' : 'transparent', color: today ? 'white' : '#374151', fontWeight: today ? 800 : 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
                   {format(day, 'd')}
                 </div>
@@ -204,8 +209,8 @@ export default function TeacherCalendar() {
         {/* Time rows */}
         <div style={{ overflowY: 'auto', maxHeight: '65vh' }}>
           {HOURS.map(hour => (
-            <div key={hour} style={{ display: 'grid', gridTemplateColumns: '56px repeat(7, 1fr)', borderBottom: '1px solid #f1f5f9', minHeight: 60 }}>
-              <div style={{ padding: '0.6rem 0.5rem 0', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 600, textAlign: 'right', borderRight: '1px solid #f1f5f9', fontVariantNumeric: 'tabular-nums' }}>
+            <div key={hour} style={{ display: 'grid', gridTemplateColumns: gridCols, borderBottom: '1px solid #f1f5f9', minHeight: 60 }}>
+              <div style={{ padding: '0.6rem 0.4rem 0', color: '#94a3b8', fontSize: '0.68rem', fontWeight: 600, textAlign: 'right', borderRight: '1px solid #f1f5f9', fontVariantNumeric: 'tabular-nums' }}>
                 {String(hour).padStart(2, '0')}:00
               </div>
               {weekDays.map((day, di) => {
@@ -214,7 +219,7 @@ export default function TeacherCalendar() {
                 });
                 return (
                   <div key={di} onClick={() => openAdd(day, hour)}
-                    style={{ padding: '0.3rem', borderRight: di < 6 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'background 0.1s', background: isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent' }}
+                    style={{ padding: '0.3rem', borderRight: di < colCount - 1 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'background 0.1s', background: isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                     onMouseLeave={e => e.currentTarget.style.background = isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent'}>
                     {cellLessons.map(l => <LessonChip key={l.id} lesson={l} compact />)}
@@ -338,7 +343,7 @@ export default function TeacherCalendar() {
       </div>
 
       {/* Genel Bakış — takvimin üstünde */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '0.75rem' }}>
+      {!isMobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
         {[
           { label: 'Toplam Ders', value: lessons.length, color: '#4f46e5', bg: '#eef2ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
           { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#6366f1', bg: '#e0e7ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
@@ -355,7 +360,7 @@ export default function TeacherCalendar() {
             </div>
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* Takvim — sürüklenebilir wrapper */}
       <div
@@ -371,7 +376,7 @@ export default function TeacherCalendar() {
           window.addEventListener('mouseup', onUp);
         }}
       >
-        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? '900px' : '650px' }}>
+        <div style={{ minWidth: isMobile ? 0 : view === 'monthly' ? '1000px' : view === 'weekly' ? '900px' : '650px' }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
@@ -379,7 +384,7 @@ export default function TeacherCalendar() {
       </div>
 
       {/* Yaklaşan Dersler — takvimin altında */}
-      {upcoming.length > 0 && (
+      {!isMobile && upcoming.length > 0 && (
         <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: '1.1rem 1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <h3 style={{ color: '#374151', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Calendar size={14} color='#4f46e5' /> Yaklaşan Dersler
