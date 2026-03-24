@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Search, MessageCircle, Phone, Video, MoreVertical, Smile, Paperclip } from 'lucide-react';
+import { Send, Search, MessageCircle, Phone, Video, MoreVertical, Smile, Paperclip, ChevronLeft } from 'lucide-react';
 
 export default function TeacherMessages() {
   const [students, setStudents] = useState([]);
@@ -10,7 +10,9 @@ export default function TeacherMessages() {
   const [me, setMe] = useState(null);
   const [search, setSearch] = useState('');
   const [lastMessages, setLastMessages] = useState({});
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const bottomRef = useRef(null);
+  const isMobile = windowWidth < 640;
 
   useEffect(() => {
     const load = async () => {
@@ -34,6 +36,11 @@ export default function TeacherMessages() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const loadMessages = async () => {
     const msgs = await base44.entities.Message.filter({ studentId: selectedStudent.id });
@@ -84,7 +91,8 @@ export default function TeacherMessages() {
     <div style={{ display: 'flex', height: '100vh', background: '#0f0c29', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── LEFT PANEL ── */}
-      <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0c29', borderRight: '1px solid rgba(99,102,241,0.2)' }}>
+      {(!isMobile || !selectedStudent) && (
+      <div style={{ width: isMobile ? '100%' : '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0c29', borderRight: isMobile ? 'none' : '1px solid rgba(99,102,241,0.2)' }}>
 
         {/* Header */}
         <div style={{ padding: '1rem 1.25rem', background: '#1e1b4b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -142,9 +150,10 @@ export default function TeacherMessages() {
           })}
         </div>
       </div>
+      )}
 
       {/* ── RIGHT PANEL ── */}
-      {!selectedStudent ? (
+      {(!isMobile || selectedStudent) && (!selectedStudent ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.25rem', background: '#13103a' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <MessageCircle size={36} color='#6366f1' strokeWidth={1.5} />
@@ -159,13 +168,21 @@ export default function TeacherMessages() {
           </p>
         </div>
       ) : (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0d0b2e', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0d0b2e', overflow: 'hidden', position: 'relative', width: isMobile ? '100%' : 'auto' }}>
 
           {/* Chat wallpaper pattern */}
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
 
           {/* Header */}
           <div style={{ padding: '0.7rem 1.25rem', background: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '0.85rem', zIndex: 1 }}>
+            {isMobile && (
+              <button
+                onClick={() => setSelectedStudent(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem', borderRadius: '50%', color: '#aebac1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
             {avatar(selectedStudent.parentName || selectedStudent.name, 40, getColor(selectedStudent.id))}
             <div style={{ flex: 1 }}>
               <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '0.95rem', margin: 0 }}>{selectedStudent.parentName || 'Veli'}</p>
@@ -256,7 +273,7 @@ export default function TeacherMessages() {
             </button>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
