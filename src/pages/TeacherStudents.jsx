@@ -45,15 +45,27 @@ export default function TeacherStudents() {
     <div style={{ padding: isMobile ? '1.25rem 1rem' : '2rem', background: 'var(--bg-primary)', minHeight: '100vh', position: 'relative' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'center' : 'flex-start', marginBottom: isMobile ? '1.25rem' : '2rem' }}>
         <div>
           <h1 style={{ color: 'var(--text-primary)', fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '800', marginBottom: '0.3rem' }}>Öğrencilerim</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Tüm öğrencilerinizi ve ders durumlarını buradan yönetin.</p>
+          {!isMobile && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Tüm öğrencilerinizi ve ders durumlarını buradan yönetin.</p>}
         </div>
 
         <button onClick={() => setShowAdd(true)}
-          style={{ background: 'var(--accent)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-          <Plus size={16} /> Yeni Öğrenci Ekle
+          style={{
+            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+            border: 'none', color: 'white',
+            borderRadius: '12px',
+            padding: isMobile ? '0.55rem 1rem' : '0.65rem 1.3rem',
+            fontWeight: '700',
+            fontSize: isMobile ? '0.82rem' : '0.9rem',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(79,70,229,0.35)',
+          }}>
+          <Plus size={15} /> Yeni Öğrenci Ekle
         </button>
       </div>
 
