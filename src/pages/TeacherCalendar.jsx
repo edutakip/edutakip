@@ -116,7 +116,7 @@ export default function TeacherCalendar() {
   const DailyView = () => {
     const dayLessons = getLessonsForDay(currentDate);
     return (
-      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden', minWidth: 0 }}>
         {/* Day header */}
         <div style={{ background: isToday(currentDate) ? '#4f46e5' : '#f8fafc', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -230,7 +230,7 @@ export default function TeacherCalendar() {
           ))}
         </div>
         {/* Days */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
           {days.map((day, i) => {
             const today = isToday(day);
             const inMonth = isSameMonth(day, currentDate);
@@ -239,7 +239,7 @@ export default function TeacherCalendar() {
             const isLastRow = i >= days.length - 7;
             return (
               <div key={i} onClick={() => openAdd(day)}
-                style={{ minHeight: 110, padding: '0.5rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative' }}
+                style={{ minHeight: 80, padding: '0.3rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative', overflow: 'hidden' }}
                 onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = today ? '#fffbeb' : 'transparent'; }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: today ? '#4f46e5' : 'transparent', color: today ? 'white' : inMonth ? '#374151' : '#d1d5db', fontWeight: today ? 800 : 500, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
@@ -275,7 +275,7 @@ export default function TeacherCalendar() {
     .slice(0, 6);
 
   return (
-    <div style={{ padding: '1rem 0.5rem', height: '100vh', overflowY: 'auto', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ padding: '1rem 0.5rem 2rem', background: '#f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
@@ -319,7 +319,7 @@ export default function TeacherCalendar() {
       </div>
 
       {/* Genel Bakış — takvimin üstünde */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
         {[
           { label: 'Toplam Ders', value: lessons.length, color: '#4f46e5', bg: '#eef2ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
           { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#6366f1', bg: '#e0e7ff', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
