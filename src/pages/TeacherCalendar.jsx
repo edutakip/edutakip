@@ -221,49 +221,79 @@ export default function TeacherCalendar() {
       days.push(d); d = addDays(d, 1);
       if (days.length > 42) break;
     }
+    const weeks = [];
+    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
+
     return (
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Day name headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1.5px solid #e2e8f0', background: '#f8fafc' }}>
           {DAYS_SHORT.map(n => (
-            <div key={n} style={{ padding: '0.7rem 0', textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px' }}>{n}</div>
+            <div key={n} style={{ padding: '0.75rem 0', textAlign: 'center', color: '#64748b', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.5px' }}>{n}</div>
           ))}
         </div>
-        {/* Days */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
-          {days.map((day, i) => {
-            const today = isToday(day);
-            const inMonth = isSameMonth(day, currentDate);
-            const dayLessons = getLessonsForDay(day);
-            const isLastCol = (i + 1) % 7 === 0;
-            const isLastRow = i >= days.length - 7;
-            return (
-              <div key={i} onClick={() => openAdd(day)}
-                style={{ minHeight: 80, padding: '0.3rem', borderRight: isLastCol ? 'none' : '1px solid #f1f5f9', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', cursor: 'pointer', background: today ? '#fffbeb' : 'transparent', transition: 'background 0.15s', position: 'relative', overflow: 'hidden' }}
-                onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = today ? '#fffbeb' : 'transparent'; }}>
-                <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: today ? '#4f46e5' : 'transparent', color: today ? 'white' : inMonth ? '#374151' : '#d1d5db', fontWeight: today ? 800 : 500, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
-                  {format(day, 'd')}
+        {/* Weeks — one row per week, full viewport height distributed */}
+        {weeks.map((week, wi) => (
+          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: wi < weeks.length - 1 ? '1px solid #f1f5f9' : 'none', minHeight: '18vw' }}>
+            {week.map((day, di) => {
+              const today = isToday(day);
+              const inMonth = isSameMonth(day, currentDate);
+              const dayLessons = getLessonsForDay(day);
+              const isLastCol = di === 6;
+              return (
+                <div key={di} onClick={() => openAdd(day)}
+                  style={{
+                    padding: '0.4rem 0.3rem',
+                    borderRight: isLastCol ? 'none' : '1px solid #f1f5f9',
+                    cursor: 'pointer',
+                    background: today ? '#eef2ff' : 'transparent',
+                    transition: 'background 0.15s',
+                    display: 'flex', flexDirection: 'column', gap: '0.2rem',
+                    overflow: 'hidden',
+                  }}
+                  onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#f8fafc'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = today ? '#eef2ff' : 'transparent'; }}>
+                  {/* Date number */}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: today ? '#4f46e5' : 'transparent',
+                    color: today ? 'white' : inMonth ? '#111827' : '#d1d5db',
+                    fontWeight: today ? 800 : 600,
+                    fontSize: '0.88rem',
+                    alignSelf: 'flex-start',
+                  }}>
+                    {format(day, 'd')}
+                  </div>
+                  {/* Lesson dots/chips */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.18rem', overflow: 'hidden' }}>
+                    {dayLessons.slice(0, 2).map(l => {
+                      const s = STATUS[l.status] || STATUS['planlandı'];
+                      return (
+                        <div key={l.id}
+                          onClick={e => { e.stopPropagation(); openEdit(l, e); }}
+                          style={{
+                            background: s.bg, color: s.color,
+                            borderRadius: 6, padding: '0.18rem 0.3rem',
+                            fontSize: '0.6rem', fontWeight: 700,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            lineHeight: 1.3,
+                          }}>
+                          {l.startTime?.slice(0,5)} {l.studentName}
+                        </div>
+                      );
+                    })}
+                    {dayLessons.length > 2 && (
+                      <div style={{ fontSize: '0.58rem', color: '#94a3b8', fontWeight: 700, paddingLeft: '0.1rem' }}>
+                        +{dayLessons.length - 2}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  {dayLessons.slice(0, 3).map(l => <LessonChip key={l.id} lesson={l} compact />)}
-                  {dayLessons.length > 3 && (
-                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', paddingLeft: '0.25rem', fontWeight: 600 }}>+{dayLessons.length - 3} daha</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {/* Legend */}
-        <div style={{ display: 'flex', gap: '1.25rem', padding: '0.85rem 1.5rem', borderTop: '1px solid #f1f5f9', alignItems: 'center' }}>
-          {Object.entries(STATUS).map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: v.bg }} />
-              {v.label}
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
     );
   };
@@ -326,12 +356,12 @@ export default function TeacherCalendar() {
           { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#10b981', bg: '#d1fae5', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> },
           { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#ef4444', bg: '#fee2e2', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> },
         ].map(({ label, value, color, bg, icon }) => (
-          <div key={label} style={{ background: 'white', borderRadius: 14, padding: '0.85rem 1.1rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div key={label} style={{ background: 'white', borderRadius: 12, padding: '0.65rem 0.75rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {icon}
             </div>
             <div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
               <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 600, marginTop: '0.15rem' }}>{label}</div>
             </div>
           </div>
