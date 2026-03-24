@@ -16,8 +16,15 @@ export default function TeacherDashboard() {
   const [monthlyGoal, setMonthlyGoal] = useState(() => parseInt(localStorage.getItem('monthlyGoal') || '20'));
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState('');
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const isMobile = windowWidth < 640;
 
   useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const loadData = async () => {
     const me = await base44.auth.me();
@@ -169,21 +176,21 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <div style={{ padding: '2rem', height: '100vh', overflowY: 'auto', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ padding: isMobile ? '1rem' : '2rem', height: '100vh', overflowY: 'auto', background: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.8rem' : 0, marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Genel Bakış</h1>
           <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{format(new Date(), 'EEEE, d MMMM yyyy', { locale: tr })}</p>
         </div>
         <button onClick={() => setShowModal(true)}
-          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
           <Plus size={16} /> Ders Ekle
         </button>
       </div>
 
       {/* ── Now Brief ────────────────────────────────────── */}
-      <div style={{ background: theme.gradient, borderRadius: 20, padding: '1.5rem 1.75rem', marginBottom: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: `0 8px 32px ${theme.primary}30` }}>
+      <div style={{ background: theme.gradient, borderRadius: isMobile ? 16 : 20, padding: isMobile ? '1rem' : '1.5rem 1.75rem', marginBottom: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: `0 8px 32px ${theme.primary}30` }}>
         <style>{`
           @keyframes briefFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
           @keyframes briefFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
@@ -196,6 +203,34 @@ export default function TeacherDashboard() {
         <div style={{ position: 'absolute', right: 60, bottom: -50, width: 120, height: 120, borderRadius: '50%', background: theme.accent + '12', animation: 'float 8s ease-in-out infinite reverse' }} />
         <div style={{ position: 'absolute', left: -20, bottom: -30, width: 100, height: 100, borderRadius: '50%', background: theme.primary + '10' }} />
 
+        {isMobile ? (
+          <div style={{ position: 'relative' }}>
+            <div style={{ border: '1px solid rgba(255,255,255,0.16)', background: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: '0.85rem 0.9rem', animation: briefVisible ? 'briefFadeIn 0.4s ease forwards' : 'briefFadeOut 0.4s ease forwards' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '0.35rem' }}>
+                {briefCards[briefSlide].icon}
+                <span style={{ fontSize: '0.66rem', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                  {briefCards[briefSlide].title}
+                </span>
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'white', marginBottom: '0.15rem', lineHeight: 1.2 }}>
+                {briefCards[briefSlide].main}
+              </div>
+              <div style={{ fontSize: '0.77rem', color: 'rgba(255,255,255,0.65)', fontWeight: '500', lineHeight: 1.4 }}>
+                {briefCards[briefSlide].detail}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.35rem', marginTop: '0.65rem' }}>
+              {briefCards.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setBriefVisible(false); setTimeout(() => { setBriefSlide(i); setBriefVisible(true); }, 300); }}
+                  style={{ width: i === briefSlide ? 16 : 6, height: 6, borderRadius: 999, border: 'none', background: i === briefSlide ? theme.accent : 'rgba(255,255,255,0.3)', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {/* Sol: Selam + saat */}
           <div style={{ flexShrink: 0, minWidth: 200 }}>
@@ -251,6 +286,7 @@ export default function TeacherDashboard() {
             ))}
           </div>
         </div>
+        )}
       </div>
 
       {/* Stat Cards */}
