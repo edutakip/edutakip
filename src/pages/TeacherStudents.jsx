@@ -23,18 +23,11 @@ export default function TeacherStudents() {
   const [showAdd, setShowAdd] = useState(false);
   const [payStudent, setPayStudent] = useState(null);
   const [detailStudent, setDetailStudent] = useState(null);
-  const [fabPulsing, setFabPulsing] = useState(true);
 
   const width = useWindowWidth();
   const isMobile = width < 1024;
 
   useEffect(() => { loadStudents(); }, []);
-
-  // FAB pulse animasyonu: 3 saniye sonra dur
-  useEffect(() => {
-    const t = setTimeout(() => setFabPulsing(false), 3000);
-    return () => clearTimeout(t);
-  }, []);
 
   const loadStudents = async () => {
     const me = await base44.auth.me();
@@ -51,29 +44,6 @@ export default function TeacherStudents() {
   return (
     <div style={{ padding: isMobile ? '1.25rem 1rem' : '2rem', background: 'var(--bg-primary)', minHeight: '100vh', position: 'relative' }}>
 
-      {/* Pulse animasyonu için keyframes */}
-      <style>{`
-        @keyframes fab-pulse {
-          0%   { box-shadow: 0 0 0 0 rgba(99,102,241,0.55); }
-          70%  { box-shadow: 0 0 0 14px rgba(99,102,241,0); }
-          100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-        }
-        @keyframes fab-in {
-          from { opacity: 0; transform: scale(0.5) rotate(-90deg); }
-          to   { opacity: 1; transform: scale(1) rotate(0deg); }
-        }
-        .fab-btn {
-          animation: fab-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        }
-        .fab-btn.pulsing {
-          animation: fab-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards,
-                     fab-pulse 1.2s ease-out 0.4s 2;
-        }
-        .fab-btn:active {
-          transform: scale(0.92) !important;
-        }
-      `}</style>
-
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
@@ -81,13 +51,10 @@ export default function TeacherStudents() {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Tüm öğrencilerinizi ve ders durumlarını buradan yönetin.</p>
         </div>
 
-        {/* Masaüstü/tablet: header'daki buton */}
-        {!isMobile && (
-          <button onClick={() => setShowAdd(true)}
-            style={{ background: 'var(--accent)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Plus size={16} /> Öğrenci Ekle
-          </button>
-        )}
+        <button onClick={() => setShowAdd(true)}
+          style={{ background: 'var(--accent)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+          <Plus size={16} /> Yeni Öğrenci Ekle
+        </button>
       </div>
 
       {/* Filters */}
@@ -140,35 +107,6 @@ export default function TeacherStudents() {
           </div>
         )}
       </div>
-
-      {/* Mobil: sağ üstte FAB butonu (sayfanın position:relative içinde, fixed değil — Layout'un nav'ıyla çakışmasın) */}
-      {isMobile && (
-        <button
-          className={`fab-btn${fabPulsing ? ' pulsing' : ''}`}
-          onClick={() => setShowAdd(true)}
-          style={{
-            position: 'fixed',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 200,
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(79,70,229,0.5)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(79,70,229,0.65)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(79,70,229,0.5)'; }}
-        >
-          <Plus size={22} color="white" strokeWidth={2.5} />
-        </button>
-      )}
 
       {showAdd && <AddStudentModal onClose={() => setShowAdd(false)} onSaved={loadStudents} />}
       {payStudent && <PaymentModal student={payStudent} onClose={() => setPayStudent(null)} onSaved={loadStudents} />}
