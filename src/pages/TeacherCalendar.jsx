@@ -380,7 +380,7 @@ export default function TeacherCalendar() {
           window.addEventListener('mouseup', onUp);
         }}
       >
-        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? (isMobile ? '678px' : '700px') : '600px' }}>
+        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? (isMobile ? '678px' : '700px') : (isMobile ? '100%' : '600px') }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
