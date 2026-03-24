@@ -62,7 +62,9 @@ const MESSAGES = [
 function SiradanGun() {
   const sectionRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const started = useRef(false);
+  const isMobile = windowWidth < 768;
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -82,18 +84,23 @@ function SiradanGun() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   return (
-    <section ref={sectionRef} style={{ background: '#080b14', padding: '6rem 2rem', position: 'relative', overflow: 'hidden' }}>
+    <section ref={sectionRef} style={{ background: '#080b14', padding: isMobile ? '4rem 1rem' : '6rem 2rem', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(99,102,241,0.07) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(168,85,247,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', position: 'relative' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2rem' : '4rem', alignItems: 'center', position: 'relative' }}>
 
         <div>
           <span style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.35rem 1rem', marginBottom: '1.5rem', border: '1px solid rgba(99,102,241,0.25)' }}>
             Tanidik Geldi Mi?
           </span>
-          <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
+          <h2 style={{ color: 'white', fontSize: isMobile ? '2.25rem' : 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-1px', marginBottom: '1.25rem' }}>
             Bir Ogretmenin
             <br />
             <span style={{ background: 'linear-gradient(120deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -113,7 +120,7 @@ function SiradanGun() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minHeight: 480 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minHeight: isMobile ? 'auto' : 480 }}>
           {MESSAGES.map((msg, i) => {
             const visible = i < visibleCount;
             const isRight = msg.side === 'right';
@@ -124,7 +131,7 @@ function SiradanGun() {
                 transform: visible ? 'translateX(0)' : (isRight ? 'translateX(20px)' : 'translateX(-20px)'),
                 transition: 'opacity 0.4s ease, transform 0.4s ease',
               }}>
-                <div style={{ maxWidth: '82%' }}>
+                <div style={{ maxWidth: isMobile ? '90%' : '82%' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem', justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
                     <span style={{ fontSize: '0.7rem', fontWeight: 700, color: msg.color }}>{msg.from}</span>
                     <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.2)' }}>{msg.time}</span>
