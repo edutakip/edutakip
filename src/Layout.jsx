@@ -137,6 +137,12 @@ const PARENT_NAV = [
   { label: 'Gelişim Raporu', icon: BookOpen, page: 'ParentPerformance' },
   { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
+const PARENT_MOBILE_NAV = [
+  { label: 'Ana Sayfa', shortLabel: 'Ana', icon: Home, page: 'ParentDashboard' },
+  { label: 'Ödevler', shortLabel: 'Ödev', icon: GraduationCap, page: 'ParentHomework' },
+  { label: 'Gelişim Raporu', shortLabel: 'Gelişim', icon: BookOpen, page: 'ParentPerformance' },
+  { label: 'Mesajlar', shortLabel: 'Mesaj', icon: MessageCircle, page: 'ParentMessages' },
+];
 
 const TEACHER_MOBILE_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -168,6 +174,7 @@ export default function Layout({ children, currentPageName }) {
   const prevPage = useRef(currentPageName);
   const windowWidth = useWindowWidth();
   const isMobile = windowWidth < 1024;
+  const isNarrowMobile = windowWidth < 430;
 
   useEffect(() => {
     if (role === 'teacher') {
@@ -295,6 +302,7 @@ export default function Layout({ children, currentPageName }) {
 
   // ── Veli: her zaman alt nav ───────────────────────────────
   if (isParent) {
+    const parentMobileNav = isNarrowMobile ? PARENT_MOBILE_NAV : PARENT_NAV;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
@@ -311,7 +319,7 @@ export default function Layout({ children, currentPageName }) {
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
           height: '64px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}>
-          {nav.map((item, i) => {
+          {parentMobileNav.map((item, i) => {
             const Icon = item.icon;
             const isActive = item.page === currentPageName;
             return (
@@ -319,7 +327,7 @@ export default function Layout({ children, currentPageName }) {
                 onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.25rem', padding: '0.35rem 0.9rem', cursor: 'pointer',
+                  gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer',
                   textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
                   color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.45)',
                   transition: 'color 0.2s ease',
@@ -329,7 +337,7 @@ export default function Layout({ children, currentPageName }) {
                     position: 'absolute',
                     top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '58px', height: '48px',
+                    width: isNarrowMobile ? '46px' : '58px', height: isNarrowMobile ? '40px' : '48px',
                     borderRadius: '18px',
                     background: 'rgba(255,255,255,0.12)',
                     backdropFilter: 'blur(12px)',
@@ -341,8 +349,10 @@ export default function Layout({ children, currentPageName }) {
                   }} />
                 )}
                 <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
-                  <Icon size={19} />
-                  <span style={{ fontSize: '0.58rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>{item.label}</span>
+                  <Icon size={isNarrowMobile ? 17 : 19} />
+                  <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
+                    {isNarrowMobile ? item.shortLabel : item.label}
+                  </span>
                 </span>
               </Link>
             );
@@ -350,13 +360,13 @@ export default function Layout({ children, currentPageName }) {
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.25rem', padding: '0.35rem 0.9rem', cursor: 'pointer', transition: 'color 0.2s ease',
+              gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer', transition: 'color 0.2s ease',
               color: 'rgba(255,150,150,0.6)', background: 'none', border: 'none', flex: 1, height: '100%',
             }}
             onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.6)'}>
-            <LogOut size={19} />
-            <span style={{ fontSize: '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>Çıkış</span>
+            <LogOut size={isNarrowMobile ? 17 : 19} />
+            <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>Çıkış</span>
           </button>
         </nav>
       </div>
