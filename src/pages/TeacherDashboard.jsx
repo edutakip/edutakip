@@ -4,11 +4,12 @@ import { format, parseISO, isToday, isTomorrow, differenceInMinutes } from 'date
 import { tr } from 'date-fns/locale';
 import { Users, CalendarCheck, CheckCircle, DollarSign, ChevronRight, MessageCircle, Plus } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LessonModal from '../components/teacher/LessonModal';
 import PendingLessonsPrompt from '../components/teacher/PendingLessonsPrompt';
 
 export default function TeacherDashboard() {
+  const navigate = useNavigate();
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -169,10 +170,10 @@ export default function TeacherDashboard() {
   const getAvatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || '#fbbf24';
 
   const statCards = [
-    { label: 'Aktif Öğrenci', value: activeStudents, icon: Users, iconColor: '#0ea5e9', iconBg: '#e0f2fe' },
-    { label: 'Bugünkü Dersler', value: todayLessons.length, icon: CalendarCheck, iconColor: '#6366f1', iconBg: '#eef2ff' },
-    { label: 'Bu Ay Tamamlanan', value: completedThisMonth, icon: CheckCircle, iconColor: '#10b981', iconBg: '#d1fae5' },
-    { label: 'Ödenmemiş Bakiye', value: `₺${totalUnpaid.toLocaleString('tr-TR')}`, icon: DollarSign, iconColor: '#f59e0b', iconBg: '#fef3c7' },
+    { label: 'Aktif Öğrenci', value: activeStudents, icon: Users, iconColor: '#0ea5e9', iconBg: '#e0f2fe', page: 'TeacherStudents' },
+    { label: 'Bugünkü Dersler', value: todayLessons.length, icon: CalendarCheck, iconColor: '#6366f1', iconBg: '#eef2ff', page: 'TeacherCalendar' },
+    { label: 'Bu Ay Tamamlanan', value: completedThisMonth, icon: CheckCircle, iconColor: '#10b981', iconBg: '#d1fae5', page: 'TeacherLessons' },
+    { label: 'Ödenmemiş Bakiye', value: `₺${totalUnpaid.toLocaleString('tr-TR')}`, icon: DollarSign, iconColor: '#f59e0b', iconBg: '#fef3c7', page: 'TeacherFinance' },
   ];
 
   return (
@@ -294,7 +295,11 @@ export default function TeacherDashboard() {
         {statCards.map((card, i) => {
           const Icon = card.icon;
           return (
-            <div key={i} style={{ background: '#ffffff', borderRadius: '16px', padding: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div key={i}
+              onClick={() => navigate(createPageUrl(card.page))}
+              style={{ background: '#ffffff', borderRadius: '16px', padding: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${card.iconColor}22`; e.currentTarget.style.borderColor = card.iconColor + '44'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#f1f5f9'; }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <Icon size={20} color={card.iconColor} />
               </div>
