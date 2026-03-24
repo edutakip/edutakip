@@ -204,8 +204,16 @@ export default function TeacherFinance() {
   const [showStudentPicker, setShowStudentPicker] = useState(false);
   const [txFilter, setTxFilter] = useState({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' });
   const [detailType, setDetailType] = useState(null);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const isMobile = windowWidth < 640;
+  const isTablet = windowWidth < 1024;
 
   useEffect(() => { loadAll(); }, []);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const loadAll = async () => {
     const me = await base44.auth.me();
@@ -272,20 +280,20 @@ export default function TeacherFinance() {
   const card = { background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' };
 
   return (
-    <div style={{ padding: '2rem', background: 'var(--bg-primary)', height: '100vh', overflowY: 'auto' }}>
+    <div style={{ padding: isMobile ? '0.9rem' : isTablet ? '1.4rem' : '2rem', background: 'var(--bg-primary)', height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.9rem' : 0, marginBottom: '1.75rem' }}>
         <div>
           <h1 style={{ color: '#111827', fontSize: '1.6rem', fontWeight: '800', marginBottom: '0.2rem' }}>Finans Yönetimi</h1>
           <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Gelir, ödeme ve öğrenci bazlı istatistikler</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', width: isMobile ? '100%' : 'auto' }}>
           <button onClick={loadAll} style={{ background: 'white', border: '1.5px solid #e5e7eb', color: '#6b7280', borderRadius: '10px', padding: '0.55rem 0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
             <RefreshCw size={14} />
           </button>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', flex: isMobile ? 1 : 'none' }}>
             <button onClick={() => setShowStudentPicker(v => !v)}
-              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.25rem', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.25rem', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)', width: isMobile ? '100%' : 'auto' }}>
               <Plus size={16} /> Ödeme Ekle <ChevronDown size={14} />
             </button>
             {showStudentPicker && (
@@ -306,7 +314,7 @@ export default function TeacherFinance() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
         <StatCard icon={Users} iconColor='#ec4899' label='Aktif Öğrenci' value={students.length} sub='Detay için tıkla' onClick={() => setDetailType('students')} />
         <StatCard icon={DollarSign} iconColor='#f97316' label='Toplam Gelir' value={`₺${totalIncome.toLocaleString('tr-TR')}`} sub='Detay için tıkla' onClick={() => setDetailType('income')} />
         <StatCard icon={Clock} iconColor='#6366f1' label='Haftalık Planlanan Ders' value={`${totalWeeklyHours} Saat`} sub='Detay için tıkla' onClick={() => setDetailType('hours')} />
@@ -315,7 +323,7 @@ export default function TeacherFinance() {
       </div>
 
       {/* Charts row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
@@ -372,7 +380,7 @@ export default function TeacherFinance() {
       </div>
 
       {/* Bottom row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', alignItems: 'start', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr', gap: '1rem', alignItems: 'start', marginBottom: '1rem' }}>
         <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>
