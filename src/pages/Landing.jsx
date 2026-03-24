@@ -146,17 +146,25 @@ function SiradanGun() {
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [studentCount, setStudentCount] = useState(20);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const perStudentPrice = 50;
   const baseTotal = studentCount * perStudentPrice;
   const totalWithoutVat = Math.round(baseTotal);
   const timeSavedHours = Math.round(studentCount * 0.5);
   const sliderPct = ((studentCount - 1) / (60 - 1)) * 100;
+  const isMobile = windowWidth < 768;
+  const isNarrow = windowWidth < 430;
 
   useEffect(() => {
     document.body.style.background = '#f5f7fa';
     const role = localStorage.getItem('tilki_role');
     if (role === 'teacher') window.location.href = createPageUrl('TeacherDashboard');
     else if (role === 'parent') window.location.href = createPageUrl('ParentDashboard');
+  }, []);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   const selectRole = (role) => setSelectedRole(role);
@@ -320,15 +328,15 @@ export default function Landing() {
       </section>
 
       {/* PRICING */}
-      <section style={{ background: 'linear-gradient(180deg, #f9fafb, #f5f7fa)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: '6rem 2rem' }}>
+      <section style={{ background: 'linear-gradient(180deg, #f9fafb, #f5f7fa)', borderTop: '1px solid rgba(229,231,235,0.5)', padding: isMobile ? '4rem 1rem' : '6rem 2rem' }}>
         <div style={{ maxWidth: '980px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: isMobile ? '2.2rem' : '3.5rem' }}>
             <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', color: '#6d28d9', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: '25px', padding: '0.4rem 1rem', marginBottom: '1rem' }}>Fiyatlandırma</span>
             <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: '900', marginBottom: '0.75rem', letterSpacing: '-0.8px' }}>Şeffaf Fiyatlandırma</h2>
             <p style={{ color: '#6b7280', fontSize: '1rem' }}>İlk ay ücretsiz — kredi kartı gerekmez</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'stretch' }}>
-            <div style={{ background: 'white', borderRadius: 20, padding: '2rem', border: '1.5px solid #e5e7eb', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: isMobile ? '1rem' : '1.5rem', alignItems: 'stretch' }}>
+            <div style={{ background: 'white', borderRadius: 20, padding: isMobile ? '1.2rem' : '2rem', border: '1.5px solid #e5e7eb', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', marginBottom: '0.25rem' }}>{FREE_PLAN.name}</h3>
                 <p style={{ fontSize: '0.82rem', color: '#9ca3af' }}>{FREE_PLAN.desc}</p>
@@ -351,18 +359,18 @@ export default function Landing() {
               </button>
             </div>
 
-            <div style={{ background: 'white', borderRadius: 22, padding: '1.8rem', border: '1.5px solid #ddd6fe', boxShadow: '0 16px 48px rgba(79,70,229,0.16)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontSize: '0.72rem', fontWeight: 800, padding: '0.35rem 0.9rem', borderRadius: 20, boxShadow: '0 6px 14px rgba(249,115,22,0.3)' }}>
+            <div style={{ background: 'white', borderRadius: 22, padding: isMobile ? '1rem' : '1.8rem', border: '1.5px solid #ddd6fe', boxShadow: '0 16px 48px rgba(79,70,229,0.16)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontSize: isMobile ? '0.66rem' : '0.72rem', fontWeight: 800, padding: isMobile ? '0.3rem 0.7rem' : '0.35rem 0.9rem', borderRadius: 20, boxShadow: '0 6px 14px rgba(249,115,22,0.3)' }}>
                 İLK ÖĞRETMENLERE ÖZEL
               </div>
 
-              <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', marginBottom: '0.6rem' }}>Pro Paket Hesaplayıcı</h3>
+              <div style={{ textAlign: 'center', marginBottom: '1rem', marginTop: isMobile ? '0.25rem' : 0 }}>
+                <h3 style={{ fontWeight: 800, fontSize: isMobile ? '1rem' : '1.1rem', color: '#111827', marginBottom: '0.6rem' }}>Pro Paket Hesaplayıcı</h3>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.4rem' }}>
-                  <span style={{ color: '#9ca3af', fontSize: '1.6rem', textDecoration: 'line-through', fontWeight: 600 }}>
+                  <span style={{ color: '#9ca3af', fontSize: isMobile ? '1.2rem' : '1.6rem', textDecoration: 'line-through', fontWeight: 600 }}>
                     {Math.round(totalWithoutVat * 1.25).toLocaleString('tr-TR')}₺
                   </span>
-                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
+                  <span style={{ fontSize: isMobile ? '2.6rem' : '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
                     {totalWithoutVat.toLocaleString('tr-TR')}₺
                   </span>
                 </div>
@@ -407,18 +415,18 @@ export default function Landing() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div style={{ background: '#f8fafc', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
                   <div style={{ color: '#6b7280', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Aylık Toplam Tutar</div>
-                  <div style={{ color: '#111827', fontSize: '1.75rem', fontWeight: 900 }}>{totalWithoutVat.toLocaleString('tr-TR')}₺</div>
+                  <div style={{ color: '#111827', fontSize: isMobile ? '1.55rem' : '1.75rem', fontWeight: 900 }}>{totalWithoutVat.toLocaleString('tr-TR')}₺</div>
                 </div>
                 <div style={{ background: '#10b981', border: '1.5px solid #10b981', borderRadius: 12, padding: '0.8rem', textAlign: 'center' }}>
                   <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.25rem' }}>Kazancınız</div>
-                  <div style={{ color: 'white', fontSize: '1.75rem', fontWeight: 900 }}>~{timeSavedHours} saat</div>
+                  <div style={{ color: 'white', fontSize: isMobile ? '1.55rem' : '1.75rem', fontWeight: 900 }}>~{timeSavedHours} saat</div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '0.5rem', marginBottom: '1.1rem' }}>
                 {[
                   '30 gün ücretsiz deneme',
                   'Tüm özellikler tam sürüm',
@@ -437,7 +445,7 @@ export default function Landing() {
               </div>
 
               <button onClick={() => selectRole('teacher')}
-                style={{ width: '100%', padding: '0.95rem', borderRadius: 999, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 900, fontSize: '1.05rem', cursor: 'pointer', boxShadow: '0 10px 20px rgba(249,115,22,0.28)' }}>
+                style={{ width: '100%', padding: isMobile ? '0.85rem' : '0.95rem', borderRadius: 999, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 900, fontSize: isMobile ? '0.95rem' : '1.05rem', cursor: 'pointer', boxShadow: '0 10px 20px rgba(249,115,22,0.28)' }}>
                 30 Gün Ücretsiz Başlayın
               </button>
               <p style={{ margin: '0.6rem 0 0', textAlign: 'center', color: '#9ca3af', fontSize: '0.82rem', fontWeight: 600 }}>• Kredi kartı gerekmez</p>
