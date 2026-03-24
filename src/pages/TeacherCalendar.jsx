@@ -103,20 +103,24 @@ export default function TeacherCalendar() {
         style={{
           background: sc.bg,
           borderRadius: compact ? 6 : 10,
-          padding: compact ? '0.2rem 0.5rem' : '0.5rem 0.75rem',
+          padding: compact ? '0.25rem 0.35rem' : '0.5rem 0.75rem',
           cursor: 'pointer',
           display: 'flex',
-          flexDirection: compact ? 'row' : 'column',
-          gap: compact ? '0.3rem' : '0.25rem',
-          alignItems: compact ? 'center' : 'flex-start',
+          flexDirection: 'column',
+          gap: '0.1rem',
+          alignItems: 'flex-start',
           transition: 'opacity 0.15s, transform 0.15s',
           boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+          overflow: 'hidden',
+          minWidth: 0,
+          width: '100%',
+          boxSizing: 'border-box',
         }}
         onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.02)'; }}
         onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)'; }}
       >
-        <div style={{ color: 'white', fontWeight: 700, fontSize: compact ? '0.7rem' : '0.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
-          {lesson.startTime?.slice(0,5)} {lesson.studentName?.split(' ')[0]}
+        <div style={{ color: 'white', fontWeight: 700, fontSize: compact ? '0.65rem' : '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', lineHeight: 1.25, whiteSpace: compact ? 'normal' : 'nowrap', wordBreak: compact ? 'break-word' : 'normal' }}>
+          {lesson.startTime?.slice(0,5)}{compact ? <br /> : ' '}{lesson.studentName?.split(' ')[0]}
         </div>
         {!compact && lesson.subject && (
           <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '100%' }}>{lesson.subject}</div>
@@ -182,7 +186,9 @@ export default function TeacherCalendar() {
     // Tüm cihazlarda 7 gün — mobilde container kaydırılabilir
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), i));
     const colCount = weekDays.length;
-    const gridCols = `48px repeat(${colCount}, 1fr)`;
+    // Mobilde her gün kolonu en az 90px — toplam 7*90+48=678px — kaydırılabilir
+    const colWidth = isMobile ? '90px' : '1fr';
+    const gridCols = `48px repeat(${colCount}, ${colWidth})`;
     return (
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {/* Week day headers */}
@@ -217,7 +223,7 @@ export default function TeacherCalendar() {
                 });
                 return (
                   <div key={di} onClick={() => openAdd(day, hour)}
-                    style={{ padding: '0.3rem', borderRight: di < colCount - 1 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'background 0.1s', background: isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent' }}
+                    style={{ padding: '0.25rem', borderRight: di < colCount - 1 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'background 0.1s', background: isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent', overflow: 'hidden', minWidth: 0 }}
                     onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                     onMouseLeave={e => e.currentTarget.style.background = isToday(day) ? 'rgba(79,70,229,0.02)' : 'transparent'}>
                     {cellLessons.map(l => <LessonChip key={l.id} lesson={l} compact />)}
@@ -374,7 +380,7 @@ export default function TeacherCalendar() {
           window.addEventListener('mouseup', onUp);
         }}
       >
-        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? '700px' : '600px' }}>
+        <div style={{ minWidth: view === 'monthly' ? '1000px' : view === 'weekly' ? (isMobile ? '678px' : '700px') : '600px' }}>
           {view === 'daily' && <DailyView />}
           {view === 'weekly' && <WeeklyView />}
           {view === 'monthly' && <MonthlyView />}
