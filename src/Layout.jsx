@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2 } from 'lucide-react';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 
@@ -128,6 +128,7 @@ const TEACHER_NAV = [
   { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
+  { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
 ];
 

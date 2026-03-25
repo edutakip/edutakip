@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ParentLessonsPayments from './pages/ParentLessonsPayments';
+import TeacherReports from './pages/TeacherReports';
 import ParentLessonRequests from './pages/ParentLessonRequests';
 import ParentSettings from './pages/ParentSettings';
 import { useEffect, useRef, useState } from 'react';
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/TeacherReports" element={<LayoutWrapper currentPageName="TeacherReports"><TeacherReports /></LayoutWrapper>} />
       <Route path="/ParentLessonsPayments" element={<LayoutWrapper currentPageName="ParentLessonsPayments"><ParentLessonsPayments /></LayoutWrapper>} />
       <Route path="/ParentLessonRequests" element={<LayoutWrapper currentPageName="ParentLessonRequests"><ParentLessonRequests /></LayoutWrapper>} />
       <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
