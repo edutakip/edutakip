@@ -458,7 +458,7 @@ export default function Landing() {
             </div>
 
             <div style={{ background: 'white', borderRadius: 22, padding: isMobile ? '1rem' : '1.8rem', border: '1.5px solid #ddd6fe', boxShadow: '0 16px 48px rgba(79,70,229,0.16)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontSize: isMobile ? '0.66rem' : '0.72rem', fontWeight: 800, padding: isMobile ? '0.3rem 0.7rem' : '0.35rem 0.9rem', borderRadius: 20, boxShadow: '0 6px 14px rgba(249,115,22,0.3)' }}>
+              <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontSize: isMobile ? '0.66rem' : '0.72rem', fontWeight: 800, padding: isMobile ? '0.3rem 0.7rem' : '0.35rem 0.9rem', borderRadius: 20, boxShadow: '0 6px 14px rgba(249,115,22,0.3)' }}>
                 İLK ÖĞRETMENLERE ÖZEL
               </div>
 
