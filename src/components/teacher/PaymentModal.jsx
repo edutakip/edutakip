@@ -51,8 +51,8 @@ export default function PaymentModal({ student, onClose, onSaved }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '1rem', paddingTop: 'max(1rem, env(safe-area-inset-top))', backdropFilter: 'blur(4px)', overflowY: 'auto' }}>
+      <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)', marginTop: '1rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
             <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Ödeme Ekle</h2>
