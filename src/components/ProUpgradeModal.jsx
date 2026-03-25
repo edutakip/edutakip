@@ -43,7 +43,7 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
   const msg = reasonMessages[reason] || reasonMessages.limit;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.7)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
       <div style={{ background: 'white', borderRadius: 24, padding: '2rem', width: '100%', maxWidth: 460, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', position: 'relative' }}>
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: '#f3f4f6', border: 'none', borderRadius: 8, padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
           <X size={16} color='#6b7280' />
