@@ -331,7 +331,7 @@ export default function TeacherCalendar() {
     return `${format(ws, 'd MMM', { locale: tr })} – ${format(we, 'd MMM', { locale: tr })}`;
   };
 
-  const SLOT_H = 60;
+  const SLOT_H = 80;
 
   const LessonBlock = ({ lesson }) => {
     const sc = STATUS_CFG[lesson.status] || STATUS_CFG['planlandı'];
