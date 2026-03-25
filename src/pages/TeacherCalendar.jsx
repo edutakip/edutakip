@@ -515,10 +515,11 @@ export default function TeacherCalendar() {
           borderRadius: 16,
           border: '1px solid #e5e7eb',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-          padding: '0.5rem 0.75rem',
+          padding: '0.35rem 0.6rem',
           display: 'flex',
           alignItems: 'center',
           gap: '0.25rem',
+          alignSelf: 'flex-start',
         }}>
           <button onClick={() => setCurrentDate(d => addDays(d, -7))}
             style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', borderRadius: 6 }}>
@@ -531,21 +532,21 @@ export default function TeacherCalendar() {
               const dayIdx = (day.getDay() + 6) % 7;
               return (
                 <button key={i} onClick={() => setCurrentDate(day)}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                    padding: '0.35rem 0.5rem', borderRadius: 10, border: 'none',
-                    background: isSelected ? '#4f46e5' : 'transparent',
-                    cursor: 'pointer', transition: 'all 0.15s', minWidth: 38,
-                  }}
+                 style={{
+                   display: 'flex', flexDirection: 'column', alignItems: 'center',
+                   padding: '0.25rem 0.4rem', borderRadius: 9, border: 'none',
+                   background: isSelected ? '#4f46e5' : 'transparent',
+                   cursor: 'pointer', transition: 'all 0.15s', minWidth: 34,
+                 }}
                   onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f3f4f6'; }}
                   onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
-                  <span style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.5px', color: isSelected ? 'rgba(255,255,255,0.8)' : '#9ca3af', textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.5px', color: isSelected ? 'rgba(255,255,255,0.8)' : '#9ca3af', textTransform: 'uppercase' }}>
                     {DAYS_SHORT[dayIdx]}
                   </span>
-                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: isSelected ? 'white' : today ? '#4f46e5' : '#374151', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 800, color: isSelected ? 'white' : today ? '#4f46e5' : '#374151', lineHeight: 1.2 }}>
                     {format(day, 'd')}
                   </span>
-                  <span style={{ fontSize: '0.5rem', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.7)' : '#9ca3af', textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '0.45rem', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.7)' : '#9ca3af', textTransform: 'uppercase' }}>
                     {format(day, 'MMM', { locale: tr }).toUpperCase()}
                   </span>
                   {today && !isSelected && (
