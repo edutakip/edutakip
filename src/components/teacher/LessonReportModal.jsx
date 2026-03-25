@@ -455,10 +455,16 @@ ZORUNLU KURALLAR:
 
           {step === 2 && (
             !isPro(currentUser) ? (
-              <button onClick={() => setShowProModal(true)}
-                style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🔒 Pro ile AI Rapor Oluştur
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => { setGeneratedReport(''); setStep(3); }}
+                  style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}>
+                  Manuel Yaz
+                </button>
+                <button onClick={() => setShowProModal(true)}
+                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🔒 AI Rapor (Pro)
+                </button>
+              </div>
             ) : (
               <button onClick={generateReport} disabled={generating}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
