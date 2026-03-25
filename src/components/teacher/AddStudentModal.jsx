@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign, Check, CalendarDays } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import { format, addDays } from 'date-fns';
 import { parseISO } from 'date-fns';
 
@@ -166,6 +167,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
     }
 
     setLoading(false);
+    showToast({ message: `Öğrenci eklendi — ${form.name}` });
     setSavedStudent({ ...student, teacherEmail: me.email });
     onSaved();
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import { format, parseISO, isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -87,11 +88,13 @@ export default function TeacherHomework() {
   const handleSave = async () => {
     if (!form.studentId || !form.title) return;
     const student = students.find(s => s.id === form.studentId);
-    if (editingHw) {
+    const isEditing = !!editingHw;
+    if (isEditing) {
       await base44.entities.Homework.update(editingHw.id, { ...form, studentName: student?.name || editingHw.studentName });
     } else {
       await base44.entities.Homework.create({ ...form, studentName: student?.name || '', teacherEmail: me.email, status: 'verildi' });
     }
+    showToast({ message: isEditing ? 'Ödev güncellendi' : `Ödev verildi — ${student?.name || ''}` });
     setForm({ studentId: '', title: '', description: '', dueDate: '' });
     setEditingHw(null);
     setShowForm(false);

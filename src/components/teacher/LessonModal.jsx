@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import { format, addWeeks, parseISO } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
@@ -144,6 +145,13 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     }
 
     setLoading(false);
+
+    if (isEditing) {
+      showToast({ message: 'Ders güncellendi' });
+    } else {
+      const sName = students.find(s => s.id === form.studentId)?.name || '';
+      showToast({ message: `Ders eklendi${sName ? ' — ' + sName : ''}` });
+    }
 
     // WhatsApp bildirimi — telefon yoksa bile modalı aç
     if (!isEditing) {

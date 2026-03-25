@@ -11,6 +11,7 @@ import ParentLessonRequests from './pages/ParentLessonRequests';
 import ParentSettings from './pages/ParentSettings';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import ToastNotification from './components/ToastNotification';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -191,6 +192,7 @@ function App() {
           <AuthenticatedApp />
         </Router>
         <Toaster />
+        <ToastNotification />
       </QueryClientProvider>
     </AuthProvider>
   )

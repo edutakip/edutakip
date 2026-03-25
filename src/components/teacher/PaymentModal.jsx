@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import { format } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
@@ -32,6 +33,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     });
 
     setLoading(false);
+    showToast({ message: `₺${paidAmount} ödeme kaydedildi — ${student.name}` });
     onSaved();
 
     const phone = freshStudent.parentPhone;
