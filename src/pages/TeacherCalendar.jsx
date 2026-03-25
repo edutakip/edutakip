@@ -375,8 +375,8 @@ export default function TeacherCalendar() {
     return (
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', flexDirection: 'column' }}>
         {/* Day headers */}
-        <div style={{ display: 'flex', flexShrink: 0, borderBottom: '1px solid #e5e7eb', background: 'white' }}>
-          <div style={{ width: 52, flexShrink: 0 }} />
+        <div style={{ display: 'flex', flexShrink: 0, borderBottom: '1px solid #e5e7eb', background: 'white', overflowY: 'scroll' }}>
+          <div style={{ width: 52, flexShrink: 0, borderRight: '1px solid #f3f4f6' }} />
           {days.map((day, i) => {
             const today = isToday(day);
             const dayIdx = (day.getDay() + 6) % 7;
@@ -408,10 +408,10 @@ export default function TeacherCalendar() {
         </div>
 
         {/* Time body */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: 'white' }}>
+        <div ref={scrollRef} style={{ flex: 1, overflowY: 'scroll', overflowX: 'hidden', background: 'white' }}>
           <div style={{ display: 'flex', position: 'relative', height: totalGridH }}>
             {/* Hour labels */}
-            <div style={{ width: 52, flexShrink: 0, position: 'relative', background: 'white' }}>
+            <div style={{ width: 52, flexShrink: 0, position: 'relative', background: 'white', borderRight: '1px solid #f3f4f6' }}>
               {HOURS.map((h, i) => (
                 <div key={h} style={{ position: 'absolute', top: i * SLOT_H, left: 0, right: 0, height: SLOT_H }}>
                   <span style={{ position: 'absolute', top: -7, right: 8, color: '#9ca3af', fontSize: '0.62rem', fontWeight: 600 }}>
