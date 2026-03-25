@@ -503,14 +503,14 @@ ZORUNLU KURALLAR:
           {step === 2 && (
             !isPro(currentUser) ? (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => setShowProModal(true)}
-                  style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  ✨ AI Rapor (Pro)
-                </button>
                 <button onClick={handleSaveWithoutReport} disabled={loading}
-                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
+                  style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
                   Kaydet ve Gönder
+                </button>
+                <button onClick={() => setShowProModal(true)}
+                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(249,115,22,0.35)' }}>
+                  🔒 Pro ile AI Rapor Oluştur
                 </button>
               </div>
             ) : (
