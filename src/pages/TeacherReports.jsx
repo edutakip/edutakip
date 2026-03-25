@@ -100,17 +100,41 @@ export default function TeacherReports() {
   if (!isPro(currentUser)) {
     return (
       <>
-        <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: 20, padding: '3rem 2rem', textAlign: 'center', maxWidth: 400, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-            <h2 style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.5rem' }}>Pro Özellik</h2>
-            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>Gelişim raporları sadece Pro hesaplarda kullanılabilir. Öğrenci performansını izlemek için Pro'ya geç.</p>
-            <button onClick={() => setShowProModal(true)} style={{ width: '100%', padding: '0.8rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer' }}>
-              Pro'ya Geç 🚀
+        <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #f0f4ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <style>{`
+            @keyframes float {
+              0%, 100% { transform: translateY(0px); }
+              50% { transform: translateY(-12px); }
+            }
+            .pro-lock-icon {
+              animation: float 3s ease-in-out infinite;
+            }
+          `}</style>
+          <div style={{ background: 'white', borderRadius: 24, padding: '3.5rem 2.5rem', textAlign: 'center', maxWidth: 440, boxShadow: '0 20px 60px rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.1)' }}>
+            <div className="pro-lock-icon" style={{ width: 80, height: 80, borderRadius: 16, background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem', boxShadow: '0 8px 24px rgba(251,146,60,0.25)' }}>
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1C6.48 1 2 5.48 2 11v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-5.52-4.48-10-10-10zm0 2c4.42 0 8 3.58 8 8v1H4v-1c0-4.42 3.58-8 8-8zm0 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#d97706" opacity="0.8"/>
+              </svg>
+            </div>
+            <h2 style={{ color: '#111827', fontWeight: 900, fontSize: '1.5rem', marginBottom: '0.75rem', letterSpacing: '-0.5px' }}>Pro Özellik</h2>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: '1.75rem', lineHeight: 1.7 }}>
+              Gelişim raporları sadece <span style={{ fontWeight: 700, color: '#4f46e5' }}>Pro hesaplarda</span> kullanılabilir. Öğrenci performansını detaylı izlemek ve geliştirmek için Pro'ya geçin.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem' }}>
+              {['📊 Detaylı performans analizi', '📈 İlerleme trendi takibi', '💬 AI destekli değerlendirme'].map((item, i) => (
+                <div key={i} style={{ fontSize: '0.85rem', color: '#374151', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#4f46e5', fontWeight: 700 }}>✓</span> {item}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowProModal(true)} style={{ width: '100%', padding: '1rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(79,70,229,0.35)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', letterSpacing: '0.3px' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(79,70,229,0.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(79,70,229,0.35)'; }}>
+              Pro'ya Geç <span style={{ fontSize: '1.1rem' }}>🚀</span>
             </button>
           </div>
         </div>
-        {showProModal && <ProUpgradeModal reason='ai' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
+        {showProModal && <ProUpgradeModal reason='finance' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
       </>
     );
   }
