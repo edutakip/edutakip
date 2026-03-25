@@ -8,6 +8,16 @@ import ScheduleSlotEditor from './ScheduleSlotEditor';
 const DAYS_FULL = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const GRADES = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
 
+function useWindowSize() {
+  const [width, setWidth] = React.useState(window.innerWidth);
+  React.useEffect(() => {
+    const h = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return width;
+}
+
 const inp = {
   width: '100%', padding: '0.6rem 0.9rem', borderRadius: '10px',
   background: 'rgba(255,255,255,0.07)', border: '1.5px solid rgba(255,255,255,0.12)',
@@ -48,7 +58,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const [lessons, setLessons] = useState([]);
   const [form, setForm] = useState({ ...student });
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
-  const [editingSlot, setEditingSlot] = useState(null); // {slot, slotIndex}
+  const [editingSlot, setEditingSlot] = useState(null);
+  const isMobile = useWindowSize() < 640;
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -103,76 +114,77 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const statusLabels = { tamamlandı: 'Tamamlandı', planlandı: 'Planlandı', iptal: 'İptal' };
 
   return createPortal(
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
-      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', width: '100%', maxWidth: '680px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? '0' : '1rem', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: isMobile ? '20px 20px 0 0' : '20px', width: '100%', maxWidth: isMobile ? '100%' : '680px', maxHeight: isMobile ? '92vh' : '92vh', height: isMobile ? '92vh' : 'auto', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
-        <div style={{ padding: '1.5rem 1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', zIndex: 10, borderRadius: '20px 20px 0 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.1rem', color: 'white', flexShrink: 0 }}>
+        <div style={{ padding: isMobile ? '1rem 1.1rem' : '1.5rem 1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', zIndex: 10, borderRadius: isMobile ? '20px 20px 0 0' : '20px 20px 0 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: isMobile ? '38px' : '46px', height: isMobile ? '38px' : '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: isMobile ? '0.95rem' : '1.1rem', color: 'white', flexShrink: 0 }}>
               {student.name?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 style={{ color: '#ffffff', fontSize: '1.15rem', fontWeight: '800' }}>{student.name}</h2>
-              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem' }}>
-                {student.grade && <span style={{ border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.55)', fontSize: '0.65rem', fontWeight: '600', padding: '0.15rem 0.5rem', borderRadius: '5px' }}>{student.grade}</span>}
-                <span style={{ border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.65rem', fontWeight: '700', padding: '0.15rem 0.5rem', borderRadius: '5px' }}>
+              <h2 style={{ color: '#ffffff', fontSize: isMobile ? '1rem' : '1.15rem', fontWeight: '800' }}>{student.name}</h2>
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
+                {student.grade && <span style={{ border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.55)', fontSize: '0.6rem', fontWeight: '600', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>{student.grade}</span>}
+                <span style={{ border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.6rem', fontWeight: '700', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>
                   {student.status === 'active' ? '● Aktif' : '● Arşiv'}
                 </span>
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
             {!editing && (
               <button onClick={() => setShowPaymentHistory(true)}
-                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <History size={13} /> Geçmiş
+                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: isMobile ? '0.4rem 0.65rem' : '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <History size={12} /> {!isMobile && 'Geçmiş'}
+                {isMobile && 'Geçmiş'}
               </button>
             )}
             {!editing ? (
               <button onClick={() => setEditing(true)}
-                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Edit2 size={13} /> Düzenle
+                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: isMobile ? '0.4rem 0.65rem' : '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <Edit2 size={12} /> Düzenle
               </button>
             ) : (
               <>
                 <button onClick={() => { setEditing(false); setForm({ ...student }); }}
-                  style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}>
+                  style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '9px', padding: '0.4rem 0.65rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer' }}>
                   İptal
                 </button>
                 <button onClick={save} disabled={loading}
-                  style={{ background: '#4f46e5', border: 'none', color: 'white', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  {loading ? <Loader2 size={13} className='animate-spin' /> : <Save size={13} />} Kaydet
+                  style={{ background: '#4f46e5', border: 'none', color: 'white', borderRadius: '9px', padding: '0.4rem 0.65rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {loading ? <Loader2 size={12} className='animate-spin' /> : <Save size={12} />} Kaydet
                 </button>
               </>
             )}
             <button onClick={onClose}
-              style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.2)'; e.currentTarget.style.color = '#f87171'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
-              <X size={16} />
+              <X size={15} />
             </button>
           </div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '1.75rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ padding: isMobile ? '1rem' : '1.75rem', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '0' : '1.5rem' }}>
 
           {/* LEFT */}
           <div>
             {!editing ? (
               <>
                 {/* Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '0.5rem' : '0.6rem', marginBottom: isMobile ? '1rem' : '1.5rem' }}>
                   {[
                     { label: 'Ders Saat Ücreti', value: `₺${(student.feePerLesson || 0).toLocaleString()}`, color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)' },
                     { label: 'Ders Süresi', value: `${student.lessonDuration || 60} dk`, color: '#a78bfa', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.3)' },
                     { label: 'Haftalık Ders', value: `${student.weeklyLessons || 0}`, color: '#34d399', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)' },
                     { label: 'Toplam Ders', value: `${lessons.length}+`, color: '#fb923c', bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.3)' },
                   ].map(({ label, value, color, bg, border }) => (
-                    <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '12px', padding: '0.75rem' }}>
-                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.3rem', textTransform: 'uppercase' }}>{label}</div>
-                      <div style={{ color, fontWeight: '800', fontSize: '1rem' }}>{value}</div>
+                    <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '12px', padding: isMobile ? '0.65rem 0.75rem' : '0.75rem' }}>
+                      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.58rem', fontWeight: '700', letterSpacing: '0.6px', marginBottom: '0.25rem', textTransform: 'uppercase' }}>{label}</div>
+                      <div style={{ color, fontWeight: '800', fontSize: isMobile ? '1.1rem' : '1rem' }}>{value}</div>
                     </div>
                   ))}
                 </div>
@@ -277,7 +289,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
           </div>
 
           {/* RIGHT */}
-          <div>
+          <div style={{ marginTop: isMobile ? '0.25rem' : '0' }}>
+            {isMobile && <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0.75rem 0 1rem' }} />}
             {/* Finance Summary */}
             <Section title="Finansal Özet" icon={DollarSign}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
