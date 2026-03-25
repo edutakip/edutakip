@@ -112,6 +112,6 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           </button>
         </div>
       </div>
-    </div>
+    </div> 
   );
 }
