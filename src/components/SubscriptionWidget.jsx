@@ -114,7 +114,14 @@ export default function SubscriptionWidget({ user, collapsed }) {
             ))}
           </div>
           <button onClick={() => setShowModal(true)}
-            style={{ width: '100%', padding: '0.6rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(79,70,229,0.4)' }}>
+            style={{ width: '100%', padding: '0.6rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(79,70,229,0.4)', animation: 'heartbeatGlow 1.5s ease-in-out infinite' }}>
+            <style>{`
+              @keyframes heartbeatGlow {
+                0%, 100% { box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+                25% { box-shadow: 0 8px 24px rgba(79,70,229,0.7); }
+                50% { box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+              }
+            `}</style>
             <Crown size={13} fill='white' /> Pro Paket'e Geç
           </button>
         </div>
