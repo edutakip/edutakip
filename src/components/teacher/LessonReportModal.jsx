@@ -159,6 +159,53 @@ ZORUNLU KURALLAR:
     }
   };
 
+  const handleSaveWithoutReport = async () => {
+    const understoodMap = { tam: 'Tam anladı', kismen: 'Kısmen anladı', tekrar: 'Tekrar gerekli' };
+    const participationMap = { aktif: 'Aktif katılım', orta: 'Orta katılım', pasif: 'Pasif' };
+    const motivationMap = { yuksek: 'Yüksek', normal: 'Normal', dusuk: 'Düşük' };
+    const ratingStars = '⭐'.repeat(form.rating);
+
+    const summary = [
+      `📚 İşlenen Konular: ${form.topics}`,
+      `✅ Anlama: ${understoodMap[form.understood] || form.understood}`,
+      `🙋 Katılım: ${participationMap[form.participation] || form.participation}`,
+      `🔥 Motivasyon: ${motivationMap[form.motivation] || form.motivation}`,
+      `${ratingStars} Performans: ${form.rating}/5`,
+      form.challenge ? `⚠️ Zorlandığı Nokta: ${form.challenge}` : '',
+      form.homework ? `📖 Ödev: ${form.homework}` : '',
+      form.nextGoal ? `➡️ Sonraki Hedef: ${form.nextGoal}` : '',
+    ].filter(Boolean).join('\n');
+
+    setGeneratedReport(summary);
+    // handleSave tetiklenecek, generatedReport state güncellemesi async olduğu için direkt çağırıyoruz
+    setLoading(true);
+    const me = await base44.auth.me();
+    const data = {
+      lessonId: lesson.id, studentId: lesson.studentId,
+      studentName: lesson.studentName, teacherEmail: me.email,
+      date: lesson.date, subject: lesson.subject,
+      rating: form.rating, attendance: form.attendance,
+      topicsCovered: form.topics, generalNote: summary,
+      improvements: form.challenge, homework: form.homework, nextGoal: form.nextGoal,
+    };
+    if (existing) await base44.entities.LessonReport.update(existing.id, data);
+    else await base44.entities.LessonReport.create(data);
+
+    if (form.homework?.trim()) {
+      const existingHws = await base44.entities.Homework.filter({ lessonId: lesson.id });
+      if (existingHws.length > 0) {
+        await base44.entities.Homework.update(existingHws[0].id, { title: form.homework, description: form.homework });
+      } else {
+        await base44.entities.Homework.create({ lessonId: lesson.id, studentId: lesson.studentId, studentName: lesson.studentName, teacherEmail: me.email, title: form.homework, description: form.homework, status: 'verildi' });
+      }
+    }
+    setLoading(false);
+
+    const phone = lesson.parentPhone || (await base44.entities.Student.filter({ id: lesson.studentId }).then(s => s[0]?.parentPhone).catch(() => null));
+    if (phone) setWhatsapp({ phone, message: summary });
+    else { onSaved?.(); onClose(); }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     const me = await base44.auth.me();
@@ -456,13 +503,14 @@ ZORUNLU KURALLAR:
           {step === 2 && (
             !isPro(currentUser) ? (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => { setGeneratedReport(''); setStep(3); }}
-                  style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}>
-                  Manuel Yaz
-                </button>
                 <button onClick={() => setShowProModal(true)}
-                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🔒 AI Rapor (Pro)
+                  style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  ✨ AI Rapor (Pro)
+                </button>
+                <button onClick={handleSaveWithoutReport} disabled={loading}
+                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
+                  {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
+                  Kaydet ve Gönder
                 </button>
               </div>
             ) : (
