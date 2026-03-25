@@ -7,6 +7,7 @@ import { Users, DollarSign, Clock, TrendingUp, AlertCircle, Plus, RefreshCw, Che
 import { format, subMonths, startOfMonth, endOfMonth, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import PaymentModal from '../components/teacher/PaymentModal';
+import { showToast } from '@/lib/toast';
 
 const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6'];
 
@@ -649,7 +650,7 @@ export default function TeacherFinance() {
         })()}
       </div>
 
-      {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={loadAll} />}
+      {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={() => { showToast({ message: `Ödeme alındı — ${payModalStudent.name}` }); loadAll(); }} />}
       {detailType && <DetailModal type={detailType} students={students} payments={payments} lessons={lessons} onClose={() => setDetailType(null)} />}
     </div>
   );
