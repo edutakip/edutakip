@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight, History } from 'lucide-react';
 import PaymentHistoryModal from './PaymentHistoryModal';
@@ -101,7 +102,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const statusColors = { tamamlandı: '#22c55e', planlandı: '#f59e0b', iptal: '#ef4444' };
   const statusLabels = { tamamlandı: 'Tamamlandı', planlandı: 'Planlandı', iptal: 'İptal' };
 
-  return (
+  return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
       <div style={{ background: 'linear-gradient(145deg, #1a1535, #1e1b4b)', borderRadius: '20px', width: '100%', maxWidth: '680px', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
 
@@ -336,5 +337,5 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             />
             )}
             </div>
-            );
-            }
+  , document.body);
+}
