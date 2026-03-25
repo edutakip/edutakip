@@ -125,25 +125,50 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             </div>
             <div>
               <h2 style={{ color: '#ffffff', fontSize: isMobile ? '1rem' : '1.15rem', fontWeight: '800' }}>{student.name}</h2>
-              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 {student.grade && <span style={{ border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.55)', fontSize: '0.6rem', fontWeight: '600', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>{student.grade}</span>}
                 <span style={{ border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.6rem', fontWeight: '700', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>
                   {student.status === 'active' ? '● Aktif' : '● Arşiv'}
                 </span>
+                {/* Mobil: butonlar ismin yanında */}
+                {isMobile && !editing && (
+                  <>
+                    <button onClick={() => setShowPaymentHistory(true)}
+                      style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <History size={10} /> Geçmiş
+                    </button>
+                    <button onClick={() => setEditing(true)}
+                      style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Edit2 size={10} /> Düzenle
+                    </button>
+                  </>
+                )}
+                {isMobile && editing && (
+                  <>
+                    <button onClick={() => { setEditing(false); setForm({ ...student }); }}
+                      style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer' }}>
+                      İptal
+                    </button>
+                    <button onClick={save} disabled={loading}
+                      style={{ background: '#4f46e5', border: 'none', color: 'white', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      {loading ? <Loader2 size={10} className='animate-spin' /> : <Save size={10} />} Kaydet
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            {!editing && (
+          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+            {/* Masaüstü/tablet: butonlar header'da */}
+            {!isMobile && !editing && (
               <button onClick={() => setShowPaymentHistory(true)}
-                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: isMobile ? '0.4rem 0.65rem' : '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <History size={12} /> {!isMobile && 'Geçmiş'}
-                {isMobile && 'Geçmiş'}
+                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <History size={12} /> Geçmiş
               </button>
             )}
-            {!editing ? (
+            {!isMobile && (!editing ? (
               <button onClick={() => setEditing(true)}
-                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: isMobile ? '0.4rem 0.65rem' : '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Edit2 size={12} /> Düzenle
               </button>
             ) : (
@@ -157,7 +182,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                   {loading ? <Loader2 size={12} className='animate-spin' /> : <Save size={12} />} Kaydet
                 </button>
               </>
-            )}
+            ))}
             <button onClick={onClose}
               style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.2)'; e.currentTarget.style.color = '#f87171'; }}
