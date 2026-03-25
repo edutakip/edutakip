@@ -30,7 +30,7 @@ const FREE_PLAN = {
   price: '₺0',
   period: 'sonsuza kadar',
   desc: 'Başlamak için ideal',
-  features: ['5 öğrenciye kadar', 'Ders takvimi', 'Temel finans takibi', 'WhatsApp bildirimleri'],
+  features: ['3 öğrenciye kadar', 'Ders takvimi', 'Temel finans takibi', 'WhatsApp bildirimleri'],
   cta: 'Hemen Başla',
 };
 
