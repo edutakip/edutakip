@@ -268,7 +268,6 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
-      {role === 'teacher' && <SubscriptionWidget user={user} collapsed={collapsed} />}
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.75rem 1rem' }} />
 
       <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
@@ -351,6 +350,8 @@ export default function Layout({ children, currentPageName }) {
           );
         })}
       </nav>
+
+      {role === 'teacher' && <SubscriptionWidget user={user} collapsed={collapsed} />}
 
       {collapsed && (
         <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
