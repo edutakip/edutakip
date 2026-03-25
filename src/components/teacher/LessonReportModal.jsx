@@ -328,8 +328,8 @@ ZORUNLU KURALLAR:
         </div>
       )}
 
-      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(17,24,39,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 580, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(17,24,39,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', paddingBottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 70px))' }}>
+      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 580, maxHeight: 'calc(100vh - max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px)))', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
 
         {/* Header */}
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
