@@ -28,25 +28,16 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
     ]);
 
-    // Ödenmiş ders ID'lerini topla — lessonId varsa ID ile, yoksa date ile eşleştir (geriye dönük uyumluluk)
+    // Ödenmiş ders ID'lerini topla — sadece lessonId ile eşleştir
     const paidLessonIds = new Set(
       allPayments
         .filter(p => p.status === 'alındı' && p.lessonId)
         .map(p => p.lessonId)
     );
-    const paidDatesWithoutLessonId = new Set(
-      allPayments
-        .filter(p => p.status === 'alındı' && !p.lessonId)
-        .map(p => p.date)
-    );
 
     // En eski ödenmemiş tamamlanmış dersi bul
     const oldestUnpaid = allLessons
-      .filter(l =>
-        l.status === 'tamamlandı' &&
-        !paidLessonIds.has(l.id) &&
-        !paidDatesWithoutLessonId.has(l.date)
-      )
+      .filter(l => l.status === 'tamamlandı' && !paidLessonIds.has(l.id))
       .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
     const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
