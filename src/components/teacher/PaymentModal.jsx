@@ -28,17 +28,22 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
     ]);
 
-    // Ödenmiş ders ID'lerini topla — sadece lessonId ile eşleştir
+    // Tamamlanmış dersleri tarihe göre sırala
+    const completedLessons = allLessons
+      .filter(l => l.status === 'tamamlandı')
+      .sort((a, b) => new Date(a.date + 'T' + (a.startTime || '00:00')) - new Date(b.date + 'T' + (b.startTime || '00:00')));
+
+    // lessonId'si olan ödemelerin ID setini oluştur
     const paidLessonIds = new Set(
-      allPayments
-        .filter(p => p.status === 'alındı' && p.lessonId)
-        .map(p => p.lessonId)
+      allPayments.filter(p => p.status === 'alındı' && p.lessonId).map(p => p.lessonId)
     );
 
-    // En eski ödenmemiş tamamlanmış dersi bul
-    const oldestUnpaid = allLessons
-      .filter(l => l.status === 'tamamlandı' && !paidLessonIds.has(l.id))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+    // lessonId'si olmayan ödeme sayısı (eski kayıtlar) — bunlar en eski derslerle eşleştirilmiş sayılır
+    const paymentsWithoutLessonId = allPayments.filter(p => p.status === 'alındı' && !p.lessonId).length;
+
+    // lessonId'si olan ödemeleri çıkar, geri kalanları "eski ödemeler" sayısı kadar baş tarafından atla
+    const lessonsWithoutDirectPayment = completedLessons.filter(l => !paidLessonIds.has(l.id));
+    const oldestUnpaid = lessonsWithoutDirectPayment[paymentsWithoutLessonId] || null;
 
     const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
 
