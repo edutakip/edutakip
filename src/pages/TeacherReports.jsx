@@ -3,6 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Star, TrendingUp, BookOpen, Target, CheckCircle, AlertCircle, ChevronDown, ChevronUp, FileText, Zap, Users, Search } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { isPro } from '@/lib/subscription';
+import ProUpgradeModal from '@/components/ProUpgradeModal';
 
 const UNDERSTOOD_MAP = {
   tam:    { label: 'Tam Anladı',      bg: '#d1fae5', color: '#065f46' },
@@ -56,10 +58,13 @@ export default function TeacherReports() {
   const [selectedStudentId, setSelectedStudentId] = useState('all');
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showProModal, setShowProModal] = useState(false);
 
   useEffect(() => {
     (async () => {
       const me = await base44.auth.me();
+      setCurrentUser(me);
       const [s, r] = await Promise.all([
         base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
         base44.entities.LessonReport.filter({ teacherEmail: me.email }, '-date'),
@@ -91,6 +96,24 @@ export default function TeacherReports() {
       </div>
     </div>
   );
+
+  if (!isPro(currentUser)) {
+    return (
+      <>
+        <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '3rem 2rem', textAlign: 'center', maxWidth: 400, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+            <h2 style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.5rem' }}>Pro Özellik</h2>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>Gelişim raporları sadece Pro hesaplarda kullanılabilir. Öğrenci performansını izlemek için Pro'ya geç.</p>
+            <button onClick={() => setShowProModal(true)} style={{ width: '100%', padding: '0.8rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer' }}>
+              Pro'ya Geç 🚀
+            </button>
+          </div>
+        </div>
+        {showProModal && <ProUpgradeModal reason='ai' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
+      </>
+    );
+  }
 
   return (
     <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: '#f8fafc' }}>
