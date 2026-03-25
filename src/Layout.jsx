@@ -5,6 +5,7 @@ import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, Cale
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
+import SubscriptionWidget from './components/SubscriptionWidget';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -267,6 +268,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
+      {role === 'teacher' && <SubscriptionWidget user={user} collapsed={collapsed} />}
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.75rem 1rem' }} />
 
       <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
