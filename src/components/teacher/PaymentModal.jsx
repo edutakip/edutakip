@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
-import { showToast } from '@/lib/toast';
 import { format } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
@@ -24,16 +22,30 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     const freshStudents = await base44.entities.Student.filter({ id: student.id });
     const freshStudent = freshStudents[0] || student;
 
-    // Her zaman yeni ayrı kayıt oluştur, mevcut borç kayıtlarına dokunma
+    // En eski ödenmemiş tamamlanmış dersi bul
+    const [allLessons, allPayments] = await Promise.all([
+      base44.entities.Lesson.filter({ teacherEmail: me.email, studentId: student.id }),
+      base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
+    ]);
+    const paidDates = new Set(allPayments.filter(p => p.status === 'alındı').map(p => p.date));
+    const oldestUnpaid = allLessons
+      .filter(l => l.status === 'tamamlandı' && !paidDates.has(l.date))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+    // Ödeme tarihini en eski ödenmemiş dersin tarihine ata (yoksa form tarihini kullan)
+    const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
+
     await base44.entities.Payment.create({
-      ...form, amount: paidAmount,
+      ...form,
+      amount: paidAmount,
+      date: paymentDate,
+      month: paymentDate.slice(0, 7),
       studentId: student.id, studentName: student.name,
       teacherEmail: me.email,
       parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
     });
 
     setLoading(false);
-    showToast({ message: `₺${paidAmount} ödeme kaydedildi — ${student.name}` });
     onSaved();
 
     const phone = freshStudent.parentPhone;
@@ -50,12 +62,12 @@ export default function PaymentModal({ student, onClose, onSaved }) {
   const labelStyle = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
   if (whatsapp) {
-    return createPortal(<WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />, document.body);
+    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
   }
 
-  return createPortal(
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '1rem', paddingTop: 'max(1rem, env(safe-area-inset-top))', backdropFilter: 'blur(4px)', overflowY: 'auto' }}>
-      <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)', marginTop: '1rem', marginBottom: '1rem' }}>
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
             <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Ödeme Ekle</h2>
@@ -115,7 +127,6 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }
