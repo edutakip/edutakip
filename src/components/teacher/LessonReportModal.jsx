@@ -63,6 +63,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [generatedReport, setGeneratedReport] = useState('');
   const [existing, setExisting] = useState(null);
   const [whatsapp, setWhatsapp] = useState(null);
@@ -91,6 +92,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
 
   const generateReport = async () => {
     setGenerating(true);
+    setOverlayVisible(true);
     try {
       const understoodMap = { tam: 'tam olarak anladı', kismen: 'konuyu kısmen anladı', tekrar: 'konuyu tekrar gözden geçirmesi gerekiyor' };
       const participationMap = { aktif: 'aktif bir katılım gösterdi', orta: 'orta düzeyde katılım gösterdi', pasif: 'derse pasif olarak katıldı' };
@@ -133,11 +135,13 @@ ZORUNLU KURALLAR:
       // Önce generating kapat, success ekranı göster
       setGenerating(false);
       setShowSuccess(true);
-      // 1.8sn sonra success ekranını kapat ve rapora yumuşak geç
       setTimeout(() => {
-        setShowSuccess(false);
-        setTimeout(() => setStep(3), 120);
-      }, 1800);
+        setOverlayVisible(false); // CSS opacity transition → solar
+        setTimeout(() => {
+          setShowSuccess(false);
+          setStep(3);             // rapor, overlay DOM'dan kalktıktan sonra açılır
+        }, 500);
+      }, 1900);
     } catch (err) {
       console.error(err);
     } finally {
@@ -228,12 +232,18 @@ ZORUNLU KURALLAR:
 
   return (
     <>
-      {generating && (
+      {/* ── Loading / Success Overlay (tek div, smooth geçiş) ── */}
+      {(generating || showSuccess) && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999999,
-          background: 'linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f0c29 100%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: '2rem',
+          background: showSuccess
+            ? 'linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #0a1628 100%)'
+            : 'linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f0c29 100%)',
+          opacity: overlayVisible ? 1 : 0,
+          transition: 'background 0.6s ease, opacity 0.45s ease',
+          pointerEvents: overlayVisible ? 'auto' : 'none',
         }}>
 
           {/* Animasyon stilleri */}
@@ -242,68 +252,78 @@ ZORUNLU KURALLAR:
             '@keyframes pulse-ring { 0%{transform:scale(0.85);opacity:0.6} 50%{transform:scale(1.15);opacity:0} 100%{transform:scale(0.85);opacity:0} }',
             '@keyframes shimmer-text { 0%,100%{opacity:0.5} 50%{opacity:1} }',
             '@keyframes dot-bounce { 0%,80%,100%{transform:translateY(0);opacity:0.4} 40%{transform:translateY(-8px);opacity:1} }',
-            '@keyframes success-pop { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.15)} 80%{transform:scale(0.95)} 100%{transform:scale(1);opacity:1} }',
+            '@keyframes success-pop { 0%{transform:scale(0.4);opacity:0} 65%{transform:scale(1.12)} 85%{transform:scale(0.97)} 100%{transform:scale(1);opacity:1} }',
             '@keyframes check-draw { 0%{stroke-dashoffset:50} 100%{stroke-dashoffset:0} }',
-            '@keyframes fade-in-up { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }',
-            '@keyframes overlay-fadein { 0%{opacity:0} 100%{opacity:1} }',
-            '@keyframes overlay-fadeout { 0%{opacity:1} 100%{opacity:0} }',
+            '@keyframes fade-in-up { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }',
+            '@keyframes fade-out { 0%{opacity:1} 100%{opacity:0} }',
           ].join(' ')}</style>
 
-          {/* Pulse halkalar + Logo */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'absolute', width: 130, height: 130, borderRadius: '50%', border: '2px solid rgba(99,102,241,0.5)', animation: 'pulse-ring 1.8s ease-out infinite' }} />
-            <div style={{ position: 'absolute', width: 108, height: 108, borderRadius: '50%', border: '2px solid rgba(139,92,246,0.4)', animation: 'pulse-ring 1.8s ease-out 0.5s infinite' }} />
-            <div style={{ width: 84, height: 84, borderRadius: '24px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(99,102,241,0.5)', animation: 'heartbeat 1.8s ease-in-out infinite' }}>
-              <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: 56, height: 56, borderRadius: '14px', objectFit: 'cover' }} />
+          {/* LOADING içeriği */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem',
+            opacity: showSuccess ? 0 : 1,
+            transform: showSuccess ? 'scale(0.9)' : 'scale(1)',
+            transition: 'opacity 0.4s ease, transform 0.4s ease',
+            position: showSuccess ? 'absolute' : 'relative',
+            pointerEvents: 'none',
+          }}>
+            {/* Pulse halkalar + Logo */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', width: 130, height: 130, borderRadius: '50%', border: '2px solid rgba(99,102,241,0.5)', animation: 'pulse-ring 1.8s ease-out infinite' }} />
+              <div style={{ position: 'absolute', width: 108, height: 108, borderRadius: '50%', border: '2px solid rgba(139,92,246,0.4)', animation: 'pulse-ring 1.8s ease-out 0.5s infinite' }} />
+              <div style={{ width: 84, height: 84, borderRadius: '24px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(99,102,241,0.5)', animation: 'heartbeat 1.8s ease-in-out infinite' }}>
+                <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: 56, height: 56, borderRadius: '14px', objectFit: 'cover' }} />
+              </div>
             </div>
-          </div>
-
-          {/* Yazı */}
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>EduTakip</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>Özel Ders Yönetim Platformu</p>
-          </div>
-
-          {/* Nokta animasyonu */}
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0s infinite' }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.2s infinite' }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.4s infinite' }} />
-          </div>
-
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>AI rapor oluşturuluyor...</p>
-        </div>
-      )}
-
-      {/* ── Başarı Ekranı ── */}
-      {showSuccess && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 999999,
-          background: 'linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #0a1628 100%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: '1.5rem',
-          animation: 'overlay-fadein 0.35s ease',
-        }}>
-          {/* Yeşil tik dairesi */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'success-pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}>
-            <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.3)', animation: 'pulse-ring 1.6s ease-out infinite' }} />
-            <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.2)', animation: 'pulse-ring 1.6s ease-out 0.4s infinite' }} />
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #16a34a, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(34,197,94,0.4)' }}>
-              <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-                <polyline
-                  points="8,19 16,27 30,11"
-                  stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
-                  strokeDasharray="50" strokeDashoffset="50"
-                  style={{ animation: 'check-draw 0.4s ease 0.25s forwards' }}
-                />
-              </svg>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>EduTakip</h2>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>Özel Ders Yönetim Platformu</p>
             </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0s infinite' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.2s infinite' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.4s infinite' }} />
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>AI rapor oluşturuluyor...</p>
           </div>
 
-          {/* Yazı */}
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.4rem', animation: 'fade-in-up 0.4s ease 0.3s both' }}>
-            <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Raporunuz Oluşturuldu!</h2>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>Raporu düzenleyebilir ve veliye iletebilirsiniz</p>
+          {/* SUCCESS içeriği */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem',
+            opacity: showSuccess ? 1 : 0,
+            transform: showSuccess ? 'scale(1)' : 'scale(1.05)',
+            transition: 'opacity 0.45s ease 0.15s, transform 0.45s ease 0.15s',
+            position: showSuccess ? 'relative' : 'absolute',
+            pointerEvents: showSuccess ? 'auto' : 'none',
+          }}>
+            {/* Yeşil tik dairesi */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: showSuccess ? 'success-pop 0.55s cubic-bezier(0.175,0.885,0.32,1.275) 0.1s both' : 'none' }}>
+              <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.35)', animation: showSuccess ? 'pulse-ring 1.6s ease-out 0.5s infinite' : 'none' }} />
+              <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.2)', animation: showSuccess ? 'pulse-ring 1.6s ease-out 0.85s infinite' : 'none' }} />
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #16a34a, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(34,197,94,0.45)' }}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polyline
+                    points="9,20 17,28 31,12"
+                    stroke="white"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="50"
+                    style={{
+                      strokeDashoffset: showSuccess ? undefined : '50',
+                      animation: showSuccess ? 'check-draw 0.45s ease 0.4s both' : 'none',
+                    }}
+                  />
+                </svg>
+              </div>
+            </div>
+            {/* Yazı */}
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.4rem',
+              animation: showSuccess ? 'fade-in-up 0.4s ease 0.5s both' : 'none' }}>
+              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Raporunuz Oluşturuldu!</h2>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>Raporu düzenleyebilir ve veliye iletebilirsiniz</p>
+            </div>
           </div>
         </div>
       )}
