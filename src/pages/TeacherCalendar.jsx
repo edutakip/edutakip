@@ -7,17 +7,18 @@ import {
 import { tr } from 'date-fns/locale';
 import {
   ChevronLeft, ChevronRight, Plus, Video, MapPin,
-  Edit2, X, Check, Clock, DollarSign, Trash2, ExternalLink, Copy
+  Edit2, X, Check, DollarSign, Trash2, ExternalLink, Copy,
+  Clock, BookOpen, ChevronRight as ChevRight
 } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
 
 const STATUS_CFG = {
-  planlandı:  { bg: '#4f46e5', label: 'Planlandı',   dot: '#818cf8' },
-  tamamlandı: { bg: '#10b981', label: 'Tamamlandı',  dot: '#34d399' },
-  iptal:      { bg: '#ef4444', label: 'İptal',        dot: '#f87171' },
+  planlandı:  { bg: '#4f46e5', label: 'Planlandı',   dot: '#818cf8', chipBg: '#eef2ff', chipColor: '#4f46e5' },
+  tamamlandı: { bg: '#10b981', label: 'Tamamlandı',  dot: '#10b981', chipBg: '#ecfdf5', chipColor: '#065f46' },
+  iptal:      { bg: '#ef4444', label: 'İptal',        dot: '#ef4444', chipBg: '#fef2f2', chipColor: '#b91c1c' },
 };
 
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 07–21
+const HOURS = Array.from({ length: 15 }, (_, i) => i + 7);
 const DAYS_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
 function useWindowWidth() {
@@ -67,168 +68,183 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
     ? `${dateObj.getDate()} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()} ${dayNames[dateObj.getDay()]}`
     : lesson.date;
 
+  const fee = lesson.lessonFee || student?.feePerLesson;
+
   return (
     <div style={{
-      background: '#1a1f35',
+      background: 'white',
       borderRadius: 16,
-      border: '1px solid rgba(255,255,255,0.1)',
+      border: '1px solid #e5e7eb',
       overflow: 'hidden',
       display: 'flex', flexDirection: 'column',
+      height: '100%',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
     }}>
       {/* Header */}
-      <div style={{ padding: '1rem 1.1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
-            <span style={{ color: sc.dot, fontSize: '0.7rem', fontWeight: 700 }}>
-              {lesson.startTime?.slice(0, 5)} - {lesson.endTime?.slice(0, 5)} · {sc.label}
+      <div style={{ padding: '1rem 1.1rem 0.85rem', borderBottom: '1px solid #f3f4f6' }}>
+        {/* Status chip + time + edit/close */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{
+              background: sc.chipBg, color: sc.chipColor,
+              fontSize: '0.68rem', fontWeight: 700,
+              padding: '0.2rem 0.6rem', borderRadius: 20,
+              display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}>
+              <Check size={10} /> {sc.label}
+            </span>
+            <span style={{ color: '#9ca3af', fontSize: '0.72rem', fontWeight: 600 }}>
+              {lesson.startTime?.slice(0,5)} – {lesson.endTime?.slice(0,5)}
             </span>
           </div>
-          <h3 style={{ color: 'white', fontSize: '1rem', fontWeight: 800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {lesson.studentName}
-          </h3>
-          {lesson.subject && (
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', margin: '0.2rem 0 0' }}>{lesson.subject}</p>
-          )}
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            <button onClick={onEdit}
+              style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 7, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Edit2 size={12} />
+            </button>
+            <button onClick={onClose}
+              style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 7, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={12} />
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0, marginLeft: '0.5rem' }}>
-          <button onClick={onEdit}
-            style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.6)', borderRadius: 8, width: 30, height: 30, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Edit2 size={13} />
-          </button>
-          <button onClick={onClose}
-            style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.6)', borderRadius: 8, width: 30, height: 30, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <X size={13} />
-          </button>
-        </div>
+        {/* Student name */}
+        <h3 style={{ color: '#111827', fontSize: '1.05rem', fontWeight: 800, margin: 0 }}>{lesson.studentName}</h3>
+        {lesson.subject && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#f3f4f6', borderRadius: 6, padding: '0.15rem 0.5rem', marginTop: '0.35rem' }}>
+            <BookOpen size={10} color='#9ca3af' />
+            <span style={{ color: '#6b7280', fontSize: '0.7rem', fontWeight: 600 }}>{lesson.subject}</span>
+          </div>
+        )}
       </div>
 
       {/* Status Buttons */}
-      <div style={{ padding: '0.85rem 1.1rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: '0.5rem' }}>
+      <div style={{ padding: '0.85rem 1.1rem', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: '0.5rem' }}>
         {[
-          { key: 'tamamlandı', label: 'Tamamlandı', color: '#10b981', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)' },
-          { key: 'planlandı',  label: 'Planlandı',  color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.35)' },
-          { key: 'iptal',      label: 'İptal',       color: '#f87171', bg: 'rgba(239,68,68,0.15)',  border: 'rgba(239,68,68,0.35)' },
-        ].map(s => (
-          <button key={s.key} onClick={() => handleStatus(s.key)} disabled={loading}
-            style={{
-              flex: 1, padding: '0.45rem 0.5rem', borderRadius: 10, border: `1.5px solid ${lesson.status === s.key ? s.border : 'rgba(255,255,255,0.1)'}`,
-              background: lesson.status === s.key ? s.bg : 'transparent',
-              color: lesson.status === s.key ? s.color : 'rgba(255,255,255,0.4)',
-              fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.15s',
-            }}>
-            {s.label}
-          </button>
-        ))}
+          { key: 'tamamlandı', label: 'Tamamlandı', activeColor: '#fff', activeBg: '#10b981', activeBorder: '#10b981', icon: <Check size={12}/> },
+          { key: 'planlandı',  label: 'Gelmedi',    activeColor: '#fff', activeBg: '#6366f1', activeBorder: '#6366f1', icon: <X size={12}/> },
+          { key: 'iptal',      label: 'İptal',       activeColor: '#fff', activeBg: '#ef4444', activeBorder: '#ef4444', icon: <X size={12}/> },
+        ].map(s => {
+          const isActive = lesson.status === s.key;
+          return (
+            <button key={s.key} onClick={() => handleStatus(s.key)} disabled={loading}
+              style={{
+                flex: 1, padding: '0.5rem 0.25rem', borderRadius: 10,
+                border: `1.5px solid ${isActive ? s.activeBorder : '#e5e7eb'}`,
+                background: isActive ? s.activeBg : 'white',
+                color: isActive ? s.activeColor : '#9ca3af',
+                fontWeight: 700, fontSize: '0.68rem', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem',
+                transition: 'all 0.15s',
+              }}>
+              <span style={{ fontSize: '1rem' }}>
+                {s.key === 'tamamlandı' ? '✓' : s.key === 'planlandı' ? '👤' : '✗'}
+              </span>
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Details */}
-      <div style={{ padding: '0.85rem 1.1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto', flex: 1 }}>
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem 1.1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-        {/* Tarih */}
+        {/* Ücret */}
         <div>
-          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Tarih</div>
-          <div style={{ color: 'white', fontSize: '0.82rem', fontWeight: 600 }}>{dateLabel}</div>
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>ÜCRET</div>
+          <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ color: '#9ca3af', fontSize: '0.82rem' }}>₺</span>
+            <span style={{ color: '#111827', fontWeight: 700, fontSize: '0.95rem' }}>{fee || '—'}</span>
+          </div>
         </div>
 
-        {/* Saat */}
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Başlangıç</div>
-            <div style={{ color: 'white', fontSize: '0.82rem', fontWeight: 600 }}>{lesson.startTime?.slice(0,5)}</div>
+        {/* Ödeme */}
+        <div>
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>ÖDEME</div>
+          <div style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+            <Check size={14} color='#10b981' />
+            <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>Ödendi</span>
           </div>
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Bitiş</div>
-            <div style={{ color: 'white', fontSize: '0.82rem', fontWeight: 600 }}>{lesson.endTime?.slice(0,5)}</div>
-          </div>
-          {lesson.duration && (
-            <div>
-              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Süre</div>
-              <div style={{ color: 'white', fontSize: '0.82rem', fontWeight: 600 }}>{lesson.duration} dk</div>
+          {fee && (
+            <div style={{ marginTop: '0.4rem', padding: '0.5rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>ÖDEME DETAYLARI</div>
+                <div style={{ color: '#374151', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem' }}>{dateLabel}</div>
+              </div>
+              <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>{fee} ₺</span>
             </div>
           )}
         </div>
 
-        {/* Ücret */}
-        {(lesson.lessonFee || student?.feePerLesson) && (
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Ücret</div>
-            <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 8, padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <DollarSign size={13} color='#34d399' />
-              <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.88rem' }}>
-                {lesson.lessonFee || student?.feePerLesson} ₺
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Tür */}
+        {/* Nerede kaldık */}
         <div>
-          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Ders Türü</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            {lesson.type === 'online'
-              ? <><Video size={13} color='#818cf8' /><span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem' }}>Online Ders</span></>
-              : <><MapPin size={13} color='#fb923c' /><span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem' }}>Yüz Yüze</span></>
-            }
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📎 NEREDE KALDIK?
           </div>
+          <textarea
+            defaultValue={lesson.notes || ''}
+            placeholder='Öğrenci ile paylaşılan bir sonraki ders notu...'
+            rows={3}
+            style={{ width: '100%', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', fontSize: '0.8rem', color: '#374151', resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+          />
         </div>
 
-        {/* Online link */}
-        {lesson.type === 'online' && lesson.meetingLink && (
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Toplantı Linki</div>
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
-              <a href={lesson.meetingLink} target='_blank' rel='noreferrer'
-                style={{ flex: 1, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#a5b4fc', fontSize: '0.75rem', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <ExternalLink size={11} /> {lesson.meetingLink.replace('https://', '')}
-              </a>
-              <button onClick={copyLink}
-                style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '0.45rem 0.6rem', color: '#a5b4fc', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', fontWeight: 600 }}>
-                {copied ? <Check size={11} color='#34d399' /> : <Copy size={11} />}
-              </button>
+        {/* Öğretmen notu */}
+        <div>
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📄 ÖĞRETMEN NOTU (VELİ GÖRÜR)
+          </div>
+          <textarea
+            placeholder='Veli ile paylaşılacak ders notu...'
+            rows={3}
+            style={{ width: '100%', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', fontSize: '0.8rem', color: '#374151', resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        {/* Önceki Ders */}
+        <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.75rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Clock size={14} color='#4f46e5' />
+            </div>
+            <div>
+              <div style={{ color: '#111827', fontSize: '0.78rem', fontWeight: 700 }}>ÖNCEKİ DERS</div>
+              <div style={{ color: '#9ca3af', fontSize: '0.68rem' }}>{dateLabel}</div>
             </div>
           </div>
-        )}
+          <ChevRight size={14} color='#d1d5db' />
+        </div>
 
-        {/* Konum */}
-        {lesson.type !== 'online' && lesson.location && (
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Konum</div>
-            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem' }}>{lesson.location}</div>
+        {/* Ders türü + link */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {lesson.type === 'online'
+              ? <><Video size={14} color='#4f46e5' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>Online Ders</span></>
+              : <><MapPin size={14} color='#f97316' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>Yüz Yüze</span></>
+            }
           </div>
-        )}
-
-        {/* Notlar */}
-        {lesson.notes && (
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Notlar</div>
-            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '0.6rem 0.75rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', lineHeight: 1.55 }}>{lesson.notes}</div>
-          </div>
-        )}
-
-        {/* Veli */}
-        {(lesson.parentName || lesson.parentPhone || student?.parentName) && (
-          <div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.3rem' }}>Veli Bilgisi</div>
-            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '0.6rem 0.75rem' }}>
-              {(lesson.parentName || student?.parentName) && (
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', fontWeight: 600 }}>{lesson.parentName || student?.parentName}</div>
-              )}
-              {(lesson.parentPhone || student?.parentPhone) && (
-                <a href={`tel:${lesson.parentPhone || student?.parentPhone}`}
-                  style={{ color: '#818cf8', fontSize: '0.75rem', textDecoration: 'none', marginTop: '0.15rem', display: 'block' }}>
-                  {lesson.parentPhone || student?.parentPhone}
-                </a>
-              )}
-            </div>
-          </div>
-        )}
+          {lesson.type === 'online' && lesson.meetingLink && (
+            <button onClick={copyLink}
+              style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              {copied ? <Check size={12} color='#10b981' /> : <Copy size={12} />}
+              {copied ? 'Kopyalandı' : 'Kopyala'}
+            </button>
+          )}
+          {lesson.type === 'online' && lesson.meetingLink && (
+            <a href={lesson.meetingLink} target='_blank' rel='noreferrer'
+              style={{ color: '#4f46e5', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <ExternalLink size={12} /> Aç
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Delete */}
-      <div style={{ padding: '0.75rem 1.1rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ padding: '0.75rem 1.1rem', borderTop: '1px solid #f3f4f6' }}>
         <button onClick={handleDelete} disabled={loading}
-          style={{ width: '100%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', borderRadius: 10, padding: '0.55rem', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+          style={{ width: '100%', background: 'white', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: 10, padding: '0.55rem', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', transition: 'all 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.background = '#fff5f5'}
+          onMouseLeave={e => e.currentTarget.style.background = 'white'}>
           <Trash2 size={13} /> Dersi Sil
         </button>
       </div>
@@ -249,19 +265,16 @@ export default function TeacherCalendar() {
   const scrollRef = useRef(null);
   const windowWidth = useWindowWidth();
   const isMobile = windowWidth < 640;
-  const isTablet = windowWidth < 1024;
 
-  // Mobilde haftalık view zor, günlük göster
   useEffect(() => {
     if (isMobile) setView('daily');
   }, [isMobile]);
 
   useEffect(() => {
     loadData();
-    // Scroll to 8:00
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 60 * (8 - 7);
-    }, 100);
+    }, 150);
   }, []);
 
   const loadData = async () => {
@@ -318,10 +331,9 @@ export default function TeacherCalendar() {
     return `${format(ws, 'd MMM', { locale: tr })} – ${format(we, 'd MMM', { locale: tr })}`;
   };
 
-  // ── Lesson Block (time-grid) ─────────────────────────────────
-  const SLOT_H = 60; // px per hour
+  const SLOT_H = 60;
 
-  const LessonBlock = ({ lesson, cellWidth }) => {
+  const LessonBlock = ({ lesson }) => {
     const sc = STATUS_CFG[lesson.status] || STATUS_CFG['planlandı'];
     const [sh, sm] = (lesson.startTime || '08:00').split(':').map(Number);
     const [eh, em] = (lesson.endTime || '09:00').split(':').map(Number);
@@ -336,38 +348,35 @@ export default function TeacherCalendar() {
         style={{
           position: 'absolute', left: 2, right: 2,
           top: topOffset, height,
-          background: isSelected
-            ? `linear-gradient(135deg, ${sc.bg}ee, ${sc.bg}cc)`
-            : `linear-gradient(135deg, ${sc.bg}bb, ${sc.bg}88)`,
-          border: `1.5px solid ${isSelected ? sc.dot : sc.bg + '66'}`,
-          borderRadius: 8,
-          padding: '0.25rem 0.4rem',
+          background: isSelected ? sc.bg : sc.bg + 'cc',
+          borderRadius: 7,
+          padding: '0.2rem 0.4rem',
           cursor: 'pointer',
           overflow: 'hidden',
-          boxShadow: isSelected ? `0 0 0 2px ${sc.dot}55, 0 4px 12px rgba(0,0,0,0.25)` : '0 2px 6px rgba(0,0,0,0.2)',
+          boxShadow: isSelected ? `0 0 0 2px ${sc.bg}, 0 4px 12px ${sc.bg}44` : '0 1px 4px rgba(0,0,0,0.1)',
           transition: 'all 0.15s',
           zIndex: isSelected ? 5 : 2,
+          borderLeft: `3px solid ${sc.dot}`,
         }}>
-        <div style={{ color: 'white', fontWeight: 700, fontSize: height > 40 ? '0.72rem' : '0.62rem', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {lesson.studentName}
+        <div style={{ color: 'white', fontWeight: 700, fontSize: height > 40 ? '0.7rem' : '0.6rem', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {lesson.startTime?.slice(0,5)}{height > 30 ? ' – ' + lesson.endTime?.slice(0,5) : ''}
         </div>
-        {height > 38 && (
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.62rem', marginTop: '0.1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {lesson.startTime?.slice(0,5)} – {lesson.endTime?.slice(0,5)}
+        {height > 28 && (
+          <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.68rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {lesson.studentName}
           </div>
         )}
       </div>
     );
   };
 
-  // ── Time Grid ─────────────────────────────────────────────────
   const TimeGrid = ({ days }) => {
     const totalGridH = SLOT_H * HOURS.length;
     return (
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', flexDirection: 'column' }}>
         {/* Day headers */}
-        <div style={{ display: 'flex', flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ width: 48, flexShrink: 0 }} />
+        <div style={{ display: 'flex', flexShrink: 0, borderBottom: '1px solid #e5e7eb', background: 'white' }}>
+          <div style={{ width: 52, flexShrink: 0 }} />
           {days.map((day, i) => {
             const today = isToday(day);
             const dayIdx = (day.getDay() + 6) % 7;
@@ -375,20 +384,20 @@ export default function TeacherCalendar() {
               <div key={i}
                 onClick={() => openAdd(day)}
                 style={{
-                  flex: 1, minWidth: 0, textAlign: 'center', padding: '0.65rem 0.25rem',
-                  cursor: 'pointer', borderRight: i < days.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                  transition: 'background 0.1s',
+                  flex: 1, minWidth: 0, textAlign: 'center', padding: '0.7rem 0.25rem',
+                  cursor: 'pointer', borderRight: i < days.length - 1 ? '1px solid #f3f4f6' : 'none',
+                  background: today ? '#f5f3ff' : 'white', transition: 'background 0.1s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>
+                onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#fafafa'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = today ? '#f5f3ff' : 'white'; }}>
+                <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>
                   {DAYS_SHORT[dayIdx]}
                 </div>
                 <div style={{
-                  width: 30, height: 30, borderRadius: '50%', margin: '0 auto',
+                  width: 28, height: 28, borderRadius: '50%', margin: '0 auto',
                   background: today ? '#4f46e5' : 'transparent',
-                  color: today ? 'white' : 'rgba(255,255,255,0.7)',
-                  fontWeight: today ? 800 : 600, fontSize: '0.85rem',
+                  color: today ? 'white' : '#374151',
+                  fontWeight: today ? 800 : 500, fontSize: '0.85rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {format(day, 'd')}
@@ -398,21 +407,21 @@ export default function TeacherCalendar() {
           })}
         </div>
 
-        {/* Scrollable time body */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {/* Time body */}
+        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: 'white' }}>
           <div style={{ display: 'flex', position: 'relative', height: totalGridH }}>
             {/* Hour labels */}
-            <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
+            <div style={{ width: 52, flexShrink: 0, position: 'relative', background: 'white' }}>
               {HOURS.map((h, i) => (
                 <div key={h} style={{ position: 'absolute', top: i * SLOT_H, left: 0, right: 0, height: SLOT_H }}>
-                  <span style={{ position: 'absolute', top: -7, right: 6, color: 'rgba(255,255,255,0.25)', fontSize: '0.62rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ position: 'absolute', top: -7, right: 8, color: '#9ca3af', fontSize: '0.62rem', fontWeight: 600 }}>
                     {String(h).padStart(2, '0')}:00
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Columns */}
+            {/* Day columns */}
             {days.map((day, di) => {
               const dayLessons = getLessonsForDay(day);
               const today = isToday(day);
@@ -421,15 +430,13 @@ export default function TeacherCalendar() {
                   onClick={() => openAdd(day)}
                   style={{
                     flex: 1, minWidth: 0, position: 'relative',
-                    borderLeft: '1px solid rgba(255,255,255,0.05)',
-                    background: today ? 'rgba(79,70,229,0.03)' : 'transparent',
+                    borderLeft: '1px solid #f3f4f6',
+                    background: today ? '#faf9ff' : 'white',
                     cursor: 'pointer',
                   }}>
-                  {/* Hour grid lines */}
                   {HOURS.map((_, i) => (
-                    <div key={i} style={{ position: 'absolute', top: i * SLOT_H, left: 0, right: 0, borderTop: '1px solid rgba(255,255,255,0.04)', height: SLOT_H }} />
+                    <div key={i} style={{ position: 'absolute', top: i * SLOT_H, left: 0, right: 0, borderTop: '1px solid #f3f4f6', height: SLOT_H }} />
                   ))}
-                  {/* Lesson blocks */}
                   {dayLessons.map(l => (
                     <LessonBlock key={l.id} lesson={l} />
                   ))}
@@ -449,41 +456,38 @@ export default function TeacherCalendar() {
     <div style={{
       display: 'flex', flexDirection: 'column',
       height: '100vh', overflow: 'hidden',
-      background: '#0f1117',
-      color: 'white',
+      background: '#f1f5f9',
       padding: isMobile ? '0.5rem' : '1rem',
       gap: '0.75rem',
     }}>
-      {/* ── Header ── */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
-        {/* Nav */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <button onClick={() => navigate(-1)}
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ background: 'white', border: '1px solid #e5e7eb', color: '#6b7280', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <ChevronLeft size={15} />
           </button>
-          <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700, fontSize: isMobile ? '0.78rem' : '0.88rem', minWidth: isMobile ? 90 : 160, textAlign: 'center' }}>
+          <span style={{ color: '#374151', fontWeight: 700, fontSize: isMobile ? '0.78rem' : '0.88rem', minWidth: isMobile ? 90 : 160, textAlign: 'center' }}>
             {navLabel()}
           </span>
           <button onClick={() => navigate(1)}
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ background: 'white', border: '1px solid #e5e7eb', color: '#6b7280', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <ChevronRight size={15} />
           </button>
         </div>
 
-        {/* View toggle + Bugün + Ders Ekle */}
         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', background: 'white', border: '1px solid #e5e7eb', borderRadius: 9, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             {(isMobile ? [['daily', 'Gün']] : [['daily', 'Günlük'], ['weekly', 'Haftalık']]).map(([v, lbl]) => (
               <button key={v} onClick={() => setView(v)}
-                style={{ padding: '0.4rem 0.8rem', border: 'none', background: view === v ? 'rgba(79,70,229,0.6)' : 'transparent', color: view === v ? 'white' : 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                style={{ padding: '0.4rem 0.85rem', border: 'none', background: view === v ? '#4f46e5' : 'transparent', color: view === v ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s' }}>
                 {lbl}
               </button>
             ))}
           </div>
           {!isMobile && (
-            <button onClick={() => { setCurrentDate(new Date()); }}
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', borderRadius: 9, padding: '0.4rem 0.75rem', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer' }}>
+            <button onClick={() => setCurrentDate(new Date())}
+              style={{ background: 'white', border: '1px solid #e5e7eb', color: '#4f46e5', borderRadius: 9, padding: '0.4rem 0.75rem', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
               Bugün
             </button>
           )}
@@ -494,23 +498,22 @@ export default function TeacherCalendar() {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: '0.75rem' }}>
-        {/* Calendar grid */}
+      {/* Main */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: '0.75rem', minHeight: 0 }}>
         <div style={{
           flex: 1, minWidth: 0,
-          background: '#1a1f35',
+          background: 'white',
           borderRadius: 16,
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid #e5e7eb',
           overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         }}>
           <TimeGrid days={view === 'daily' ? [currentDate] : weekDays} />
         </div>
 
-        {/* Detail panel — desktop */}
         {showDetailPanel && (
-          <div style={{ width: 280, flexShrink: 0, height: '100%', overflow: 'hidden' }}>
+          <div style={{ width: 290, flexShrink: 0, height: '100%', overflow: 'hidden' }}>
             <LessonDetailPanel
               lesson={selectedLesson}
               students={students}
@@ -523,18 +526,12 @@ export default function TeacherCalendar() {
         )}
       </div>
 
-      {/* Mobile detail panel — bottom sheet */}
+      {/* Mobile bottom sheet */}
       {showMobileDetail && (
         <>
-          <div
-            onClick={() => setSelectedLesson(null)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998, backdropFilter: 'blur(3px)' }}
-          />
-          <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
-            maxHeight: '75vh', overflowY: 'auto',
-            borderRadius: '20px 20px 0 0',
-          }}>
+          <div onClick={() => setSelectedLesson(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, backdropFilter: 'blur(2px)' }} />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, maxHeight: '78vh', overflowY: 'auto', borderRadius: '20px 20px 0 0' }}>
             <LessonDetailPanel
               lesson={selectedLesson}
               students={students}
