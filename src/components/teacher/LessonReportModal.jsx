@@ -509,8 +509,29 @@ ZORUNLU KURALLAR:
                   Kaydet ve Gönder
                 </button>
                 <button onClick={() => setShowProModal(true)}
-                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(249,115,22,0.35)' }}>
-                  🔒 Pro ile AI Rapor Oluştur
+                  style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(249,115,22,0.35)', position: 'relative', overflow: 'hidden', animation: 'proButtonPulse 2s ease-in-out infinite' }}>
+                  <style>{`
+                    @keyframes proButtonPulse {
+                      0%, 100% { transform: scale(1); box-shadow: 0 4px 14px rgba(249,115,22,0.35); }
+                      50% { transform: scale(1.04); box-shadow: 0 6px 22px rgba(249,115,22,0.55); }
+                    }
+                    @keyframes proShimmer {
+                      0% { left: -100%; }
+                      60%, 100% { left: 150%; }
+                    }
+                    .pro-btn-shimmer::after {
+                      content: '';
+                      position: absolute;
+                      top: 0; left: -100%;
+                      width: 60%; height: 100%;
+                      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+                      animation: proShimmer 2.2s ease-in-out infinite;
+                    }
+                  `}</style>
+                  <span className="pro-btn-shimmer" style={{ position: 'absolute', inset: 0 }} />
+                  <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    🔒 Pro ile AI Rapor Oluştur
+                  </span>
                 </button>
               </div>
             ) : (
