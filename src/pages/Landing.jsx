@@ -190,16 +190,18 @@ export default function Landing() {
           <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
           <span style={{ fontWeight: '900', fontSize: '1.25rem', color: '#111827', letterSpacing: '-0.6px' }}>EduTakip</span>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button onClick={() => selectRole('parent')}
-            style={{ background: 'none', border: '1.5px solid #e5e7eb', color: '#374151', borderRadius: '10px', padding: '0.55rem 1.25rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}>
-            Veli Girişi
-          </button>
-          <button onClick={() => selectRole('teacher')}
-            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)' }}>
-            Öğretmen Girişi
-          </button>
-        </div>
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button onClick={() => selectRole('parent')}
+              style={{ background: 'none', border: '1.5px solid #e5e7eb', color: '#374151', borderRadius: '10px', padding: '0.55rem 1.25rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}>
+              Veli Girişi
+            </button>
+            <button onClick={() => selectRole('teacher')}
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1.5rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(79,70,229,0.35)' }}>
+              Öğretmen Girişi
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
@@ -300,7 +302,7 @@ export default function Landing() {
       </section>
 
       {/* TEK PLATFORM DORT COZUM */}
-      <section style={{ padding: '6rem 2rem', background: '#f5f7fa' }}>
+      <section style={{ padding: '6rem 2rem', background: '#f5f7fa', display: isMobile ? 'none' : 'block' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
             <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', color: '#4338ca', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.4rem 1rem', marginBottom: '1rem' }}>Ozellikler</span>
