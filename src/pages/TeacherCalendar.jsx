@@ -451,6 +451,15 @@ export default function TeacherCalendar() {
 
   const showDetailPanel = !!selectedLesson && !isMobile;
   const showMobileDetail = !!selectedLesson && isMobile;
+  const [panelVisible, setPanelVisible] = useState(false);
+
+  useEffect(() => {
+    if (showDetailPanel) {
+      setTimeout(() => setPanelVisible(true), 10);
+    } else {
+      setPanelVisible(false);
+    }
+  }, [showDetailPanel, selectedLesson?.id]);
 
   return (
     <div style={{
@@ -498,6 +507,61 @@ export default function TeacherCalendar() {
         </div>
       </div>
 
+      {/* Haftalık gün scroll — günlük görünümde */}
+      {view === 'daily' && (
+        <div style={{
+          flexShrink: 0,
+          background: 'white',
+          borderRadius: 16,
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          padding: '0.5rem 0.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.25rem',
+        }}>
+          <button onClick={() => setCurrentDate(d => addDays(d, -7))}
+            style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', borderRadius: 6 }}>
+            <ChevronLeft size={14} />
+          </button>
+          <div style={{ display: 'flex', gap: '0.2rem' }}>
+            {weekDays.map((day, i) => {
+              const isSelected = isSameDay(day, currentDate);
+              const today = isToday(day);
+              const dayIdx = (day.getDay() + 6) % 7;
+              return (
+                <button key={i} onClick={() => setCurrentDate(day)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    padding: '0.35rem 0.5rem', borderRadius: 10, border: 'none',
+                    background: isSelected ? '#4f46e5' : 'transparent',
+                    cursor: 'pointer', transition: 'all 0.15s', minWidth: 38,
+                  }}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f3f4f6'; }}
+                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
+                  <span style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.5px', color: isSelected ? 'rgba(255,255,255,0.8)' : '#9ca3af', textTransform: 'uppercase' }}>
+                    {DAYS_SHORT[dayIdx]}
+                  </span>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: isSelected ? 'white' : today ? '#4f46e5' : '#374151', lineHeight: 1.2 }}>
+                    {format(day, 'd')}
+                  </span>
+                  <span style={{ fontSize: '0.5rem', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.7)' : '#9ca3af', textTransform: 'uppercase' }}>
+                    {format(day, 'MMM', { locale: tr }).toUpperCase()}
+                  </span>
+                  {today && !isSelected && (
+                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#4f46e5', marginTop: '0.15rem' }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <button onClick={() => setCurrentDate(d => addDays(d, 7))}
+            style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', borderRadius: 6 }}>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Main */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: '0.75rem', minHeight: 0 }}>
         <div style={{
@@ -513,7 +577,12 @@ export default function TeacherCalendar() {
         </div>
 
         {showDetailPanel && (
-          <div style={{ width: 290, flexShrink: 0, height: '100%', overflow: 'hidden' }}>
+          <div style={{
+            width: 290, flexShrink: 0, height: '100%', overflow: 'hidden',
+            transform: panelVisible ? 'translateX(0)' : 'translateX(320px)',
+            opacity: panelVisible ? 1 : 0,
+            transition: 'transform 0.3s cubic-bezier(0.34,1.2,0.64,1), opacity 0.25s ease',
+          }}>
             <LessonDetailPanel
               lesson={selectedLesson}
               students={students}
