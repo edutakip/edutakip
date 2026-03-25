@@ -55,7 +55,7 @@ function getNextOccurrences(dayIdx, weeksCount = 4) {
   return dates;
 }
 
-export default function AddStudentModal({ onClose, onSaved }) {
+export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [existingLessons, setExistingLessons] = useState([]);
@@ -79,6 +79,20 @@ export default function AddStudentModal({ onClose, onSaved }) {
       base44.entities.Lesson.filter({ teacherEmail: me.email }).then(setExistingLessons)
     );
   }, []);
+
+  // Limit kontrolü — save başlamadan önce
+  const checkLimit = async () => {
+    const me = await base44.auth.me();
+    const plan = me?.plan || 'free';
+    if (plan === 'pro' || plan === 'trialing') return true; // Pro kullanıcı sınırsız
+    const limit = me?.studentLimit || 3;
+    const activeStudents = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
+    if (activeStudents.length >= limit) {
+      onNeedUpgrade?.('limit');
+      return false;
+    }
+    return true;
+  };
 
   // Close time picker on outside click
   useEffect(() => {
@@ -136,6 +150,8 @@ export default function AddStudentModal({ onClose, onSaved }) {
 
   const save = async () => {
     if (!form.name) return;
+    const canProceed = await checkLimit();
+    if (!canProceed) return;
     setLoading(true);
     const me = await base44.auth.me();
     const weeklyLessons = form.schedule.length || 1;

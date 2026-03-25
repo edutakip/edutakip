@@ -10,6 +10,7 @@ import ParentLessonsPayments from './pages/ParentLessonsPayments';
 import TeacherReports from './pages/TeacherReports';
 import ParentLessonRequests from './pages/ParentLessonRequests';
 import ParentSettings from './pages/ParentSettings';
+import AdminPanel from './pages/AdminPanel';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -180,6 +181,7 @@ const AuthenticatedApp = () => {
       <Route path="/ParentLessonsPayments" element={<LayoutWrapper currentPageName="ParentLessonsPayments"><ParentLessonsPayments /></LayoutWrapper>} />
       <Route path="/ParentLessonRequests" element={<LayoutWrapper currentPageName="ParentLessonRequests"><ParentLessonRequests /></LayoutWrapper>} />
       <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
+      <Route path="/adminreis" element={<AdminPanel />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

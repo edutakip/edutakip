@@ -5,6 +5,7 @@ import StudentCard from '../components/teacher/StudentCard';
 import AddStudentModal from '../components/teacher/AddStudentModal';
 import PaymentModal from '../components/teacher/PaymentModal';
 import StudentDetailModal from '../components/teacher/StudentDetailModal';
+import ProUpgradeModal from '../components/ProUpgradeModal';
 
 function useWindowWidth() {
   const [width, setWidth] = React.useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -23,6 +24,7 @@ export default function TeacherStudents() {
   const [showAdd, setShowAdd] = useState(false);
   const [payStudent, setPayStudent] = useState(null);
   const [detailStudent, setDetailStudent] = useState(null);
+  const [upgradeReason, setUpgradeReason] = useState(null);
 
   const width = useWindowWidth();
   const isMobile = width < 1024;
@@ -120,7 +122,20 @@ export default function TeacherStudents() {
         )}
       </div>
 
-      {showAdd && <AddStudentModal onClose={() => setShowAdd(false)} onSaved={loadStudents} />}
+      {showAdd && (
+        <AddStudentModal
+          onClose={() => setShowAdd(false)}
+          onSaved={loadStudents}
+          onNeedUpgrade={(reason) => { setShowAdd(false); setUpgradeReason(reason); }}
+        />
+      )}
+      {upgradeReason && (
+        <ProUpgradeModal
+          reason={upgradeReason}
+          onClose={() => setUpgradeReason(null)}
+          onUpgraded={() => { setUpgradeReason(null); setShowAdd(true); }}
+        />
+      )}
       {payStudent && <PaymentModal student={payStudent} onClose={() => setPayStudent(null)} onSaved={loadStudents} />}
       {detailStudent && <StudentDetailModal student={detailStudent} onClose={() => setDetailStudent(null)} onSaved={loadStudents} />}
     </div>
