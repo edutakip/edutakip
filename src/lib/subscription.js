@@ -29,8 +29,7 @@ export function canUseDetailedFinance(user) {
 
 export function canUseWhatsApp(user) {
   if (isTrialExpired(user)) return false;
-  if (user?.plan === 'free') return true; // free'de temel WhatsApp var
-  return true;
+  return isPro(user);
 }
 
 export function getPlanLabel(plan) {

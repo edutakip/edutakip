@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
+import { isPro } from '@/lib/subscription';
+import ProUpgradeModal from '../ProUpgradeModal';
 
 const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
 
@@ -67,10 +69,12 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   const [generatedReport, setGeneratedReport] = useState('');
   const [existing, setExisting] = useState(null);
   const [whatsapp, setWhatsapp] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showProModal, setShowProModal] = useState(false);
 
   useEffect(() => {
-    // Modal açıkken FAB'ı gizle
     document.body.classList.add('modal-open-hide-fab');
+    base44.auth.me().then(setCurrentUser).catch(() => {});
     return () => document.body.classList.remove('modal-open-hide-fab');
   }, []);
 
@@ -450,11 +454,18 @@ ZORUNLU KURALLAR:
           )}
 
           {step === 2 && (
-            <button onClick={generateReport} disabled={generating}
-              style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
-              {generating ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={15} />}
-              {generating ? 'Rapor Oluşturuluyor...' : 'AI ile Rapor Oluştur'}
-            </button>
+            !isPro(currentUser) ? (
+              <button onClick={() => setShowProModal(true)}
+                style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🔒 Pro ile AI Rapor Oluştur
+              </button>
+            ) : (
+              <button onClick={generateReport} disabled={generating}
+                style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
+                {generating ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={15} />}
+                {generating ? 'Rapor Oluşturuluyor...' : 'AI ile Rapor Oluştur'}
+              </button>
+            )
           )}
 
           {step === 3 && (
@@ -475,6 +486,7 @@ ZORUNLU KURALLAR:
           transition: opacity 0.2s ease !important;
         }
       `}</style>
+      {showProModal && <ProUpgradeModal reason='ai' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
     </>
   );
 }

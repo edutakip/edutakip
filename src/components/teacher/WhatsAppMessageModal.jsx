@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, MessageCircle, Send, BookmarkPlus, ChevronDown, Trash2, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { isPro } from '@/lib/subscription';
+import ProUpgradeModal from '../ProUpgradeModal';
 
 export default function WhatsAppMessageModal({ phone, message: initialMessage, templateType = 'genel', onClose }) {
   const [message, setMessage] = useState(initialMessage);
@@ -9,9 +11,12 @@ export default function WhatsAppMessageModal({ phone, message: initialMessage, t
   const [saveName, setSaveName] = useState('');
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showProModal, setShowProModal] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(me => {
+      setCurrentUser(me);
       base44.entities.MessageTemplate.filter({ teacherEmail: me.email }).then(setTemplates);
     });
   }, []);
@@ -54,6 +59,26 @@ export default function WhatsAppMessageModal({ phone, message: initialMessage, t
   };
 
   const relevantTemplates = templates.filter(t => t.type === templateType || t.type === 'genel');
+
+  if (showProModal) {
+    return <ProUpgradeModal reason='whatsapp' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />;
+  }
+
+  if (!isPro(currentUser) && currentUser !== null) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.65)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+        <div style={{ background: 'white', borderRadius: 20, padding: '2rem', width: '100%', maxWidth: 380, textAlign: 'center', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔒</div>
+          <h3 style={{ color: '#111827', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Pro Özellik</h3>
+          <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>WhatsApp bildirimleri Pro hesaplara özeldir. Upgrade yaparak velilerle anında iletişim kurun.</p>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '0.7rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Kapat</button>
+            <button onClick={() => setShowProModal(true)} style={{ flex: 2, padding: '0.7rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Pro'ya Geç 🚀</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.65)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>

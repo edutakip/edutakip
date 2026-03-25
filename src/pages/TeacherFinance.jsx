@@ -8,6 +8,8 @@ import { format, subMonths, startOfMonth, endOfMonth, subWeeks, startOfWeek, end
 import { tr } from 'date-fns/locale';
 import PaymentModal from '../components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
+import { isPro } from '@/lib/subscription';
+import ProUpgradeModal from '../components/ProUpgradeModal';
 
 const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6'];
 
@@ -206,6 +208,8 @@ export default function TeacherFinance() {
   const [txFilter, setTxFilter] = useState({ type: 'all', studentId: 'all', dateFrom: '', dateTo: '' });
   const [detailType, setDetailType] = useState(null);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = windowWidth < 640;
   const isTablet = windowWidth < 1024;
 
@@ -218,6 +222,7 @@ export default function TeacherFinance() {
 
   const loadAll = async () => {
     const me = await base44.auth.me();
+    setCurrentUser(me);
     const [p, s, l] = await Promise.all([
       base44.entities.Payment.filter({ teacherEmail: me.email }),
       base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
@@ -324,7 +329,16 @@ export default function TeacherFinance() {
       </div>
 
       {/* Charts row */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr', gap: '1rem', marginBottom: '1rem', position: 'relative' }}>
+        {!isPro(currentUser) && (
+          <div onClick={() => setShowUpgradeModal(true)} style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', background: 'rgba(255,255,255,0.4)', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', borderRadius: 14, padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 20px rgba(79,70,229,0.35)' }}>
+              <span style={{ fontSize: '1.1rem' }}>🔒</span>
+              <span style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem' }}>Pro ile Kilidi Aç</span>
+            </div>
+            <span style={{ color: '#4f46e5', fontSize: '0.8rem', fontWeight: 600 }}>Detaylı finans analizi sadece Pro hesaplarda</span>
+          </div>
+        )}
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
@@ -381,7 +395,16 @@ export default function TeacherFinance() {
       </div>
 
       {/* Bottom row */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr', gap: '1rem', alignItems: 'start', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr', gap: '1rem', alignItems: 'start', marginBottom: '1rem', position: 'relative' }}>
+        {!isPro(currentUser) && (
+          <div onClick={() => setShowUpgradeModal(true)} style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', background: 'rgba(255,255,255,0.4)', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', borderRadius: 14, padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 20px rgba(79,70,229,0.35)' }}>
+              <span style={{ fontSize: '1.1rem' }}>🔒</span>
+              <span style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem' }}>Pro ile Kilidi Aç</span>
+            </div>
+            <span style={{ color: '#4f46e5', fontSize: '0.8rem', fontWeight: 600 }}>Detaylı finans analizi sadece Pro hesaplarda</span>
+          </div>
+        )}
         <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>
@@ -652,6 +675,7 @@ export default function TeacherFinance() {
 
       {payModalStudent && <PaymentModal student={payModalStudent} onClose={() => setPayModalStudent(null)} onSaved={() => { showToast({ message: `Ödeme alındı — ${payModalStudent.name}` }); loadAll(); }} />}
       {detailType && <DetailModal type={detailType} students={students} payments={payments} lessons={lessons} onClose={() => setDetailType(null)} />}
+      {showUpgradeModal && <ProUpgradeModal reason='finance' onClose={() => setShowUpgradeModal(false)} onUpgraded={() => { setShowUpgradeModal(false); loadAll(); }} />}
     </div>
   );
 }

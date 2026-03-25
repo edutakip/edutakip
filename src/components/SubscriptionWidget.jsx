@@ -4,9 +4,10 @@ import { getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import ProUpgradeModal from './ProUpgradeModal';
 
 const FREE_PERKS = [
-  '🤖 AI ders raporları',
-  '👨‍👩‍👧 Sınırsız öğrenci',
-  '📊 Detaylı finans analizi',
+  { text: '3 öğrenci limiti', locked: false },
+  { text: 'AI ders raporları', locked: true },
+  { text: 'WhatsApp bildirimleri', locked: true },
+  { text: 'Detaylı finans analizi', locked: true },
 ];
 
 export default function SubscriptionWidget({ user, collapsed }) {
@@ -97,7 +98,10 @@ export default function SubscriptionWidget({ user, collapsed }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.7rem' }}>
             {FREE_PERKS.map(p => (
-              <span key={p} style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.4 }}>{p}</span>
+              <div key={p.text} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{p.locked ? '🔒' : '✓'}</span>
+                <span style={{ fontSize: '0.75rem', color: p.locked ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.65)', lineHeight: 1.4, textDecoration: p.locked ? 'line-through' : 'none' }}>{p.text}</span>
+              </div>
             ))}
           </div>
           <button onClick={() => setShowModal(true)}
