@@ -128,7 +128,7 @@ const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
   { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
   {
-    label: 'Ders Takibi', icon: BookOpen,
+    label: 'Ders Yönetimi', icon: BookOpen,
     submenu: [
       { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
       { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
@@ -156,7 +156,7 @@ const PARENT_MOBILE_NAV = [
 const TEACHER_MOBILE_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
   { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-  { label: 'Ders Takibi', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
+  { label: 'Ders Yönetimi', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
 ];
