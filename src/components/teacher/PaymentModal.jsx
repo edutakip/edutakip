@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -47,10 +48,10 @@ export default function PaymentModal({ student, onClose, onSaved }) {
   const labelStyle = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
   if (whatsapp) {
-    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+    return createPortal(<WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />, document.body);
   }
 
-  return (
+  return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '1rem', paddingTop: 'max(1rem, env(safe-area-inset-top))', backdropFilter: 'blur(4px)', overflowY: 'auto' }}>
       <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)', marginTop: '1rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -112,6 +113,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           </button>
         </div>
       </div>
-    </div> 
+    </div>,
+    document.body
   );
 }
