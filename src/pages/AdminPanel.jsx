@@ -129,10 +129,10 @@ export default function AdminPanel() {
             { label: 'Süresi Dolmuş', value: stats.expired, icon: XCircle, color: '#dc2626', bg: '#fee2e2' },
             { label: 'Aktif Öğrenci', value: stats.totalStudents, icon: Users, color: '#7c3aed', bg: '#f5f3ff' },
             { label: 'Tahmini MRR', value: `${stats.mrr.toLocaleString('tr-TR')}₺`, icon: CreditCard, color: '#0369a1', bg: '#e0f2fe' },
-          ].map(({ label, value, icon: Icon, color, bg }) => (
+          ].map(({ label, value, icon: StatIcon, color, bg }) => (
             <div key={label} style={{ background: 'white', borderRadius: 14, padding: '1.25rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                <div style={{ padding: '0.35rem', borderRadius: 8, background: bg }}><Icon size={15} color={color} /></div>
+                <div style={{ padding: '0.35rem', borderRadius: 8, background: bg }}><StatIcon size={15} color={color} /></div>
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
               </div>
               <p style={{ fontSize: '1.75rem', fontWeight: 900, color: '#111827', margin: 0, lineHeight: 1 }}>{value}</p>
@@ -145,12 +145,15 @@ export default function AdminPanel() {
           {[
             { key: 'users', label: 'Kullanıcılar & Abonelikler', icon: Users },
             { key: 'stats', label: 'Genel İstatistik', icon: BarChart2 },
-          ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', borderRadius: 10, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', background: tab === t.key ? '#4f46e5' : 'white', color: tab === t.key ? 'white' : '#6b7280', boxShadow: tab === t.key ? '0 4px 12px rgba(79,70,229,0.3)' : 'none', transition: 'all 0.15s' }}>
-              <t.icon size={15} /> {t.label}
-            </button>
-          ))}
+          ].map(t => {
+            const TabIcon = t.icon;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', borderRadius: 10, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', background: tab === t.key ? '#4f46e5' : 'white', color: tab === t.key ? 'white' : '#6b7280', boxShadow: tab === t.key ? '0 4px 12px rgba(79,70,229,0.3)' : 'none', transition: 'all 0.15s' }}>
+                <TabIcon size={15} /> {t.label}
+              </button>
+            );
+          })}
         </div>
 
         {tab === 'users' && (
