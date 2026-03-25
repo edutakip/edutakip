@@ -291,7 +291,7 @@ export default function TeacherHomework() {
                 <input type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} style={inp} />
               </div>
               <button onClick={handleSave} disabled={!form.studentId || !form.title}
-                style={{ background: (!form.studentId || !form.title) ? '#e5e7eb' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: (!form.studentId || !form.title) ? '#9ca3af' : 'white', border: 'none', borderRadius: '12px', padding: '0.875rem', fontWeight: '800', fontSize: '0.9rem', cursor: (!form.studentId || !form.title) ? 'default' : 'pointer', marginTop: '0.25rem', transition: 'all 0.15s' }}>
+                style={{ background: (!form.studentId || !form.title) ? '#ffffffff' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: (!form.studentId || !form.title) ? '#9ca3af' : 'white', border: 'none', borderRadius: '12px', padding: '0.875rem', fontWeight: '800', fontSize: '0.9rem', cursor: (!form.studentId || !form.title) ? 'default' : 'pointer', marginTop: '0.25rem', transition: 'all 0.15s' }}>
                 {editingHw ? 'Kaydet' : '📚 Ödev Ver'}
               </button>
             </div>
