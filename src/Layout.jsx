@@ -493,7 +493,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* FAB */}
         {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
-        <div style={{ position: 'fixed', bottom: '5rem', right: '1rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+        <div className="app-fab" style={{ position: 'fixed', bottom: '5rem', right: '1rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
           {fabOpen && FAB_ACTIONS.map((a, i) => {
             const Icon = a.Icon;
             const handleClick = () => {
@@ -620,7 +620,7 @@ export default function Layout({ children, currentPageName }) {
           onSaved={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
         />
       )}
-      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+      <div className="app-fab" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
         {fabOpen && FAB_ACTIONS.map((a, i) => {
           const Icon = a.Icon;
           const handleClick = () => {
