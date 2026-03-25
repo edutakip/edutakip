@@ -299,6 +299,129 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* TEK PLATFORM DORT COZUM */}
+      <section style={{ padding: '6rem 2rem', background: '#f8fafc' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <span style={{ display: 'inline-block', background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', color: '#4338ca', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', borderRadius: 25, padding: '0.4rem 1rem', marginBottom: '1rem' }}>Ozellikler</span>
+            <h2 style={{ color: '#111827', fontSize: 'clamp(1.5rem, 3vw, 2.4rem)', fontWeight: 900, letterSpacing: '-1px', marginBottom: '0.75rem' }}>Tek Platform, Dort Cozum</h2>
+            <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: 560, margin: '0 auto' }}>Ogrenci takibi, ders planlamasi, odemeler ve veli iletisimi — hepsi birbiriyle entegre, hepsi tek yerden.</p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6rem' }}>
+
+            {/* 01 - Ogrenci Yonetimi */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>01</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>Ogrenci Yonetimi</h3>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>Tum ogrencileriniz tek profilde. Notlar, odemeler, ders gecmisi — hepsi bir arada.</p>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {['Tum ogrencilerinizi tek ekranda gorun, Excel bitti', 'Her ogrenci icin ayri profil: iletisim, veli bilgileri, notlar', 'Gecmis derslere ve odeme gecmisine tek tikla erisin', 'Ogrenci bazli performans grafikleri ve raporlar'].map(item => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem', color: '#374151' }}>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div style={{ background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', borderRadius: 20, aspectRatio: '16/10', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #c7d2fe' }}>
+                <div style={{ textAlign: 'center', color: '#a5b4fc' }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 0.5rem', display: 'block' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Gorsel eklenecek</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 02 - Ders Planlama */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+              <div style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderRadius: 20, aspectRatio: '16/10', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #bbf7d0', order: -1 }}>
+                <div style={{ textAlign: 'center', color: '#6ee7b7' }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 0.5rem', display: 'block' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Gorsel eklenecek</span>
+                </div>
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>02</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>Ders Planlama</h3>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>Haftalik plan, otomatik takvim. Programinizi bir kez kurun, EduTakip gerisini takip etsin.</p>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {['Haftalik programi bir kez olustur, tekrarlayan dersler otomatik gelsin', 'Online dersler icin Jitsi linki otomatik olusturulsun', 'Gunluk, haftalik ve aylik takvim goruntusu', 'Ders iptal ve yeniden planlama tek tikla'].map(item => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem', color: '#374151' }}>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* 03 - Odeme Takibi */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>03</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>Odeme Takibi</h3>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>Kim ne kadar odedi, tek ekranda. Odeme stresi bitti — bakiyeler, borclar ve kazanciniz hepsi deftersiz.</p>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {['Her ogrencinin bakiyesini anlik gorun, deftere yazmayin', 'Nakit ve havale odemelerini ayri takip edin', 'Aylik kazancinizi tek bakista gorun', 'Bekleyen odemeleri otomatik tespit edin'].map(item => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem', color: '#374151' }}>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div style={{ background: 'linear-gradient(135deg, #fff7ed, #fed7aa)', borderRadius: 20, aspectRatio: '16/10', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #fdba74' }}>
+                <div style={{ textAlign: 'center', color: '#fb923c' }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 0.5rem', display: 'block' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Gorsel eklenecek</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 04 - Veli Paneli */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+              <div style={{ background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', borderRadius: 20, aspectRatio: '16/10', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #c4b5fd', order: -1 }}>
+                <div style={{ textAlign: 'center', color: '#c084fc' }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 0.5rem', display: 'block' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Gorsel eklenecek</span>
+                </div>
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '3rem', fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>04</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>Veli Paneli</h3>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>Veliler sormadan gorsuon. Ders programi, odemeler ve AI ders raporlari — her an eriselebilir.</p>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {['Veli paneli ile veliler ders programini kendileri gorsuon', 'AI destekli ders degerlendirme raporlari WhatsAppa gitsin', 'Bu ay kac ders yaptik? sorusunu bir daha duymayın', 'Odev takibi ve gelisim raporlari'].map(item => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem', color: '#374151' }}>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* TESTIMONIALS */}
       <section style={{ padding: '6rem 2rem', maxWidth: '1100px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
