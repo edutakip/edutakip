@@ -62,6 +62,7 @@ export default function LessonReportModal({ lesson, onClose, onSaved }) {
   });
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [generatedReport, setGeneratedReport] = useState('');
   const [existing, setExisting] = useState(null);
   const [whatsapp, setWhatsapp] = useState(null);
@@ -129,7 +130,14 @@ ZORUNLU KURALLAR:
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const text = typeof result === 'string' ? result : result?.text || result?.content || JSON.stringify(result);
       setGeneratedReport(text);
-      setStep(3);
+      // Önce generating kapat, success ekranı göster
+      setGenerating(false);
+      setShowSuccess(true);
+      // 1.8sn sonra success ekranını kapat ve rapora yumuşak geç
+      setTimeout(() => {
+        setShowSuccess(false);
+        setTimeout(() => setStep(3), 120);
+      }, 1800);
     } catch (err) {
       console.error(err);
     } finally {
@@ -234,6 +242,11 @@ ZORUNLU KURALLAR:
             '@keyframes pulse-ring { 0%{transform:scale(0.85);opacity:0.6} 50%{transform:scale(1.15);opacity:0} 100%{transform:scale(0.85);opacity:0} }',
             '@keyframes shimmer-text { 0%,100%{opacity:0.5} 50%{opacity:1} }',
             '@keyframes dot-bounce { 0%,80%,100%{transform:translateY(0);opacity:0.4} 40%{transform:translateY(-8px);opacity:1} }',
+            '@keyframes success-pop { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.15)} 80%{transform:scale(0.95)} 100%{transform:scale(1);opacity:1} }',
+            '@keyframes check-draw { 0%{stroke-dashoffset:50} 100%{stroke-dashoffset:0} }',
+            '@keyframes fade-in-up { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }',
+            '@keyframes overlay-fadein { 0%{opacity:0} 100%{opacity:1} }',
+            '@keyframes overlay-fadeout { 0%{opacity:1} 100%{opacity:0} }',
           ].join(' ')}</style>
 
           {/* Pulse halkalar + Logo */}
@@ -259,6 +272,39 @@ ZORUNLU KURALLAR:
           </div>
 
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>AI rapor oluşturuluyor...</p>
+        </div>
+      )}
+
+      {/* ── Başarı Ekranı ── */}
+      {showSuccess && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999999,
+          background: 'linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #0a1628 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: '1.5rem',
+          animation: 'overlay-fadein 0.35s ease',
+        }}>
+          {/* Yeşil tik dairesi */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'success-pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}>
+            <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.3)', animation: 'pulse-ring 1.6s ease-out infinite' }} />
+            <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.2)', animation: 'pulse-ring 1.6s ease-out 0.4s infinite' }} />
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #16a34a, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(34,197,94,0.4)' }}>
+              <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+                <polyline
+                  points="8,19 16,27 30,11"
+                  stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
+                  strokeDasharray="50" strokeDashoffset="50"
+                  style={{ animation: 'check-draw 0.4s ease 0.25s forwards' }}
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Yazı */}
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.4rem', animation: 'fade-in-up 0.4s ease 0.3s both' }}>
+            <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Raporunuz Oluşturuldu!</h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>Raporu düzenleyebilir ve veliye iletebilirsiniz</p>
+          </div>
         </div>
       )}
 
@@ -347,7 +393,7 @@ ZORUNLU KURALLAR:
 
           {/* Step 3: Rapor */}
           {step === 3 && (
-            <>
+            <div style={{ animation: 'fade-in-up 0.45s ease both' }}>
               <div style={{ background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', borderRadius: 14, padding: '1rem', border: '1.5px solid #c7d2fe', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={18} color='#4f46e5' />
                 <div>
@@ -357,7 +403,7 @@ ZORUNLU KURALLAR:
               </div>
               <textarea value={generatedReport} onChange={e => setGeneratedReport(e.target.value)}
                 rows={14} style={{ ...inp, lineHeight: 1.7, fontSize: '0.88rem' }} />
-            </>
+            </div>
           )}
         </div>
 
