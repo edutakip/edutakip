@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2 } from 'lucide-react';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
+import { showToast } from '@/lib/toast';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -545,7 +546,7 @@ export default function Layout({ children, currentPageName }) {
           <PaymentModal
             student={selectedPayStudent}
             onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-            onSaved={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
+            onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
           />
         )}
       </div>
@@ -618,7 +619,7 @@ export default function Layout({ children, currentPageName }) {
         <PaymentModal
           student={selectedPayStudent}
           onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-          onSaved={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
+          onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
         />
       )}
       <div className="app-fab" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
