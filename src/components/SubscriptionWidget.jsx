@@ -97,10 +97,19 @@ export default function SubscriptionWidget({ user, collapsed }) {
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ücretsiz Hesap</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.7rem' }}>
+            <style>{`
+              @keyframes lockedPulse {
+                0%, 100% { opacity: 0.35; }
+                50% { opacity: 0.5; }
+              }
+              .locked-feature {
+                animation: lockedPulse 2.5s ease-in-out infinite;
+              }
+            `}</style>
             {FREE_PERKS.map(p => (
               <div key={p.text} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{p.locked ? '🔒' : '✓'}</span>
-                <span style={{ fontSize: '0.75rem', color: p.locked ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.65)', lineHeight: 1.4, textDecoration: p.locked ? 'line-through' : 'none' }}>{p.text}</span>
+                <span className={p.locked ? 'locked-feature' : ''} style={{ fontSize: '0.75rem', color: p.locked ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>{p.text}</span>
               </div>
             ))}
           </div>
