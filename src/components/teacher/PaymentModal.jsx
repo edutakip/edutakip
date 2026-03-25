@@ -18,21 +18,37 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     setLoading(true);
     const me = await base44.auth.me();
     const paidAmount = Number(form.amount);
+
     // Güncel öğrenci verisini DB'den al (parentPhone dahil)
     const freshStudents = await base44.entities.Student.filter({ id: student.id });
     const freshStudent = freshStudents[0] || student;
 
-    // En eski ödenmemiş tamamlanmış dersi bul
     const [allLessons, allPayments] = await Promise.all([
       base44.entities.Lesson.filter({ teacherEmail: me.email, studentId: student.id }),
       base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
     ]);
-    const paidDates = new Set(allPayments.filter(p => p.status === 'alındı').map(p => p.date));
+
+    // Ödenmiş ders ID'lerini topla — lessonId varsa ID ile, yoksa date ile eşleştir (geriye dönük uyumluluk)
+    const paidLessonIds = new Set(
+      allPayments
+        .filter(p => p.status === 'alındı' && p.lessonId)
+        .map(p => p.lessonId)
+    );
+    const paidDatesWithoutLessonId = new Set(
+      allPayments
+        .filter(p => p.status === 'alındı' && !p.lessonId)
+        .map(p => p.date)
+    );
+
+    // En eski ödenmemiş tamamlanmış dersi bul
     const oldestUnpaid = allLessons
-      .filter(l => l.status === 'tamamlandı' && !paidDates.has(l.date))
+      .filter(l =>
+        l.status === 'tamamlandı' &&
+        !paidLessonIds.has(l.id) &&
+        !paidDatesWithoutLessonId.has(l.date)
+      )
       .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-    // Ödeme tarihini en eski ödenmemiş dersin tarihine ata (yoksa form tarihini kullan)
     const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
 
     await base44.entities.Payment.create({
@@ -40,9 +56,13 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       amount: paidAmount,
       date: paymentDate,
       month: paymentDate.slice(0, 7),
-      studentId: student.id, studentName: student.name,
+      // Ders ID'sini kaydet — aynı tarihteki farklı dersler karışmasın
+      lessonId: oldestUnpaid ? oldestUnpaid.id : null,
+      studentId: student.id,
+      studentName: student.name,
       teacherEmail: me.email,
-      parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
+      parentPhone: freshStudent.parentPhone || '',
+      parentName: freshStudent.parentName || '',
     });
 
     setLoading(false);
@@ -50,8 +70,8 @@ export default function PaymentModal({ student, onClose, onSaved }) {
 
     const phone = freshStudent.parentPhone;
     if (phone) {
-      const methodLabel = { nakit: 'Nakit', havale: 'Havale', diğer: 'Diğer' }[form.method] || form.method;
-      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n*Odeme Kaydedildi*\nOgrenci: ${student.name}\nTutar: ${paidAmount} TL\nTarih: ${form.date}\nYontem: ${methodLabel}${form.description ? '\nAciklama: ' + form.description : ''}\n\nTesekkurler!`;
+      const methodLabel = { nakit: 'Nakit', havale: 'Havale', diger: 'Diger' }[form.method] || form.method;
+      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n*Odeme Kaydedildi*\nOgrenci: ${student.name}\nTutar: ${paidAmount} TL\nTarih: ${form.date}\nYontem: ${methodLabel}${form.description ? '\nAciklama: ' + form.description : ''}\n\n─────────────────\nEduTakip.com`;
       setWhatsapp({ phone, message: msg });
     } else {
       onClose();
@@ -70,7 +90,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
-            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Ödeme Ekle</h2>
+            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Odeme Ekle</h2>
             <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.15rem' }}>{student?.name}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -89,7 +109,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
-              <label style={labelStyle}>Tutar (₺)</label>
+              <label style={labelStyle}>Tutar (TL)</label>
               <input style={inputStyle} type='number' placeholder='0' value={form.amount} onChange={e => u('amount', e.target.value)} />
             </div>
             <div>
@@ -111,19 +131,19 @@ export default function PaymentModal({ student, onClose, onSaved }) {
               <select style={inputStyle} value={form.method} onChange={e => u('method', e.target.value)}>
                 <option value='nakit'>Nakit</option>
                 <option value='havale'>Havale</option>
-                <option value='diğer'>Diğer</option>
+                <option value='diger'>Diger</option>
               </select>
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Açıklama</label>
-            <input style={inputStyle} placeholder='Açıklama...' value={form.description} onChange={e => u('description', e.target.value)} />
+            <label style={labelStyle}>Aciklama</label>
+            <input style={inputStyle} placeholder='Aciklama...' value={form.description} onChange={e => u('description', e.target.value)} />
           </div>
           <button onClick={save} disabled={loading || !form.amount}
             style={{ padding: '0.85rem', borderRadius: '12px', border: 'none', background: loading || !form.amount ? '#86efac' : 'linear-gradient(135deg, #16a34a, #22c55e)', color: 'white', fontWeight: '800', fontSize: '0.95rem', cursor: loading || !form.amount ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(34,197,94,0.4)', transition: 'all 0.15s', letterSpacing: '0.3px' }}
             onMouseEnter={e => { if (!loading && form.amount) e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-            {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : '💰 Ödeme Kaydet'}
+            {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : 'Odeme Kaydet'}
           </button>
         </div>
       </div>
