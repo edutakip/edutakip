@@ -122,14 +122,21 @@ const PAGE_PREFETCH = {
   ]),
 };
 
+const LESSON_TRACKING_PAGES = ['TeacherLessons', 'TeacherHomework', 'TeacherReports'];
+
 const TEACHER_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
   { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-  { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-  { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
+  {
+    label: 'Ders Takibi', icon: BookOpen,
+    submenu: [
+      { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
+      { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
+      { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
+    ],
+  },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
 ];
 
@@ -148,10 +155,10 @@ const PARENT_MOBILE_NAV = [
 
 const TEACHER_MOBILE_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Dersler', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherStudents', 'TeacherHomework'] },
+  { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
+  { label: 'Ders Takibi', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
 ];
 
 const FAB_ACTIONS = [
@@ -265,6 +272,61 @@ export default function Layout({ children, currentPageName }) {
       <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
         {nav.map((item, i) => {
           const Icon = item.icon;
+          if (item.submenu) {
+            const isGroupActive = item.submenu.some(s => s.page === currentPageName);
+            const [subOpen, setSubOpen] = React.useState(isGroupActive);
+            return (
+              <div key={i}>
+                <button onClick={() => setSubOpen(o => !o)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    width: '100%', padding: '0.6rem 0.75rem', borderRadius: '10px',
+                    fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
+                    background: isGroupActive ? 'rgba(99,102,241,0.15)' : 'transparent',
+                    color: isGroupActive ? '#c7d2fe' : 'rgba(255,255,255,0.55)',
+                    fontWeight: isGroupActive ? '600' : '400',
+                    border: 'none', borderLeft: isGroupActive ? '3px solid #6366f1' : '3px solid transparent',
+                    overflow: 'hidden', whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={e => { if (!isGroupActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}
+                  onMouseLeave={e => { if (!isGroupActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}>
+                  <Icon size={17} style={{ flexShrink: 0 }} />
+                  {!collapsed && (
+                    <>
+                      <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
+                      <ChevronRight size={13} style={{ transform: subOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', opacity: 0.5 }} />
+                    </>
+                  )}
+                </button>
+                {subOpen && !collapsed && (
+                  <div style={{ marginLeft: '1rem', marginTop: '0.1rem', display: 'flex', flexDirection: 'column', gap: '0.05rem', borderLeft: '2px solid rgba(255,255,255,0.1)', paddingLeft: '0.5rem' }}>
+                    {item.submenu.map((sub, j) => {
+                      const SubIcon = sub.icon;
+                      const isActive = sub.page === currentPageName;
+                      return (
+                        <Link key={j} to={createPageUrl(sub.page)}
+                          onClick={(e) => handleNav(e, sub.page)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '0.6rem',
+                            padding: '0.5rem 0.65rem', borderRadius: '8px',
+                            fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
+                            background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
+                            color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
+                            fontWeight: isActive ? '600' : '400',
+                            textDecoration: 'none', whiteSpace: 'nowrap',
+                          }}
+                          onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
+                          onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; } }}>
+                          <SubIcon size={14} style={{ flexShrink: 0 }} />
+                          <span>{sub.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
           const isActive = item.page === currentPageName;
           return (
             <Link key={i} to={createPageUrl(item.page)}
@@ -401,8 +463,8 @@ export default function Layout({ children, currentPageName }) {
             }}>
               {[
                 { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-                { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
                 { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
+                { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
               ].map((item, i) => {
                 const Icon = item.icon;
                 const isActive = item.page === currentPageName;
