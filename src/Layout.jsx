@@ -579,7 +579,7 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
-        <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
+        <div style={{ maxWidth: currentPageName === 'TeacherCalendar' ? '100%' : '1300px', width: '100%', margin: '0 auto' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
       </main>
