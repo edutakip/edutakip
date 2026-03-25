@@ -18,62 +18,17 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     setLoading(true);
     const me = await base44.auth.me();
     const paidAmount = Number(form.amount);
-
-    // Güncel öğrenci verisini DB'den al
+    // Güncel öğrenci verisini DB'den al (parentPhone dahil)
     const freshStudents = await base44.entities.Student.filter({ id: student.id });
     const freshStudent = freshStudents[0] || student;
 
-    // Bu öğrencinin tüm derslerini ve ödemelerini al
-    const [allLessons, allPayments] = await Promise.all([
-      base44.entities.Lesson.filter({ teacherEmail: me.email, studentId: student.id }),
-      base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
-    ]);
-
-    // Ödenmemiş (alındı statüsünde payment'ı olmayan) tamamlanmış dersleri bul
-    // En eski tarihe göre sırala
-    const unpaidLessons = allLessons
-      .filter(l => l.status === 'tamamlandı' && (l.lessonFee || 0) > 0)
-      .filter(l => !allPayments.some(p => p.date === l.date && p.status === 'alındı'))
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    // En eski ödenmemiş dersi hedef al
-    const targetLesson = unpaidLessons[0];
-
-    if (targetLesson) {
-      // O derse ait "bekliyor" payment varsa güncelle, yoksa yeni oluştur
-      const pendingPayment = allPayments.find(
-        p => p.date === targetLesson.date && (p.status === 'bekliyor' || p.status === 'gecikmiş')
-      );
-      if (pendingPayment) {
-        await base44.entities.Payment.update(pendingPayment.id, {
-          status: 'alındı',
-          amount: paidAmount,
-          method: form.method,
-          date: form.date,
-          description: form.description || pendingPayment.description,
-          parentPhone: freshStudent.parentPhone || '',
-          parentName: freshStudent.parentName || '',
-        });
-      } else {
-        await base44.entities.Payment.create({
-          ...form, amount: paidAmount,
-          studentId: student.id, studentName: student.name,
-          teacherEmail: me.email,
-          date: form.date,
-          description: form.description || (targetLesson.subject ? targetLesson.subject + ' - ' + targetLesson.date : targetLesson.date),
-          month: targetLesson.date?.slice(0, 7),
-          parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
-        });
-      }
-    } else {
-      // Atanacak ders bulunamadı — genel ödeme kaydı oluştur
-      await base44.entities.Payment.create({
-        ...form, amount: paidAmount,
-        studentId: student.id, studentName: student.name,
-        teacherEmail: me.email,
-        parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
-      });
-    }
+    // Her zaman yeni ayrı kayıt oluştur, mevcut borç kayıtlarına dokunma
+    await base44.entities.Payment.create({
+      ...form, amount: paidAmount,
+      studentId: student.id, studentName: student.name,
+      teacherEmail: me.email,
+      parentPhone: freshStudent.parentPhone || '', parentName: freshStudent.parentName || '',
+    });
 
     setLoading(false);
     onSaved();
