@@ -25,9 +25,9 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const handleInvite = (e) => {
     e.stopPropagation();
     if (!student.inviteCode) return;
-    const appUrl = window.location.origin;
+    const appUrl = EduTakip.com;
     const msg = encodeURIComponent(
-      `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
+      `Merhaba! ${student.name} için EduTakip Özel Ders Yönetim platformuna davet edildiniz.\n\n` +
       `Davet kodunuz: *${student.inviteCode}*\n\n` +
       `Platforma giriş yapın: ${appUrl}\n\n` +
       `Ders takibi, ödev ve gelişim raporlarını buradan takip edebilirsiniz.`
@@ -37,7 +37,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
       window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     } else {
       navigator.clipboard.writeText(
-        `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
+        `Merhaba! ${student.name} için EduTakip Özel Ders Yönetim platformuna davet edildiniz.\n\n` +
         `Davet kodunuz: ${student.inviteCode}\n\nPlatforma giriş yapın: ${appUrl}`
       );
       alert('Veli telefonu yok — davet mesajı panoya kopyalandı.');
