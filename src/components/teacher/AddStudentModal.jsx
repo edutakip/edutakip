@@ -407,7 +407,10 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
                   </Field>
                 </div>
                 <Field label="Veli Telefon">
-                  <input style={inp} placeholder="05XX XXX XXXX" value={form.parentPhone} onChange={e => u('parentPhone', e.target.value)}
+                  <input style={inp} placeholder="5XX XXX XXXX" value={form.parentPhone} onChange={e => {
+                    const val = e.target.value.replace(/^0+/, '');
+                    u('parentPhone', val);
+                  }}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
                 <Field label="Veli E-posta">
