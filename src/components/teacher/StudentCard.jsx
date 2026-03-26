@@ -1,15 +1,41 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check, Send } from 'lucide-react';
+import { Phone, Clock, DollarSign, BookOpen, Plus, MessageCircle } from 'lucide-react';
 
 export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const [payments, setPayments] = useState([]);
-  const [copied, setCopied] = useState(false);
-
-  const copyCode = (e) => {
+  const handleInvite = (e) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(student.inviteCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!student.inviteCode) return;
+
+    const appUrl = "https://edutakip.com";
+
+    const msg = encodeURIComponent(
+      `Merhaba 👋\n\n` +
+      `Ben öğretmeniniz. ${student.name}'in ders sürecini daha düzenli takip edebilmeniz için sizi EduTakip platformuna davet ediyorum.\n\n` +
+      `EduTakip, velilerin öğrencilerin derslerini, ödevlerini ve gelişimlerini takip edebilmesi için aylar süren çalışmalar sonucunda geliştirdiğim bir sistemdir.\n\n` +
+      `Platform üzerinden:\n` +
+      `📚 İşlenen dersleri\n` +
+      `📝 Verilen ödevleri\n` +
+      `📊 Gelişim durumunu\n` +
+      `💳 Ödeme bilgisini\n\n` +
+      `tek bir yerden takip edebilirsiniz.\n\n` +
+      `Önce hesap oluşturun ardından aşağıdaki davet kodunu girin.\n\n` +
+      `🔑 Davet kodunuz: ${student.inviteCode}\n\n` +
+      `Giriş: ${appUrl}`
+    );
+
+    const phone = student.parentPhone?.replace(/\D/g, '');
+
+    if (phone) {
+      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(
+        `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
+        `Davet kodunuz: ${student.inviteCode}\n\n` +
+        `Giriş: ${appUrl}`
+      );
+      alert('Veli telefonu yok — davet mesajı panoya kopyalandı.');
+    }
   };
 
   const fetchPayments = useCallback(() => {
@@ -21,28 +47,6 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
-
-  const handleInvite = (e) => {
-    e.stopPropagation();
-    if (!student.inviteCode) return;
-    const appUrl = "https://edutakip.com";
-    const msg = encodeURIComponent(
-      `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
-      `Davet kodunuz: *${student.inviteCode}*\n\n` +
-      `Platforma giriş yapın: ${appUrl}\n\n` +
-      `Ders takibi, ödev ve gelişim raporlarını buradan takip edebilirsiniz.`
-    );
-    const phone = student.parentPhone?.replace(/\D/g, '');
-    if (phone) {
-      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    } else {
-      navigator.clipboard.writeText(
-        `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
-        `Davet kodunuz: ${student.inviteCode}\n\nPlatforma giriş yapın: ${appUrl}`
-      );
-      alert('Veli telefonu yok — davet mesajı panoya kopyalandı.');
-    }
-  };
 
   const handleAddPayment = async (e) => {
     e.stopPropagation();
@@ -96,9 +100,9 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
             <div style={{ color: 'rgba(165,180,252,0.7)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.15rem' }}>DAVETİYE KODU</div>
             <span style={{ color: '#a5b4fc', fontWeight: '800', fontSize: '0.95rem', letterSpacing: '2px' }}>{student.inviteCode}</span>
           </div>
-          <button onClick={copyCode}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#22c55e' : 'rgba(165,180,252,0.7)', padding: '0.25rem', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>
-            {copied ? <Check size={15} /> : <Copy size={15} />}
+          <button onClick={handleInvite}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(165,180,252,0.7)', padding: '0.25rem', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>
+            <MessageCircle size={15} />
           </button>
         </div>
       )}
@@ -163,39 +167,20 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
             {balance < 0 ? '-' : '+'}₺{Math.abs(balance).toLocaleString('tr-TR')}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {student.inviteCode && (
-            <button
-              onClick={handleInvite}
-              style={{
-                background: 'rgba(99,102,241,0.15)',
-                border: '1px solid rgba(99,102,241,0.4)',
-                color: '#a5b4fc', borderRadius: '10px',
-                padding: '0.6rem 0.85rem', fontWeight: '700', fontSize: '0.82rem',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.3)'; e.currentTarget.style.transform = 'scale(1.04)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
-            >
-              <Send size={13} /> Davet
-            </button>
-          )}
-          <button
-            onClick={handleAddPayment}
-            style={{
-              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-              border: 'none', color: 'white', borderRadius: '10px',
-              padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
-              boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <Plus size={14} /> Ödeme
-          </button>
-        </div>
+        <button
+          onClick={handleAddPayment}
+          style={{
+            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+            border: 'none', color: 'white', borderRadius: '10px',
+            padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+            boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Plus size={14} /> Ödeme
+        </button>
       </div>
     </div>
   );
