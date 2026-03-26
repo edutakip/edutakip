@@ -185,6 +185,7 @@ export default function TeacherAssistant() {
       return;
     }
 
+
     setInput('');
     setLoading(true);
 
@@ -210,7 +211,7 @@ export default function TeacherAssistant() {
 
   return (
     <>
-      {showProModal && <ProUpgradeModal reason="limit" onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
+      {showProModal && <ProUpgradeModal reason="assistant" onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
       <style>{`
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }

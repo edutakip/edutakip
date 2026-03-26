@@ -39,6 +39,7 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
     ai: { title: 'Pro Özellik: AI Ders Raporu', desc: 'Yapay zeka destekli ders raporları Pro plana özeldir.' },
     finance: { title: 'Pro Özellik: Detaylı Finans', desc: 'Gelişmiş finans analizi ve raporları Pro plana özeldir.' },
     whatsapp: { title: 'Pro Özellik: WhatsApp', desc: 'Otomatik WhatsApp bildirimleri Pro plana özeldir.' },
+    assistant: { title: 'Pro Özellik: AI Asistan', desc: 'Ücretsiz planda 2 soru hakkınız var. Sınırsız kullanım için Pro\'ya geçin.' },
   };
   const msg = reasonMessages[reason] || reasonMessages.limit;
 
