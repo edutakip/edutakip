@@ -185,7 +185,6 @@ const AuthenticatedApp = () => {
       <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
       <Route path="/adminreis" element={<AdminPanel />} />
       <Route path="/TeacherAssistant" element={<LayoutWrapper currentPageName="TeacherAssistant"><TeacherAssistant /></LayoutWrapper>} />
-      <Route path="/advertise" element={<AdvertiseDemo />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -197,7 +196,10 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <UpdateBanner />
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/advertise" element={<AdvertiseDemo />} />
+            <Route path="*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
         <ToastNotification />
