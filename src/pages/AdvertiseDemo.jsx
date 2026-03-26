@@ -16,7 +16,7 @@ import {
   Users, CalendarCheck, CheckCircle, DollarSign, ChevronRight,
   MessageCircle, Plus, BarChart2, BookOpen, Bot, Star, TrendingUp,
   Clock, Zap, GraduationCap, Sparkles, Send, LayoutDashboard,
-  CalendarDays, Search, RefreshCw, X, ChevronDown,
+  CalendarDays, Search, RefreshCw, X, ChevronDown, Phone,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
@@ -288,8 +288,86 @@ function DashboardTab({ students, lessons, payments }) {
   );
 }
 
+// ─── Demo StudentCard (gerçek StudentCard ile birebir) ─────────
+function DemoStudentCard({ student, payments }) {
+  const monthlyFee = student.monthlyFee || 0;
+  const weeklyLessons = student.weeklyLessons || 1;
+  const lessonFee = student.feePerLesson || 0;
+  const studentPayments = payments.filter(p => p.studentId === student.id);
+  const earned = studentPayments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
+  const collected = studentPayments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  const balance = collected - earned;
+
+  return (
+    <div style={{
+      background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
+      borderRadius: 18, border: '1px solid rgba(255,255,255,0.08)',
+      padding: '1.25rem', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+      display: 'flex', flexDirection: 'column', gap: '1rem',
+      cursor: 'pointer', transition: 'border-color 0.15s, transform 0.15s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+      <div>
+        <h3 style={{ color: 'white', fontWeight: 800, fontSize: '1.05rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>{student.name}</h3>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {student.grade && <span style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.7)', fontSize: '0.68rem', fontWeight: 600, padding: '0.18rem 0.55rem', borderRadius: 6 }}>{student.grade}</span>}
+          <span style={{ background: 'transparent', border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.68rem', fontWeight: 700, padding: '0.18rem 0.55rem', borderRadius: 6, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: student.status === 'active' ? '#22c55e' : '#9ca3af', display: 'inline-block' }} />
+            {student.status === 'active' ? 'Aktif' : 'Arşiv'}
+          </span>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.35), rgba(99,102,241,0.2))', border: '1px solid rgba(99,102,241,0.4)', borderRadius: 12, padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.8px', marginBottom: '0.4rem' }}>HAFTALIK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: 800, fontSize: '0.95rem' }}>
+            <Clock size={14} color='#818cf8' />{weeklyLessons} Ders
+          </div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.35), rgba(139,92,246,0.2))', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 12, padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(196,181,253,0.8)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.8px', marginBottom: '0.4rem' }}>SAATLİK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: 800, fontSize: '0.95rem' }}>
+            <DollarSign size={14} color='#a78bfa' />₺{lessonFee.toLocaleString('tr-TR')}
+          </div>
+        </div>
+      </div>
+      {student.subject && (
+        <div>
+          <span style={{ border: '1px solid #f97316', color: '#fb923c', fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.75rem', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <BookOpen size={11} />{student.subject}
+          </span>
+        </div>
+      )}
+      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '0.85rem' }}>
+        {[
+          { label: 'Aylık Gelir (MRR)', value: `₺${monthlyFee.toLocaleString('tr-TR')}`, color: 'white' },
+          { label: 'Hak Edilen',        value: `₺${earned.toLocaleString('tr-TR')}`,     color: 'rgba(255,255,255,0.7)' },
+          { label: 'Tahsil Edilen',     value: `₺${collected.toLocaleString('tr-TR')}`,  color: '#22c55e' },
+        ].map(({ label, value, color }, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.35rem 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>{label}</span>
+            <span style={{ color, fontWeight: 700, fontSize: '0.82rem' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem', gap: '0.75rem' }}>
+        <div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.8px', marginBottom: '0.25rem' }}>▤ BAKİYE</div>
+          <div style={{ color: balance < 0 ? '#f87171' : '#22c55e', fontWeight: 800, fontSize: '1.15rem' }}>
+            {balance < 0 ? '-' : '+'}₺{Math.abs(balance).toLocaleString('tr-TR')}
+          </div>
+        </div>
+        <button style={{ background: 'linear-gradient(135deg, #16a34a, #22c55e)', border: 'none', color: 'white', borderRadius: 10, padding: '0.6rem 1.1rem', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(34,197,94,0.3)' }}>
+          <Plus size={14} /> Ödeme
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Students Tab ─────────────────────────────────────────────
-function StudentsTab({ students }) {
+function StudentsTab({ students, payments }) {
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
 
@@ -300,7 +378,7 @@ function StudentsTab({ students }) {
   });
 
   return (
-    <div>
+    <div style={{ padding: '2rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ color: '#111827', fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.3rem' }}>Öğrencilerim</h1>
@@ -319,43 +397,25 @@ function StudentsTab({ students }) {
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {[{ v: 'active', l: 'Aktif' }, { v: 'archived', l: 'Arşiv' }, { v: 'all', l: 'Tümü' }].map(({ v, l }) => (
             <button key={v} onClick={() => setFilter(v)}
-              style={{ padding: '0.5rem 1rem', borderRadius: 10, border: '1px solid', borderColor: filter === v ? '#6366f1' : '#e5e7eb', background: filter === v ? '#eef2ff' : 'transparent', color: filter === v ? '#4f46e5' : '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}>
+              style={{ padding: '0.5rem 1rem', borderRadius: 10, border: '1px solid', borderColor: filter === v ? '#4f46e5' : '#e5e7eb', background: filter === v ? '#eef2ff' : 'transparent', color: filter === v ? '#4f46e5' : '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}>
               {l}
             </button>
           ))}
         </div>
+        <button style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', color: '#6b7280', borderRadius: 10, padding: '0.5rem', cursor: 'pointer' }}>
+          <RefreshCw size={16} />
+        </button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-        {filtered.map(s => (
-          <div key={s.id} style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.18s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = '#c7d2fe'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#f1f5f9'; }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-              <Avatar name={s.name} size={48} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>{s.name}</div>
-                <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: 2 }}>{s.grade}</div>
-              </div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: 20, background: s.status === 'active' ? '#d1fae5' : '#f3f4f6', color: s.status === 'active' ? '#065f46' : '#6b7280' }}>
-                {s.status === 'active' ? 'Aktif' : 'Arşiv'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {[{ label: 'Ders', value: s.subject }, { label: 'Ücret', value: `₺${s.feePerLesson}/ders` }, { label: 'Veli', value: s.parentName }, { label: 'Aylık', value: `₺${(s.monthlyFee||0).toLocaleString('tr-TR')}` }].map(({ label, value }) => (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                  <span style={{ color: '#9ca3af' }}>{label}</span>
-                  <span style={{ fontWeight: 600, color: '#374151' }}>{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-        {/* Add new card */}
-        <div style={{ background: 'linear-gradient(145deg, #1a1a2e, #16213e)', border: '2px dashed rgba(99,102,241,0.4)', borderRadius: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.75rem', minHeight: 200 }}>
+        {filtered.map(s => <DemoStudentCard key={s.id} student={s} payments={payments} />)}
+        <div style={{ background: 'linear-gradient(145deg, #1a1a2e, #16213e)', border: '2px dashed rgba(99,102,241,0.4)', borderRadius: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.75rem', minHeight: 200 }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.8)'; e.currentTarget.style.background = 'linear-gradient(145deg, #1e1b4b, #16213e)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.background = 'linear-gradient(145deg, #1a1a2e, #16213e)'; }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Plus size={24} color='#818cf8' />
           </div>
           <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', fontWeight: 600 }}>Yeni Öğrenci Ekle</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>Tıkla ve ekle</span>
         </div>
       </div>
     </div>
@@ -449,10 +509,20 @@ function FinanceTab({ students, lessons, payments }) {
   const card = { background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 16, padding: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' };
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h1 style={{ color: '#111827', fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.2rem' }}>Finans Yönetimi</h1>
-        <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Gelir, ödeme ve öğrenci bazlı istatistikler</p>
+    <div style={{ padding: '2rem', background: 'var(--bg-primary)', height: '100vh', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
+        <div>
+          <h1 style={{ color: '#111827', fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.2rem' }}>Finans Yönetimi</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Gelir, ödeme ve öğrenci bazlı istatistikler</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button style={{ background: 'white', border: '1.5px solid #e5e7eb', color: '#6b7280', borderRadius: 10, padding: '0.55rem 0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
+            <RefreshCw size={14} />
+          </button>
+          <button style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: 12, padding: '0.65rem 1.25rem', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+            <Plus size={16} /> Ödeme Ekle <ChevronDown size={14} />
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
@@ -879,14 +949,16 @@ export default function AdvertiseDemo() {
       {/* Layout */}
       <div style={{ display: 'flex', minHeight: 'calc(100vh - 40px)' }}>
         <Sidebar active={activeTab} onNav={setActiveTab} />
-        <main style={{ flex: 1, overflowY: 'auto', padding: '2rem', maxWidth: 1200 }}>
+        <main style={{ flex: 1, overflowY: 'auto', maxWidth: 1200 }}>
+          <div style={{ padding: activeTab === 'students' || activeTab === 'finance' ? 0 : '2rem' }}>
           {activeTab === 'dashboard' && <DashboardTab students={students} lessons={lessons} payments={payments} />}
-          {activeTab === 'students'  && <StudentsTab students={students} />}
+          {activeTab === 'students'  && <StudentsTab students={students} payments={payments} />}
           {activeTab === 'lessons'   && <LessonsTab lessons={lessons} />}
           {activeTab === 'calendar'  && <CalendarTab lessons={lessons} />}
           {activeTab === 'finance'   && <FinanceTab students={activeStudents} lessons={lessons} payments={payments} />}
           {activeTab === 'reports'   && <ReportsTab students={activeStudents} reports={reports} />}
           {activeTab === 'assistant' && <AssistantTab />}
+          </div>
         </main>
       </div>
     </div>
