@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import usePullToRefresh from '@/hooks/usePullToRefresh';
-import PullToRefresh from '@/components/PullToRefresh';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight } from 'lucide-react';
 import { showToast } from '@/lib/toast';
@@ -82,11 +80,10 @@ export default function TeacherHomework() {
     }
   }, [showForm]);
 
-  const reload = useCallback(async () => {
-    if (!me) return;
+  const reload = async () => {
     const h = await base44.entities.Homework.filter({ teacherEmail: me.email }, '-created_date');
     setHomeworks(h);
-  }, [me]);
+  };
 
   const handleSave = async () => {
     if (!form.studentId || !form.title) return;
@@ -129,8 +126,6 @@ export default function TeacherHomework() {
 
   const filtered = homeworks.filter(h => filter === 'all' || h.status === filter);
 
-  const { containerRef, indicatorHeight, refreshing } = usePullToRefresh(reload);
-
   const inp = {
     width: '100%', background: '#f8fafc', border: '1.5px solid #e5e7eb',
     borderRadius: '10px', padding: '0.65rem 0.875rem', fontSize: '0.875rem',
@@ -138,8 +133,7 @@ export default function TeacherHomework() {
   };
 
   return (
-    <div ref={containerRef} style={{ padding: 'clamp(1rem, 4vw, 2rem)', height: '100vh', overflowY: 'auto', background: '#f8fafc' }}>
-      <PullToRefresh indicatorHeight={indicatorHeight} refreshing={refreshing} />
+    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', height: '100vh', overflowY: 'auto', background: '#f8fafc' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>

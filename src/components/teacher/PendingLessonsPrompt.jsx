@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle, XCircle, ClipboardList, Clock } from 'lucide-react';
 import LessonReportModal from './LessonReportModal';
@@ -90,10 +89,10 @@ export default function PendingLessonsPrompt({ onDone }) {
     return `${days[date.getDay()]} ${d.split('-').reverse().join('.')} ${t ? t.slice(0,5) : ''}`;
   };
 
-  return createPortal(
+  return (
     <>
       <div style={{
-        position: 'fixed', inset: 0, zIndex: 9000,
+        position: 'fixed', inset: 0, zIndex: 900,
         background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
       }}>
@@ -150,7 +149,6 @@ export default function PendingLessonsPrompt({ onDone }) {
           onSaved={handleReportClose}
         />
       )}
-    </>,
-    document.body
+    </>
   );
 }

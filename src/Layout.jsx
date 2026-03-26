@@ -156,7 +156,8 @@ const PARENT_MOBILE_NAV = [
 
 const TEACHER_MOBILE_NAV = [
   { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Yönetim', icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
+  { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
+  { label: 'Ders Yönetimi', icon: BookOpen, submenu: ['TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
 ];
@@ -464,7 +465,6 @@ export default function Layout({ children, currentPageName }) {
               minWidth: '160px',
             }}>
               {[
-                { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
                 { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
                 { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
                 { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
