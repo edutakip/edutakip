@@ -16,12 +16,19 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
   const handleStartTrial = async () => {
     setLoading(true);
     const me = await base44.auth.me();
+    // Daha önce deneme sürümü kullandıysa engelle
+    if (me.trialUsed) {
+      setLoading(false);
+      alert('Deneme sürenizi daha önce kullandınız. Lütfen Pro plana geçmek için bizimle iletişime geçin.');
+      return;
+    }
     const trialEndDate = format(addDays(new Date(), 30), 'yyyy-MM-dd');
     await base44.auth.updateMe({
       plan: 'trialing',
       studentLimit: studentCount,
       trialStudentCount: studentCount,
       trialEndDate,
+      trialUsed: true,
       aiReportsEnabled: true,
       detailedFinanceEnabled: true,
       whatsappEnabled: true,

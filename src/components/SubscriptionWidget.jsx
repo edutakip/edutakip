@@ -6,6 +6,8 @@ import ProUpgradeModal from './ProUpgradeModal';
 const FREE_PERKS = [
   { text: '3 öğrenci limiti', locked: false },
   { text: 'AI ders raporları', locked: true },
+  { text: 'EduTakip Asistan (AI)', locked: true },
+  { text: 'Otomatik ders ekleme', locked: true },
   { text: 'WhatsApp bildirimleri', locked: true },
   { text: 'Detaylı finans analizi', locked: true },
 ];

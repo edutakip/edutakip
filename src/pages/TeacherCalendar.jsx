@@ -35,8 +35,19 @@ function useWindowWidth() {
 function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onStatusChange }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [payment, setPayment] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(true);
   const sc = STATUS_CFG[lesson.status] || STATUS_CFG['planlandı'];
   const student = students.find(s => s.id === lesson.studentId);
+
+  useEffect(() => {
+    setPaymentLoading(true);
+    base44.entities.Payment.filter({ studentId: lesson.studentId }).then(payments => {
+      const paid = payments.find(p => p.status === 'alındı' && p.lessonId === lesson.id);
+      setPayment(paid || null);
+      setPaymentLoading(false);
+    }).catch(() => setPaymentLoading(false));
+  }, [lesson.id, lesson.studentId]);
 
   const handleDelete = async () => {
     if (!confirm('Bu dersi silmek istediğinizden emin misiniz?')) return;
@@ -161,17 +172,28 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
         {/* Ödeme */}
         <div>
           <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>ÖDEME</div>
-          <div style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-            <Check size={14} color='#10b981' />
-            <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>Ödendi</span>
-          </div>
-          {fee && (
-            <div style={{ marginTop: '0.4rem', padding: '0.5rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>ÖDEME DETAYLARI</div>
-                <div style={{ color: '#374151', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem' }}>{dateLabel}</div>
+          {paymentLoading ? (
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>Yükleniyor...</span>
+            </div>
+          ) : payment ? (
+            <>
+              <div style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                <Check size={14} color='#10b981' />
+                <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>Ödendi</span>
               </div>
-              <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>{fee} ₺</span>
+              <div style={{ marginTop: '0.4rem', padding: '0.5rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>ÖDEME TARİHİ</div>
+                  <div style={{ color: '#374151', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem' }}>{payment.date}</div>
+                </div>
+                <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>{payment.amount} ₺</span>
+              </div>
+            </>
+          ) : (
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+              <X size={14} color='#ef4444' />
+              <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>Ödenmedi</span>
             </div>
           )}
         </div>
