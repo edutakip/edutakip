@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Android/Mobile native feel ── */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+button, a, [role="button"], select, input, textarea, label {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Pull-to-refresh indicator */
+.ptr-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: height 0.2s ease;
+  color: #6366f1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  gap: 0.5rem;
+}
+.ptr-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(99,102,241,0.25);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: ptr-spin 0.7s linear infinite;
+}
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
