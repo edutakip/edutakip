@@ -19,7 +19,6 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     const me = await base44.auth.me();
     const paidAmount = Number(form.amount);
 
-    // Güncel öğrenci verisini DB'den al (parentPhone dahil)
     const freshStudents = await base44.entities.Student.filter({ id: student.id });
     const freshStudent = freshStudents[0] || student;
 
@@ -28,22 +27,28 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       base44.entities.Payment.filter({ teacherEmail: me.email, studentId: student.id }),
     ]);
 
-    // Tamamlanmış dersleri tarihe göre sırala
-    const completedLessons = allLessons
-      .filter(l => l.status === 'tamamlandı')
-      .sort((a, b) => new Date(a.date + 'T' + (a.startTime || '00:00')) - new Date(b.date + 'T' + (b.startTime || '00:00')));
-
-    // lessonId'si olan ödemelerin ID setini oluştur
+    // Sadece lessonId ile eşleştir — tarih bazlı eşleştirme kaldırıldı
     const paidLessonIds = new Set(
-      allPayments.filter(p => p.status === 'alındı' && p.lessonId).map(p => p.lessonId)
+      allPayments
+        .filter(p => p.status === 'alındı' && p.lessonId)
+        .map(p => p.lessonId)
     );
 
-    // lessonId'si olmayan ödeme sayısı (eski kayıtlar) — bunlar en eski derslerle eşleştirilmiş sayılır
-    const paymentsWithoutLessonId = allPayments.filter(p => p.status === 'alındı' && !p.lessonId).length;
+    // lessonId'si olmayan eski ödemeler için: tarih + tutar kombinasyonu ile eşleştir
+    const paidDateAmounts = new Set(
+      allPayments
+        .filter(p => p.status === 'alındı' && !p.lessonId)
+        .map(p => `${p.date}_${p.amount}`)
+    );
 
-    // lessonId'si olan ödemeleri çıkar, geri kalanları "eski ödemeler" sayısı kadar baş tarafından atla
-    const lessonsWithoutDirectPayment = completedLessons.filter(l => !paidLessonIds.has(l.id));
-    const oldestUnpaid = lessonsWithoutDirectPayment[paymentsWithoutLessonId] || null;
+    // En eski ödenmemiş tamamlanmış dersi bul
+    const oldestUnpaid = allLessons
+      .filter(l =>
+        l.status === 'tamamlandı' &&
+        !paidLessonIds.has(l.id) &&
+        !paidDateAmounts.has(`${l.date}_${l.lessonFee}`)
+      )
+      .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
     const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
 
@@ -52,7 +57,6 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       amount: paidAmount,
       date: paymentDate,
       month: paymentDate.slice(0, 7),
-      // Ders ID'sini kaydet — aynı tarihteki farklı dersler karışmasın
       lessonId: oldestUnpaid ? oldestUnpaid.id : null,
       studentId: student.id,
       studentName: student.name,
@@ -136,7 +140,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
             <input style={inputStyle} placeholder='Aciklama...' value={form.description} onChange={e => u('description', e.target.value)} />
           </div>
           <button onClick={save} disabled={loading || !form.amount}
-            style={{ padding: '0.85rem', borderRadius: '12px', border: 'none', background: loading || !form.amount ? '#86efac' : 'linear-gradient(135deg, #16a34a, #22c55e)', color: 'white', fontWeight: '800', fontSize: '0.95rem', cursor: loading || !form.amount ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(34,197,94,0.4)', transition: 'all 0.15s', letterSpacing: '0.3px' }}
+            style={{ padding: '0.85rem', borderRadius: '12px', border: 'none', background: loading || !form.amount ? '#86efac' : 'linear-gradient(135deg, #16a34a, #22c55e)', color: 'white', fontWeight: '800', fontSize: '0.95rem', cursor: loading || !form.amount ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(34,197,94,0.4)', transition: 'all 0.15s' }}
             onMouseEnter={e => { if (!loading && form.amount) e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
             {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : 'Odeme Kaydet'}
