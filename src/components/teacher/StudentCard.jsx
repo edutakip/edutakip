@@ -1,717 +1,201 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot } from 'lucide-react';
-import LessonModal from './components/teacher/LessonModal';
-import PaymentModal from './components/teacher/PaymentModal';
-import { showToast } from '@/lib/toast';
-import SubscriptionWidget from './components/SubscriptionWidget';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check, Send } from 'lucide-react';
 
-// ── Page transition wrapper ───────────────────────────────────
-function PageTransition({ children, pageKey }) {
-  const [visible, setVisible] = useState(false);
-  const [displayChildren, setDisplayChildren] = useState(children);
-  const prevKey = useRef(pageKey);
+export default function StudentCard({ student, onAddPayment, onCardClick }) {
+  const [payments, setPayments] = useState([]);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (prevKey.current !== pageKey) {
-      setVisible(false);
-      const t1 = setTimeout(() => {
-        setDisplayChildren(children);
-        prevKey.current = pageKey;
-        const t2 = setTimeout(() => setVisible(true), 30);
-        return () => clearTimeout(t2);
-      }, 150);
-      return () => clearTimeout(t1);
-    } else {
-      const t = setTimeout(() => setVisible(true), 50);
-      return () => clearTimeout(t);
-    }
-  }, [pageKey]);
-
-  useEffect(() => {
-    if (prevKey.current === pageKey) {
-      setDisplayChildren(children);
-    }
-  }, [children]);
-
-  return (
-    <div style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(12px)',
-      transition: 'opacity 0.22s ease, transform 0.22s ease',
-    }}>
-      {displayChildren}
-    </div>
-  );
-}
-
-// ── Top loading bar ───────────────────────────────────────────
-function LoadingBar({ active }) {
-  const [width, setWidth] = useState(0);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (active) {
-      setWidth(0);
-      setOpacity(1);
-      const t1 = setTimeout(() => setWidth(70), 30);
-      const t2 = setTimeout(() => setWidth(90), 800);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
-    } else {
-      setWidth(100);
-      const t = setTimeout(() => setOpacity(0), 200);
-      return () => clearTimeout(t);
-    }
-  }, [active]);
-
-  useEffect(() => {
-    if (!active) {
-      const t = setTimeout(() => { setWidth(0); setOpacity(1); }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [active]);
-
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, zIndex: 9999, pointerEvents: 'none', opacity, transition: 'opacity 0.2s ease' }}>
-      <div style={{
-        height: '100%', width: `${width}%`,
-        background: 'linear-gradient(90deg, #6366f1, #a78bfa)',
-        borderRadius: '0 3px 3px 0',
-        boxShadow: '0 0 10px rgba(99,102,241,0.6)',
-        transition: width === 0 ? 'none' : width === 100 ? 'width 0.2s ease' : 'width 0.8s ease',
-      }} />
-    </div>
-  );
-}
-
-// ── Window size hook ──────────────────────────────────────────
-function useWindowWidth() {
-  const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  useEffect(() => {
-    const handler = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-  return width;
-}
-
-// ── Prefetch config ───────────────────────────────────────────
-const PAGE_PREFETCH = {
-  TeacherFinance:   (base44, me) => Promise.all([
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherCalendar:  (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-  ]),
-  TeacherStudents:  (base44, me) => Promise.all([
-    base44.entities.Student.filter({ teacherEmail: me.email }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherDashboard: (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-  TeacherLessons:   (base44, me) => Promise.all([
-    base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    base44.entities.Student.filter({ teacherEmail: me.email }),
-    base44.entities.Payment.filter({ teacherEmail: me.email }),
-  ]),
-};
-
-const LESSON_TRACKING_PAGES = ['TeacherLessons', 'TeacherHomework', 'TeacherReports'];
-
-const TEACHER_NAV = [
-  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-  {
-    label: 'Ders Yönetimi', icon: BookOpen,
-    submenu: [
-      { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-      { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
-      { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
-    ],
-  },
-  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
-  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
-  { label: 'EduTakip Asistan', icon: Bot, page: 'TeacherAssistant' },
-];
-
-const PARENT_NAV = [
-  { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
-  { label: 'Ödevler', icon: GraduationCap, page: 'ParentHomework' },
-  { label: 'Gelişim Raporu', icon: BookOpen, page: 'ParentPerformance' },
-  { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
-];
-const PARENT_MOBILE_NAV = [
-  { label: 'Ana Sayfa', shortLabel: 'Ana', icon: Home, page: 'ParentDashboard' },
-  { label: 'Ödevler', shortLabel: 'Ödev', icon: GraduationCap, page: 'ParentHomework' },
-  { label: 'Gelişim Raporu', shortLabel: 'Gelişim', icon: BookOpen, page: 'ParentPerformance' },
-  { label: 'Mesajlar', shortLabel: 'Mesaj', icon: MessageCircle, page: 'ParentMessages' },
-];
-
-const TEACHER_MOBILE_NAV = [
-  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Ders Yönetimi', icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
-  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
-  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Mesajlar', icon: MessageCircle, page: 'TeacherMessages' },
-];
-
-const FAB_ACTIONS = [
-  { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
-  { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
-  { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
-];
-
-export default function Layout({ children, currentPageName }) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [role] = useState(() => localStorage.getItem('tilki_role') || '');
-  const [user, setUser] = useState(null);
-  const [navigating, setNavigating] = useState(false);
-  const [fabOpen, setFabOpen] = useState(false);
-  const [showLessonModal, setShowLessonModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [fabStudents, setFabStudents] = useState([]);
-  const [selectedPayStudent, setSelectedPayStudent] = useState(null);
-  const [derslerOpen, setDerslerOpen] = useState(false);
-
-  const navigate = useNavigate();
-  const prevPage = useRef(currentPageName);
-  const windowWidth = useWindowWidth();
-  const isMobile = windowWidth < 1024;
-  const isNarrowMobile = windowWidth < 430;
-
-  useEffect(() => {
-    if (role === 'teacher') {
-      import('@/api/base44Client').then(({ base44 }) => {
-        base44.auth.me().then(me => {
-          base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(setFabStudents).catch(() => {});
-        }).catch(() => {});
-      });
-    }
-  }, [role]);
-
-  useEffect(() => {
-    if (prevPage.current !== currentPageName) {
-      setNavigating(true);
-      const t = setTimeout(() => { setNavigating(false); prevPage.current = currentPageName; }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [currentPageName]);
-
-  const handleNav = (e, page) => {
-    if (page === currentPageName) return;
-    e.preventDefault();
-    setNavigating(true);
-    const prefetch = PAGE_PREFETCH[page];
-    if (prefetch) {
-      import('@/api/base44Client').then(({ base44 }) => {
-        base44.auth.me().then(me => {
-          const timeout = new Promise(res => setTimeout(res, 1200));
-          Promise.race([prefetch(base44, me), timeout]).finally(() => navigate(createPageUrl(page)));
-        }).catch(() => navigate(createPageUrl(page)));
-      });
-    } else {
-      setTimeout(() => navigate(createPageUrl(page)), 300);
-    }
+  const copyCode = (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(student.inviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  React.useEffect(() => {
+  const fetchPayments = useCallback(() => {
     import('@/api/base44Client').then(({ base44 }) => {
-      base44.auth.me().then(setUser).catch(() => {});
+      base44.entities.Payment.filter({ studentId: student.id }).then(setPayments);
     });
-  }, []);
+  }, [student.id]);
 
-  if (currentPageName === 'Landing') {
-    return <div>{children}</div>;
-  }
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
 
-  const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
-  const sideW = collapsed ? '64px' : '224px';
-  const isParent = role === 'parent';
-
-  const handleLogout = () => {
-    localStorage.removeItem('tilki_role');
-    window.location.href = createPageUrl('Landing');
+  const handleInvite = (e) => {
+    e.stopPropagation();
+    if (!student.inviteCode) return;
+    const appUrl = window.location.origin;
+    const msg = encodeURIComponent(
+      `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
+      `Davet kodunuz: *${student.inviteCode}*\n\n` +
+      `Platforma giriş yapın: ${appUrl}\n\n` +
+      `Ders takibi, ödev ve gelişim raporlarını buradan takip edebilirsiniz.`
+    );
+    const phone = student.parentPhone?.replace(/\D/g, '');
+    if (phone) {
+      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(
+        `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
+        `Davet kodunuz: ${student.inviteCode}\n\nPlatforma giriş yapın: ${appUrl}`
+      );
+      alert('Veli telefonu yok — davet mesajı panoya kopyalandı.');
+    }
   };
 
-  // SidebarContent artık inline JSX olarak kullanılıyor (her render'da yeni component tanımlamayı önler)
-  const sidebarContent = (
-    <>
-      <div style={{ padding: '1.25rem 1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: '38px', height: '38px', flexShrink: 0, borderRadius: '12px' }} />
-        {!collapsed && (
-          <div>
-            <h1 style={{ color: 'white', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.3px', lineHeight: 1 }}>EduTakip</h1>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
-              {role === 'teacher' ? 'Öğretmen Paneli' : 'Veli Paneli'}
-            </p>
-          </div>
-        )}
-      </div>
+  const handleAddPayment = async (e) => {
+    e.stopPropagation();
+    await onAddPayment();
+    fetchPayments();
+  };
 
-      {user && !collapsed && (
-        <div style={{ margin: '0 0.75rem 0.75rem', padding: '0.65rem 0.75rem', background: 'rgba(255,255,255,0.07)', borderRadius: '10px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: '700', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.full_name}</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', margin: '0.2rem 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
-          <button onClick={handleLogout}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}
-            onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
-            <LogOut size={12} /> Çıkış Yap
-          </button>
-        </div>
-      )}
+  const monthlyFee = student.monthlyFee || 0;
+  const weeklyLessons = student.weeklyLessons || 1;
+  const lessonFee = student.feePerLesson || 0;
 
-      <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.75rem 1rem' }} />
+  const earned = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
+  const collected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  const balance = collected - earned; // negative = owes
 
-      <nav style={{ flex: 1, padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', overflowY: 'auto' }}>
-        {nav.map((item, i) => {
-          const Icon = item.icon;
-          if (item.submenu) {
-            const isGroupActive = item.submenu.some(s => s.page === currentPageName);
-            const [subOpen, setSubOpen] = React.useState(isGroupActive);
-            return (
-              <div key={i}>
-                <button onClick={() => setSubOpen(o => !o)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    width: '100%', padding: '0.6rem 0.75rem', borderRadius: '10px',
-                    fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
-                    background: isGroupActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                    color: isGroupActive ? '#c7d2fe' : 'rgba(255,255,255,0.55)',
-                    fontWeight: isGroupActive ? '600' : '400',
-                    border: 'none', borderLeft: isGroupActive ? '3px solid #6366f1' : '3px solid transparent',
-                    overflow: 'hidden', whiteSpace: 'nowrap',
-                  }}
-                  onMouseEnter={e => { if (!isGroupActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}
-                  onMouseLeave={e => { if (!isGroupActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}>
-                  <Icon size={17} style={{ flexShrink: 0 }} />
-                  {!collapsed && (
-                    <>
-                      <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
-                      <ChevronRight size={13} style={{ transform: subOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', opacity: 0.5 }} />
-                    </>
-                  )}
-                </button>
-                {subOpen && !collapsed && (
-                  <div style={{ marginLeft: '1rem', marginTop: '0.1rem', display: 'flex', flexDirection: 'column', gap: '0.05rem', borderLeft: '2px solid rgba(255,255,255,0.1)', paddingLeft: '0.5rem' }}>
-                    {item.submenu.map((sub, j) => {
-                      const SubIcon = sub.icon;
-                      const isActive = sub.page === currentPageName;
-                      return (
-                        <Link key={j} to={createPageUrl(sub.page)}
-                          onClick={(e) => handleNav(e, sub.page)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '0.6rem',
-                            padding: '0.5rem 0.65rem', borderRadius: '8px',
-                            fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
-                            background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
-                            color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
-                            fontWeight: isActive ? '600' : '400',
-                            textDecoration: 'none', whiteSpace: 'nowrap',
-                          }}
-                          onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
-                          onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; } }}>
-                          <SubIcon size={14} style={{ flexShrink: 0 }} />
-                          <span>{sub.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          }
-          const isActive = item.page === currentPageName;
-          return (
-            <Link key={i} to={createPageUrl(item.page)}
-              onClick={(e) => handleNav(e, item.page)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                padding: '0.6rem 0.75rem', borderRadius: '10px',
-                fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
-                background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
-                color: isActive ? 'white' : 'rgba(255,255,255,0.55)',
-                fontWeight: isActive ? '600' : '400',
-                textDecoration: 'none', overflow: 'hidden', whiteSpace: 'nowrap',
-                borderLeft: isActive ? '3px solid #6366f1' : '3px solid transparent',
-              }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}>
-              <Icon size={17} style={{ flexShrink: 0 }} />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {role === 'teacher' && <SubscriptionWidget user={user} collapsed={collapsed} />}
-
-      {collapsed && (
-        <div style={{ padding: '0 0.5rem 1rem', marginTop: 'auto', flexShrink: 0 }}>
-          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0 0.25rem 0.75rem' }} />
-          <button onClick={handleLogout}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.6rem', borderRadius: '10px', border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', width: '100%', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}>
-            <LogOut size={17} />
-          </button>
-        </div>
-      )}
-    </>
-  );
-
-  // ── Veli: her zaman alt nav ───────────────────────────────
-  if (isParent) {
-    const parentMobileNav = isNarrowMobile ? PARENT_MOBILE_NAV : PARENT_NAV;
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-        <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
-        </main>
-        <nav style={{
-          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
-          background: 'rgba(22,18,60,0.78)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.13)',
-          borderRadius: '28px',
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '64px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-        }}>
-          {parentMobileNav.map((item, i) => {
-            const Icon = item.icon;
-            const isActive = item.page === currentPageName;
-            return (
-              <Link key={i} to={createPageUrl(item.page)}
-                onClick={(e) => handleNav(e, item.page)}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer',
-                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
-                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.45)',
-                  transition: 'color 0.2s ease',
-                }}>
-                {isActive && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: isNarrowMobile ? '46px' : '58px', height: isNarrowMobile ? '40px' : '48px',
-                    borderRadius: '18px',
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                    zIndex: 0,
-                    transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                  }} />
-                )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
-                  <Icon size={isNarrowMobile ? 17 : 19} />
-                  <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
-                    {isNarrowMobile ? item.shortLabel : item.label}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-          <button onClick={handleLogout}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer', transition: 'color 0.2s ease',
-              color: 'rgba(255,150,150,0.6)', background: 'none', border: 'none', flex: 1, height: '100%',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.6)'}>
-            <LogOut size={isNarrowMobile ? 17 : 19} />
-            <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>Çıkış</span>
-          </button>
-        </nav>
-      </div>
-    );
-  }
-
-  // ── Öğretmen: tablet/mobil → alt nav, masaüstü → sidebar ──
-  if (isMobile) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-        <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
-        </main>
-
-        {/* Alt nav — öğretmen mobil */}
-        {/* Dersler alt menü popup */}
-        {derslerOpen && (
-          <>
-            <div onClick={() => setDerslerOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
-            <div style={{
-              position: 'fixed', bottom: '92px', left: '50%', transform: 'translateX(-50%)',
-              zIndex: 100, display: 'flex', flexDirection: 'column', gap: '0.5rem',
-              background: 'rgba(22,18,60,0.92)',
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '20px', padding: '0.6rem',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
-              minWidth: '160px',
-            }}>
-              {[
-                { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-                { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-                { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
-                { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
-              ].map((item, i) => {
-                const Icon = item.icon;
-                const isActive = item.page === currentPageName;
-                return (
-                  <Link key={i} to={createPageUrl(item.page)}
-                    onClick={(e) => { handleNav(e, item.page); setDerslerOpen(false); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.65rem',
-                      padding: '0.55rem 0.85rem', borderRadius: '12px',
-                      color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.75)',
-                      textDecoration: 'none', fontSize: '0.85rem', fontWeight: isActive ? '700' : '500',
-                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                      transition: 'all 0.15s',
-                    }}>
-                    <Icon size={16} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        <nav style={{
-          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
-          background: 'rgba(22,18,60,0.78)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.13)',
-          borderRadius: '28px',
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '60px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-        }}>
-          {TEACHER_MOBILE_NAV.map((item, i) => {
-            const Icon = item.icon;
-            const isActive = item.submenu
-              ? item.submenu.some(s => s === currentPageName)
-              : item.page === currentPageName;
-            const handleClick = (e) => {
-              if (item.submenu) {
-                e.preventDefault();
-                setDerslerOpen(o => !o);
-              } else {
-                handleNav(e, item.page);
-              }
-            };
-            return (
-              <Link key={i}
-                to={item.submenu ? '#' : createPageUrl(item.page)}
-                onClick={handleClick}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
-                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.4)',
-                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
-                  transition: 'color 0.2s ease',
-                }}>
-                {isActive && (
-                  <span style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '52px', height: '44px', borderRadius: '16px',
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                    zIndex: 0, transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                  }} />
-                )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
-                  <Icon size={18} />
-                  <span style={{ fontSize: '0.55rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
-                    {item.label}{item.submenu ? ' ›' : ''}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-          <button onClick={handleLogout}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
-              color: 'rgba(255,150,150,0.55)', background: 'none', border: 'none', flex: 1, height: '100%',
-              transition: 'color 0.2s ease',
-            }}>
-            <LogOut size={18} />
-            <span style={{ fontSize: '0.55rem', fontWeight: '500' }}>Çıkış</span>
-          </button>
-        </nav>
-
-        {/* FAB */}
-        {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
-        <div className="app-fab" style={{ position: 'fixed', bottom: '5rem', right: '1rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-          {fabOpen && FAB_ACTIONS.map((a, i) => {
-            const Icon = a.Icon;
-            const handleClick = () => {
-              if (a.action === 'lessonModal') setShowLessonModal(true);
-              else if (a.action === 'paymentModal') setShowPaymentModal(true);
-              else if (a.action === 'homeworkModal') navigate(createPageUrl('TeacherHomework') + '?openForm=true');
-              setFabOpen(false);
-            };
-            return (
-              <div key={i} onClick={handleClick} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                  <Icon size={18} color={a.color} />
-                </div>
-              </div>
-            );
-          })}
-          <button onClick={() => setFabOpen(o => !o)}
-            style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-            <Plus size={22} color="white" />
-          </button>
-        </div>
-
-        {showLessonModal && (
-          <LessonModal
-            students={fabStudents}
-            defaultDate={new Date().toISOString().slice(0, 10)}
-            onClose={() => setShowLessonModal(false)}
-            onSaved={() => setShowLessonModal(false)}
-          />
-        )}
-        {showPaymentModal && !selectedPayStudent && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}
-            onClick={() => setShowPaymentModal(false)}>
-            <div style={{ background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 380, boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
-              onClick={e => e.stopPropagation()}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '1.25rem' }}>Ödeme Al</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 300, overflowY: 'auto' }}>
-                {fabStudents.map(s => (
-                  <button key={s.id} onClick={() => setSelectedPayStudent(s)}
-                    style={{ padding: '0.75rem 1rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#111827', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left' }}>{s.name}</button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        {showPaymentModal && selectedPayStudent && (
-          <PaymentModal
-            student={selectedPayStudent}
-            onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-            onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
-          />
-        )}
-      </div>
-    );
-  }
-
-  // ── Öğretmen: masaüstü → sidebar (değişmedi) ─────────────
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <LoadingBar active={navigating} />
-
-      <aside style={{
-        width: sideW, flexShrink: 0,
-        background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1b6e 100%)',
-        display: 'flex', flexDirection: 'column',
-        position: 'fixed', top: 0, left: 0, height: '100vh',
-        zIndex: 50, overflowX: 'hidden', overflowY: 'hidden', transition: 'width 0.2s ease',
-        boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
-      }}>
-        {sidebarContent}
-        <button onClick={() => setCollapsed(c => !c)}
-          style={{
-            position: 'absolute', top: '50%', right: '-11px', transform: 'translateY(-50%)',
-            width: '22px', height: '22px', borderRadius: '50%',
-            background: 'white', border: '1.5px solid #e5e7eb',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-            transition: 'all 0.15s', zIndex: 10,
-          }}>
-          {collapsed ? <ChevronRight size={11} color='#4f46e5' /> : <ChevronLeft size={11} color='#4f46e5' />}
-        </button>
-      </aside>
-
-      <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
-        <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+    <div onClick={onCardClick} style={{
+      background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
+      borderRadius: '18px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      padding: '1.25rem',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem',
+      cursor: 'pointer',
+      transition: 'border-color 0.15s, transform 0.15s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+      {/* Name + badges */}
+      <div>
+        <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.05rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>{student.name}</h3>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {student.grade && (
+            <span style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.7)', fontSize: '0.68rem', fontWeight: '600', padding: '0.18rem 0.55rem', borderRadius: '6px' }}>
+              {student.grade}
+            </span>
+          )}
+          <span style={{ background: 'transparent', border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.68rem', fontWeight: '700', padding: '0.18rem 0.55rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: student.status === 'active' ? '#22c55e' : '#9ca3af', display: 'inline-block' }} />
+            {student.status === 'active' ? 'Aktif' : 'Arşiv'}
+          </span>
         </div>
-      </main>
+      </div>
 
-      {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
-      {showLessonModal && (
-        <LessonModal
-          students={fabStudents}
-          defaultDate={new Date().toISOString().slice(0, 10)}
-          onClose={() => setShowLessonModal(false)}
-          onSaved={() => setShowLessonModal(false)}
-        />
+      {/* Invite Code */}
+      {student.inviteCode && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(99,102,241,0.12)', border: '1px dashed rgba(99,102,241,0.4)', borderRadius: '10px', padding: '0.5rem 0.75rem' }}>
+          <div>
+            <div style={{ color: 'rgba(165,180,252,0.7)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.15rem' }}>DAVETİYE KODU</div>
+            <span style={{ color: '#a5b4fc', fontWeight: '800', fontSize: '0.95rem', letterSpacing: '2px' }}>{student.inviteCode}</span>
+          </div>
+          <button onClick={copyCode}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#22c55e' : 'rgba(165,180,252,0.7)', padding: '0.25rem', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+          </button>
+        </div>
       )}
-      {showPaymentModal && !selectedPayStudent && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}
-          onClick={() => setShowPaymentModal(false)}>
-          <div style={{ background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 380, boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
-            onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.4rem' }}>Ödeme Al</h2>
-            <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginBottom: '1.25rem' }}>Öğrenci seçin</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 300, overflowY: 'auto' }}>
-              {fabStudents.map(s => (
-                <button key={s.id} onClick={() => setSelectedPayStudent(s)}
-                  style={{ padding: '0.75rem 1rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#111827', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#6366f1'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
-                  {s.name}
-                </button>
-              ))}
-            </div>
+
+      {/* Phone */}
+      {student.phone && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem' }}>
+          <Phone size={13} />
+          <span>{student.phone}</span>
+        </div>
+      )}
+
+      {/* Haftalık + Saatlik boxes */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.35), rgba(99,102,241,0.2))', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '12px', padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.4rem' }}>HAFTALIK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: '800', fontSize: '0.95rem' }}>
+            <Clock size={14} color='#818cf8' />
+            {weeklyLessons} Ders
           </div>
         </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.35), rgba(139,92,246,0.2))', border: '1px solid rgba(139,92,246,0.4)', borderRadius: '12px', padding: '0.75rem' }}>
+          <div style={{ color: 'rgba(196,181,253,0.8)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.4rem' }}>SAATLİK</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', fontWeight: '800', fontSize: '0.95rem' }}>
+            <DollarSign size={14} color='#a78bfa' />
+            ₺{lessonFee.toLocaleString('tr-TR')}
+          </div>
+        </div>
+      </div>
+
+      {/* Subject badge */}
+      {student.subject && (
+        <div>
+          <span style={{ border: '1px solid #f97316', color: '#fb923c', fontSize: '0.75rem', fontWeight: '600', padding: '0.25rem 0.75rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <BookOpen size={11} />
+            {student.subject}
+          </span>
+        </div>
       )}
-      {showPaymentModal && selectedPayStudent && (
-        <PaymentModal
-          student={selectedPayStudent}
-          onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-          onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
-        />
-      )}
-      <div className="app-fab" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-        {fabOpen && FAB_ACTIONS.map((a, i) => {
-          const Icon = a.Icon;
-          const handleClick = () => {
-            if (a.action === 'lessonModal') setShowLessonModal(true);
-            else if (a.action === 'paymentModal') setShowPaymentModal(true);
-            else if (a.action === 'homeworkModal') navigate(createPageUrl('TeacherHomework') + '?openForm=true');
-            setFabOpen(false);
-          };
-          return (
-            <div key={i} onClick={handleClick}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
-              <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                <Icon size={18} color={a.color} />
-              </div>
-            </div>
-          );
-        })}
-        <button onClick={() => setFabOpen(o => !o)}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(79,70,229,0.45)', transition: 'transform 0.25s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-          <Plus size={22} color="white" />
-        </button>
+
+      {/* Finance table */}
+      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '0.85rem' }}>
+        {[
+          { label: 'Aylık Gelir (MRR)', value: `₺${monthlyFee.toLocaleString('tr-TR')}`, color: 'white' },
+          { label: 'Hak Edilen', value: `₺${earned.toLocaleString('tr-TR')}`, color: 'rgba(255,255,255,0.7)' },
+          { label: 'Tahsil Edilen', value: `₺${collected.toLocaleString('tr-TR')}`, color: '#22c55e' },
+        ].map(({ label, value, color }, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.35rem 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>{label}</span>
+            <span style={{ color, fontWeight: '700', fontSize: '0.82rem' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer: balance + payment button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem', gap: '0.75rem' }}>
+        <div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', fontWeight: '700', letterSpacing: '0.8px', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span>▤</span> BAKİYE
+          </div>
+          <div style={{ color: balance < 0 ? '#f87171' : '#22c55e', fontWeight: '800', fontSize: '1.15rem' }}>
+            {balance < 0 ? '-' : '+'}₺{Math.abs(balance).toLocaleString('tr-TR')}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {student.inviteCode && (
+            <button
+              onClick={handleInvite}
+              style={{
+                background: 'rgba(99,102,241,0.15)',
+                border: '1px solid rgba(99,102,241,0.4)',
+                color: '#a5b4fc', borderRadius: '10px',
+                padding: '0.6rem 0.85rem', fontWeight: '700', fontSize: '0.82rem',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.3)'; e.currentTarget.style.transform = 'scale(1.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <Send size={13} /> Davet
+            </button>
+          )}
+          <button
+            onClick={handleAddPayment}
+            style={{
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              border: 'none', color: 'white', borderRadius: '10px',
+              padding: '0.6rem 1.1rem', fontWeight: '700', fontSize: '0.82rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              boxShadow: '0 4px 12px rgba(34,197,94,0.3)', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <Plus size={14} /> Ödeme
+          </button>
+        </div>
       </div>
     </div>
   );
