@@ -309,12 +309,7 @@ export default function TeacherLessons() {
                                 <ActionBtn label="Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => markUndone(lesson)} />
                                 <ActionBtn icon={<ClipboardList size={13} />} label="Değerlendir" color="#7c3aed" bg="#ede9fe" onClick={() => setReportLesson(lesson)} />
                               </>
-                            )}
-                            {!isPaid && !isCancelled && (
-                              <ActionBtn label="Ödendi İşaretle" color="#4f46e5" bg="#eef2ff" onClick={() => markPaid(lesson)} />
-                            )}
-                            {isPaid && !isCancelled && (
-                              <ActionBtn label="Ödemeyi Geri Al" color="#dc2626" bg="#fee2e2" onClick={() => markUnpaid(lesson)} />
+                            
                             )}
                             <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#374151" bg="#f3f4f6" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
                           </div>
