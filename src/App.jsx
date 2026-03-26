@@ -12,6 +12,7 @@ import ParentLessonRequests from './pages/ParentLessonRequests';
 import ParentSettings from './pages/ParentSettings';
 import AdminPanel from './pages/AdminPanel';
 import TeacherAssistant from './pages/TeacherAssistant';
+import AdvertiseDemo from './pages/AdvertiseDemo';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -184,6 +185,7 @@ const AuthenticatedApp = () => {
       <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
       <Route path="/adminreis" element={<AdminPanel />} />
       <Route path="/TeacherAssistant" element={<LayoutWrapper currentPageName="TeacherAssistant"><TeacherAssistant /></LayoutWrapper>} />
+      <Route path="/advertise" element={<AdvertiseDemo />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
