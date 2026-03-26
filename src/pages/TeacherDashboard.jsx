@@ -177,7 +177,7 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <div style={{ padding: isMobile ? '1rem' : '2rem', height: '100vh', overflowY: 'auto', background: '#ffffffff', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ padding: isMobile ? '1rem' : '2rem', background: '#ffffffff', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.8rem' : 0, marginBottom: '2rem' }}>
         <div>
