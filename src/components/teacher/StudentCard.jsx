@@ -25,7 +25,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const handleInvite = (e) => {
     e.stopPropagation();
     if (!student.inviteCode) return;
-    const appUrl = window.location.origin;
+    const appUrl = "https://edutakip.com";
     const msg = encodeURIComponent(
       `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
       `Davet kodunuz: *${student.inviteCode}*\n\n` +
