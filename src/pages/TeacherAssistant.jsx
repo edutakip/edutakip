@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Bot, Sparkles } from 'lucide-react';
+import { Send, Bot, Sparkles, Lock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import ProUpgradeModal from '@/components/ProUpgradeModal';
+import { isPro } from '@/lib/subscription';
+
+const FREE_QUESTION_LIMIT = 2;
 
 const AGENT_NAME = 'edu_asistan';
 
@@ -128,6 +132,8 @@ export default function TeacherAssistant() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showProModal, setShowProModal] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -138,6 +144,7 @@ export default function TeacherAssistant() {
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
     initConversation();
   }, []);
 
@@ -170,6 +177,14 @@ export default function TeacherAssistant() {
   const sendMessage = async (text) => {
     const msg = text || input.trim();
     if (!msg || loading || !conversation) return;
+
+    // Free plan limit check
+    const userQuestionCount = messages.filter(m => m.role === 'user').length;
+    if (!isPro(currentUser) && userQuestionCount >= FREE_QUESTION_LIMIT) {
+      setShowProModal(true);
+      return;
+    }
+
     setInput('');
     setLoading(true);
 
@@ -190,9 +205,12 @@ export default function TeacherAssistant() {
 
   const visibleMessages = messages.filter(m => m.role === 'user' || m.role === 'assistant');
   const isTyping = loading || (visibleMessages.length > 0 && visibleMessages[visibleMessages.length - 1]?.role === 'user');
+  const userQuestionCount = messages.filter(m => m.role === 'user').length;
+  const isLimitReached = !isPro(currentUser) && currentUser && userQuestionCount >= FREE_QUESTION_LIMIT;
 
   return (
     <>
+      {showProModal && <ProUpgradeModal reason="limit" onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />}
       <style>{`
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
@@ -350,64 +368,101 @@ export default function TeacherAssistant() {
           padding: '1rem 1.5rem',
           flexShrink: 0,
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: '0.65rem',
-            background: '#f4f6fb',
-            borderRadius: '16px',
-            border: '1.5px solid #e5e7eb',
-            padding: '0.6rem 0.6rem 0.6rem 1.1rem',
-            transition: 'border-color 0.15s',
-          }}
-            onFocus={() => {}}
-          >
-            <Bot size={18} color='#9ca3af' style={{ flexShrink: 0, marginBottom: '0.35rem' }} />
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="EduTakip Asistanına bir şeyler sorun..."
-              rows={1}
-              style={{
-                flex: 1,
-                background: 'none',
-                border: 'none',
-                outline: 'none',
-                resize: 'none',
-                fontSize: '0.9rem',
-                color: '#111827',
-                lineHeight: 1.5,
-                maxHeight: '120px',
-                overflowY: 'auto',
-                fontFamily: 'inherit',
-              }}
-              onInput={e => {
-                e.target.style.height = 'auto';
-                e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-              }}
-            />
-            <button
-              className="send-btn"
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || loading || !conversation}
-              style={{
-                width: 38, height: 38, borderRadius: '10px',
-                background: input.trim() && !loading
-                  ? 'linear-gradient(135deg, #4f46e5, #7c3aed)'
-                  : '#e5e7eb',
-                border: 'none',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: input.trim() && !loading ? 'pointer' : 'default',
-                flexShrink: 0,
-                transition: 'all 0.15s ease',
-                boxShadow: input.trim() && !loading ? '0 2px 8px rgba(79,70,229,0.35)' : 'none',
-              }}
-            >
-              <Send size={15} color={input.trim() && !loading ? 'white' : '#9ca3af'} />
+          {/* Free limit banner */}
+          {!isPro(currentUser) && currentUser && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: isLimitReached ? '#fef3c7' : '#f0f4ff',
+              border: `1.5px solid ${isLimitReached ? '#fbbf24' : '#c7d2fe'}`,
+              borderRadius: '12px', padding: '0.55rem 0.9rem',
+              marginBottom: '0.75rem', gap: '0.75rem',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Lock size={13} color={isLimitReached ? '#92400e' : '#4f46e5'} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: isLimitReached ? '#92400e' : '#3730a3' }}>
+                  {isLimitReached
+                    ? 'Ücretsiz soru limitine ulaştınız (2/2)'
+                    : `Ücretsiz soru: ${userQuestionCount}/${FREE_QUESTION_LIMIT}`}
+                </span>
+              </div>
+              <button onClick={() => setShowProModal(true)} style={{
+                background: isLimitReached ? 'linear-gradient(135deg, #f59e0b, #f97316)' : 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                border: 'none', color: 'white', borderRadius: '8px',
+                padding: '0.3rem 0.8rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>
+                Pro'ya Geç
+              </button>
+            </div>
+          )}
+
+          {isLimitReached ? (
+            <button onClick={() => setShowProModal(true)} style={{
+              width: '100%', padding: '0.85rem', borderRadius: '14px', border: 'none',
+              background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+              color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+              boxShadow: '0 4px 14px rgba(249,115,22,0.35)',
+            }}>
+              <Lock size={16} /> Devam etmek için Pro'ya geçin
             </button>
-          </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: '0.65rem',
+              background: '#f4f6fb',
+              borderRadius: '16px',
+              border: '1.5px solid #e5e7eb',
+              padding: '0.6rem 0.6rem 0.6rem 1.1rem',
+              transition: 'border-color 0.15s',
+            }}>
+              <Bot size={18} color='#9ca3af' style={{ flexShrink: 0, marginBottom: '0.35rem' }} />
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="EduTakip Asistanına bir şeyler sorun..."
+                rows={1}
+                style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'none',
+                  fontSize: '0.9rem',
+                  color: '#111827',
+                  lineHeight: 1.5,
+                  maxHeight: '120px',
+                  overflowY: 'auto',
+                  fontFamily: 'inherit',
+                }}
+                onInput={e => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                }}
+              />
+              <button
+                className="send-btn"
+                onClick={() => sendMessage()}
+                disabled={!input.trim() || loading || !conversation}
+                style={{
+                  width: 38, height: 38, borderRadius: '10px',
+                  background: input.trim() && !loading
+                    ? 'linear-gradient(135deg, #4f46e5, #7c3aed)'
+                    : '#e5e7eb',
+                  border: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: input.trim() && !loading ? 'pointer' : 'default',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                  boxShadow: input.trim() && !loading ? '0 2px 8px rgba(79,70,229,0.35)' : 'none',
+                }}
+              >
+                <Send size={15} color={input.trim() && !loading ? 'white' : '#9ca3af'} />
+              </button>
+            </div>
+          )}
           <p style={{ textAlign: 'center', color: '#c4c9d4', fontSize: '0.7rem', marginTop: '0.5rem' }}>
             EduTakip Asistanı yapay zeka tarafından desteklenmektedir ve hatalar yapabilir.
           </p>
