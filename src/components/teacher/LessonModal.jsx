@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays } from 'lucide-react';
+import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays, Lock } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import { format, addWeeks, parseISO } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
+import { isPro } from '@/lib/subscription';
+import ProUpgradeModal from '../ProUpgradeModal';
 
 export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
+  const [currentUser, setCurrentUser] = React.useState(null);
+  const [showProModal, setShowProModal] = React.useState(false);
+
+  React.useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const isMobile = windowWidth < 640;
 
@@ -195,6 +203,10 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
     return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={() => { onSaved?.(); onClose(); }} />;
   }
 
+  if (showProModal) {
+    return <ProUpgradeModal reason='limit' onClose={() => setShowProModal(false)} onUpgraded={() => setShowProModal(false)} />;
+  }
+
   if (confirmStep) {
     return (
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
@@ -350,28 +362,41 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           </div>
 
           {!isEditing && (
-            <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
-                <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
-                  style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
-                <RefreshCw size={14} color='#4f46e5' />
-                <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
-              </label>
-              {recurring && (
-                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
-                  {[2, 4, 8, 12].map(w => (
-                    <button key={w} onClick={() => setRecurringWeeks(w)} style={{
-                      padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
-                      borderColor: recurringWeeks === w ? '#4f46e5' : '#e5e7eb',
-                      background: recurringWeeks === w ? '#eef2ff' : 'white',
-                      color: recurringWeeks === w ? '#4f46e5' : '#6b7280',
-                      cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
-                    }}>{w}</button>
-                  ))}
+            isPro(currentUser) ? (
+              <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #e5e7eb' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+                  <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
+                  <RefreshCw size={14} color='#4f46e5' />
+                  <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
+                </label>
+                {recurring && (
+                  <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
+                    {[2, 4, 8, 12].map(w => (
+                      <button key={w} onClick={() => setRecurringWeeks(w)} style={{
+                        padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
+                        borderColor: recurringWeeks === w ? '#4f46e5' : '#e5e7eb',
+                        background: recurringWeeks === w ? '#eef2ff' : 'white',
+                        color: recurringWeeks === w ? '#4f46e5' : '#6b7280',
+                        cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                      }}>{w}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button onClick={() => setShowProModal(true)}
+                style={{ width: '100%', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '12px', padding: '0.9rem 1rem', border: '1.5px solid #fbbf24', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'left' }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(251,191,36,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Lock size={15} color='#92400e' />
                 </div>
-              )}
-            </div>
+                <div>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400e', margin: 0 }}>Pro Özellik: Tekrarlayan Dersler</p>
+                  <p style={{ fontSize: '0.73rem', color: '#b45309', margin: 0, marginTop: '0.1rem' }}>Sonraki haftalara otomatik ders ekle — Pro'ya geç</p>
+                </div>
+              </button>
+            )
           )}
           <div style={isMobile ? { position: 'sticky', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', background: 'linear-gradient(180deg, rgba(255,255,255,0), white 24%)', paddingTop: '0.55rem', marginTop: '0.2rem' } : undefined}>
             <button onClick={save} disabled={loading || !form.studentId} style={{
