@@ -42,7 +42,9 @@ export default function ParentLessonsPayments() {
   }, []);
 
   const totalPaid = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const totalPending = payments.filter(p => p.status !== 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalPending = totalDebt; // sadece bekliyor/gecikmiş
+  const bakiye = totalPaid - totalDebt; // negatif = borçlu
   const completedLessons = lessons.filter(l => l.status === 'tamamlandı').length;
 
   const filteredLessons = lessonFilter === 'tümü' ? lessons : lessons.filter(l => l.status === lessonFilter);
@@ -65,7 +67,7 @@ export default function ParentLessonsPayments() {
           {[
             { label: 'Toplam Ders', value: lessons.length, emoji: '📚' },
             { label: 'Tamamlanan', value: completedLessons, emoji: '✅' },
-            { label: 'Bekleyen Ödeme', value: `₺${totalPending.toLocaleString('tr-TR')}`, emoji: '💳' },
+            { label: 'Bakiye', value: `${bakiye < 0 ? '-' : ''}₺${Math.abs(bakiye).toLocaleString('tr-TR')}`, emoji: bakiye < 0 ? '💳' : '✅' },
           ].map(({ label, value, emoji }) => (
             <div key={label} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '14px', padding: '0.85rem 0.75rem', backdropFilter: 'blur(8px)', textAlign: 'center' }}>
               <div style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>{emoji}</div>
@@ -152,9 +154,9 @@ export default function ParentLessonsPayments() {
                 <div style={{ color: '#065f46', fontSize: '0.7rem', fontWeight: '700', marginBottom: '0.25rem' }}>TOPLAM ÖDENDİ</div>
                 <div style={{ color: '#064e3b', fontSize: '1.35rem', fontWeight: '900' }}>₺{totalPaid.toLocaleString('tr-TR')}</div>
               </div>
-              <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '14px', padding: '1rem' }}>
-                <div style={{ color: '#92400e', fontSize: '0.7rem', fontWeight: '700', marginBottom: '0.25rem' }}>BEKLEYEN</div>
-                <div style={{ color: '#78350f', fontSize: '1.35rem', fontWeight: '900' }}>₺{totalPending.toLocaleString('tr-TR')}</div>
+              <div style={{ background: bakiye < 0 ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : 'linear-gradient(135deg, #d1fae5, #a7f3d0)', borderRadius: '14px', padding: '1rem' }}>
+                <div style={{ color: bakiye < 0 ? '#92400e' : '#065f46', fontSize: '0.7rem', fontWeight: '700', marginBottom: '0.25rem' }}>BAKİYE</div>
+                <div style={{ color: bakiye < 0 ? '#78350f' : '#064e3b', fontSize: '1.35rem', fontWeight: '900' }}>{bakiye < 0 ? '-' : ''}₺{Math.abs(bakiye).toLocaleString('tr-TR')}</div>
               </div>
             </div>
 
