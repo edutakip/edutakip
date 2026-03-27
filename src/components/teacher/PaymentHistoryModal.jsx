@@ -15,14 +15,11 @@ export default function PaymentHistoryModal({ student, onClose }) {
     });
   }, [student.id]);
 
-  const totalDebt = payments.filter(p => p.status !== 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const totalCollected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const pending = totalDebt - 0; // debt records are separate from collected
-
-  // Recalculate: total debt = sum of bekliyor/gecikmiş, total collected = sum of alındı
-  const realDebt = payments.filter(p => p.status !== 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  // Borç: sadece bekliyor/gecikmiş, Tahsilat: alındı
+  const realDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
   const realCollected = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const balance = realDebt - realCollected;
+  // balance > 0 → fazla ödeme, balance < 0 → borçlu
+  const balance = realCollected - realDebt;
 
   const formatDate = (dateStr) => {
     try { return format(parseISO(dateStr), 'd MMM yyyy', { locale: tr }); } catch { return dateStr; }
@@ -83,13 +80,13 @@ export default function PaymentHistoryModal({ student, onClose }) {
                   <div style={{ color: '#22c55e', fontWeight: '900', fontSize: '1.05rem' }}>₺{realCollected.toLocaleString('tr-TR')}</div>
                 </div>
                 <div style={{
-                  background: balance > 0 ? 'rgba(249,115,22,0.12)' : 'rgba(34,197,94,0.12)',
-                  border: `1px solid ${balance > 0 ? 'rgba(249,115,22,0.25)' : 'rgba(34,197,94,0.25)'}`,
+                  background: balance < 0 ? 'rgba(249,115,22,0.12)' : 'rgba(34,197,94,0.12)',
+                  border: `1px solid ${balance < 0 ? 'rgba(249,115,22,0.25)' : 'rgba(34,197,94,0.25)'}`,
                   borderRadius: '12px', padding: '0.85rem', textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '0.6rem', fontWeight: '700', color: balance > 0 ? 'rgba(249,115,22,0.6)' : 'rgba(34,197,94,0.6)', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '0.35rem' }}>Bakiye</div>
-                  <div style={{ color: balance > 0 ? '#fb923c' : '#22c55e', fontWeight: '900', fontSize: '1.05rem' }}>
-                    {balance > 0 ? `₺${balance.toLocaleString('tr-TR')}` : '✓ Kapalı'}
+                  <div style={{ fontSize: '0.6rem', fontWeight: '700', color: balance < 0 ? 'rgba(249,115,22,0.6)' : 'rgba(34,197,94,0.6)', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '0.35rem' }}>Bakiye</div>
+                  <div style={{ color: balance < 0 ? '#fb923c' : '#22c55e', fontWeight: '900', fontSize: '1.05rem' }}>
+                    {balance < 0 ? `-₺${Math.abs(balance).toLocaleString('tr-TR')}` : '✓ Kapalı'}
                   </div>
                 </div>
               </div>
