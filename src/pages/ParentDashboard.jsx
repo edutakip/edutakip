@@ -156,17 +156,21 @@ export default function ParentDashboard() {
         const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
         const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-        // Build schedule map by day index (0=Sun..6=Sat)
+        // Build schedule map — day can be numeric index (0=Pzt..6=Paz) or short/long string
         const scheduleMap = {};
         (student.schedule || []).forEach(slot => {
-          const idx = dayNames.indexOf(slot.day);
-          if (idx >= 0) scheduleMap[idx] = slot.time;
-          // also try full names
-        });
-        // Also try matching by full name
-        (student.schedule || []).forEach(slot => {
-          const idx = dayNamesLong.indexOf(slot.day);
-          if (idx >= 0) scheduleMap[idx] = slot.time;
+          if (typeof slot.day === 'number') {
+            // Numeric: AddStudentModal stores 0=Pzt,1=Sal,...,6=Paz → map to JS getDay() index
+            // dayIdx 0=Pzt → getDay()=1, ..., 6=Paz → getDay()=0
+            const jsDay = slot.day === 6 ? 0 : slot.day + 1;
+            scheduleMap[jsDay] = slot.time;
+          } else {
+            // String: try short names then long names
+            const shortIdx = dayNames.indexOf(slot.day);
+            if (shortIdx >= 0) { scheduleMap[shortIdx] = slot.time; return; }
+            const longIdx = dayNamesLong.indexOf(slot.day);
+            if (longIdx >= 0) scheduleMap[longIdx] = slot.time;
+          }
         });
         const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
         const bakiye = totalPaid - totalDebt;
