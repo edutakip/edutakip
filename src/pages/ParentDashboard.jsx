@@ -156,22 +156,32 @@ export default function ParentDashboard() {
         const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
         const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-        // Build schedule map — day can be numeric index (0=Pzt..6=Paz) or short/long string
+        // Build schedule map from lessons (most reliable source)
+        // JS getDay(): 0=Pazar,1=Pzt,...,6=Cmt
         const scheduleMap = {};
-        (student.schedule || []).forEach(slot => {
-          if (typeof slot.day === 'number') {
-            // Numeric: AddStudentModal stores 0=Pzt,1=Sal,...,6=Paz → map to JS getDay() index
-            // dayIdx 0=Pzt → getDay()=1, ..., 6=Paz → getDay()=0
-            const jsDay = slot.day === 6 ? 0 : slot.day + 1;
-            scheduleMap[jsDay] = slot.time;
-          } else {
-            // String: try short names then long names
-            const shortIdx = dayNames.indexOf(slot.day);
-            if (shortIdx >= 0) { scheduleMap[shortIdx] = slot.time; return; }
-            const longIdx = dayNamesLong.indexOf(slot.day);
-            if (longIdx >= 0) scheduleMap[longIdx] = slot.time;
-          }
+        // First try to derive from upcoming/planned lessons
+        lessons.filter(l => l.status === 'planlandı').forEach(l => {
+          try {
+            const d = new Date(l.date + 'T12:00:00');
+            const jsDay = d.getDay();
+            if (!scheduleMap[jsDay]) scheduleMap[jsDay] = l.startTime;
+          } catch {}
         });
+        // Fallback: also parse student.schedule for cases with no lessons yet
+        if (Object.keys(scheduleMap).length === 0) {
+          (student.schedule || []).forEach(slot => {
+            if (typeof slot.day === 'number') {
+              // 0=Pzt..6=Paz → JS getDay: Pzt=1..Paz=0
+              const jsDay = slot.day === 6 ? 0 : slot.day + 1;
+              scheduleMap[jsDay] = slot.time;
+            } else {
+              const shortIdx = dayNames.indexOf(slot.day);
+              if (shortIdx >= 0) { scheduleMap[shortIdx] = slot.time; return; }
+              const longIdx = dayNamesLong.indexOf(slot.day);
+              if (longIdx >= 0) scheduleMap[longIdx] = slot.time;
+            }
+          });
+        }
         const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
         const bakiye = totalPaid - totalDebt;
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
