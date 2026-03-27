@@ -168,8 +168,8 @@ export default function ParentDashboard() {
           const idx = dayNamesLong.indexOf(slot.day);
           if (idx >= 0) scheduleMap[idx] = slot.time;
         });
-        const earnedTotal = lessons.filter(l => l.status === 'tamamlandı').reduce((s, l) => s + (l.lessonFee || 0), 0);
-        const bakiye = totalPaid - earnedTotal;
+        const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+        const bakiye = totalPaid - totalDebt;
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
         return (
           <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1b6e 100%)', borderRadius: '20px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 32px rgba(99,102,241,0.25)' }}>
