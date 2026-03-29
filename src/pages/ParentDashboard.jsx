@@ -4,6 +4,124 @@ import { Calendar, CheckCircle, DollarSign, AlertCircle, BookOpen, BarChart2, Se
 import { createPageUrl } from '@/utils';
 import LessonRequestModal from '../components/parent/LessonRequestModal';
 
+const neonBtnStyle = `
+  @property --btn-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  .neon-connect-btn {
+    position: relative;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border-radius: 100px;
+    border: none;
+    background: #5c35cc;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.01em;
+    overflow: hidden;
+    outline: none;
+    transition: background 0.2s, transform 0.15s;
+    opacity: 1;
+  }
+
+  .neon-connect-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .neon-connect-btn:not(:disabled):hover {
+    background: #6a40dd;
+    transform: scale(1.02);
+  }
+
+  .neon-connect-btn:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  .neon-connect-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 100px;
+    padding: 2px;
+    background: conic-gradient(
+      from var(--btn-angle),
+      #a855f7, #7c3aed, #4f46e5, #818cf8, #c084fc, #a855f7
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: btn-border-spin 2.5s linear infinite;
+    pointer-events: none;
+  }
+
+  .neon-connect-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 100px;
+    box-shadow: 0 0 18px 4px rgba(139,92,246,0.55), 0 0 40px 8px rgba(109,40,217,0.28);
+    animation: btn-glow-pulse 1.8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes btn-border-spin {
+    to { --btn-angle: 360deg; }
+  }
+
+  @keyframes btn-glow-pulse {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1; }
+  }
+
+  .neon-btn-streak {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    border-radius: 100px;
+    animation: btn-streak 2.2s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes btn-streak {
+    0%   { left: -60%; }
+    100% { left: 120%; }
+  }
+
+  .neon-btn-sparkle {
+    font-size: 18px;
+    position: relative;
+    z-index: 1;
+    animation: sparkle-anim 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(216,180,254,1));
+    display: inline-flex;
+  }
+
+  @keyframes sparkle-anim {
+    0%,100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    25%      { transform: scale(1.35) rotate(20deg); opacity: 1; }
+    50%      { transform: scale(1) rotate(0deg); opacity: 0.6; }
+    75%      { transform: scale(1.2) rotate(-15deg); opacity: 1; }
+  }
+
+  .neon-btn-label {
+    position: relative;
+    z-index: 1;
+  }
+`;
+
 export default function ParentDashboard() {
   const [student, setStudent] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -55,6 +173,7 @@ export default function ParentDashboard() {
   if (!student) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <style>{neonBtnStyle}</style>
         <div style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '2.5rem', maxWidth: '420px', width: '100%', border: '1px solid var(--border)', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔗</div>
           <h2 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.5rem' }}>Öğrenciye Bağlan</h2>
@@ -64,13 +183,20 @@ export default function ParentDashboard() {
           <input
             value={inviteCode} onChange={e => setInviteCode(e.target.value.toUpperCase())}
             placeholder='Davet kodunu girin (örn: ABC123)'
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '1rem', textAlign: 'center', letterSpacing: '3px', fontWeight: '700', outline: 'none', marginBottom: '0.75rem' }}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '1rem', textAlign: 'center', letterSpacing: '3px', fontWeight: '700', outline: 'none', marginBottom: '0.75rem', boxSizing: 'border-box' }}
             onKeyDown={e => e.key === 'Enter' && handleJoinWithCode()}
           />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
-          <button onClick={handleJoinWithCode} disabled={loading || !inviteCode.trim()}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
+          <button
+            onClick={handleJoinWithCode}
+            disabled={loading || !inviteCode.trim()}
+            className="neon-connect-btn"
+          >
+            <div className="neon-btn-streak" />
+            <span className="neon-btn-sparkle">✦</span>
+            <span className="neon-btn-label">
+              {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
+            </span>
           </button>
         </div>
       </div>
@@ -156,10 +282,7 @@ export default function ParentDashboard() {
         const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
         const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-        // Build schedule map from lessons (most reliable source)
-        // JS getDay(): 0=Pazar,1=Pzt,...,6=Cmt
         const scheduleMap = {};
-        // First try to derive from upcoming/planned lessons
         lessons.filter(l => l.status === 'planlandı').forEach(l => {
           try {
             const d = new Date(l.date + 'T12:00:00');
@@ -167,11 +290,9 @@ export default function ParentDashboard() {
             if (!scheduleMap[jsDay]) scheduleMap[jsDay] = l.startTime;
           } catch {}
         });
-        // Fallback: also parse student.schedule for cases with no lessons yet
         if (Object.keys(scheduleMap).length === 0) {
           (student.schedule || []).forEach(slot => {
             if (typeof slot.day === 'number') {
-              // 0=Pzt..6=Paz → JS getDay: Pzt=1..Paz=0
               const jsDay = slot.day === 6 ? 0 : slot.day + 1;
               scheduleMap[jsDay] = slot.time;
             } else {
@@ -187,7 +308,6 @@ export default function ParentDashboard() {
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
         return (
           <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1b6e 100%)', borderRadius: '20px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 32px rgba(99,102,241,0.25)' }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: '900', color: 'white' }}>{student.name.split(' ')[0]}</h2>
@@ -199,7 +319,6 @@ export default function ParentDashboard() {
               </span>
             </div>
 
-            {/* Next Lesson */}
             {upcomingLesson ? (
               <div style={{ background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
@@ -217,7 +336,6 @@ export default function ParentDashboard() {
               </div>
             )}
 
-            {/* Weekly Schedule */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.35rem', marginBottom: '1rem' }}>
               {[1,2,3,4,5,6,0].map(dayIdx => {
                 const time = scheduleMap[dayIdx];
@@ -238,7 +356,6 @@ export default function ParentDashboard() {
               })}
             </div>
 
-            {/* Balance Row */}
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>BAKİYE</span>
@@ -288,7 +405,6 @@ export default function ParentDashboard() {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${shadow}`; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${shadow}`; }}
           >
-            {/* Decorative circle */}
             <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
             <div style={{ position: 'absolute', bottom: '-20px', right: '15px', width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
 
