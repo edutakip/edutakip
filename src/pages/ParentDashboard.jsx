@@ -69,7 +69,7 @@ export default function ParentDashboard() {
           />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <button onClick={handleJoinWithCode} disabled={loading || !inviteCode.trim()}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'black', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
           </button>
         </div>
