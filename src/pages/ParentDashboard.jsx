@@ -54,8 +54,8 @@ export default function ParentDashboard() {
 
   if (!student) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '2rem 1.5rem', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 70px))', overflowY: 'auto' }}>
-        <div style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '2.5rem', maxWidth: '420px', width: '100%', border: '1px solid var(--border)', textAlign: 'center', marginTop: 'max(2rem, 10vh)' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <div style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '2.5rem', maxWidth: '420px', width: '100%', border: '1px solid var(--border)', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔗</div>
           <h2 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.5rem' }}>Öğrenciye Bağlan</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: '1.6' }}>
@@ -69,7 +69,7 @@ export default function ParentDashboard() {
           />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <button onClick={handleJoinWithCode} disabled={loading || !inviteCode.trim()}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'black', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
           </button>
         </div>
@@ -156,20 +156,34 @@ export default function ParentDashboard() {
         const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
         const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-        // Build schedule map by day index (0=Sun..6=Sat)
+        // Build schedule map from lessons (most reliable source)
+        // JS getDay(): 0=Pazar,1=Pzt,...,6=Cmt
         const scheduleMap = {};
-        (student.schedule || []).forEach(slot => {
-          const idx = dayNames.indexOf(slot.day);
-          if (idx >= 0) scheduleMap[idx] = slot.time;
-          // also try full names
+        // First try to derive from upcoming/planned lessons
+        lessons.filter(l => l.status === 'planlandı').forEach(l => {
+          try {
+            const d = new Date(l.date + 'T12:00:00');
+            const jsDay = d.getDay();
+            if (!scheduleMap[jsDay]) scheduleMap[jsDay] = l.startTime;
+          } catch {}
         });
-        // Also try matching by full name
-        (student.schedule || []).forEach(slot => {
-          const idx = dayNamesLong.indexOf(slot.day);
-          if (idx >= 0) scheduleMap[idx] = slot.time;
-        });
-        const earnedTotal = lessons.filter(l => l.status === 'tamamlandı').reduce((s, l) => s + (l.lessonFee || 0), 0);
-        const bakiye = totalPaid - earnedTotal;
+        // Fallback: also parse student.schedule for cases with no lessons yet
+        if (Object.keys(scheduleMap).length === 0) {
+          (student.schedule || []).forEach(slot => {
+            if (typeof slot.day === 'number') {
+              // 0=Pzt..6=Paz → JS getDay: Pzt=1..Paz=0
+              const jsDay = slot.day === 6 ? 0 : slot.day + 1;
+              scheduleMap[jsDay] = slot.time;
+            } else {
+              const shortIdx = dayNames.indexOf(slot.day);
+              if (shortIdx >= 0) { scheduleMap[shortIdx] = slot.time; return; }
+              const longIdx = dayNamesLong.indexOf(slot.day);
+              if (longIdx >= 0) scheduleMap[longIdx] = slot.time;
+            }
+          });
+        }
+        const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+        const bakiye = totalPaid - totalDebt;
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
         return (
           <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1b6e 100%)', borderRadius: '20px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 32px rgba(99,102,241,0.25)' }}>
