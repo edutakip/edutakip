@@ -109,6 +109,9 @@ export default function Landing() {
         <div style={{ position:'absolute', width:400, height:400, borderRadius:'50%', filter:'blur(80px)', opacity:.25, background:'#f97316', bottom:-100, left:-100, pointerEvents:'none' }} />
         <div style={{ position:'absolute', width:300, height:300, borderRadius:'50%', filter:'blur(80px)', opacity:.25, background:'#10b981', top:'40%', left:'30%', pointerEvents:'none' }} />
         <div style={{ position:'relative', zIndex:2, textAlign:'center', maxWidth:820, margin:'0 auto' }}>
+          <div style={{ marginBottom:28, animation:'fadeInDown .6s ease both' }}>
+            <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width:80, height:80, borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.3)' }} />
+          </div>
           <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(124,58,237,.25)', border:'1px solid rgba(167,139,250,.4)', color:'#a78bfa', padding:'7px 18px', borderRadius:50, fontSize:'.82rem', fontWeight:600, marginBottom:28, animation:'fadeInDown .6s ease both' }}>
             <span style={{ width:7, height:7, background:'#a78bfa', borderRadius:'50%', animation:'pulse 1.5s infinite', display:'inline-block' }} />
             Özel Ders Öğretmenleri İçin Tasarlandı
