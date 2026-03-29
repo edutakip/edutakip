@@ -28,6 +28,7 @@ function AnimSection({ children, id, style }) {
 
 export default function Landing() {
   const [selectedRole, setSelectedRole] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [studentCount, setStudentCount] = useState(20);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const perStudentPrice = 50;
@@ -90,40 +91,90 @@ export default function Landing() {
             ))}
           </ul>
         )}
-        {/* ── GİRİŞ BUTONLARI (orijinal) ── */}
-        <div style={{ display:'flex', gap:'.75rem', alignItems:'center' }}>
-          <button onClick={() => selectRole('parent')}
-            style={{ background:'none', border:'1.5px solid rgba(255,255,255,.25)', color:'rgba(255,255,255,.85)', borderRadius:8, padding:'8px 18px', fontWeight:600, fontSize:'.85rem', cursor:'pointer' }}>
-            Veli Girişi
+        {/* ── GİRİŞ / HAMBURGER ── */}
+        {isMobile ? (
+          <button
+            onClick={() => setMobileMenuOpen(o => !o)}
+            style={{ background:'none', border:'1.5px solid rgba(255,255,255,.25)', color:'rgba(255,255,255,.85)', borderRadius:8, padding:'8px 12px', cursor:'pointer', display:'flex', flexDirection:'column', gap:4, alignItems:'center', justifyContent:'center' }}
+            aria-label="Menüyü aç"
+          >
+            <span style={{ display:'block', width:18, height:2, background:'rgba(255,255,255,.85)', borderRadius:1, transition:'all .2s', transform: mobileMenuOpen ? 'rotate(45deg) translateY(6px)' : 'none' }} />
+            <span style={{ display:'block', width:18, height:2, background:'rgba(255,255,255,.85)', borderRadius:1, transition:'all .2s', opacity: mobileMenuOpen ? 0 : 1 }} />
+            <span style={{ display:'block', width:18, height:2, background:'rgba(255,255,255,.85)', borderRadius:1, transition:'all .2s', transform: mobileMenuOpen ? 'rotate(-45deg) translateY(-6px)' : 'none' }} />
           </button>
-          <button onClick={() => selectRole('teacher')}
-            style={{ background:'#7c3aed', border:'none', color:'white', borderRadius:8, padding:'9px 22px', fontWeight:700, fontSize:'.85rem', cursor:'pointer', boxShadow:'0 4px 15px rgba(124,58,237,.4)' }}>
-            Öğretmen Girişi
-          </button>
-        </div>
+        ) : (
+          <div style={{ display:'flex', gap:'.75rem', alignItems:'center' }}>
+            <button onClick={() => selectRole('parent')}
+              style={{ background:'none', border:'1.5px solid rgba(255,255,255,.25)', color:'rgba(255,255,255,.85)', borderRadius:8, padding:'8px 18px', fontWeight:600, fontSize:'.85rem', cursor:'pointer' }}>
+              Veli Girişi
+            </button>
+            <button onClick={() => selectRole('teacher')}
+              style={{ background:'#7c3aed', border:'none', color:'white', borderRadius:8, padding:'9px 22px', fontWeight:700, fontSize:'.85rem', cursor:'pointer', boxShadow:'0 4px 15px rgba(124,58,237,.4)' }}>
+              Öğretmen Girişi
+            </button>
+          </div>
+        )}
+
+        {/* ── MOBİL AÇILIR MENÜ ── */}
+        {isMobile && mobileMenuOpen && (
+          <div style={{ position:'absolute', top:70, left:0, right:0, background:'rgba(10,15,35,0.98)', backdropFilter:'blur(16px)', borderBottom:'1px solid rgba(124,58,237,.3)', padding:'0.5rem 5% 1rem', zIndex:998 }}>
+            {[['#features','Özellikler'],['#how-it-works','Nasıl Çalışır'],['#screenshots','Ekran Görüntüleri'],['#pricing','Fiyatlar']].map(([href, label]) => (
+              <a key={href} href={href}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ display:'flex', alignItems:'center', color:'rgba(255,255,255,.85)', textDecoration:'none', fontSize:'1rem', fontWeight:600, padding:'0.9rem 0', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+                {label}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%)', position:'relative', overflow:'hidden', padding:'100px 5% 60px' }}>
+      <section style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%)', position:'relative', overflow:'hidden', padding: isMobile ? '30px 5% 20px' : '100px 5% 60px' }}>
         <div style={{ position:'absolute', width:600, height:600, borderRadius:'50%', filter:'blur(80px)', opacity:.25, background:'#7c3aed', top:-200, right:-150, pointerEvents:'none' }} />
         <div style={{ position:'absolute', width:400, height:400, borderRadius:'50%', filter:'blur(80px)', opacity:.25, background:'#f97316', bottom:-100, left:-100, pointerEvents:'none' }} />
         <div style={{ position:'absolute', width:300, height:300, borderRadius:'50%', filter:'blur(80px)', opacity:.25, background:'#10b981', top:'40%', left:'30%', pointerEvents:'none' }} />
         <div style={{ position:'relative', zIndex:2, textAlign:'center', maxWidth:820, margin:'0 auto' }}>
-          <div style={{ marginBottom:28, animation:'fadeInDown .6s ease both' }}>
-            <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width:80, height:80, borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.3)' }} />
+          <div style={{ display:'flex', justifyContent:'center', marginBottom: isMobile ? 10 : 24, animation:'fadeInDown .5s ease both' }}>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap: isMobile ? 6 : 14 }}>
+              <img
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png"
+                alt="EduTakip"
+                style={{ width: isMobile ? 62 : 88, height: isMobile ? 62 : 88, borderRadius:22, boxShadow:'0 16px 48px rgba(124,58,237,0.45), 0 4px 16px rgba(0,0,0,0.35)', animation:'float 3s ease-in-out infinite' }}
+              />
+              <div style={{ textAlign:'center' }}>
+                <div style={{ color:'#fff', fontSize: isMobile ? '1.1rem' : '1.4rem', fontWeight:800, letterSpacing:'-.5px', lineHeight:1.2 }}>EduTakip</div>
+                <div style={{ color:'rgba(255,255,255,.5)', fontSize: isMobile ? '.72rem' : '.8rem', fontWeight:500, marginTop:2, letterSpacing:'.3px' }}>Özel Ders Yönetim Platformu</div>
+              </div>
+            </div>
           </div>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(124,58,237,.25)', border:'1px solid rgba(167,139,250,.4)', color:'#a78bfa', padding:'7px 18px', borderRadius:50, fontSize:'.82rem', fontWeight:600, marginBottom:28, animation:'fadeInDown .6s ease both' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(124,58,237,.25)', border:'1px solid rgba(167,139,250,.4)', color:'#a78bfa', padding:'7px 18px', borderRadius:50, fontSize: isMobile ? '.76rem' : '.82rem', fontWeight:600, marginBottom: isMobile ? 10 : 28, animation:'fadeInDown .6s ease both' }}>
             <span style={{ width:7, height:7, background:'#a78bfa', borderRadius:'50%', animation:'pulse 1.5s infinite', display:'inline-block' }} />
             Özel Ders Öğretmenleri İçin Tasarlandı
           </div>
-          <h1 style={{ fontSize:'clamp(2.4rem,5vw,3.8rem)', fontWeight:900, color:'#fff', lineHeight:1.15, marginBottom:22, animation:'fadeInUp .7s ease .1s both' }}>
+          <h1 style={{ fontSize: isMobile ? '1.9rem' : 'clamp(2.4rem,5vw,3.8rem)', fontWeight:900, color:'#fff', lineHeight:1.15, marginBottom: isMobile ? 10 : 22, animation:'fadeInUp .7s ease .1s both' }}>
             Tüm Öğrencilerinizi <span style={{ color:'#a78bfa' }}>Tek Platformda</span> Yönetin
           </h1>
+
+          {/* ── MOBİL HERO BUTONLARI ── */}
+          {isMobile && (
+            <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap', marginBottom: isMobile ? 8 : 24, animation:'fadeInUp .7s ease .18s both' }}>
+              <button onClick={() => selectRole('teacher')}
+                style={{ background:'#7c3aed', color:'#fff', padding:'13px 22px', borderRadius:10, fontWeight:700, fontSize:'.95rem', cursor:'pointer', border:'none', boxShadow:'0 8px 24px rgba(124,58,237,.45)', display:'inline-flex', alignItems:'center', gap:7 }}>
+                <GraduationCap size={18} /> Öğretmen Paneli <ChevronRight size={16} />
+              </button>
+              <button onClick={() => selectRole('parent')}
+                style={{ background:'rgba(255,255,255,.1)', color:'#fff', padding:'13px 22px', borderRadius:10, fontWeight:600, fontSize:'.95rem', cursor:'pointer', border:'1px solid rgba(255,255,255,.28)', display:'inline-flex', alignItems:'center', gap:7 }}>
+                <Users size={18} /> Veli Paneli <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+
           <p style={{ fontSize:'clamp(1rem,2vw,1.18rem)', color:'rgba(255,255,255,.75)', maxWidth:600, margin:'0 auto 38px', lineHeight:1.7, animation:'fadeInUp .7s ease .2s both' }}>
             EduTakip ile ders planlamasından finansal takibe, gelişim raporlarından AI destekli asistana kadar özel ders işinizi kolayca ve profesyonelce yönetin.
           </p>
-          {/* ── HERO GİRİŞ BUTONLARI (orijinal) ── */}
-          <div style={{ display:'flex', gap:14, justifyContent:'center', flexWrap:'wrap', animation:'fadeInUp .7s ease .3s both' }}>
+          {/* ── HERO GİRİŞ BUTONLARI (masaüstü/tablet) ── */}
+          {!isMobile && <div style={{ display:'flex', gap:14, justifyContent:'center', flexWrap:'wrap', animation:'fadeInUp .7s ease .3s both' }}>
             <button onClick={() => selectRole('teacher')}
               style={{ background:'#7c3aed', color:'#fff', padding:'14px 32px', borderRadius:10, fontWeight:700, fontSize:'1rem', cursor:'pointer', border:'none', boxShadow:'0 8px 30px rgba(124,58,237,.4)', display:'inline-flex', alignItems:'center', gap:8, animation:'float 3s ease-in-out infinite' }}>
               <GraduationCap size={19} /> Öğretmen Paneli <ChevronRight size={17} />
@@ -132,7 +183,7 @@ export default function Landing() {
               style={{ background:'rgba(255,255,255,.1)', color:'#fff', padding:'14px 32px', borderRadius:10, fontWeight:600, fontSize:'1rem', cursor:'pointer', border:'1px solid rgba(255,255,255,.25)', display:'inline-flex', alignItems:'center', gap:8, animation:'float 3s ease-in-out infinite .15s' }}>
               <Users size={19} /> Veli Paneli <ChevronRight size={17} />
             </button>
-          </div>
+          </div>}
           <div style={{ display:'flex', justifyContent:'center', gap:40, marginTop:56, flexWrap:'wrap', animation:'fadeInUp .7s ease .45s both' }}>
             {[['10+','Öğrenci Takibi'],['100%','Devam Takibi'],['AI','Destekli Asistan'],['₺0','Başlangıç Ücreti']].map(([val,lbl],i,arr) => (
               <React.Fragment key={lbl}>
