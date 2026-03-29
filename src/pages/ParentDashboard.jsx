@@ -15,7 +15,7 @@ export default function ParentDashboard() {
   const [showLessonRequest, setShowLessonRequest] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then((u) => {
+    base44.auth.me().then(u => {
       setUser(u);
       loadStudentData(u.email);
     });
@@ -27,9 +27,9 @@ export default function ParentDashboard() {
       const s = all[0];
       setStudent(s);
       const [l, p] = await Promise.all([
-      base44.entities.Lesson.filter({ studentId: s.id }),
-      base44.entities.Payment.filter({ studentId: s.id })]
-      );
+        base44.entities.Lesson.filter({ studentId: s.id }),
+        base44.entities.Payment.filter({ studentId: s.id }),
+      ]);
       setLessons(l.sort((a, b) => new Date(a.date) - new Date(b.date)));
       setPayments(p);
     }
@@ -37,11 +37,11 @@ export default function ParentDashboard() {
 
   const handleJoinWithCode = async () => {
     if (!inviteCode.trim()) return;
-    setLoading(true);setError('');
+    setLoading(true); setError('');
     const all = await base44.entities.Student.filter({ inviteCode: inviteCode.toUpperCase() });
     if (all.length === 0) {
       setError('Geçersiz davet kodu. Lütfen öğretmeninizden aldığınız kodu kontrol edin.');
-      setLoading(false);return;
+      setLoading(false); return;
     }
     const s = all[0];
     await base44.entities.Student.update(s.id, { inviteAccepted: true, parentEmail: user?.email || '' });
@@ -49,8 +49,8 @@ export default function ParentDashboard() {
     loadStudentData(user?.email || '');
   };
 
-  const totalPaid = payments.filter((p) => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
-  const pendingAmount = payments.filter((p) => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalPaid = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
+  const pendingAmount = payments.filter(p => p.status === 'bekliyor').reduce((s, p) => s + (p.amount || 0), 0);
 
   if (!student) {
     return (
@@ -62,82 +62,82 @@ export default function ParentDashboard() {
             Öğretmeninizin size verdiği davet kodunu girerek çocuğunuzun derslerini takip edebilirsiniz.
           </p>
           <input
-            value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+            value={inviteCode} onChange={e => setInviteCode(e.target.value.toUpperCase())}
             placeholder='Davet kodunu girin (örn: ABC123)'
             style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '1rem', textAlign: 'center', letterSpacing: '3px', fontWeight: '700', outline: 'none', marginBottom: '0.75rem' }}
-            onKeyDown={(e) => e.key === 'Enter' && handleJoinWithCode()} />
-          
+            onKeyDown={e => e.key === 'Enter' && handleJoinWithCode()}
+          />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <button onClick={handleJoinWithCode} disabled={loading || !inviteCode.trim()}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'back', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }} className="\n\u2726\nHesab\u0131ma Ba\u011Fla\n// CSS className=\"connect-btn\" ekle\n// globals.css veya module'e:\n\n.connect-btn {\n  position: relative;\n  display: inline-flex;\n  align-items: center;\n  gap: 10px;\n  padding: 0.9rem 2rem;\n  border-radius: 100px;\n  border: none;\n  background: #5c35cc;\n  color: #fff;\n  font-size: 1rem;\n  font-weight: 600;\n  cursor: pointer;\n  overflow: hidden;\n}\n\n@property --angle {\n  syntax: '<angle>';\n  initial-value: 0deg;\n  inherits: false;\n}\n\n.connect-btn::before {\n  content: '';\n  position: absolute;\n  inset: -2px;\n  border-radius: 100px;\n  padding: 2px;\n  background: conic-gradient(\n    from var(--angle),\n    #a855f7, #7c3aed, #4f46e5,\n    #818cf8, #c084fc, #a855f7\n  );\n  -webkit-mask:\n    linear-gradient(#fff 0 0) content-box,\n    linear-gradient(#fff 0 0);\n  -webkit-mask-composite: xor;\n  mask-composite: exclude;\n  animation: border-spin 2.5s linear infinite;\n}\n\n@keyframes border-spin {\n  to { --angle: 360deg; }\n}">
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
           </button>
         </div>
-      </div>);
-
+      </div>
+    );
   }
 
   const menuItems = [
-  {
-    label: 'Dersler & Ödemeler',
-    desc: 'Toplam ders sayısı ve ödeme geçmişini görüntüle',
-    icon: DollarSign,
-    gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    shadow: 'rgba(99,102,241,0.35)',
-    page: 'ParentLessonsPayments',
-    stats: [
-    { label: 'Toplam Ders', value: lessons.length },
-    { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}` }]
-
-  },
-  {
-    label: 'Ödevler',
-    desc: 'Öğretmenin verdiği ödevleri takip et',
-    icon: BookOpen,
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-    shadow: 'rgba(245,158,11,0.35)',
-    page: 'ParentHomework',
-    stats: []
-  },
-  {
-    label: 'Ders Performansı',
-    desc: 'Gelişim grafikleri ve değerlendirme notları',
-    icon: BarChart2,
-    gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-    shadow: 'rgba(16,185,129,0.35)',
-    page: 'ParentPerformance',
-    stats: [
-    { label: 'Tamamlanan', value: lessons.filter((l) => l.status === 'tamamlandı').length }]
-
-  },
-  {
-    label: 'Ders Talebi',
-    desc: 'İptal, erteleme veya değişim talebinde bulun',
-    icon: RefreshCw,
-    gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-    shadow: 'rgba(59,130,246,0.35)',
-    page: 'lessonRequest',
-    stats: []
-  },
-  {
-    label: 'Ayarlar',
-    desc: 'Bildirim ve hesap tercihlerini yönet',
-    icon: Settings,
-    gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-    shadow: 'rgba(100,116,139,0.35)',
-    page: 'ParentSettings',
-    stats: []
-  },
-  {
-    label: 'Çıkış Yap',
-    desc: 'Hesabınızdan çıkış yapın',
-    icon: LogOut,
-    gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    shadow: 'rgba(239,68,68,0.35)',
-    page: 'logout',
-    stats: []
-  }];
-
+    {
+      label: 'Dersler & Ödemeler',
+      desc: 'Toplam ders sayısı ve ödeme geçmişini görüntüle',
+      icon: DollarSign,
+      gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+      shadow: 'rgba(99,102,241,0.35)',
+      page: 'ParentLessonsPayments',
+      stats: [
+        { label: 'Toplam Ders', value: lessons.length },
+        { label: 'Ödenen', value: `₺${totalPaid.toLocaleString('tr-TR')}` },
+      ],
+    },
+    {
+      label: 'Ödevler',
+      desc: 'Öğretmenin verdiği ödevleri takip et',
+      icon: BookOpen,
+      gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+      shadow: 'rgba(245,158,11,0.35)',
+      page: 'ParentHomework',
+      stats: [],
+    },
+    {
+      label: 'Ders Performansı',
+      desc: 'Gelişim grafikleri ve değerlendirme notları',
+      icon: BarChart2,
+      gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+      shadow: 'rgba(16,185,129,0.35)',
+      page: 'ParentPerformance',
+      stats: [
+        { label: 'Tamamlanan', value: lessons.filter(l => l.status === 'tamamlandı').length },
+      ],
+    },
+    {
+      label: 'Ders Talebi',
+      desc: 'İptal, erteleme veya değişim talebinde bulun',
+      icon: RefreshCw,
+      gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+      shadow: 'rgba(59,130,246,0.35)',
+      page: 'lessonRequest',
+      stats: [],
+    },
+    {
+      label: 'Ayarlar',
+      desc: 'Bildirim ve hesap tercihlerini yönet',
+      icon: Settings,
+      gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
+      shadow: 'rgba(100,116,139,0.35)',
+      page: 'ParentSettings',
+      stats: [],
+    },
+    {
+      label: 'Çıkış Yap',
+      desc: 'Hesabınızdan çıkış yapın',
+      icon: LogOut,
+      gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+      shadow: 'rgba(239,68,68,0.35)',
+      page: 'logout',
+      stats: [],
+    },
+  ];
 
   return (
     <div style={{ padding: '1rem', background: 'var(--bg-primary)', minHeight: '100vh' }}>
@@ -152,7 +152,7 @@ export default function ParentDashboard() {
       {/* Quick Stats Row */}
       {(() => {
         const today = new Date();
-        const upcomingLesson = lessons.filter((l) => l.status === 'planlandı' && new Date(l.date) >= new Date(today.toDateString())).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+        const upcomingLesson = lessons.filter(l => l.status === 'planlandı' && new Date(l.date) >= new Date(today.toDateString())).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
         const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
         const dayNamesLong = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
@@ -160,7 +160,7 @@ export default function ParentDashboard() {
         // JS getDay(): 0=Pazar,1=Pzt,...,6=Cmt
         const scheduleMap = {};
         // First try to derive from upcoming/planned lessons
-        lessons.filter((l) => l.status === 'planlandı').forEach((l) => {
+        lessons.filter(l => l.status === 'planlandı').forEach(l => {
           try {
             const d = new Date(l.date + 'T12:00:00');
             const jsDay = d.getDay();
@@ -169,20 +169,20 @@ export default function ParentDashboard() {
         });
         // Fallback: also parse student.schedule for cases with no lessons yet
         if (Object.keys(scheduleMap).length === 0) {
-          (student.schedule || []).forEach((slot) => {
+          (student.schedule || []).forEach(slot => {
             if (typeof slot.day === 'number') {
               // 0=Pzt..6=Paz → JS getDay: Pzt=1..Paz=0
               const jsDay = slot.day === 6 ? 0 : slot.day + 1;
               scheduleMap[jsDay] = slot.time;
             } else {
               const shortIdx = dayNames.indexOf(slot.day);
-              if (shortIdx >= 0) {scheduleMap[shortIdx] = slot.time;return;}
+              if (shortIdx >= 0) { scheduleMap[shortIdx] = slot.time; return; }
               const longIdx = dayNamesLong.indexOf(slot.day);
               if (longIdx >= 0) scheduleMap[longIdx] = slot.time;
             }
           });
         }
-        const totalDebt = payments.filter((p) => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
+        const totalDebt = payments.filter(p => p.status === 'bekliyor' || p.status === 'gecikmiş').reduce((s, p) => s + (p.amount || 0), 0);
         const bakiye = totalPaid - totalDebt;
         const monthlyFee = student.monthlyFee || (student.feePerLesson || 0) * (student.weeklyLessons || 1) * 4;
         return (
@@ -200,8 +200,8 @@ export default function ParentDashboard() {
             </div>
 
             {/* Next Lesson */}
-            {upcomingLesson ?
-            <div style={{ background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+            {upcomingLesson ? (
+              <div style={{ background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
                   <Calendar size={13} color='#a5b4fc' />
                   <span style={{ color: '#a5b4fc', fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.5px' }}>SONRAKİ DERS</span>
@@ -210,16 +210,16 @@ export default function ParentDashboard() {
                   {dayNamesLong[new Date(upcomingLesson.date).getDay()]}, {new Date(upcomingLesson.date).getDate()} {monthNames[new Date(upcomingLesson.date).getMonth()]}
                   <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}> · {upcomingLesson.startTime} - {upcomingLesson.endTime}</span>
                 </p>
-              </div> :
-
-            <div style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+              </div>
+            ) : (
+              <div style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>Planlanmış ders yok</p>
               </div>
-            }
+            )}
 
             {/* Weekly Schedule */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.35rem', marginBottom: '1rem' }}>
-              {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
+              {[1,2,3,4,5,6,0].map(dayIdx => {
                 const time = scheduleMap[dayIdx];
                 const label = dayNames[dayIdx];
                 const hasLesson = !!time;
@@ -229,12 +229,12 @@ export default function ParentDashboard() {
                     border: hasLesson ? '1.5px solid rgba(99,102,241,0.6)' : '1.5px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px',
                     padding: '0.4rem 0.2rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
                   }}>
                     <p style={{ fontSize: '0.62rem', fontWeight: '700', color: hasLesson ? '#a5b4fc' : 'rgba(255,255,255,0.3)', marginBottom: '0.15rem' }}>{label}</p>
                     <p style={{ fontSize: '0.62rem', color: hasLesson ? 'white' : 'rgba(255,255,255,0.2)', fontWeight: hasLesson ? '600' : '400' }}>{time || '—'}</p>
-                  </div>);
-
+                  </div>
+                );
               })}
             </div>
 
@@ -251,8 +251,8 @@ export default function ParentDashboard() {
                 <span style={{ fontSize: '0.95rem', fontWeight: '800', color: 'white' }}>₺{monthlyFee.toLocaleString('tr-TR')}</span>
               </div>
             </div>
-          </div>);
-
+          </div>
+        );
       })()}
 
       {/* Menu Cards */}
@@ -269,9 +269,9 @@ export default function ParentDashboard() {
               setShowLessonRequest(true);
             }
           };
-          const href = page === 'logout' || page === 'lessonRequest' ? '#' : createPageUrl(page);
+          const href = (page === 'logout' || page === 'lessonRequest') ? '#' : createPageUrl(page);
           return (
-            <a key={label} href={href} onClick={handleClick}
+          <a key={label} href={href} onClick={handleClick}
             style={{
               background: gradient,
               borderRadius: '14px',
@@ -283,11 +283,11 @@ export default function ParentDashboard() {
               boxShadow: `0 4px 16px ${shadow}`,
               transition: 'transform 0.15s, box-shadow 0.15s',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
-            onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)';e.currentTarget.style.boxShadow = `0 8px 24px ${shadow}`;}}
-            onMouseLeave={(e) => {e.currentTarget.style.transform = 'translateY(0)';e.currentTarget.style.boxShadow = `0 4px 16px ${shadow}`;}}>
-              
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${shadow}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${shadow}`; }}
+          >
             {/* Decorative circle */}
             <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
             <div style={{ position: 'absolute', bottom: '-20px', right: '15px', width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
@@ -302,23 +302,23 @@ export default function ParentDashboard() {
             <h3 style={{ color: 'white', fontSize: '0.9rem', fontWeight: '800', marginBottom: '0.2rem', position: 'relative' }}>{label}</h3>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.7rem', lineHeight: '1.3', position: 'relative', marginBottom: stats.length > 0 ? '0.6rem' : '0' }}>{desc}</p>
 
-            {stats.length > 0 &&
+            {stats.length > 0 && (
               <div style={{ display: 'flex', gap: '0.6rem', position: 'relative', flexWrap: 'wrap' }}>
-                {stats.map((s) =>
-                <div key={s.label} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '8px', padding: '0.3rem 0.6rem' }}>
+                {stats.map(s => (
+                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.18)', borderRadius: '8px', padding: '0.3rem 0.6rem' }}>
                     <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.6rem', fontWeight: '600', marginBottom: '0.05rem' }}>{s.label}</p>
                     <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>{s.value}</p>
                   </div>
-                )}
+                ))}
               </div>
-              }
-            </a>);
-
-        })}
+            )}
+            </a>
+            );
+            })}
       </div>
-      {showLessonRequest && student &&
-      <LessonRequestModal student={student} onClose={() => setShowLessonRequest(false)} />
-      }
-    </div>);
-
+      {showLessonRequest && student && (
+        <LessonRequestModal student={student} onClose={() => setShowLessonRequest(false)} />
+      )}
+    </div>
+  );
 }
