@@ -136,18 +136,21 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 9999,
         background: 'rgba(15,23,42,0.5)',
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
         backdropFilter: 'blur(4px)',
+        padding: '1rem',
       }}
     >
       <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
+        @keyframes modalIn {
+          from { transform: scale(0.92) translateY(16px); opacity: 0; }
+          to   { transform: scale(1)    translateY(0);    opacity: 1; }
         }
         .hw-modal-scroll::-webkit-scrollbar { width: 4px; }
         .hw-modal-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -163,28 +166,20 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
         className="hw-modal-scroll"
         style={{
           background: 'white',
-          borderRadius: '20px 20px 0 0',
+          borderRadius: '20px',
           width: '100%',
-          maxWidth: '520px',
-          /* bottom padding accounts for mobile nav bar (~64px) */
-          maxHeight: 'calc(100vh - 60px)',
+          maxWidth: '480px',
+          maxHeight: 'calc(100vh - 80px)',
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: '1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px))',
+          padding: '1.5rem',
           fontFamily: 'Inter, sans-serif',
-          animation: 'slideUp 0.32s cubic-bezier(0.34,1.56,0.64,1)',
+          animation: 'modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1)',
           boxSizing: 'border-box',
-          boxShadow: '0 -8px 40px rgba(99,102,241,0.15)',
+          boxShadow: '0 20px 60px rgba(15,23,42,0.25)',
           border: '1px solid #e0e7ff',
-          borderBottom: 'none',
-          paddingBottom: '80px',
         }}
       >
-        {/* Drag handle */}
-        <div style={{
-          width: '40px', height: '4px', borderRadius: '2px',
-          background: '#e0e7ff', margin: '0 auto 1rem',
-        }} />
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
