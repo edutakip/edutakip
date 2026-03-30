@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { BookOpen, CheckCircle, Clock, AlertCircle, MessageSquare, X, Upload, Calendar } from 'lucide-react';
 import { format, parseISO, differenceInSeconds } from 'date-fns';
@@ -64,7 +65,7 @@ function Countdown({ dueDate }) {
   );
 }
 
-// ── Homework Modal ────────────────────────────────────────────
+// ── Homework Modal (Portal) ───────────────────────────────────
 function HomeworkModal({ hw, student, onClose, onSubmitted }) {
   const [files, setFiles] = useState([]);
   const [teacherNote, setTeacherNote] = useState(hw.parentNote || '');
@@ -126,31 +127,60 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     }
   };
 
-  // Lock body scroll
+  // Lock ALL scroll containers when modal is open
   useEffect(() => {
+    // Save original styles
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    // Lock body + html
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+
+    // Also lock any scrollable parent divs (base44 layout container)
+    const scrollables = Array.from(document.querySelectorAll('*')).filter(el => {
+      if (el === document.body || el === document.documentElement) return false;
+      const style = window.getComputedStyle(el);
+      return (style.overflow === 'auto' || style.overflow === 'scroll' ||
+              style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+             el.scrollHeight > el.clientHeight;
+    });
+    const savedOverflows = scrollables.map(el => ({ el, overflow: el.style.overflow, overflowY: el.style.overflowY }));
+    scrollables.forEach(el => { el.style.overflow = 'hidden'; el.style.overflowY = 'hidden'; });
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      savedOverflows.forEach(({ el, overflow, overflowY }) => {
+        el.style.overflow = overflow;
+        el.style.overflowY = overflowY;
+      });
+    };
   }, []);
 
-  return (
+  const modal = (
     <div
       onClick={onClose}
       style={{
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        zIndex: 9999,
-        background: 'rgba(15,23,42,0.5)',
+        width: '100vw',
+        height: '100vh',
+        zIndex: 2147483647, // max z-index
+        background: 'rgba(15,23,42,0.55)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
         padding: '1rem',
+        boxSizing: 'border-box',
       }}
     >
       <style>{`
-        @keyframes modalIn {
-          from { transform: scale(0.92) translateY(16px); opacity: 0; }
-          to   { transform: scale(1)    translateY(0);    opacity: 1; }
+        @keyframes hwModalIn {
+          from { transform: scale(0.93) translateY(12px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         .hw-modal-scroll::-webkit-scrollbar { width: 4px; }
         .hw-modal-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -169,18 +199,18 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
           borderRadius: '20px',
           width: '100%',
           maxWidth: '480px',
-          maxHeight: 'calc(100vh - 80px)',
+          maxHeight: 'calc(100vh - 100px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           padding: '1.5rem',
           fontFamily: 'Inter, sans-serif',
-          animation: 'modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1)',
+          animation: 'hwModalIn 0.28s cubic-bezier(0.34,1.56,0.64,1)',
           boxSizing: 'border-box',
-          boxShadow: '0 20px 60px rgba(15,23,42,0.25)',
+          boxShadow: '0 24px 64px rgba(15,23,42,0.3)',
           border: '1px solid #e0e7ff',
+          position: 'relative',
         }}
       >
-
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <div style={{
@@ -387,6 +417,9 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
       </div>
     </div>
   );
+
+  // Mount directly into document.body via portal — bypasses ALL layout scroll containers
+  return ReactDOM.createPortal(modal, document.body);
 }
 
 // ── Main Page ─────────────────────────────────────────────────
@@ -581,7 +614,7 @@ export default function ParentHomework() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal — rendered via portal into document.body */}
       {selectedHw && (
         <HomeworkModal
           hw={selectedHw}
