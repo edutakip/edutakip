@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight, Upload, Search, Filter, Sparkles, Bell, Send, Eye, Award, ArrowRight, FileText, Image as ImageIcon, Paperclip } from 'lucide-react';
 import { showToast } from '@/lib/toast';
@@ -45,9 +46,29 @@ function AnimCounter({ value }) {
   return <>{display}</>;
 }
 
+/* ─── usePortalLock — "Yaramaz pop-up fix" ───────────── */
+function usePortalLock(contentRef) {
+  useEffect(() => {
+    const prevent = (e) => {
+      if (contentRef.current && contentRef.current.contains(e.target)) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', prevent, { passive: false });
+    document.addEventListener('wheel', prevent, { passive: false });
+    return () => {
+      document.removeEventListener('touchmove', prevent);
+      document.removeEventListener('wheel', prevent);
+    };
+  }, [contentRef]);
+}
+
 /* ─── Slide Panel ────────────────────────────────────── */
 function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit }) {
   const [visible, setVisible] = useState(false);
+  const panelRef = useRef(null);
+
+  usePortalLock(panelRef);
+
   useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
 
   const handleClose = () => {
@@ -69,40 +90,47 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
   ];
   const stepIndex = hw?.status === 'tamamlandı' ? 2 : hw?.status === 'gecikmiş' ? 0 : 0;
 
-  return (
+  const panel = (
     <>
+      <style>{`
+        @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes popIn { from { opacity:0; transform:scale(0.85) } to { opacity:1; transform:scale(1) } }
+        @keyframes progressFill { from { width: 0 } to { width: var(--target-width) } }
+        @keyframes shimmerSlide { 0% { transform: translateX(-100%) } 100% { transform: translateX(200%) } }
+      `}</style>
+
       {/* Backdrop */}
       <div onClick={handleClose} style={{
         position: 'fixed', inset: 0, zIndex: 9998,
         background: 'rgba(0,0,0,0.25)',
         backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.3s ease',
       }} />
-      {/* Panel */}
-      <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0,
-        width: 'min(420px, 95vw)',
-        background: 'white',
-        zIndex: 9999,
-        boxShadow: '-20px 0 60px rgba(0,0,0,0.15)',
-        transform: visible ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
-        display: 'flex', flexDirection: 'column',
-        overflowY: 'auto',
-      }}>
-        <style>{`
-          @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-          @keyframes popIn { from { opacity:0; transform:scale(0.85) } to { opacity:1; transform:scale(1) } }
-          @keyframes progressFill { from { width: 0 } to { width: var(--target-width) } }
-          @keyframes shimmerSlide { 0% { transform: translateX(-100%) } 100% { transform: translateX(200%) } }
-        `}</style>
 
+      {/* Panel */}
+      <div
+        ref={panelRef}
+        style={{
+          position: 'fixed', top: 0, right: 0, bottom: 0,
+          width: 'min(420px, 95vw)',
+          background: 'white',
+          zIndex: 9999,
+          boxShadow: '-20px 0 60px rgba(0,0,0,0.15)',
+          transform: visible ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
+          display: 'flex', flexDirection: 'column',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         {/* Header gradient banner */}
         <div style={{
           background: cfg.gradient,
           padding: '1.75rem 1.5rem 3.5rem',
           position: 'relative', overflow: 'hidden',
+          flexShrink: 0,
         }}>
           <div style={{ position:'absolute', right:-30, top:-30, width:150, height:150, borderRadius:'50%', background:'rgba(255,255,255,0.08)' }} />
           <div style={{ position:'absolute', right:40, bottom:-50, width:100, height:100, borderRadius:'50%', background:'rgba(255,255,255,0.06)' }} />
@@ -251,10 +279,15 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
               </button>
             </div>
           </div>
+
+          {/* Bottom padding for mobile nav bar */}
+          <div style={{ height: '5rem' }} />
         </div>
       </div>
     </>
   );
+
+  return ReactDOM.createPortal(panel, document.body);
 }
 
 /* ─── Add/Edit Modal ─────────────────────────────────── */
@@ -267,6 +300,9 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
   });
   const [visible, setVisible] = useState(false);
   const [datePreset, setDatePreset] = useState('');
+  const modalRef = useRef(null);
+
+  usePortalLock(modalRef);
 
   useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
 
@@ -286,32 +322,47 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
   const canSave = form.studentId && form.title;
 
-  return (
+  const modal = (
     <>
       <style>{`
         @keyframes modalBg { from{opacity:0} to{opacity:1} }
         @keyframes modalSlide { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes labelFloat { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
-      <div onClick={handleClose} style={{
-        position:'fixed', inset:0, zIndex:99999,
-        background:'rgba(0,0,0,0.4)',
-        backdropFilter:'blur(6px)',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        padding:'1rem',
-        opacity: visible ? 1 : 0,
-        animation:'modalBg 0.25s ease both',
-      }}>
-        <div onClick={e => e.stopPropagation()} style={{
-          background:'white',
-          borderRadius:24,
-          width:'100%', maxWidth:480,
-          maxHeight:'90vh', overflowY:'auto',
-          boxShadow:'0 32px 80px rgba(0,0,0,0.2)',
-          animation:'modalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both',
-        }}>
+
+      {/* Overlay */}
+      <div
+        onClick={handleClose}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1rem',
+          boxSizing: 'border-box',
+          opacity: visible ? 1 : 0,
+          animation: 'modalBg 0.25s ease both',
+        }}
+      >
+        {/* Modal box */}
+        <div
+          ref={modalRef}
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: 'white',
+            borderRadius: 24,
+            width: '100%', maxWidth: 480,
+            maxHeight: 'calc(100dvh - 80px)',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            WebkitOverflowScrolling: 'touch',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.2)',
+            animation: 'modalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+            boxSizing: 'border-box',
+          }}
+        >
           {/* Modal header */}
-          <div style={{ padding:'1.5rem 1.5rem 0' }}>
+          <div style={{ padding: '1.5rem 1.5rem 0' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
               <div>
                 <h2 style={{ fontSize:'1.25rem', fontWeight:800, color:'#111827', marginBottom:'0.15rem' }}>
@@ -468,7 +519,6 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               display:'flex', alignItems:'center', justifyContent:'center', gap:'0.6rem',
               boxShadow: canSave ? '0 8px 24px rgba(249,115,22,0.35)' : 'none',
               transition:'all 0.2s',
-              transform: canSave ? 'scale(1)' : 'scale(0.99)',
             }}
               onMouseEnter={e => canSave && (e.currentTarget.style.transform = 'scale(1.02)')}
               onMouseLeave={e => canSave && (e.currentTarget.style.transform = 'scale(1)')}>
@@ -480,6 +530,8 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
       </div>
     </>
   );
+
+  return ReactDOM.createPortal(modal, document.body);
 }
 
 /* ─── Main Page ──────────────────────────────────────── */
@@ -593,7 +645,6 @@ export default function TeacherHomework() {
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes cardPop { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
         @keyframes badgePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
-        @keyframes searchGlow { 0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)} 50%{box-shadow:0 0 0 3px rgba(249,115,22,0.15)} }
         .hw-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .hw-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.1) !important; }
         .filter-tab { transition: all 0.2s ease; }
