@@ -73,6 +73,7 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const fileInputRef = useRef();
+  const modalContentRef = useRef();
 
   const MAX_PHOTOS = 25;
   const MAX_PHOTO_MB = 10;
@@ -127,34 +128,31 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     }
   };
 
-  // Lock ALL scroll containers when modal is open
+  // Prevent background scroll WITHOUT locking the modal's own scroll
   useEffect(() => {
-    // Save original styles
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
+    // Prevent touchmove on overlay but allow it inside modal content
+    const preventScroll = (e) => {
+      if (modalContentRef.current && modalContentRef.current.contains(e.target)) {
+        // Allow scroll inside modal
+        return;
+      }
+      e.preventDefault();
+    };
 
-    // Lock body + html
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
+    // Prevent wheel scroll on background
+    const preventWheel = (e) => {
+      if (modalContentRef.current && modalContentRef.current.contains(e.target)) {
+        return;
+      }
+      e.preventDefault();
+    };
 
-    // Also lock any scrollable parent divs (base44 layout container)
-    const scrollables = Array.from(document.querySelectorAll('*')).filter(el => {
-      if (el === document.body || el === document.documentElement) return false;
-      const style = window.getComputedStyle(el);
-      return (style.overflow === 'auto' || style.overflow === 'scroll' ||
-              style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-             el.scrollHeight > el.clientHeight;
-    });
-    const savedOverflows = scrollables.map(el => ({ el, overflow: el.style.overflow, overflowY: el.style.overflowY }));
-    scrollables.forEach(el => { el.style.overflow = 'hidden'; el.style.overflowY = 'hidden'; });
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventWheel, { passive: false });
 
     return () => {
-      document.body.style.overflow = originalBodyOverflow;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      savedOverflows.forEach(({ el, overflow, overflowY }) => {
-        el.style.overflow = overflow;
-        el.style.overflowY = overflowY;
-      });
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventWheel);
     };
   }, []);
 
@@ -166,7 +164,7 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
         top: 0, left: 0, right: 0, bottom: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 2147483647, // max z-index
+        zIndex: 2147483647,
         background: 'rgba(15,23,42,0.55)',
         display: 'flex',
         alignItems: 'center',
@@ -182,9 +180,9 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
           from { transform: scale(0.93) translateY(12px); opacity: 0; }
           to   { transform: scale(1) translateY(0); opacity: 1; }
         }
-        .hw-modal-scroll::-webkit-scrollbar { width: 4px; }
-        .hw-modal-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hw-modal-scroll::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+        .hw-modal-inner::-webkit-scrollbar { width: 4px; }
+        .hw-modal-inner::-webkit-scrollbar-track { background: transparent; }
+        .hw-modal-inner::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
         .hw-file-zone:hover { border-color: #6366f1 !important; background: #eef2ff !important; }
         .hw-remove-btn:hover { background: #fee2e2 !important; }
         .hw-submit-btn:hover:not(:disabled) { background: #4338ca !important; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.35) !important; }
@@ -192,16 +190,20 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
       `}</style>
 
       <div
+        ref={modalContentRef}
         onClick={e => e.stopPropagation()}
-        className="hw-modal-scroll"
+        className="hw-modal-inner"
         style={{
           background: 'white',
           borderRadius: '20px',
           width: '100%',
           maxWidth: '480px',
-          maxHeight: 'calc(100vh - 100px)',
+          /* Key fix: use dvh so it accounts for mobile browser chrome */
+          maxHeight: 'calc(100dvh - 100px)',
           overflowY: 'auto',
           overflowX: 'hidden',
+          /* Enable momentum scrolling on iOS */
+          WebkitOverflowScrolling: 'touch',
           padding: '1.5rem',
           fontFamily: 'Inter, sans-serif',
           animation: 'hwModalIn 0.28s cubic-bezier(0.34,1.56,0.64,1)',
@@ -418,7 +420,6 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     </div>
   );
 
-  // Mount directly into document.body via portal — bypasses ALL layout scroll containers
   return ReactDOM.createPortal(modal, document.body);
 }
 
