@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, CheckCircle, Clock, AlertCircle, MessageSquare, X, Upload, Calendar } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, AlertCircle, MessageSquare, X, Upload, Calendar, Eye } from 'lucide-react';
 import { format, parseISO, differenceInSeconds } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -114,10 +114,14 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     addFiles(e.dataTransfer.files);
   };
 
+  // ── Tamamla → status: 'tamamlandı' ──────────────────────────
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await base44.entities.Homework.update(hw.id, { parentNote: teacherNote || hw.parentNote });
+      await base44.entities.Homework.update(hw.id, {
+        parentNote: teacherNote || hw.parentNote,
+        status: 'tamamlandı',
+      });
       setSubmitted(true);
       setTimeout(() => {
         onSubmitted();
@@ -130,26 +134,16 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
 
   // Prevent background scroll WITHOUT locking the modal's own scroll
   useEffect(() => {
-    // Prevent touchmove on overlay but allow it inside modal content
     const preventScroll = (e) => {
-      if (modalContentRef.current && modalContentRef.current.contains(e.target)) {
-        // Allow scroll inside modal
-        return;
-      }
+      if (modalContentRef.current && modalContentRef.current.contains(e.target)) return;
       e.preventDefault();
     };
-
-    // Prevent wheel scroll on background
     const preventWheel = (e) => {
-      if (modalContentRef.current && modalContentRef.current.contains(e.target)) {
-        return;
-      }
+      if (modalContentRef.current && modalContentRef.current.contains(e.target)) return;
       e.preventDefault();
     };
-
     document.addEventListener('touchmove', preventScroll, { passive: false });
     document.addEventListener('wheel', preventWheel, { passive: false });
-
     return () => {
       document.removeEventListener('touchmove', preventScroll);
       document.removeEventListener('wheel', preventWheel);
@@ -198,11 +192,9 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
           borderRadius: '20px',
           width: '100%',
           maxWidth: '480px',
-          /* Key fix: use dvh so it accounts for mobile browser chrome */
           maxHeight: 'calc(100dvh - 100px)',
           overflowY: 'auto',
           overflowX: 'hidden',
-          /* Enable momentum scrolling on iOS */
           WebkitOverflowScrolling: 'touch',
           padding: '1.5rem',
           fontFamily: 'Inter, sans-serif',
@@ -466,10 +458,38 @@ export default function ParentHomework() {
     setHomeworks(h);
   };
 
+  // ── Ödeve tıklandığında → 'goruldu' statüsüne güncelle ──────
+  const handleOpenHomework = async (hw) => {
+    // Sadece 'verildi' veya 'gecikmiş' ise güncelle
+    // 'goruldu', 'tamamlandı' olanları tekrar güncelleme
+    const shouldMarkSeen = hw.status === 'verildi' || hw.status === 'gecikmiş';
+
+    if (shouldMarkSeen) {
+      // Önce local state'i güncelle (anlık feedback)
+      setHomeworks(prev =>
+        prev.map(h => h.id === hw.id ? { ...h, status: 'goruldu' } : h)
+      );
+      // Seçili ödevi güncelle
+      setSelectedHw({ ...hw, status: 'goruldu' });
+      // Backend'e kaydet
+      try {
+        await base44.entities.Homework.update(hw.id, { status: 'goruldu' });
+      } catch {
+        // Hata olursa orijinal hali geri koy
+        setHomeworks(prev =>
+          prev.map(h => h.id === hw.id ? { ...h, status: hw.status } : h)
+        );
+      }
+    } else {
+      setSelectedHw(hw);
+    }
+  };
+
   const statusCfg = {
-    verildi: { label: 'Yapılacak', bg: '#e0e7ff', color: '#4338ca', icon: Clock },
-    tamamlandı: { label: 'Tamamlandı', bg: '#d1fae5', color: '#065f46', icon: CheckCircle },
-    gecikmiş: { label: 'Gecikmiş', bg: '#fee2e2', color: '#b91c1c', icon: AlertCircle },
+    verildi:    { label: 'Yapılacak',   bg: '#e0e7ff', color: '#4338ca', icon: Clock },
+    goruldu:    { label: 'Görüldü',     bg: '#fef9c3', color: '#854d0e', icon: Eye },
+    tamamlandı: { label: 'Tamamlandı',  bg: '#d1fae5', color: '#065f46', icon: CheckCircle },
+    gecikmiş:   { label: 'Gecikmiş',    bg: '#fee2e2', color: '#b91c1c', icon: AlertCircle },
   };
 
   const filtered = homeworks.filter(h => filter === 'all' || h.status === filter);
@@ -538,7 +558,7 @@ export default function ParentHomework() {
                   border: '1px solid #f1f5f9', overflow: 'hidden',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.04)', cursor: 'pointer',
                 }}
-                onClick={() => setSelectedHw(hw)}
+                onClick={() => handleOpenHomework(hw)}
               >
                 <div style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                   <div style={{
