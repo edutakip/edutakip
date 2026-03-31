@@ -51,13 +51,39 @@ function AnimCounter({ value }) {
 /* ─── usePortalLock — "Yaramaz pop-up fix" ───────────── */
 function usePortalLock(contentRef) {
   useEffect(() => {
+    // Lock all background scrollable containers
+    const scrollables = Array.from(document.querySelectorAll('*')).filter(el => {
+      if (contentRef.current?.contains(el)) return false;
+      const style = window.getComputedStyle(el);
+      return (
+        (style.overflow === 'auto' || style.overflow === 'scroll' ||
+         style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight
+      );
+    });
+    const saved = scrollables.map(el => ({
+      el,
+      overflow: el.style.overflow,
+      overflowY: el.style.overflowY,
+    }));
+    scrollables.forEach(el => {
+      el.style.overflow = 'hidden';
+      el.style.overflowY = 'hidden';
+    });
+
+    // Also block touch/wheel on anything outside the modal content
     const prevent = (e) => {
       if (contentRef.current && contentRef.current.contains(e.target)) return;
       e.preventDefault();
     };
     document.addEventListener('touchmove', prevent, { passive: false });
     document.addEventListener('wheel', prevent, { passive: false });
+
     return () => {
+      saved.forEach(({ el, overflow, overflowY }) => {
+        el.style.overflow = overflow;
+        el.style.overflowY = overflowY;
+      });
       document.removeEventListener('touchmove', prevent);
       document.removeEventListener('wheel', prevent);
     };
