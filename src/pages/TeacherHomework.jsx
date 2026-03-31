@@ -51,8 +51,23 @@ function AnimCounter({ value }) {
 /* ─── usePortalLock — "Yaramaz pop-up fix" ───────────── */
 function usePortalLock(contentRef) {
   useEffect(() => {
-    // Lock all background scrollable containers
+    // ── 1) body position:fixed trick ─────────────────────
+    // Bu yöntem her layout'ta çalışır — scroll pozisyonunu kaydeder,
+    // body'yi fixed yapar (scroll'u dondurur), kapanınca geri yükler.
+    const scrollY = window.scrollY;
+    const originalBodyPosition = document.body.style.position;
+    const originalBodyTop = document.body.style.top;
+    const originalBodyWidth = document.body.style.width;
+    const originalBodyOverflow = document.body.style.overflow;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+
+    // ── 2) Tüm iç scroll container'ları da kilitle ───────
     const scrollables = Array.from(document.querySelectorAll('*')).filter(el => {
+      if (el === document.body || el === document.documentElement) return false;
       if (contentRef.current?.contains(el)) return false;
       const style = window.getComputedStyle(el);
       return (
@@ -71,7 +86,7 @@ function usePortalLock(contentRef) {
       el.style.overflowY = 'hidden';
     });
 
-    // Also block touch/wheel on anything outside the modal content
+    // ── 3) touch/wheel eventleri engelle ─────────────────
     const prevent = (e) => {
       if (contentRef.current && contentRef.current.contains(e.target)) return;
       e.preventDefault();
@@ -80,6 +95,13 @@ function usePortalLock(contentRef) {
     document.addEventListener('wheel', prevent, { passive: false });
 
     return () => {
+      // body'yi eski haline getir ve scroll pozisyonunu geri yükle
+      document.body.style.position = originalBodyPosition;
+      document.body.style.top = originalBodyTop;
+      document.body.style.width = originalBodyWidth;
+      document.body.style.overflow = originalBodyOverflow;
+      window.scrollTo(0, scrollY);
+
       saved.forEach(({ el, overflow, overflowY }) => {
         el.style.overflow = overflow;
         el.style.overflowY = overflowY;
@@ -87,7 +109,7 @@ function usePortalLock(contentRef) {
       document.removeEventListener('touchmove', prevent);
       document.removeEventListener('wheel', prevent);
     };
-  }, [contentRef]);
+  }, []);
 }
 
 /* ─── Slide Panel ────────────────────────────────────── */
