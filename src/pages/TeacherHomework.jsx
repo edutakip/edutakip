@@ -21,9 +21,11 @@ function getDueDateLabel(dueDate) {
 }
 
 const STATUS_CONFIG = {
-  verildi:    { label: 'Bekliyor',     color: '#4f46e5', bg: '#eef2ff', dot: '#6366f1', icon: Clock,        gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
-  tamamlandı: { label: 'Tamamlandı',  color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
-  gecikmiş:   { label: 'Gecikmiş',    color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
+  verildi:         { label: 'Bekliyor',        color: '#4f46e5', bg: '#eef2ff', dot: '#6366f1', icon: Clock,        gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
+  goruldu:         { label: 'Görüldü',         color: '#b45309', bg: '#fef9c3', dot: '#ca8a04', icon: Eye,          gradient: 'linear-gradient(135deg, #b45309, #ca8a04)' },
+  tamamlandı:      { label: 'Tamamlandı',      color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
+  gecikmiş:        { label: 'Gecikmiş',        color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
+  degerlendirildi: { label: 'Değerlendirildi', color: '#7c3aed', bg: '#f5f3ff', dot: '#8b5cf6', icon: Award,        gradient: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' },
 };
 
 const avatarColors = ['#f97316', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
@@ -83,19 +85,27 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
   const avatarColor = getAvatarColor(hw?.studentName);
 
   const steps = [
-    { key: 'verildi', label: 'İletildi', icon: Send },
-    { key: 'goruldu', label: 'Görüldü', icon: Eye },
-    { key: 'tamamlandı', label: 'Teslim', icon: CheckCircle },
+    { key: 'verildi',         label: 'İletildi',        icon: Send },
+    { key: 'goruldu',         label: 'Görüldü',         icon: Eye },
+    { key: 'tamamlandı',      label: 'Teslim',          icon: CheckCircle },
     { key: 'degerlendirildi', label: 'Değerlendirildi', icon: Award },
   ];
-  const stepIndex = hw?.status === 'tamamlandı' ? 2 : hw?.status === 'gecikmiş' ? 0 : 0;
+
+  // Map status → step index
+  const stepIndexMap = {
+    verildi:         0,
+    goruldu:         1,
+    tamamlandı:      2,
+    degerlendirildi: 3,
+    gecikmiş:        0, // gecikmiş stays at step 0 visually
+  };
+  const stepIndex = stepIndexMap[hw?.status] ?? 0;
 
   const panel = (
     <>
       <style>{`
         @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
         @keyframes popIn { from { opacity:0; transform:scale(0.85) } to { opacity:1; transform:scale(1) } }
-        @keyframes progressFill { from { width: 0 } to { width: var(--target-width) } }
         @keyframes shimmerSlide { 0% { transform: translateX(-100%) } 100% { transform: translateX(200%) } }
       `}</style>
 
@@ -168,13 +178,16 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
                 const StepIcon = s.icon;
                 const isActive = i <= stepIndex;
                 const isCurrent = i === stepIndex;
+                // Use the step's own color for active steps
+                const stepCfg = STATUS_CONFIG[s.key] || cfg;
+                const activeGradient = isCurrent ? cfg.gradient : (isActive ? 'linear-gradient(135deg, #10b981, #059669)' : '#f3f4f6');
                 return (
                   <React.Fragment key={s.key}>
                     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.35rem' }}>
                       <div style={{
                         width: isCurrent ? 36 : 28, height: isCurrent ? 36 : 28,
                         borderRadius:'50%',
-                        background: isActive ? cfg.gradient : '#f3f4f6',
+                        background: isActive ? (isCurrent ? cfg.gradient : 'linear-gradient(135deg, #10b981, #059669)') : '#f3f4f6',
                         display:'flex', alignItems:'center', justifyContent:'center',
                         boxShadow: isCurrent ? `0 4px 12px ${cfg.color}40` : 'none',
                         transition:'all 0.3s ease',
@@ -182,10 +195,10 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
                       }}>
                         <StepIcon size={isCurrent ? 16 : 12} color={isActive ? 'white' : '#d1d5db'} />
                       </div>
-                      <span style={{ fontSize:'0.6rem', fontWeight: isCurrent ? 700 : 500, color: isActive ? cfg.color : '#9ca3af', textAlign:'center', lineHeight:1.2 }}>{s.label}</span>
+                      <span style={{ fontSize:'0.6rem', fontWeight: isCurrent ? 700 : 500, color: isCurrent ? cfg.color : (isActive ? '#059669' : '#9ca3af'), textAlign:'center', lineHeight:1.2 }}>{s.label}</span>
                     </div>
                     {i < steps.length - 1 && (
-                      <div style={{ flex:1, height:2, margin:'0 0.25rem', marginBottom:18, background: i < stepIndex ? cfg.gradient : '#f3f4f6', borderRadius:2, position:'relative', overflow:'hidden' }}>
+                      <div style={{ flex:1, height:2, margin:'0 0.25rem', marginBottom:18, background: i < stepIndex ? 'linear-gradient(135deg, #10b981, #059669)' : '#f3f4f6', borderRadius:2, position:'relative', overflow:'hidden' }}>
                         {i < stepIndex && <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)', animation:'shimmerSlide 1.5s ease-in-out infinite' }} />}
                       </div>
                     )}
@@ -250,19 +263,19 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
           {/* Actions */}
           <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem', animation:'slideUp 0.4s ease 0.35s both' }}>
             <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.25rem' }}>İşlemler</p>
-            {hw?.status !== 'tamamlandı' && (
+            {hw?.status !== 'tamamlandı' && hw?.status !== 'degerlendirildi' && (
               <button onClick={() => onStatusChange(hw, 'tamamlandı')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'linear-gradient(135deg, #059669, #10b981)', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer', boxShadow:'0 4px 14px rgba(16,185,129,0.3)' }}>
                 <CheckCircle size={18} color="white" />
                 <span style={{ fontSize:'0.875rem', fontWeight:700, color:'white' }}>Tamamlandı Olarak İşaretle</span>
               </button>
             )}
-            {hw?.status === 'tamamlandı' && (
+            {(hw?.status === 'tamamlandı' || hw?.status === 'goruldu') && (
               <button onClick={() => onStatusChange(hw, 'verildi')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#f3f4f6', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
                 <Clock size={18} color="#6b7280" />
                 <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#374151' }}>Bekliyor'a Geri Al</span>
               </button>
             )}
-            {hw?.status !== 'gecikmiş' && hw?.status !== 'tamamlandı' && (
+            {hw?.status !== 'gecikmiş' && hw?.status !== 'tamamlandı' && hw?.status !== 'degerlendirildi' && (
               <button onClick={() => onStatusChange(hw, 'gecikmiş')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#fef2f2', border:'1px solid #fecaca', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
                 <AlertCircle size={18} color="#dc2626" />
                 <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#dc2626' }}>Gecikmiş Olarak İşaretle</span>
@@ -280,7 +293,6 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
             </div>
           </div>
 
-          {/* Bottom padding for mobile nav bar */}
           <div style={{ height: '5rem' }} />
         </div>
       </div>
@@ -329,7 +341,6 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
         @keyframes modalSlide { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
       `}</style>
 
-      {/* Overlay */}
       <div
         onClick={handleClose}
         style={{
@@ -344,7 +355,6 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
           animation: 'modalBg 0.25s ease both',
         }}
       >
-        {/* Modal box */}
         <div
           ref={modalRef}
           onClick={e => e.stopPropagation()}
@@ -361,7 +371,6 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
             boxSizing: 'border-box',
           }}
         >
-          {/* Modal header */}
           <div style={{ padding: '1.5rem 1.5rem 0' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
               <div>
@@ -389,12 +398,10 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
                   return (
                     <button key={s.id} onClick={() => setForm(f => ({ ...f, studentId: s.id }))} style={{
                       display:'flex', alignItems:'center', gap:'0.5rem',
-                      padding:'0.45rem 0.85rem',
-                      borderRadius:20,
+                      padding:'0.45rem 0.85rem', borderRadius:20,
                       border: selected ? `2px solid ${ac}` : '2px solid #f1f5f9',
                       background: selected ? ac + '15' : 'white',
-                      cursor:'pointer',
-                      transition:'all 0.18s',
+                      cursor:'pointer', transition:'all 0.18s',
                       transform: selected ? 'scale(1.04)' : 'scale(1)',
                     }}>
                       <div style={{ width:22, height:22, borderRadius:'50%', background:ac, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -437,20 +444,12 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               />
             </div>
 
-            {/* Dosya yükleme alanı (görsel) */}
+            {/* Dosya yükleme */}
             <div style={{ marginBottom:'1.25rem' }}>
               <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
                 Ek Dosyalar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
               </label>
-              <div style={{
-                border:'2px dashed #e5e7eb',
-                borderRadius:14,
-                padding:'1.5rem',
-                textAlign:'center',
-                background:'#fafafa',
-                cursor:'pointer',
-                transition:'all 0.2s',
-              }}
+              <div style={{ border:'2px dashed #e5e7eb', borderRadius:14, padding:'1.5rem', textAlign:'center', background:'#fafafa', cursor:'pointer', transition:'all 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
                 <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
@@ -465,9 +464,7 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', marginBottom:'0.75rem' }}>
                 {presets.map(p => (
                   <button key={p.label} onClick={() => handlePreset(p)} style={{
-                    padding:'0.45rem 0.85rem',
-                    borderRadius:20,
-                    border:'2px solid',
+                    padding:'0.45rem 0.85rem', borderRadius:20, border:'2px solid',
                     borderColor: datePreset === p.label ? '#f97316' : '#f1f5f9',
                     background: datePreset === p.label ? '#fff7ed' : 'white',
                     color: datePreset === p.label ? '#f97316' : '#6b7280',
@@ -478,9 +475,9 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
                     {p.icon} {p.label}
                   </button>
                 ))}
-                <button onClick={() => { setDatePreset('custom'); }} style={{
-                  padding:'0.45rem 0.85rem', borderRadius:20,
-                  border:'2px solid', borderColor: datePreset === 'custom' ? '#f97316' : '#f1f5f9',
+                <button onClick={() => setDatePreset('custom')} style={{
+                  padding:'0.45rem 0.85rem', borderRadius:20, border:'2px solid',
+                  borderColor: datePreset === 'custom' ? '#f97316' : '#f1f5f9',
                   background: datePreset === 'custom' ? '#fff7ed' : 'white',
                   color: datePreset === 'custom' ? '#f97316' : '#6b7280',
                   fontSize:'0.8rem', fontWeight: datePreset === 'custom' ? 700 : 500,
@@ -620,6 +617,7 @@ export default function TeacherHomework() {
   const counts = {
     all: homeworks.length,
     verildi: homeworks.filter(h => h.status === 'verildi').length,
+    goruldu: homeworks.filter(h => h.status === 'goruldu').length,
     tamamlandı: homeworks.filter(h => h.status === 'tamamlandı').length,
     gecikmiş: homeworks.filter(h => h.status === 'gecikmiş').length,
   };
@@ -675,8 +673,7 @@ export default function TeacherHomework() {
               padding:'0.75rem 1.5rem', fontWeight:800, fontSize:'0.9rem',
               cursor:'pointer', display:'flex', alignItems:'center', gap:'0.5rem',
               boxShadow:'0 8px 24px rgba(249,115,22,0.35)',
-              fontFamily:'inherit',
-              transition:'all 0.2s',
+              fontFamily:'inherit', transition:'all 0.2s',
             }}
               onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px) scale(1.02)'}
               onMouseLeave={e => e.currentTarget.style.transform='translateY(0) scale(1)'}>
@@ -686,17 +683,17 @@ export default function TeacherHomework() {
         </div>
 
         {/* ── Stats Cards ──────────────────────────────── */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:'0.85rem', marginBottom:'1.75rem' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:'0.85rem', marginBottom:'1.75rem' }}>
           {[
-            { key:'all', label:'Toplam', icon:'📋', color:'#374151', bg:'white', border:'#f1f5f9', shadow:'rgba(0,0,0,0.06)' },
-            { key:'verildi', label:'Bekliyor', icon:'⏳', color:'#4f46e5', bg:'#eef2ff', border:'#c7d2fe', shadow:'rgba(99,102,241,0.12)' },
-            { key:'gecikmiş', label:'Gecikmiş', icon:'🚨', color:'#dc2626', bg:'#fef2f2', border:'#fecaca', shadow:'rgba(220,38,38,0.12)' },
-            { key:'tamamlandı', label:'Tamamlandı', icon:'✅', color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', shadow:'rgba(5,150,105,0.12)' },
+            { key:'all',       label:'Toplam',      icon:'📋', color:'#374151', bg:'white',   border:'#f1f5f9', shadow:'rgba(0,0,0,0.06)' },
+            { key:'verildi',   label:'Bekliyor',    icon:'⏳', color:'#4f46e5', bg:'#eef2ff', border:'#c7d2fe', shadow:'rgba(99,102,241,0.12)' },
+            { key:'goruldu',   label:'Görüldü',     icon:'👁️', color:'#b45309', bg:'#fef9c3', border:'#fde68a', shadow:'rgba(180,83,9,0.12)' },
+            { key:'gecikmiş',  label:'Gecikmiş',    icon:'🚨', color:'#dc2626', bg:'#fef2f2', border:'#fecaca', shadow:'rgba(220,38,38,0.12)' },
+            { key:'tamamlandı',label:'Tamamlandı',  icon:'✅', color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', shadow:'rgba(5,150,105,0.12)' },
           ].map(({ key, label, icon, color, bg, border, shadow }, idx) => (
             <div key={key} className="filter-tab" onClick={() => setFilter(key)} style={{
               background: filter === key ? bg : 'white',
-              borderRadius:16,
-              padding:'1.1rem 1.25rem',
+              borderRadius:16, padding:'1.1rem 1.25rem',
               border: `1.5px solid ${filter === key ? border : '#f1f5f9'}`,
               cursor:'pointer',
               boxShadow: filter === key ? `0 6px 20px ${shadow}` : '0 1px 4px rgba(0,0,0,0.04)',
@@ -704,10 +701,10 @@ export default function TeacherHomework() {
             }}>
               <div style={{ fontSize:'1.5rem', marginBottom:'0.5rem' }}>{icon}</div>
               <div style={{ fontSize:'2rem', fontWeight:900, color, lineHeight:1, marginBottom:'0.2rem' }}>
-                <AnimCounter value={counts[key]} />
+                <AnimCounter value={counts[key] ?? 0} />
               </div>
               <div style={{ fontSize:'0.72rem', color: filter === key ? color : '#9ca3af', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px' }}>{label}</div>
-              {counts[key] > 0 && key === 'gecikmiş' && (
+              {(counts[key] ?? 0) > 0 && key === 'gecikmiş' && (
                 <div style={{ width:8, height:8, borderRadius:'50%', background:'#ef4444', marginTop:'0.4rem', animation:'badgePulse 1.5s ease-in-out infinite' }} />
               )}
             </div>
@@ -723,13 +720,12 @@ export default function TeacherHomework() {
             placeholder="Ödev veya öğrenci ara..."
             style={{
               width:'100%', background:'white',
-              border:'1.5px solid #f1f5f9',
-              borderRadius:14, padding:'0.75rem 1rem 0.75rem 2.75rem',
+              border:'1.5px solid #f1f5f9', borderRadius:14,
+              padding:'0.75rem 1rem 0.75rem 2.75rem',
               fontSize:'0.875rem', color:'#111827',
               outline:'none', boxSizing:'border-box',
               boxShadow:'0 1px 4px rgba(0,0,0,0.04)',
-              fontFamily:'inherit',
-              transition:'all 0.2s',
+              fontFamily:'inherit', transition:'all 0.2s',
             }}
             onFocus={e => { e.target.style.borderColor='#f97316'; e.target.style.boxShadow='0 0 0 3px rgba(249,115,22,0.1)'; }}
             onBlur={e => { e.target.style.borderColor='#f1f5f9'; e.target.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)'; }}
@@ -756,7 +752,6 @@ export default function TeacherHomework() {
               const avatarColor = getAvatarColor(studentName);
               return (
                 <div key={studentName} style={{ animation: loaded ? `cardPop 0.45s ease ${0.1 + groupIdx * 0.08}s both` : 'none' }}>
-                  {/* Student group header */}
                   <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.75rem' }}>
                     <div style={{ width:32, height:32, borderRadius:'50%', background:avatarColor, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 4px 12px ${avatarColor}40` }}>
                       <span style={{ fontSize:'0.72rem', fontWeight:800, color:'white' }}>{getInitials(studentName)}</span>
@@ -766,9 +761,8 @@ export default function TeacherHomework() {
                     <span style={{ fontSize:'0.72rem', fontWeight:700, color:'#9ca3af' }}>{hws.length} ödev</span>
                   </div>
 
-                  {/* Homework cards */}
                   <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
-                    {hws.map((hw, i) => {
+                    {hws.map((hw) => {
                       const cfg = STATUS_CONFIG[hw.status] || STATUS_CONFIG.verildi;
                       const Icon = cfg.icon;
                       const dueDateInfo = getDueDateLabel(hw.dueDate);
@@ -778,24 +772,19 @@ export default function TeacherHomework() {
                         <div key={hw.id} className="hw-card"
                           onClick={() => setSelectedHw(hw)}
                           style={{
-                            background:'white',
-                            borderRadius:16,
+                            background:'white', borderRadius:16,
                             border: `1.5px solid ${isSelected ? cfg.dot + '60' : '#f1f5f9'}`,
-                            padding:'1rem 1.1rem',
-                            cursor:'pointer',
+                            padding:'1rem 1.1rem', cursor:'pointer',
                             boxShadow: isSelected ? `0 8px 24px ${cfg.dot}20` : '0 1px 6px rgba(0,0,0,0.05)',
                             display:'flex', alignItems:'center', gap:'1rem',
                             position:'relative', overflow:'hidden',
                           }}>
-                          {/* Left accent bar */}
-                          <div style={{ position:'absolute', left:0, top:0, bottom:0, width:3, background:cfg.gradient, borderRadius:'0 0 0 0' }} />
+                          <div style={{ position:'absolute', left:0, top:0, bottom:0, width:3, background:cfg.gradient }} />
 
-                          {/* Status icon */}
                           <div style={{ width:40, height:40, borderRadius:12, background:cfg.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                             <Icon size={18} color={cfg.color} />
                           </div>
 
-                          {/* Main content */}
                           <div style={{ flex:1, minWidth:0 }}>
                             <div style={{ fontWeight:700, color:'#111827', fontSize:'0.92rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginBottom:'0.25rem' }}>
                               {hw.title}
@@ -814,7 +803,6 @@ export default function TeacherHomework() {
                             </div>
                           </div>
 
-                          {/* Status badge */}
                           <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', flexShrink:0 }}>
                             <span style={{ fontSize:'0.7rem', fontWeight:800, padding:'0.25rem 0.65rem', borderRadius:20, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.dot}30` }}>
                               {cfg.label}
@@ -832,7 +820,6 @@ export default function TeacherHomework() {
         )}
       </div>
 
-      {/* Slide Panel */}
       {selectedHw && (
         <SlidePanel
           hw={selectedHw}
@@ -844,7 +831,6 @@ export default function TeacherHomework() {
         />
       )}
 
-      {/* Add/Edit Modal */}
       {showModal && (
         <HomeworkModal
           editingHw={editingHw}
