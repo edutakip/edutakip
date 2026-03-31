@@ -118,35 +118,84 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await base44.entities.Homework.update(hw.id, {
-        parentNote: teacherNote || hw.parentNote,
+      // Dosyaları base44 storage'a yükle
+      let attachmentUrls = [];
+      if (files.length > 0) {
+        try {
+          const uploadPromises = files.map(f => base44.storage.uploadFile(f));
+          attachmentUrls = await Promise.all(uploadPromises);
+        } catch (uploadErr) {
+          console.warn('Dosya yüklenemedi, devam ediliyor:', uploadErr);
+          // Dosya yüklenemese de notu ve statüsü kaydet
+          attachmentUrls = [];
+        }
+      }
+
+      const updateData = {
+        parentNote: teacherNote || hw.parentNote || '',
         status: 'tamamlandı',
-      });
+      };
+      if (attachmentUrls.length > 0) {
+        updateData.attachments = attachmentUrls;
+      }
+
+      await base44.entities.Homework.update(hw.id, updateData);
       setSubmitted(true);
       setTimeout(() => {
         onSubmitted();
         onClose();
       }, 1200);
-    } catch {
+    } catch (err) {
+      console.error('Ödev güncellenemedi:', err);
       setSubmitting(false);
     }
   };
 
-  // Prevent background scroll WITHOUT locking the modal's own scroll
+  // ── "Yaramaz pop-up fix" — body position:fixed trick ────────
   useEffect(() => {
-    const preventScroll = (e) => {
+    // 1) body'yi sabitle
+    const scrollY = window.scrollY;
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const originalWidth = document.body.style.width;
+    const originalOverflow = document.body.style.overflow;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+
+    // 2) İç scroll container'ları kilitle
+    const scrollables = Array.from(document.querySelectorAll('*')).filter(el => {
+      if (el === document.body || el === document.documentElement) return false;
+      if (modalContentRef.current?.contains(el)) return false;
+      const style = window.getComputedStyle(el);
+      return (
+        (style.overflow === 'auto' || style.overflow === 'scroll' ||
+         style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight
+      );
+    });
+    const saved = scrollables.map(el => ({ el, overflow: el.style.overflow, overflowY: el.style.overflowY }));
+    scrollables.forEach(el => { el.style.overflow = 'hidden'; el.style.overflowY = 'hidden'; });
+
+    // 3) touch/wheel engelle
+    const prevent = (e) => {
       if (modalContentRef.current && modalContentRef.current.contains(e.target)) return;
       e.preventDefault();
     };
-    const preventWheel = (e) => {
-      if (modalContentRef.current && modalContentRef.current.contains(e.target)) return;
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('wheel', preventWheel, { passive: false });
+    document.addEventListener('touchmove', prevent, { passive: false });
+    document.addEventListener('wheel', prevent, { passive: false });
+
     return () => {
-      document.removeEventListener('touchmove', preventScroll);
-      document.removeEventListener('wheel', preventWheel);
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      document.body.style.width = originalWidth;
+      document.body.style.overflow = originalOverflow;
+      window.scrollTo(0, scrollY);
+      saved.forEach(({ el, overflow, overflowY }) => { el.style.overflow = overflow; el.style.overflowY = overflowY; });
+      document.removeEventListener('touchmove', prevent);
+      document.removeEventListener('wheel', prevent);
     };
   }, []);
 
@@ -281,12 +330,11 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
           </div>
 
           {/* Drop zone */}
-          <div
+          <label
             className="hw-file-zone"
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
             style={{
               border: `2px dashed ${dragging ? '#6366f1' : '#c7d2fe'}`,
               borderRadius: '10px',
@@ -296,6 +344,7 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
               transition: 'all 0.2s',
               background: dragging ? '#eef2ff' : 'white',
               marginBottom: files.length > 0 ? '0.75rem' : 0,
+              display: 'block',
             }}
           >
             <div style={{
@@ -316,10 +365,10 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
               type="file"
               multiple
               accept="image/*,application/pdf"
-              style={{ display: 'none' }}
-              onChange={e => addFiles(e.target.files)}
+              style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+              onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
             />
-          </div>
+          </label>
 
           {/* File list */}
           {files.length > 0 && (
@@ -459,27 +508,24 @@ export default function ParentHomework() {
   };
 
   // ── Ödeve tıklandığında → 'goruldu' statüsüne güncelle ──────
-  const handleOpenHomework = async (hw) => {
-    // Sadece 'verildi' veya 'gecikmiş' ise güncelle
-    // 'goruldu', 'tamamlandı' olanları tekrar güncelleme
+  const handleOpenHomework = (hw) => {
     const shouldMarkSeen = hw.status === 'verildi' || hw.status === 'gecikmiş';
 
     if (shouldMarkSeen) {
       // Önce local state'i güncelle (anlık feedback)
+      const updatedHw = { ...hw, status: 'goruldu' };
       setHomeworks(prev =>
-        prev.map(h => h.id === hw.id ? { ...h, status: 'goruldu' } : h)
+        prev.map(h => h.id === hw.id ? updatedHw : h)
       );
-      // Seçili ödevi güncelle
-      setSelectedHw({ ...hw, status: 'goruldu' });
-      // Backend'e kaydet
-      try {
-        await base44.entities.Homework.update(hw.id, { status: 'goruldu' });
-      } catch {
-        // Hata olursa orijinal hali geri koy
+      setSelectedHw(updatedHw);
+      // Backend'e kaydet — hata olursa sadece console'a yaz, login'e atma
+      base44.entities.Homework.update(hw.id, { status: 'goruldu' }).catch(err => {
+        console.warn('goruldu güncellenemedi:', err);
+        // Geri al
         setHomeworks(prev =>
           prev.map(h => h.id === hw.id ? { ...h, status: hw.status } : h)
         );
-      }
+      });
     } else {
       setSelectedHw(hw);
     }
