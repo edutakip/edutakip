@@ -1,550 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight, Upload, Search, Filter, Sparkles, Bell, Send, Eye, Award, ArrowRight, FileText, Image as ImageIcon, Paperclip } from 'lucide-react';
+import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight } from 'lucide-react';
 import { showToast } from '@/lib/toast';
-import { format, parseISO, isPast, isToday, isTomorrow, differenceInDays, addDays } from 'date-fns';
+import { format, parseISO, isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
-/* ─── Helpers ─────────────────────────────────────────── */
+const STATUS_CFG = {
+  verildi:    { label: 'Verildi',     bg: '#e0e7ff', color: '#4338ca', dot: '#6366f1', icon: Clock },
+  tamamlandı: { label: 'Tamamlandı', bg: '#d1fae5', color: '#065f46', dot: '#10b981', icon: CheckCircle },
+  gecikmiş:   { label: 'Gecikmiş',   bg: '#fee2e2', color: '#b91c1c', dot: '#ef4444', icon: AlertCircle },
+};
+
 function getDueDateLabel(dueDate) {
   if (!dueDate) return null;
   try {
     const d = parseISO(dueDate);
-    if (isToday(d)) return { text: 'Bugün son gün!', color: '#dc2626', bg: '#fef2f2', urgent: true };
-    if (isTomorrow(d)) return { text: 'Yarın son gün', color: '#d97706', bg: '#fffbeb', urgent: true };
+    if (isToday(d)) return { text: 'Bugün son gün!', color: '#dc2626', urgent: true };
+    if (isTomorrow(d)) return { text: 'Yarın son gün', color: '#d97706', urgent: true };
     const diff = differenceInDays(d, new Date());
-    if (diff < 0) return { text: `${Math.abs(diff)} gün geçti`, color: '#b91c1c', bg: '#fef2f2', urgent: true };
-    if (diff <= 3) return { text: `${diff} gün kaldı`, color: '#d97706', bg: '#fffbeb', urgent: false };
-    return { text: format(d, 'd MMM', { locale: tr }), color: '#6b7280', bg: '#f3f4f6', urgent: false };
+    if (diff < 0) return { text: `${Math.abs(diff)} gün geçti`, color: '#b91c1c', urgent: true };
+    if (diff <= 3) return { text: `${diff} gün kaldı`, color: '#d97706', urgent: false };
+    return { text: format(d, 'd MMMM yyyy', { locale: tr }), color: '#6b7280', urgent: false };
   } catch { return null; }
 }
 
-const STATUS_CONFIG = {
-  verildi:    { label: 'Bekliyor',     color: '#4f46e5', bg: '#eef2ff', dot: '#6366f1', icon: Clock,        gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
-  tamamlandı: { label: 'Tamamlandı',  color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
-  gecikmiş:   { label: 'Gecikmiş',    color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
-};
-
-const avatarColors = ['#f97316', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-const getAvatarColor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length];
-const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
-
-/* ─── Animated Counter ───────────────────────────────── */
-function AnimCounter({ value }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    let start = 0;
-    const step = Math.ceil(value / 20);
-    const t = setInterval(() => {
-      start += step;
-      if (start >= value) { setDisplay(value); clearInterval(t); }
-      else setDisplay(start);
-    }, 30);
-    return () => clearInterval(t);
-  }, [value]);
-  return <>{display}</>;
-}
-
-/* ─── usePortalLock — "Yaramaz pop-up fix" ───────────── */
-function usePortalLock(contentRef) {
-  useEffect(() => {
-    const prevent = (e) => {
-      if (contentRef.current && contentRef.current.contains(e.target)) return;
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', prevent, { passive: false });
-    document.addEventListener('wheel', prevent, { passive: false });
-    return () => {
-      document.removeEventListener('touchmove', prevent);
-      document.removeEventListener('wheel', prevent);
-    };
-  }, [contentRef]);
-}
-
-/* ─── Slide Panel ────────────────────────────────────── */
-function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit }) {
-  const [visible, setVisible] = useState(false);
-  const panelRef = useRef(null);
-
-  usePortalLock(panelRef);
-
-  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 320);
-  };
-
-  const cfg = STATUS_CONFIG[hw?.status] || STATUS_CONFIG.verildi;
-  const Icon = cfg.icon;
-  const student = students.find(s => s.id === hw?.studentId);
-  const dueDateInfo = getDueDateLabel(hw?.dueDate);
-  const avatarColor = getAvatarColor(hw?.studentName);
-
-  const steps = [
-    { key: 'verildi', label: 'İletildi', icon: Send },
-    { key: 'goruldu', label: 'Görüldü', icon: Eye },
-    { key: 'tamamlandı', label: 'Teslim', icon: CheckCircle },
-    { key: 'degerlendirildi', label: 'Değerlendirildi', icon: Award },
-  ];
-  const stepIndex = hw?.status === 'tamamlandı' ? 2 : hw?.status === 'gecikmiş' ? 0 : 0;
-
-  const panel = (
-    <>
-      <style>{`
-        @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes popIn { from { opacity:0; transform:scale(0.85) } to { opacity:1; transform:scale(1) } }
-        @keyframes progressFill { from { width: 0 } to { width: var(--target-width) } }
-        @keyframes shimmerSlide { 0% { transform: translateX(-100%) } 100% { transform: translateX(200%) } }
-      `}</style>
-
-      {/* Backdrop */}
-      <div onClick={handleClose} style={{
-        position: 'fixed', inset: 0, zIndex: 9998,
-        background: 'rgba(0,0,0,0.25)',
-        backdropFilter: 'blur(3px)',
-        WebkitBackdropFilter: 'blur(3px)',
-        opacity: visible ? 1 : 0,
-        transition: 'opacity 0.3s ease',
-      }} />
-
-      {/* Panel */}
-      <div
-        ref={panelRef}
-        style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0,
-          width: 'min(420px, 95vw)',
-          background: 'white',
-          zIndex: 9999,
-          boxShadow: '-20px 0 60px rgba(0,0,0,0.15)',
-          transform: visible ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        {/* Header gradient banner */}
-        <div style={{
-          background: cfg.gradient,
-          padding: '1.75rem 1.5rem 3.5rem',
-          position: 'relative', overflow: 'hidden',
-          flexShrink: 0,
-        }}>
-          <div style={{ position:'absolute', right:-30, top:-30, width:150, height:150, borderRadius:'50%', background:'rgba(255,255,255,0.08)' }} />
-          <div style={{ position:'absolute', right:40, bottom:-50, width:100, height:100, borderRadius:'50%', background:'rgba(255,255,255,0.06)' }} />
-
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', position:'relative' }}>
-            <div>
-              <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.75rem' }}>
-                <div style={{ background:'rgba(255,255,255,0.2)', borderRadius:8, padding:'0.3rem 0.7rem', display:'flex', alignItems:'center', gap:'0.35rem' }}>
-                  <Icon size={12} color="white" />
-                  <span style={{ fontSize:'0.7rem', fontWeight:700, color:'white', textTransform:'uppercase', letterSpacing:'0.8px' }}>{cfg.label}</span>
-                </div>
-              </div>
-              <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'white', lineHeight:1.2, marginBottom:'0.4rem', maxWidth:260 }}>{hw?.title}</h2>
-              <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
-                <div style={{ width:22, height:22, borderRadius:'50%', background:avatarColor, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <span style={{ fontSize:'0.55rem', fontWeight:800, color:'white' }}>{getInitials(hw?.studentName)}</span>
-                </div>
-                <span style={{ fontSize:'0.82rem', color:'rgba(255,255,255,0.85)', fontWeight:600 }}>{hw?.studentName}</span>
-              </div>
-            </div>
-            <button onClick={handleClose} style={{ background:'rgba(255,255,255,0.2)', border:'none', borderRadius:10, padding:'0.5rem', cursor:'pointer', display:'flex', backdropFilter:'blur(4px)' }}>
-              <X size={16} color="white" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{ padding:'1.5rem', flex:1, marginTop:'-1.5rem' }}>
-
-          {/* Steps tracker */}
-          <div style={{ background:'white', borderRadius:16, padding:'1.25rem', boxShadow:'0 4px 24px rgba(0,0,0,0.08)', marginBottom:'1.25rem', animation:'slideUp 0.4s ease 0.1s both' }}>
-            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'1rem' }}>Ödev Takibi</p>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              {steps.map((s, i) => {
-                const StepIcon = s.icon;
-                const isActive = i <= stepIndex;
-                const isCurrent = i === stepIndex;
-                return (
-                  <React.Fragment key={s.key}>
-                    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.35rem' }}>
-                      <div style={{
-                        width: isCurrent ? 36 : 28, height: isCurrent ? 36 : 28,
-                        borderRadius:'50%',
-                        background: isActive ? cfg.gradient : '#f3f4f6',
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        boxShadow: isCurrent ? `0 4px 12px ${cfg.color}40` : 'none',
-                        transition:'all 0.3s ease',
-                        animation: isCurrent ? 'popIn 0.4s ease both' : 'none',
-                      }}>
-                        <StepIcon size={isCurrent ? 16 : 12} color={isActive ? 'white' : '#d1d5db'} />
-                      </div>
-                      <span style={{ fontSize:'0.6rem', fontWeight: isCurrent ? 700 : 500, color: isActive ? cfg.color : '#9ca3af', textAlign:'center', lineHeight:1.2 }}>{s.label}</span>
-                    </div>
-                    {i < steps.length - 1 && (
-                      <div style={{ flex:1, height:2, margin:'0 0.25rem', marginBottom:18, background: i < stepIndex ? cfg.gradient : '#f3f4f6', borderRadius:2, position:'relative', overflow:'hidden' }}>
-                        {i < stepIndex && <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)', animation:'shimmerSlide 1.5s ease-in-out infinite' }} />}
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Due date + date info */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'1.25rem', animation:'slideUp 0.4s ease 0.2s both' }}>
-            {dueDateInfo && (
-              <div style={{ background:dueDateInfo.bg, borderRadius:12, padding:'0.85rem', border:`1px solid ${dueDateInfo.color}20` }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'0.35rem', marginBottom:'0.25rem' }}>
-                  <Calendar size={13} color={dueDateInfo.color} />
-                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:dueDateInfo.color, textTransform:'uppercase', letterSpacing:'0.5px' }}>Teslim</span>
-                </div>
-                <div style={{ fontSize:'0.95rem', fontWeight:800, color:dueDateInfo.color }}>{dueDateInfo.text}</div>
-              </div>
-            )}
-            {hw?.dueDate && (
-              <div style={{ background:'#f8fafc', borderRadius:12, padding:'0.85rem' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'0.35rem', marginBottom:'0.25rem' }}>
-                  <Clock size={13} color="#6b7280" />
-                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.5px' }}>Tarih</span>
-                </div>
-                <div style={{ fontSize:'0.85rem', fontWeight:700, color:'#374151' }}>
-                  {format(parseISO(hw.dueDate), 'd MMMM yyyy', { locale: tr })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          {hw?.description && (
-            <div style={{ background:'#f8fafc', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', animation:'slideUp 0.4s ease 0.25s both' }}>
-              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.5rem' }}>Açıklama</p>
-              <p style={{ fontSize:'0.875rem', color:'#374151', lineHeight:1.7 }}>{hw.description}</p>
-            </div>
-          )}
-
-          {/* Parent phone */}
-          {student?.parentPhone && (
-            <a href={`tel:${student.parentPhone}`} style={{
-              display:'flex', alignItems:'center', gap:'0.75rem',
-              background:'#f0fdf4', borderRadius:12, padding:'0.85rem',
-              textDecoration:'none', marginBottom:'1.25rem',
-              border:'1px solid #bbf7d0',
-              animation:'slideUp 0.4s ease 0.3s both',
-            }}>
-              <div style={{ width:34, height:34, borderRadius:10, background:'linear-gradient(135deg, #10b981, #059669)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 4.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 11a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 18z"/></svg>
-              </div>
-              <div>
-                <div style={{ fontSize:'0.65rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.5px' }}>Veli İletişim</div>
-                <div style={{ fontSize:'0.875rem', fontWeight:700, color:'#065f46' }}>{student.parentPhone}</div>
-              </div>
-              <ArrowRight size={16} color="#10b981" style={{ marginLeft:'auto' }} />
-            </a>
-          )}
-
-          {/* Actions */}
-          <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem', animation:'slideUp 0.4s ease 0.35s both' }}>
-            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.25rem' }}>İşlemler</p>
-            {hw?.status !== 'tamamlandı' && (
-              <button onClick={() => onStatusChange(hw, 'tamamlandı')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'linear-gradient(135deg, #059669, #10b981)', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer', boxShadow:'0 4px 14px rgba(16,185,129,0.3)' }}>
-                <CheckCircle size={18} color="white" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'white' }}>Tamamlandı Olarak İşaretle</span>
-              </button>
-            )}
-            {hw?.status === 'tamamlandı' && (
-              <button onClick={() => onStatusChange(hw, 'verildi')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#f3f4f6', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
-                <Clock size={18} color="#6b7280" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#374151' }}>Bekliyor'a Geri Al</span>
-              </button>
-            )}
-            {hw?.status !== 'gecikmiş' && hw?.status !== 'tamamlandı' && (
-              <button onClick={() => onStatusChange(hw, 'gecikmiş')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#fef2f2', border:'1px solid #fecaca', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
-                <AlertCircle size={18} color="#dc2626" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#dc2626' }}>Gecikmiş Olarak İşaretle</span>
-              </button>
-            )}
-            <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.25rem' }}>
-              <button onClick={() => onEdit(hw)} style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'0.4rem', background:'white', border:'1.5px solid #e5e7eb', borderRadius:12, padding:'0.75rem', cursor:'pointer' }}>
-                <Pencil size={15} color="#374151" />
-                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#374151' }}>Düzenle</span>
-              </button>
-              <button onClick={() => onDelete(hw)} style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'0.4rem', background:'#fef2f2', border:'1.5px solid #fecaca', borderRadius:12, padding:'0.75rem', cursor:'pointer' }}>
-                <Trash2 size={15} color="#dc2626" />
-                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#dc2626' }}>Sil</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Bottom padding for mobile nav bar */}
-          <div style={{ height: '5rem' }} />
-        </div>
-      </div>
-    </>
-  );
-
-  return ReactDOM.createPortal(panel, document.body);
-}
-
-/* ─── Add/Edit Modal ─────────────────────────────────── */
-function HomeworkModal({ editingHw, students, onClose, onSave }) {
-  const [form, setForm] = useState({
-    studentId: editingHw?.studentId || '',
-    title: editingHw?.title || '',
-    description: editingHw?.description || '',
-    dueDate: editingHw?.dueDate || '',
-  });
-  const [visible, setVisible] = useState(false);
-  const [datePreset, setDatePreset] = useState('');
-  const modalRef = useRef(null);
-
-  usePortalLock(modalRef);
-
-  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
-
-  const handleClose = () => { setVisible(false); setTimeout(onClose, 300); };
-
-  const presets = [
-    { label: 'Bu gece', icon: '🌙', date: format(new Date(), 'yyyy-MM-dd') },
-    { label: 'Yarın', icon: '☀️', date: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
-    { label: 'Bu hafta sonu', icon: '📅', date: format(addDays(new Date(), (6 - new Date().getDay() + 6) % 7 || 7), 'yyyy-MM-dd') },
-    { label: 'Haftaya', icon: '🗓️', date: format(addDays(new Date(), 7), 'yyyy-MM-dd') },
-  ];
-
-  const handlePreset = (preset) => {
-    setDatePreset(preset.label);
-    setForm(f => ({ ...f, dueDate: preset.date }));
-  };
-
-  const canSave = form.studentId && form.title;
-
-  const modal = (
-    <>
-      <style>{`
-        @keyframes modalBg { from{opacity:0} to{opacity:1} }
-        @keyframes modalSlide { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-      `}</style>
-
-      {/* Overlay */}
-      <div
-        onClick={handleClose}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 99999,
-          background: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem',
-          boxSizing: 'border-box',
-          opacity: visible ? 1 : 0,
-          animation: 'modalBg 0.25s ease both',
-        }}
-      >
-        {/* Modal box */}
-        <div
-          ref={modalRef}
-          onClick={e => e.stopPropagation()}
-          style={{
-            background: 'white',
-            borderRadius: 24,
-            width: '100%', maxWidth: 480,
-            maxHeight: 'calc(100dvh - 80px)',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            WebkitOverflowScrolling: 'touch',
-            boxShadow: '0 32px 80px rgba(0,0,0,0.2)',
-            animation: 'modalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both',
-            boxSizing: 'border-box',
-          }}
-        >
-          {/* Modal header */}
-          <div style={{ padding: '1.5rem 1.5rem 0' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
-              <div>
-                <h2 style={{ fontSize:'1.25rem', fontWeight:800, color:'#111827', marginBottom:'0.15rem' }}>
-                  {editingHw ? '✏️ Ödevi Düzenle' : '📚 Yeni Ödev'}
-                </h2>
-                <p style={{ fontSize:'0.78rem', color:'#9ca3af', fontWeight:500 }}>
-                  {editingHw ? 'Ödev bilgilerini güncelleyin' : 'Öğrencine ödev ver'}
-                </p>
-              </div>
-              <button onClick={handleClose} style={{ background:'#f3f4f6', border:'none', borderRadius:12, padding:'0.5rem', cursor:'pointer', display:'flex', transition:'all 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.background='#e5e7eb'}
-                onMouseLeave={e => e.currentTarget.style.background='#f3f4f6'}>
-                <X size={18} color='#6b7280' />
-              </button>
-            </div>
-
-            {/* Öğrenci seçimi */}
-            <div style={{ marginBottom:'1.1rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Öğrenci Seçin</label>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem' }}>
-                {students.map(s => {
-                  const selected = form.studentId === s.id;
-                  const ac = getAvatarColor(s.name);
-                  return (
-                    <button key={s.id} onClick={() => setForm(f => ({ ...f, studentId: s.id }))} style={{
-                      display:'flex', alignItems:'center', gap:'0.5rem',
-                      padding:'0.45rem 0.85rem',
-                      borderRadius:20,
-                      border: selected ? `2px solid ${ac}` : '2px solid #f1f5f9',
-                      background: selected ? ac + '15' : 'white',
-                      cursor:'pointer',
-                      transition:'all 0.18s',
-                      transform: selected ? 'scale(1.04)' : 'scale(1)',
-                    }}>
-                      <div style={{ width:22, height:22, borderRadius:'50%', background:ac, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                        <span style={{ fontSize:'0.55rem', fontWeight:800, color:'white' }}>{getInitials(s.name)}</span>
-                      </div>
-                      <span style={{ fontSize:'0.82rem', fontWeight:selected ? 700 : 500, color: selected ? '#111827' : '#6b7280', whiteSpace:'nowrap' }}>{s.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Başlık */}
-            <div style={{ marginBottom:'1.1rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Ödev Açıklaması</label>
-              <textarea
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="Örneğin: Matematik 10. Sınıf, Sayfa 45, Soru 1-10"
-                rows={3}
-                style={{ width:'100%', background:'#f8fafc', border:'1.5px solid #e5e7eb', borderRadius:14, padding:'0.75rem 1rem', fontSize:'0.9rem', color:'#111827', outline:'none', resize:'none', boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.6, transition:'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor='#f97316'}
-                onBlur={e => e.target.style.borderColor='#e5e7eb'}
-              />
-            </div>
-
-            {/* Detay */}
-            <div style={{ marginBottom:'1.1rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
-                Ek Notlar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
-              </label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Ödev hakkında ek bilgiler..."
-                rows={2}
-                style={{ width:'100%', background:'#f8fafc', border:'1.5px solid #e5e7eb', borderRadius:14, padding:'0.75rem 1rem', fontSize:'0.875rem', color:'#111827', outline:'none', resize:'none', boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.6, transition:'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor='#f97316'}
-                onBlur={e => e.target.style.borderColor='#e5e7eb'}
-              />
-            </div>
-
-            {/* Dosya yükleme alanı (görsel) */}
-            <div style={{ marginBottom:'1.25rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
-                Ek Dosyalar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
-              </label>
-              <div style={{
-                border:'2px dashed #e5e7eb',
-                borderRadius:14,
-                padding:'1.5rem',
-                textAlign:'center',
-                background:'#fafafa',
-                cursor:'pointer',
-                transition:'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
-                <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
-                <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>Dosyaları sürükleyin veya tıklayın</p>
-                <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>Fotoğraf (maks 25, 10MB) veya PDF (maks 3, 50MB)</p>
-              </div>
-            </div>
-
-            {/* Teslim tarihi */}
-            <div style={{ marginBottom:'1.5rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.6rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Teslim Tarihi</label>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', marginBottom:'0.75rem' }}>
-                {presets.map(p => (
-                  <button key={p.label} onClick={() => handlePreset(p)} style={{
-                    padding:'0.45rem 0.85rem',
-                    borderRadius:20,
-                    border:'2px solid',
-                    borderColor: datePreset === p.label ? '#f97316' : '#f1f5f9',
-                    background: datePreset === p.label ? '#fff7ed' : 'white',
-                    color: datePreset === p.label ? '#f97316' : '#6b7280',
-                    fontSize:'0.8rem', fontWeight: datePreset === p.label ? 700 : 500,
-                    cursor:'pointer', transition:'all 0.15s',
-                    display:'flex', alignItems:'center', gap:'0.3rem',
-                  }}>
-                    {p.icon} {p.label}
-                  </button>
-                ))}
-                <button onClick={() => { setDatePreset('custom'); }} style={{
-                  padding:'0.45rem 0.85rem', borderRadius:20,
-                  border:'2px solid', borderColor: datePreset === 'custom' ? '#f97316' : '#f1f5f9',
-                  background: datePreset === 'custom' ? '#fff7ed' : 'white',
-                  color: datePreset === 'custom' ? '#f97316' : '#6b7280',
-                  fontSize:'0.8rem', fontWeight: datePreset === 'custom' ? 700 : 500,
-                  cursor:'pointer', transition:'all 0.15s',
-                  display:'flex', alignItems:'center', gap:'0.3rem',
-                }}>
-                  📅 Özel Tarih
-                </button>
-              </div>
-              {form.dueDate && (
-                <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', padding:'0.6rem 0.875rem', background:'#fff7ed', borderRadius:10, border:'1.5px solid #fed7aa' }}>
-                  <Calendar size={14} color="#f97316" />
-                  <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#c2410c' }}>
-                    {format(parseISO(form.dueDate), 'd MMMM EEEE, HH:mm', { locale: tr }).replace('00:00', '23:59')}
-                  </span>
-                </div>
-              )}
-              {datePreset === 'custom' && (
-                <input type="date" value={form.dueDate}
-                  onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
-                  style={{ width:'100%', marginTop:'0.5rem', padding:'0.65rem 0.875rem', borderRadius:12, border:'1.5px solid #e5e7eb', fontSize:'0.875rem', color:'#111827', outline:'none', boxSizing:'border-box' }}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Save button */}
-          <div style={{ padding:'0 1.5rem 1.5rem' }}>
-            <button onClick={() => onSave(form)} disabled={!canSave} style={{
-              width:'100%', padding:'0.95rem',
-              background: canSave ? 'linear-gradient(135deg, #f97316, #ea580c)' : '#f3f4f6',
-              border:'none', borderRadius:14,
-              color: canSave ? 'white' : '#9ca3af',
-              fontSize:'0.95rem', fontWeight:800,
-              cursor: canSave ? 'pointer' : 'default',
-              display:'flex', alignItems:'center', justifyContent:'center', gap:'0.6rem',
-              boxShadow: canSave ? '0 8px 24px rgba(249,115,22,0.35)' : 'none',
-              transition:'all 0.2s',
-            }}
-              onMouseEnter={e => canSave && (e.currentTarget.style.transform = 'scale(1.02)')}
-              onMouseLeave={e => canSave && (e.currentTarget.style.transform = 'scale(1)')}>
-              <Send size={18} />
-              {editingHw ? 'Güncelle' : 'Ödev Ver'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-
-  return ReactDOM.createPortal(modal, document.body);
-}
-
-/* ─── Main Page ──────────────────────────────────────── */
 export default function TeacherHomework() {
   const [homeworks, setHomeworks] = useState([]);
   const [students, setStudents] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingHw, setEditingHw] = useState(null);
-  const [selectedHw, setSelectedHw] = useState(null);
   const [filter, setFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [form, setForm] = useState({ studentId: '', title: '', description: '', dueDate: '' });
   const [me, setMe] = useState(null);
-  const [loaded, setLoaded] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -562,59 +50,71 @@ export default function TeacherHomework() {
       });
       setHomeworks(updated);
       setStudents(s);
-      setTimeout(() => setLoaded(true), 50);
     })();
   }, []);
 
+  // FAB'dan gelen event'i dinle
   useEffect(() => {
-    const handler = () => { setEditingHw(null); setShowModal(true); };
+    const handler = () => {
+      setEditingHw(null);
+      setForm({ studentId: '', title: '', description: '', dueDate: '' });
+      setShowForm(true);
+    };
     window.addEventListener('fab:openHomework', handler);
     return () => window.removeEventListener('fab:openHomework', handler);
   }, []);
 
+  // Yaramaz popup fix
+  useEffect(() => {
+    if (showForm) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showForm]);
+
   const reload = async () => {
-    if (!me) return;
     const h = await base44.entities.Homework.filter({ teacherEmail: me.email }, '-created_date');
-    const updated = h.map(hw => {
-      if (hw.status === 'verildi' && hw.dueDate && isPast(new Date(hw.dueDate + 'T23:59:59'))) {
-        return { ...hw, status: 'gecikmiş' };
-      }
-      return hw;
-    });
-    setHomeworks(updated);
+    setHomeworks(h);
   };
 
-  const handleSave = async (form) => {
+  const handleSave = async () => {
+    if (!form.studentId || !form.title) return;
     const student = students.find(s => s.id === form.studentId);
-    if (editingHw) {
+    const isEditing = !!editingHw;
+    if (isEditing) {
       await base44.entities.Homework.update(editingHw.id, { ...form, studentName: student?.name || editingHw.studentName });
-      showToast({ message: 'Ödev güncellendi ✓' });
     } else {
       await base44.entities.Homework.create({ ...form, studentName: student?.name || '', teacherEmail: me.email, status: 'verildi' });
-      showToast({ message: `📚 Ödev verildi — ${student?.name}` });
     }
-    setShowModal(false);
+    showToast({ message: isEditing ? 'Ödev güncellendi' : `Ödev verildi — ${student?.name || ''}` });
+    setForm({ studentId: '', title: '', description: '', dueDate: '' });
     setEditingHw(null);
+    setShowForm(false);
     reload();
   };
 
-  const handleStatusChange = async (hw, status) => {
+  const changeStatus = async (hw, status) => {
     await base44.entities.Homework.update(hw.id, { status });
-    setSelectedHw(prev => prev?.id === hw.id ? { ...prev, status } : prev);
     reload();
   };
 
-  const handleDelete = async (hw) => {
+  const deleteHw = async (hw) => {
     await base44.entities.Homework.delete(hw.id);
-    setSelectedHw(null);
-    showToast({ message: 'Ödev silindi' });
     reload();
   };
 
-  const handleEdit = (hw) => {
+  const openEdit = (hw) => {
     setEditingHw(hw);
-    setSelectedHw(null);
-    setShowModal(true);
+    setForm({ studentId: hw.studentId, title: hw.title, description: hw.description || '', dueDate: hw.dueDate || '' });
+    setShowForm(true);
   };
 
   const counts = {
@@ -624,235 +124,195 @@ export default function TeacherHomework() {
     gecikmiş: homeworks.filter(h => h.status === 'gecikmiş').length,
   };
 
-  const filtered = homeworks.filter(h => {
-    const matchFilter = filter === 'all' || h.status === filter;
-    const matchSearch = !searchQuery || h.title?.toLowerCase().includes(searchQuery.toLowerCase()) || h.studentName?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchFilter && matchSearch;
-  });
+  const filtered = homeworks.filter(h => filter === 'all' || h.status === filter);
 
-  // Group by student
-  const grouped = filtered.reduce((acc, hw) => {
-    const key = hw.studentName || 'Bilinmiyor';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(hw);
-    return acc;
-  }, {});
+  const inp = {
+    width: '100%', background: '#f8fafc', border: '1.5px solid #e5e7eb',
+    borderRadius: '10px', padding: '0.65rem 0.875rem', fontSize: '0.875rem',
+    color: '#111827', outline: 'none', boxSizing: 'border-box',
+  };
 
   return (
-    <div style={{ minHeight:'100vh', background:'#fafafa', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes cardPop { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes badgePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
-        .hw-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .hw-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.1) !important; }
-        .filter-tab { transition: all 0.2s ease; }
-        .filter-tab:hover { transform: translateY(-1px); }
-      `}</style>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', height: '100vh', overflowY: 'auto', background: '#f8fafc' }}>
 
-      <div style={{ maxWidth:1100, margin:'0 auto', padding:'clamp(1rem, 4vw, 2rem)' }}>
-
-        {/* ── Hero Header ─────────────────────────────── */}
-        <div style={{ marginBottom:'2rem', animation: loaded ? 'fadeUp 0.5s ease both' : 'none' }}>
-          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:'1rem' }}>
-            <div>
-              <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'0.5rem' }}>
-                <div style={{ width:48, height:48, borderRadius:16, background:'linear-gradient(135deg, #f97316, #ea580c)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 20px rgba(249,115,22,0.35)' }}>
-                  <BookOpen size={24} color="white" />
-                </div>
-                <div>
-                  <h1 style={{ fontSize:'1.75rem', fontWeight:900, color:'#111827', lineHeight:1 }}>Ödevler</h1>
-                  <p style={{ fontSize:'0.82rem', color:'#9ca3af', fontWeight:500, marginTop:'0.2rem' }}>
-                    {format(new Date(), "d MMMM yyyy, EEEE", { locale: tr })}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <button onClick={() => { setEditingHw(null); setShowModal(true); }} style={{
-              background:'linear-gradient(135deg, #f97316, #ea580c)',
-              border:'none', color:'white', borderRadius:14,
-              padding:'0.75rem 1.5rem', fontWeight:800, fontSize:'0.9rem',
-              cursor:'pointer', display:'flex', alignItems:'center', gap:'0.5rem',
-              boxShadow:'0 8px 24px rgba(249,115,22,0.35)',
-              fontFamily:'inherit',
-              transition:'all 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px) scale(1.02)'}
-              onMouseLeave={e => e.currentTarget.style.transform='translateY(0) scale(1)'}>
-              <Plus size={18} /> Yeni Ödev
-            </button>
-          </div>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.2rem' }}>Ödevler</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+            {counts.verildi} aktif · {counts.gecikmiş > 0 && <span style={{ color: '#dc2626', fontWeight: 600 }}>{counts.gecikmiş} gecikmiş · </span>}{counts.tamamlandı} tamamlandı
+          </p>
         </div>
-
-        {/* ── Stats Cards ──────────────────────────────── */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:'0.85rem', marginBottom:'1.75rem' }}>
-          {[
-            { key:'all', label:'Toplam', icon:'📋', color:'#374151', bg:'white', border:'#f1f5f9', shadow:'rgba(0,0,0,0.06)' },
-            { key:'verildi', label:'Bekliyor', icon:'⏳', color:'#4f46e5', bg:'#eef2ff', border:'#c7d2fe', shadow:'rgba(99,102,241,0.12)' },
-            { key:'gecikmiş', label:'Gecikmiş', icon:'🚨', color:'#dc2626', bg:'#fef2f2', border:'#fecaca', shadow:'rgba(220,38,38,0.12)' },
-            { key:'tamamlandı', label:'Tamamlandı', icon:'✅', color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', shadow:'rgba(5,150,105,0.12)' },
-          ].map(({ key, label, icon, color, bg, border, shadow }, idx) => (
-            <div key={key} className="filter-tab" onClick={() => setFilter(key)} style={{
-              background: filter === key ? bg : 'white',
-              borderRadius:16,
-              padding:'1.1rem 1.25rem',
-              border: `1.5px solid ${filter === key ? border : '#f1f5f9'}`,
-              cursor:'pointer',
-              boxShadow: filter === key ? `0 6px 20px ${shadow}` : '0 1px 4px rgba(0,0,0,0.04)',
-              animation: loaded ? `cardPop 0.4s ease ${idx * 0.07}s both` : 'none',
-            }}>
-              <div style={{ fontSize:'1.5rem', marginBottom:'0.5rem' }}>{icon}</div>
-              <div style={{ fontSize:'2rem', fontWeight:900, color, lineHeight:1, marginBottom:'0.2rem' }}>
-                <AnimCounter value={counts[key]} />
-              </div>
-              <div style={{ fontSize:'0.72rem', color: filter === key ? color : '#9ca3af', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px' }}>{label}</div>
-              {counts[key] > 0 && key === 'gecikmiş' && (
-                <div style={{ width:8, height:8, borderRadius:'50%', background:'#ef4444', marginTop:'0.4rem', animation:'badgePulse 1.5s ease-in-out infinite' }} />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* ── Search bar ───────────────────────────────── */}
-        <div style={{ position:'relative', marginBottom:'1.5rem', animation: loaded ? 'fadeUp 0.5s ease 0.2s both' : 'none' }}>
-          <Search size={17} color="#9ca3af" style={{ position:'absolute', left:'1rem', top:'50%', transform:'translateY(-50%)' }} />
-          <input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Ödev veya öğrenci ara..."
-            style={{
-              width:'100%', background:'white',
-              border:'1.5px solid #f1f5f9',
-              borderRadius:14, padding:'0.75rem 1rem 0.75rem 2.75rem',
-              fontSize:'0.875rem', color:'#111827',
-              outline:'none', boxSizing:'border-box',
-              boxShadow:'0 1px 4px rgba(0,0,0,0.04)',
-              fontFamily:'inherit',
-              transition:'all 0.2s',
-            }}
-            onFocus={e => { e.target.style.borderColor='#f97316'; e.target.style.boxShadow='0 0 0 3px rgba(249,115,22,0.1)'; }}
-            onBlur={e => { e.target.style.borderColor='#f1f5f9'; e.target.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)'; }}
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')} style={{ position:'absolute', right:'0.75rem', top:'50%', transform:'translateY(-50%)', background:'#f3f4f6', border:'none', borderRadius:6, padding:'0.2rem', cursor:'pointer', display:'flex' }}>
-              <X size={14} color="#6b7280" />
-            </button>
-          )}
-        </div>
-
-        {/* ── Homework List ─────────────────────────────── */}
-        {filtered.length === 0 ? (
-          <div style={{ background:'white', borderRadius:20, padding:'4rem 2rem', textAlign:'center', border:'1.5px solid #f1f5f9', animation: loaded ? 'fadeUp 0.5s ease 0.3s both' : 'none' }}>
-            <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>📭</div>
-            <p style={{ fontWeight:800, fontSize:'1.1rem', color:'#374151', marginBottom:'0.4rem' }}>Ödev bulunamadı</p>
-            <p style={{ color:'#9ca3af', fontSize:'0.875rem' }}>
-              {searchQuery ? `"${searchQuery}" için sonuç yok` : 'Henüz ödev eklenmemiş'}
-            </p>
-          </div>
-        ) : (
-          <div style={{ display:'flex', flexDirection:'column', gap:'1.5rem' }}>
-            {Object.entries(grouped).map(([studentName, hws], groupIdx) => {
-              const avatarColor = getAvatarColor(studentName);
-              return (
-                <div key={studentName} style={{ animation: loaded ? `cardPop 0.45s ease ${0.1 + groupIdx * 0.08}s both` : 'none' }}>
-                  {/* Student group header */}
-                  <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.75rem' }}>
-                    <div style={{ width:32, height:32, borderRadius:'50%', background:avatarColor, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 4px 12px ${avatarColor}40` }}>
-                      <span style={{ fontSize:'0.72rem', fontWeight:800, color:'white' }}>{getInitials(studentName)}</span>
-                    </div>
-                    <span style={{ fontSize:'0.9rem', fontWeight:800, color:'#111827' }}>{studentName}</span>
-                    <div style={{ flex:1, height:1, background:'linear-gradient(to right, #f1f5f9, transparent)' }} />
-                    <span style={{ fontSize:'0.72rem', fontWeight:700, color:'#9ca3af' }}>{hws.length} ödev</span>
-                  </div>
-
-                  {/* Homework cards */}
-                  <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
-                    {hws.map((hw, i) => {
-                      const cfg = STATUS_CONFIG[hw.status] || STATUS_CONFIG.verildi;
-                      const Icon = cfg.icon;
-                      const dueDateInfo = getDueDateLabel(hw.dueDate);
-                      const isSelected = selectedHw?.id === hw.id;
-
-                      return (
-                        <div key={hw.id} className="hw-card"
-                          onClick={() => setSelectedHw(hw)}
-                          style={{
-                            background:'white',
-                            borderRadius:16,
-                            border: `1.5px solid ${isSelected ? cfg.dot + '60' : '#f1f5f9'}`,
-                            padding:'1rem 1.1rem',
-                            cursor:'pointer',
-                            boxShadow: isSelected ? `0 8px 24px ${cfg.dot}20` : '0 1px 6px rgba(0,0,0,0.05)',
-                            display:'flex', alignItems:'center', gap:'1rem',
-                            position:'relative', overflow:'hidden',
-                          }}>
-                          {/* Left accent bar */}
-                          <div style={{ position:'absolute', left:0, top:0, bottom:0, width:3, background:cfg.gradient, borderRadius:'0 0 0 0' }} />
-
-                          {/* Status icon */}
-                          <div style={{ width:40, height:40, borderRadius:12, background:cfg.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                            <Icon size={18} color={cfg.color} />
-                          </div>
-
-                          {/* Main content */}
-                          <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontWeight:700, color:'#111827', fontSize:'0.92rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginBottom:'0.25rem' }}>
-                              {hw.title}
-                            </div>
-                            <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', flexWrap:'wrap' }}>
-                              {dueDateInfo && (
-                                <span style={{ display:'flex', alignItems:'center', gap:'0.2rem', fontSize:'0.75rem', color:dueDateInfo.color, fontWeight:700, background:dueDateInfo.bg, padding:'0.15rem 0.5rem', borderRadius:6 }}>
-                                  <Calendar size={10} /> {dueDateInfo.text}
-                                </span>
-                              )}
-                              {hw.description && (
-                                <span style={{ fontSize:'0.75rem', color:'#9ca3af', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:200 }}>
-                                  {hw.description}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Status badge */}
-                          <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', flexShrink:0 }}>
-                            <span style={{ fontSize:'0.7rem', fontWeight:800, padding:'0.25rem 0.65rem', borderRadius:20, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.dot}30` }}>
-                              {cfg.label}
-                            </span>
-                            <ChevronRight size={14} color="#d1d5db" />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <button onClick={() => { setEditingHw(null); setForm({ studentId: '', title: '', description: '', dueDate: '' }); setShowForm(true); }}
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.7rem 1.4rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
+          <Plus size={16} /> Ödev Ver
+        </button>
       </div>
 
-      {/* Slide Panel */}
-      {selectedHw && (
-        <SlidePanel
-          hw={selectedHw}
-          students={students}
-          onClose={() => setSelectedHw(null)}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
+      {/* Özet kartlar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
+        {[
+          { key: 'verildi',    label: 'Aktif',        color: '#4338ca', bg: '#e0e7ff', icon: 'book' },
+          { key: 'gecikmiş',   label: 'Gecikmiş',     color: '#b91c1c', bg: '#fee2e2', icon: 'alert' },
+          { key: 'tamamlandı', label: 'Tamamlandı',   color: '#065f46', bg: '#d1fae5', icon: 'check' },
+          { key: 'all',        label: 'Toplam Ödev',  color: '#374151', bg: '#f3f4f6', icon: 'list' },
+        ].map(({ key, label, color, bg, icon }) => (
+          <div key={key} onClick={() => setFilter(key)}
+            style={{ background: filter === key ? bg : 'white', borderRadius: 14, padding: '1rem 1.25rem', border: `1.5px solid ${filter === key ? color + '40' : '#f1f5f9'}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: filter === key ? `0 4px 14px ${color}20` : '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ marginBottom: '0.5rem' }}>
+              {icon === 'book' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>}
+              {icon === 'alert' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>}
+              {icon === 'check' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+              {icon === 'list' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>}
+            </div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color, lineHeight: 1 }}>{counts[key]}</div>
+            <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '600', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Liste */}
+      {filtered.length === 0 ? (
+        <div style={{ background: 'white', borderRadius: 20, padding: '4rem 2rem', textAlign: 'center', border: '1px solid #f1f5f9' }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 4.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 11a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 18z"/></svg></div>
+          <p style={{ color: '#9ca3af', fontWeight: '600', fontSize: '1rem' }}>Ödev bulunamadı</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {filtered.map(hw => {
+            const cfg = STATUS_CFG[hw.status] || STATUS_CFG.verildi;
+            const Icon = cfg.icon;
+            const dueDateInfo = getDueDateLabel(hw.dueDate);
+            const isExpanded = expandedId === hw.id;
+            const student = students.find(s => s.id === hw.studentId);
+
+            return (
+              <div key={hw.id} style={{ background: 'white', borderRadius: 16, border: `1.5px solid ${isExpanded ? cfg.dot + '40' : '#f1f5f9'}`, boxShadow: isExpanded ? `0 4px 16px ${cfg.dot}15` : '0 1px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s', overflow: 'hidden' }}>
+
+                {/* Ana satır */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.9rem 1.1rem', cursor: 'pointer' }}
+                  onClick={() => setExpandedId(isExpanded ? null : hw.id)}>
+
+                  {/* Renkli ikon */}
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={18} color={cfg.color} />
+                  </div>
+
+                  {/* İçerik */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.92rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hw.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#6b7280' }}>
+                        <User size={11} /> {hw.studentName}
+                      </span>
+                      {dueDateInfo && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: dueDateInfo.color, fontWeight: dueDateInfo.urgent ? '700' : '500' }}>
+                          <Calendar size={11} /> {dueDateInfo.text}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status badge */}
+                  <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.25rem 0.7rem', borderRadius: 20, background: cfg.bg, color: cfg.color, flexShrink: 0 }}>
+                    {cfg.label}
+                  </span>
+
+                  <ChevronRight size={15} color="#d1d5db" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                </div>
+
+                {/* Genişletilmiş içerik */}
+                {isExpanded && (
+                  <div style={{ padding: '0.75rem 1.1rem 1rem', borderTop: '1px solid #f3f4f6', background: '#fafafa' }}>
+                    {hw.description && (
+                      <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.85rem', lineHeight: 1.6 }}>{hw.description}</p>
+                    )}
+                    {student?.parentPhone && (
+                      <a href={`tel:${student.parentPhone}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#16a34a', fontWeight: '600', textDecoration: 'none', marginBottom: '0.85rem' }}>
+                        {student.parentPhone}
+                      </a>
+                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Durum değiştir */}
+                      {hw.status !== 'tamamlandı' && (
+                        <ActionBtn label="Tamamlandı" color="#059669" bg="#d1fae5" onClick={() => changeStatus(hw, 'tamamlandı')} />
+                      )}
+                      {hw.status === 'tamamlandı' && (
+                        <ActionBtn label="Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => changeStatus(hw, 'verildi')} />
+                      )}
+                      {hw.status !== 'gecikmiş' && hw.status !== 'tamamlandı' && (
+                        <ActionBtn label="Gecikmiş" color="#b91c1c" bg="#fee2e2" onClick={() => changeStatus(hw, 'gecikmiş')} />
+                      )}
+                      <div style={{ flex: 1 }} />
+                      <button onClick={() => openEdit(hw)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', padding: '0.4rem 0.6rem', borderRadius: 8 }}>
+                        <Pencil size={13} /> Düzenle
+                      </button>
+                      <button onClick={() => deleteHw(hw)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', padding: '0.4rem 0.6rem', borderRadius: 8 }}>
+                        <Trash2 size={13} /> Sil
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
 
-      {/* Add/Edit Modal */}
-      {showModal && (
-        <HomeworkModal
-          editingHw={editingHw}
-          students={students}
-          onClose={() => { setShowModal(false); setEditingHw(null); }}
-          onSave={handleSave}
-        />
+      {/* Modal */}
+      {showForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(17,24,39,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ background: 'white', borderRadius: '20px', padding: '1.75rem', maxWidth: '480px', width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,0.2)', animation: 'fadeUp 0.2s ease' }}>
+            <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }`}</style>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#111827' }}>{editingHw ? 'Ödevi Düzenle' : 'Ödev Ver'}</h2>
+              <button onClick={() => setShowForm(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '8px', padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
+                <X size={16} color='#6b7280' />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Öğrenci</label>
+                <select value={form.studentId} onChange={e => setForm(f => ({ ...f, studentId: e.target.value }))} style={{ ...inp, appearance: 'none' }}>
+                  <option value="">Öğrenci seç...</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ödev Başlığı</label>
+                <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Ödev başlığı..." style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Açıklama</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Ödev detayları..." rows={3} style={{ ...inp, resize: 'vertical' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Son Teslim Tarihi</label>
+                <input type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} style={inp} />
+              </div>
+              <button onClick={handleSave} disabled={!form.studentId || !form.title}
+                style={{ background: (!form.studentId || !form.title) ? '#ffffffff' : 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: (!form.studentId || !form.title) ? '#9ca3af' : 'white', border: 'none', borderRadius: '12px', padding: '0.875rem', fontWeight: '800', fontSize: '0.9rem', cursor: (!form.studentId || !form.title) ? 'default' : 'pointer', marginTop: '0.25rem', transition: 'all 0.15s' }}>
+                {editingHw ? 'Kaydet' : '📚 Ödev Ver'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
+  );
+}
+
+function ActionBtn({ label, color, bg, onClick }) {
+  const [hover, setHover] = React.useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ background: hover ? color : bg, border: 'none', color: hover ? 'white' : color, cursor: 'pointer', padding: '0.45rem 0.9rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: '700', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+      {label}
+    </button>
   );
 }

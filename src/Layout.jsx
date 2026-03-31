@@ -139,7 +139,6 @@ const TEACHER_NAV = [
   { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
-  { label: 'Akıllı Zam Önerisi', icon: DollarSign, page: 'Page1' },
   { label: 'EduTakip Asistan', icon: Bot, page: 'TeacherAssistant' },
 ];
 
