@@ -12,7 +12,7 @@ export default function Checkout() {
   useEffect(() => {
     const checkTransaction = async () => {
       try {
-        const transactionId = searchParams.get('_transaction_id');
+        const transactionId = searchParams.get('transaction_id');
         const user = await base44.auth.me();
 
         if (!user) {
