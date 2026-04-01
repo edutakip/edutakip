@@ -11,6 +11,11 @@ export default function Checkout() {
   useEffect(() => {
     const checkPayment = async () => {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const transactionId = params.get('_ptxn');
+        
+        console.log('Checkout params:', Object.fromEntries(params));
+        
         const user = await base44.auth.me();
         if (!user) {
           setStatus('error');
