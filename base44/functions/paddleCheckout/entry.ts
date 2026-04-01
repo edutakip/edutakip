@@ -42,6 +42,9 @@ Deno.serve(async (req) => {
           user_email: user.email,
           student_count: studentCount,
         },
+        checkout: {
+          return_url: 'https://edutakip.com/checkout?transaction_id={transaction_id}',
+        },
       }),
     });
 
