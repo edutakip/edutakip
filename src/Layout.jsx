@@ -156,10 +156,10 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
-    { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
-    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
+    { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
+    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages', multiLine: true },
   ];
 
   const TEACHER_NAV = [
@@ -190,6 +190,7 @@ export default function Layout({ children, currentPageName }) {
   const [fabStudents, setFabStudents] = useState([]);
   const [selectedPayStudent, setSelectedPayStudent] = useState(null);
   const [derslerOpen, setDerslerOpen] = useState(false);
+  const [finansOpen, setFinansOpen] = useState(false);
 
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
@@ -461,6 +462,46 @@ export default function Layout({ children, currentPageName }) {
         </main>
 
         {/* Alt nav — öğretmen mobil */}
+        {/* Finans alt menü popup */}
+        {finansOpen && (
+          <>
+            <div onClick={() => setFinansOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+            <div style={{
+              position: 'fixed', bottom: '92px', left: '50%', transform: 'translateX(-50%)',
+              zIndex: 100, display: 'flex', flexDirection: 'column', gap: '0.5rem',
+              background: 'rgba(22,18,60,0.92)',
+              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '20px', padding: '0.6rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              minWidth: '180px',
+            }}>
+              {[
+                { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+                { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                const isActive = item.page === currentPageName;
+                return (
+                  <Link key={i} to={createPageUrl(item.page)}
+                    onClick={(e) => { handleNav(e, item.page); setFinansOpen(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.65rem',
+                      padding: '0.55rem 0.85rem', borderRadius: '12px',
+                      color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.75)',
+                      textDecoration: 'none', fontSize: '0.85rem', fontWeight: isActive ? '700' : '500',
+                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      transition: 'all 0.15s',
+                    }}>
+                    <Icon size={16} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </>
+        )}
+
         {/* Dersler alt menü popup */}
         {derslerOpen && (
           <>
@@ -505,34 +546,60 @@ export default function Layout({ children, currentPageName }) {
 
         <nav style={{
           position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
+          zIndex: 50, width: 'calc(100% - 16px)', maxWidth: '560px',
           background: 'rgba(22,18,60,0.78)',
           backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.13)',
           borderRadius: '28px',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '60px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          height: '68px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}>
           {TEACHER_MOBILE_NAV.map((item, i) => {
             const Icon = item.icon;
             const isActive = item.submenu
               ? item.submenu.some(s => s === currentPageName)
+              : item.financeSubmenu
+              ? (currentPageName === 'TeacherFinance' || currentPageName === 'Page1')
               : item.page === currentPageName;
             const handleClick = (e) => {
               if (item.submenu) {
                 e.preventDefault();
+                setFinansOpen(false);
                 setDerslerOpen(o => !o);
+              } else if (item.financeSubmenu) {
+                e.preventDefault();
+                setDerslerOpen(false);
+                setFinansOpen(o => !o);
               } else {
+                setDerslerOpen(false);
+                setFinansOpen(false);
                 handleNav(e, item.page);
               }
             };
+
+            // Split label into two lines if multiLine
+            const renderLabel = () => {
+              if (item.multiLine) {
+                const words = item.label.split(' ');
+                if (words.length >= 2) {
+                  const mid = Math.ceil(words.length / 2);
+                  return (
+                    <span style={{ textAlign: 'center', lineHeight: '1.2' }}>
+                      {words.slice(0, mid).join(' ')}<br/>{words.slice(mid).join(' ')}
+                    </span>
+                  );
+                }
+              }
+              return <span>{item.label}{item.submenu || item.financeSubmenu ? ' ›' : ''}</span>;
+            };
+
             return (
               <Link key={i}
-                to={item.submenu ? '#' : createPageUrl(item.page)}
+                to={(item.submenu || item.financeSubmenu) ? '#' : createPageUrl(item.page)}
                 onClick={handleClick}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
+                  gap: '0.15rem', padding: '0.3rem 0.4rem', cursor: 'pointer',
                   color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.4)',
                   textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
                   transition: 'color 0.2s ease',
@@ -541,7 +608,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{
                     position: 'absolute', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '52px', height: '44px', borderRadius: '16px',
+                    width: '52px', height: '50px', borderRadius: '16px',
                     background: 'rgba(255,255,255,0.12)',
                     backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                     border: '1px solid rgba(255,255,255,0.18)',
@@ -549,11 +616,9 @@ export default function Layout({ children, currentPageName }) {
                     zIndex: 0, transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
                   }} />
                 )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
-                  <Icon size={18} />
-                  <span style={{ fontSize: '0.55rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
-                    {item.label}{item.submenu ? ' ›' : ''}
-                  </span>
+                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem', fontSize: '0.52rem', fontWeight: isActive ? '700' : '500' }}>
+                  <Icon size={17} />
+                  {renderLabel()}
                 </span>
               </Link>
             );
@@ -561,12 +626,12 @@ export default function Layout({ children, currentPageName }) {
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.2rem', padding: '0.3rem 0.5rem', cursor: 'pointer',
+              gap: '0.15rem', padding: '0.3rem 0.4rem', cursor: 'pointer',
               color: 'rgba(255,150,150,0.55)', background: 'none', border: 'none', flex: 1, height: '100%',
-              transition: 'color 0.2s ease',
+              transition: 'color 0.2s ease', fontSize: '0.52rem', fontWeight: '500',
             }}>
-            <LogOut size={18} />
-            <span style={{ fontSize: '0.55rem', fontWeight: '500' }}>{t('teacher.layout.logout')}</span>
+            <LogOut size={17} />
+            <span>{t('teacher.layout.logout')}</span>
           </button>
         </nav>
 

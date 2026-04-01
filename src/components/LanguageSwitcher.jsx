@@ -13,9 +13,9 @@ export default function LanguageSwitcher({ style = {} }) {
     <button
       onClick={toggle}
       style={{
-        background: 'rgba(255,255,255,0.12)',
-        border: '1.5px solid rgba(255,255,255,0.25)',
-        color: 'rgba(255,255,255,0.85)',
+        background: 'rgba(99,102,241,0.1)',
+        border: '1.5px solid rgba(99,102,241,0.25)',
+        color: '#4f46e5',
         borderRadius: 8,
         padding: '6px 12px',
         fontWeight: 700,

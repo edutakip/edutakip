@@ -189,7 +189,7 @@ export default function TeacherDashboard() {
           <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{format(new Date(), 'EEEE, d MMMM yyyy', { locale: dateLocale })}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: isMobile ? '100%' : 'auto' }}>
-          <LanguageSwitcher style={{ background: 'rgba(99,102,241,0.1)', border: '1.5px solid rgba(99,102,241,0.25)', color: '#4f46e5', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }} />
+          <LanguageSwitcher />
         <button onClick={() => setShowModal(true)}
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
           <Plus size={16} /> {t('teacher.dashboard.addLesson')}
