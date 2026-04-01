@@ -29,10 +29,10 @@ function ChoiceGroup({ label, field, value, onChange, CHOICES }) {
   );
 }
 
-function StarRating({ value, onChange }) {
+function StarRating({ value, onChange, label, ratingLabels }) {
   return (
     <div>
-      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.overallRating')}</label>
+      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
         {[1,2,3,4,5].map(n => (
           <button key={n} onClick={() => onChange(n)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.1rem', fontSize: '1.75rem', lineHeight: 1, transition: 'transform 0.1s' }}
@@ -41,7 +41,7 @@ function StarRating({ value, onChange }) {
             {n <= value ? '⭐' : '☆'}
           </button>
         ))}
-        {value > 0 && <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginLeft: '0.25rem' }}>{RATING_LABELS[value]}</span>}
+        {value > 0 && <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginLeft: '0.25rem' }}>{ratingLabels[value]}</span>}
       </div>
     </div>
   );
@@ -447,7 +447,7 @@ ZORUNLU KURALLAR:
           {/* Step 1: Performans */}
           {step === 1 && (
             <>
-              <StarRating value={form.rating} onChange={v => u('rating', v)} />
+              <StarRating value={form.rating} onChange={v => u('rating', v)} label={t('teacher.lessonReport.overallRating')} ratingLabels={RATING_LABELS} />
               <ChoiceGroup label={t('teacher.lessonReport.understood')} field="understood" value={form.understood} onChange={v => u('understood', v)} CHOICES={CHOICES} />
               <ChoiceGroup label={t('teacher.lessonReport.participationLevel')} field="participation" value={form.participation} onChange={v => u('participation', v)} CHOICES={CHOICES} />
               <ChoiceGroup label={t('teacher.lessonReport.motivation')} field="motivation" value={form.motivation} onChange={v => u('motivation', v)} CHOICES={CHOICES} />
