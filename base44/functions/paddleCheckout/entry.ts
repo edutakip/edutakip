@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     }
 
     // Create Paddle checkout session
-    const checkoutResponse = await fetch('https://api.paddle.com/checkouts', {
+    const checkoutResponse = await fetch('https://api.paddle.com/transactions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${PADDLE_API_KEY}`,
