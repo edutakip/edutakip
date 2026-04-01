@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import { Users, DollarSign, Clock, TrendingUp, AlertCircle, Plus, RefreshCw, ChevronDown, X } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import PaymentModal from '../components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
 import { isPro } from '@/lib/subscription';
@@ -15,14 +16,16 @@ const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6'];
 
 // ── Detail Modal ──────────────────────────────────────────────
 function DetailModal({ type, students, payments, lessons, onClose }) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
   const now = new Date();
 
   const content = () => {
     if (type === 'students') {
       return (
         <>
-          <h2 style={mTitle}>Aktif Öğrenciler</h2>
-          <p style={mSub}>{students.length} öğrenci kayıtlı</p>
+          <h2 style={mTitle}>{t('teacher.finance.activeStudentsDetail')}</h2>
+          <p style={mSub}>{students.length} {t('teacher.finance.registeredStudents')}</p>
           <div style={mList}>
             {students.map((s, i) => (
               <div key={s.id} style={mRow(i)}>
@@ -51,10 +54,10 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
       const total = received.reduce((s, p) => s + (p.amount || 0), 0);
       return (
         <>
-          <h2 style={mTitle}>Toplam Gelir Detayı</h2>
-          <p style={mSub}>Toplam tahsil edilen: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
+          <h2 style={mTitle}>{t('teacher.finance.totalIncomeDetail')}</h2>
+          <p style={mSub}>{t('teacher.finance.totalCollected')}: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
           <div style={mList}>
-            {received.length === 0 && <p style={mEmpty}>Henüz ödeme alınmamış</p>}
+            {received.length === 0 && <p style={mEmpty}>{t('teacher.finance.noPaymentsYet')}</p>}
             {received.map((p, i) => (
               <div key={p.id} style={mRow(i)}>
                 <div>
@@ -81,15 +84,15 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
 
       return (
         <>
-          <h2 style={mTitle}>Ders Saatleri Detayı</h2>
-          <p style={mSub}>Toplam tamamlanan: <strong>{Math.round(totalMins / 60 * 10) / 10} saat</strong> ({completedLessons.length} ders)</p>
+          <h2 style={mTitle}>{t('teacher.finance.lessonHoursDetail')}</h2>
+          <p style={mSub}>{t('teacher.finance.totalCompleted')}: <strong>{Math.round(totalMins / 60 * 10) / 10} {t('teacher.finance.hours')}</strong> ({completedLessons.length})</p>
           <div style={mList}>
-            {byStudent.length === 0 && <p style={mEmpty}>Henüz tamamlanan ders yok</p>}
+            {byStudent.length === 0 && <p style={mEmpty}>{t('teacher.finance.noCompletedLessons')}</p>}
             {byStudent.map((s, i) => (
               <div key={i} style={mRow(i)}>
                 <div>
                   <div style={{ color: '#111827', fontWeight: 700, fontSize: '0.88rem' }}>{s.name}</div>
-                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{s.lessons} ders · Haftalık plan: {s.weekly} ders</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{s.lessons} · {t('teacher.finance.weeklyPlan')}: {s.weekly}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ color: '#6366f1', fontWeight: 800, fontSize: '0.9rem' }}>{s.hours} saat</div>
@@ -106,8 +109,8 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
       const total = sorted.reduce((s, st) => s + (st.monthlyFee || 0), 0);
       return (
         <>
-          <h2 style={mTitle}>Düzenli Gelir (MRR) Detayı</h2>
-          <p style={mSub}>Aylık toplam: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
+          <h2 style={mTitle}>{t('teacher.finance.mrrDetail')}</h2>
+          <p style={mSub}>{t('teacher.finance.monthlyTotal')}: <strong>₺{total.toLocaleString('tr-TR')}</strong></p>
           <div style={mList}>
             {sorted.map((s, i) => (
               <div key={s.id} style={mRow(i)}>
@@ -146,19 +149,19 @@ function DetailModal({ type, students, payments, lessons, onClose }) {
 
       return (
         <>
-          <h2 style={mTitle}>Bu Ay — {format(now, 'MMMM yyyy', { locale: tr })}</h2>
+          <h2 style={mTitle}>{t('teacher.finance.thisMonthDetail')} — {format(now, 'MMMM yyyy', { locale: dateLocale })}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 12, padding: '0.85rem' }}>
-              <div style={{ color: '#16a34a', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>TAHSİL EDİLEN</div>
+              <div style={{ color: '#16a34a', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>{t('teacher.finance.collected')}</div>
               <div style={{ color: '#15803d', fontSize: '1.3rem', fontWeight: 800 }}>₺{collected.toLocaleString('tr-TR')}</div>
             </div>
             <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: 12, padding: '0.85rem' }}>
-              <div style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>BEKLEYEN</div>
+              <div style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: 700, marginBottom: 4 }}>{t('teacher.finance.pendingAmount')}</div>
               <div style={{ color: '#b45309', fontSize: '1.3rem', fontWeight: 800 }}>₺{pending.toLocaleString('tr-TR')}</div>
             </div>
           </div>
           <div style={mList}>
-            {thisMonthPayments.length === 0 && <p style={mEmpty}>Bu ay henüz ödeme alınmamış</p>}
+            {thisMonthPayments.length === 0 && <p style={mEmpty}>{t('teacher.finance.noPaymentsThisMonth')}</p>}
             {thisMonthPayments.map((p, i) => (
               <div key={p.id} style={mRow(i)}>
                 <div>
@@ -200,6 +203,8 @@ const mRow = (i) => ({ display: 'flex', justifyContent: 'space-between', alignIt
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function TeacherFinance() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
   const [payments, setPayments] = useState([]);
   const [students, setStudents] = useState([]);
   const [lessons, setLessons] = useState([]);
@@ -257,7 +262,7 @@ export default function TeacherFinance() {
       const d = new Date(p.date);
       return d >= startOfMonth(m) && d <= endOfMonth(m);
     }).reduce((s, p) => s + (p.amount || 0), 0);
-    return { month: format(m, 'MMM yy', { locale: tr }), gelir: income, hakedilen: earned };
+    return { month: format(m, 'MMM yy', { locale: dateLocale }), gelir: income, hakedilen: earned };
   });
 
   const weeklyHoursData = Array.from({ length: 8 }, (_, i) => {
@@ -268,7 +273,7 @@ export default function TeacherFinance() {
       const d = new Date(l.date);
       return d >= weekStart && d <= weekEnd && l.status !== 'iptal';
     }).reduce((s, l) => s + (l.duration || 60), 0);
-    return { week: format(weekStart, 'd MMM', { locale: tr }), saat: Math.round(mins / 60 * 10) / 10 };
+    return { week: format(weekStart, 'd MMM', { locale: dateLocale }), saat: Math.round(mins / 60 * 10) / 10 };
   });
 
   const studentIncome = students.map(s => ({
@@ -290,8 +295,8 @@ export default function TeacherFinance() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.9rem' : 0, marginBottom: '1.75rem' }}>
         <div>
-          <h1 style={{ color: '#111827', fontSize: '1.6rem', fontWeight: '800', marginBottom: '0.2rem' }}>Finans Yönetimi</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Gelir, ödeme ve öğrenci bazlı istatistikler</p>
+          <h1 style={{ color: '#111827', fontSize: '1.6rem', fontWeight: '800', marginBottom: '0.2rem' }}>{t('teacher.finance.title')}</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>{t('teacher.finance.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', width: isMobile ? '100%' : 'auto' }}>
           <button onClick={loadAll} style={{ background: 'white', border: '1.5px solid #e5e7eb', color: '#6b7280', borderRadius: '10px', padding: '0.55rem 0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
@@ -300,11 +305,11 @@ export default function TeacherFinance() {
           <div style={{ position: 'relative', flex: isMobile ? 1 : 'none' }}>
             <button onClick={() => setShowStudentPicker(v => !v)}
               style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.25rem', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)', width: isMobile ? '100%' : 'auto' }}>
-              <Plus size={16} /> Ödeme Ekle <ChevronDown size={14} />
+              <Plus size={16} /> {t('teacher.finance.addPayment')} <ChevronDown size={14} />
             </button>
             {showStudentPicker && (
               <div style={{ position: 'absolute', top: 'calc(100% + 0.5rem)', right: 0, background: 'white', border: '1.5px solid #e5e7eb', borderRadius: '14px', padding: '0.5rem', minWidth: '200px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-                {students.length === 0 && <p style={{ color: '#9ca3af', padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}>Öğrenci yok</p>}
+                {students.length === 0 && <p style={{ color: '#9ca3af', padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}>{t('teacher.finance.noStudent')}</p>}
                 {students.map(s => (
                   <button key={s.id} onClick={() => { setPayModalStudent(s); setShowStudentPicker(false); }}
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.55rem 0.75rem', borderRadius: '9px', border: 'none', background: 'transparent', color: '#111827', fontSize: '0.875rem', cursor: 'pointer' }}
@@ -321,11 +326,11 @@ export default function TeacherFinance() {
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-        <StatCard icon={Users} iconColor='#ec4899' label='Aktif Öğrenci' value={students.length} sub='Detay için tıkla' onClick={() => setDetailType('students')} />
-        <StatCard icon={DollarSign} iconColor='#f97316' label='Toplam Gelir' value={`₺${totalIncome.toLocaleString('tr-TR')}`} sub='Detay için tıkla' onClick={() => setDetailType('income')} />
-        <StatCard icon={Clock} iconColor='#6366f1' label='Haftalık Planlanan Ders' value={`${totalWeeklyHours} Saat`} sub='Detay için tıkla' onClick={() => setDetailType('hours')} />
-        <StatCard icon={TrendingUp} iconColor='#10b981' label='Düzenli Gelir' value={`₺${monthlyRecurring.toLocaleString('tr-TR')}`} sub='Detay için tıkla' badge='Aylık' onClick={() => setDetailType('mrr')} />
-        <StatCard icon={TrendingUp} iconColor='#8b5cf6' label='Bu Ay (Hakedilen)' value={`₺${thisMonthIncome.toLocaleString('tr-TR')}`} sub='Detay için tıkla' onClick={() => setDetailType('thismonth')} />
+        <StatCard icon={Users} iconColor='#ec4899' label={t('teacher.finance.activeStudents')} value={students.length} sub={t('teacher.finance.clickForDetail')} onClick={() => setDetailType('students')} />
+        <StatCard icon={DollarSign} iconColor='#f97316' label={t('teacher.finance.totalIncome')} value={`₺${totalIncome.toLocaleString('tr-TR')}`} sub={t('teacher.finance.clickForDetail')} onClick={() => setDetailType('income')} />
+        <StatCard icon={Clock} iconColor='#6366f1' label={t('teacher.finance.weeklyPlanned')} value={`${totalWeeklyHours} ${t('teacher.finance.hours')}`} sub={t('teacher.finance.clickForDetail')} onClick={() => setDetailType('hours')} />
+        <StatCard icon={TrendingUp} iconColor='#10b981' label={t('teacher.finance.recurringIncome')} value={`₺${monthlyRecurring.toLocaleString('tr-TR')}`} sub={t('teacher.finance.clickForDetail')} badge={t('teacher.finance.monthly')} onClick={() => setDetailType('mrr')} />
+        <StatCard icon={TrendingUp} iconColor='#8b5cf6' label={t('teacher.finance.thisMonthEarned')} value={`₺${thisMonthIncome.toLocaleString('tr-TR')}`} sub={t('teacher.finance.clickForDetail')} onClick={() => setDetailType('thismonth')} />
       </div>
 
       {/* Charts row */}
@@ -334,15 +339,15 @@ export default function TeacherFinance() {
           <div onClick={() => setShowUpgradeModal(true)} style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', background: 'rgba(255,255,255,0.4)', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
             <div style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', borderRadius: 14, padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 20px rgba(79,70,229,0.35)' }}>
               <span style={{ fontSize: '1.1rem' }}>🔒</span>
-              <span style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem' }}>Pro ile Kilidi Aç</span>
+              <span style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem' }}>{t('teacher.finance.unlockPro')}</span>
             </div>
-            <span style={{ color: '#4f46e5', fontSize: '0.8rem', fontWeight: 600 }}>Detaylı finans analizi sadece Pro hesaplarda</span>
+            <span style={{ color: '#4f46e5', fontSize: '0.8rem', fontWeight: 600 }}>{t('teacher.finance.proFinanceDesc')}</span>
           </div>
         )}
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
-              <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem' }}>Aylık Gelir Grafiği</h3>
+              <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem' }}>{t('teacher.finance.monthlyChart')}</h3>
               <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.15rem' }}>
                 Ort. ₺{monthlyData.length > 0 ? Math.round(monthlyData.reduce((s, d) => s + d.gelir, 0) / 6).toLocaleString('tr-TR') : 0} (Son 6 ay)
               </p>
@@ -372,8 +377,8 @@ export default function TeacherFinance() {
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
             <div>
-              <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem' }}>Haftalık Çalışma Saatleri</h3>
-              <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.15rem' }}>Son 8 hafta</p>
+              <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem' }}>{t('teacher.finance.weeklyHours')}</h3>
+              <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.15rem' }}>{t('teacher.finance.last8Weeks')}</p>
             </div>
             <div style={{ padding: '0.4rem', background: '#fff7ed', borderRadius: '8px' }}>
               <Clock size={16} color='#f97316' />
@@ -406,15 +411,15 @@ export default function TeacherFinance() {
           </div>
         )}
         <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Bekleyen Bakiye</h3>
+          <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>{t('teacher.finance.pendingBalance')}</h3>
           <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>
-            Öğrenci dağılımı · {pendingByStudent.length} öğrenci
+            {t('teacher.finance.allStudents')} · {pendingByStudent.length} {t('teacher.finance.allStudentsFilter').toLowerCase()}
           </p>
 
           {pendingByStudent.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
-              <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Bekleyen ödeme yok</p>
+              <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>{t('teacher.finance.noPaymentRecord')}</p>
             </div>
           ) : (
             <>
@@ -457,7 +462,7 @@ export default function TeacherFinance() {
                       </svg>
                       {/* Center text */}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TOPLAM</div>
+                        <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.finance.total')}</div>
                         <div style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800', lineHeight: 1.2 }}>₺{total.toLocaleString('tr-TR')}</div>
                       </div>
                     </div>
@@ -489,10 +494,10 @@ export default function TeacherFinance() {
         </div>
 
         <div style={card}>
-          <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>Öğrenci Bazlı Kazanç</h3>
-          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>Tüm öğrenciler · {students.length} öğrenci</p>
+          <h3 style={{ color: '#111827', fontWeight: '700', fontSize: '1rem', marginBottom: '0.2rem' }}>{t('teacher.finance.studentIncome')}</h3>
+          <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginBottom: '1.25rem' }}>{t('teacher.finance.allStudents')} · {students.length}</p>
           {studentIncome.length === 0 ? (
-            <p style={{ color: '#9ca3af', textAlign: 'center', padding: '2rem 0', fontSize: '0.875rem' }}>Henüz ödeme kaydı yok</p>
+            <p style={{ color: '#9ca3af', textAlign: 'center', padding: '2rem 0', fontSize: '0.875rem' }}>{t('teacher.finance.noPaymentRecord')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {studentIncome.map((s, i) => (
@@ -511,7 +516,7 @@ export default function TeacherFinance() {
 
           {pendingByStudent.length > 0 && (
             <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1.5px solid #f3f4f6' }}>
-              <h4 style={{ color: '#374151', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.75rem' }}>Bekleyen Ödemeler</h4>
+              <h4 style={{ color: '#374151', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.75rem' }}>{t('teacher.finance.pendingPayments')}</h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.6rem' }}>
                 {pendingByStudent.map(({ student, amount }) => (
                   <div key={student.id} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -521,7 +526,7 @@ export default function TeacherFinance() {
                     </div>
                     <button onClick={() => setPayModalStudent(student)}
                       style={{ background: '#f59e0b', border: 'none', color: 'white', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.72rem', fontWeight: '700', cursor: 'pointer' }}>
-                      Tahsil Et
+                      {t('teacher.finance.collect')}
                     </button>
                   </div>
                 ))}
@@ -538,7 +543,7 @@ export default function TeacherFinance() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1.5px solid #f3f4f6', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: 4, height: 22, borderRadius: 4, background: '#f97316' }} />
-            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1.05rem', margin: 0 }}>Geçmiş İşlemler</h3>
+            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1.05rem', margin: 0 }}>{t('teacher.finance.transactionHistory')}</h3>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Öğrenci filtresi */}
@@ -546,7 +551,7 @@ export default function TeacherFinance() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <select value={txFilter.studentId} onChange={e => setTxFilter(f => ({ ...f, studentId: e.target.value }))}
                 style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: '#374151', fontWeight: '600', cursor: 'pointer', outline: 'none' }}>
-                <option value="all">Tüm Öğrenciler</option>
+                <option value="all">{t('teacher.finance.allStudentsFilter')}</option>
                 {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
@@ -559,7 +564,7 @@ export default function TeacherFinance() {
             </div>
             {/* Tip toggle */}
             <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: '0.2rem' }}>
-              {[['all','Tümü'],['payment','Ödeme'],['debt','Borç']].map(([v,l]) => (
+              {[['all', t('teacher.finance.allTypes')],['payment', t('teacher.finance.payment')],['debt', t('teacher.finance.debt')]].map(([v,l]) => (
                 <button key={v} onClick={() => setTxFilter(f => ({ ...f, type: v }))}
                   style={{ padding: '0.3rem 0.7rem', borderRadius: 8, border: 'none', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s', background: txFilter.type === v ? 'white' : 'transparent', color: txFilter.type === v ? '#111827' : '#9ca3af', boxShadow: txFilter.type === v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
                   {l}
@@ -598,7 +603,7 @@ export default function TeacherFinance() {
               <div style={{ width: 48, height: 48, borderRadius: 14, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>Kayıt bulunamadı</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t('teacher.finance.recordNotFound')}</p>
             </div>
           );
 
@@ -639,7 +644,7 @@ export default function TeacherFinance() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <span style={{ background: '#f3f4f6', color: '#6b7280', fontSize: '0.72rem', fontWeight: '600', padding: '0.15rem 0.5rem', borderRadius: 6 }}>
-                          {isPayment ? methodLabel : 'Ders Ücreti'}
+                          {isPayment ? methodLabel : t('teacher.finance.lessonFee')}
                         </span>
                         <span style={{ color: '#9ca3af', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           📅 {dateStr}
@@ -662,9 +667,9 @@ export default function TeacherFinance() {
 
               {/* Alt toplam */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.5rem', background: '#f8fafc', borderTop: '1.5px solid #f3f4f6' }}>
-                <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{allRows.length} işlem gösteriliyor</span>
+                <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: '500' }}>{allRows.length} {t('teacher.finance.transactionsShown')}</span>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Toplam Tahsilat</div>
+                  <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t('teacher.finance.totalCollection')}</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>₺{totalAmount.toLocaleString('tr-TR')}</div>
                 </div>
               </div>

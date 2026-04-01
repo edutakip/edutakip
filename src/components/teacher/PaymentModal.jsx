@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 
 export default function PaymentModal({ student, onClose, onSaved }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     amount: student?.monthlyFee || '',
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -90,7 +92,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       <div style={{ background: '#ffffff', borderRadius: '20px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #e5e7eb', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
-            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>Odeme Ekle</h2>
+            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>{t('teacher.paymentModal.title')}</h2>
             <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.15rem' }}>{student?.name}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -102,48 +104,48 @@ export default function PaymentModal({ student, onClose, onSaved }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {student?.parentPhone && (
             <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '10px', padding: '0.55rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Veli Tel:</span>
+              <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.paymentModal.parentPhone')}:</span>
               <a href={`tel:${student.parentPhone}`} style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: '600', textDecoration: 'none' }}>{student.parentPhone}</a>
               {student.parentName && <span style={{ color: '#86efac', fontSize: '0.78rem' }}>({student.parentName})</span>}
             </div>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
-              <label style={labelStyle}>Tutar (TL)</label>
+              <label style={labelStyle}>{t('teacher.paymentModal.amount')}</label>
               <input style={inputStyle} type='number' placeholder='0' value={form.amount} onChange={e => u('amount', e.target.value)} />
             </div>
             <div>
-              <label style={labelStyle}>Tarih</label>
+              <label style={labelStyle}>{t('teacher.paymentModal.date')}</label>
               <input style={inputStyle} type='date' value={form.date} onChange={e => u('date', e.target.value)} />
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
-              <label style={labelStyle}>Durum</label>
+              <label style={labelStyle}>{t('teacher.paymentModal.status')}</label>
               <select style={inputStyle} value={form.status} onChange={e => u('status', e.target.value)}>
-                <option value='alındı'>Alındı</option>
-                <option value='bekliyor'>Bekliyor</option>
-                <option value='gecikmiş'>Gecikmiş</option>
+                <option value='alındı'>{t('teacher.paymentModal.received')}</option>
+                <option value='bekliyor'>{t('teacher.paymentModal.pending')}</option>
+                <option value='gecikmiş'>{t('teacher.paymentModal.overdue')}</option>
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Yöntem</label>
+              <label style={labelStyle}>{t('teacher.paymentModal.method')}</label>
               <select style={inputStyle} value={form.method} onChange={e => u('method', e.target.value)}>
-                <option value='nakit'>Nakit</option>
-                <option value='havale'>Havale</option>
-                <option value='diger'>Diger</option>
+                <option value='nakit'>{t('teacher.paymentModal.cash')}</option>
+                <option value='havale'>{t('teacher.paymentModal.transfer')}</option>
+                <option value='diger'>{t('teacher.paymentModal.other')}</option>
               </select>
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Aciklama</label>
-            <input style={inputStyle} placeholder='Aciklama...' value={form.description} onChange={e => u('description', e.target.value)} />
+            <label style={labelStyle}>{t('teacher.paymentModal.description')}</label>
+            <input style={inputStyle} placeholder={t('teacher.paymentModal.descriptionPlaceholder')} value={form.description} onChange={e => u('description', e.target.value)} />
           </div>
           <button onClick={save} disabled={loading || !form.amount}
             style={{ padding: '0.85rem', borderRadius: '12px', border: 'none', background: loading || !form.amount ? '#86efac' : 'linear-gradient(135deg, #16a34a, #22c55e)', color: 'white', fontWeight: '800', fontSize: '0.95rem', cursor: loading || !form.amount ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(34,197,94,0.4)', transition: 'all 0.15s' }}
             onMouseEnter={e => { if (!loading && form.amount) e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-            {loading ? <><Loader2 size={16} /> Kaydediliyor...</> : 'Odeme Kaydet'}
+            {loading ? <><Loader2 size={16} /> {t('teacher.paymentModal.saving')}</> : t('teacher.paymentModal.save')}
           </button>
         </div>
       </div>

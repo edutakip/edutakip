@@ -4,7 +4,8 @@ import {
   format, startOfWeek, addDays, addWeeks, subWeeks,
   isSameDay, parseISO, isToday
 } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft, ChevronRight, Plus, Video, MapPin,
   Edit2, X, Check, DollarSign, Trash2, ExternalLink, Copy,
@@ -12,10 +13,10 @@ import {
 } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
 
-const STATUS_CFG = {
-  planlandı:  { bg: '#4f46e5', label: 'Planlandı',   dot: '#818cf8', chipBg: '#eef2ff', chipColor: '#4f46e5' },
-  tamamlandı: { bg: '#10b981', label: 'Tamamlandı',  dot: '#10b981', chipBg: '#ecfdf5', chipColor: '#065f46' },
-  iptal:      { bg: '#ef4444', label: 'İptal',        dot: '#ef4444', chipBg: '#fef2f2', chipColor: '#b91c1c' },
+const STATUS_CFG_BASE = {
+  planlandı:  { bg: '#4f46e5', dot: '#818cf8', chipBg: '#eef2ff', chipColor: '#4f46e5' },
+  tamamlandı: { bg: '#10b981', dot: '#10b981', chipBg: '#ecfdf5', chipColor: '#065f46' },
+  iptal:      { bg: '#ef4444', dot: '#ef4444', chipBg: '#fef2f2', chipColor: '#b91c1c' },
 };
 
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 7);
@@ -33,6 +34,12 @@ function useWindowWidth() {
 
 // ── Ders Detay Paneli ─────────────────────────────────────────
 function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onStatusChange }) {
+  const { t } = useTranslation();
+  const STATUS_CFG = {
+    planlandı:  { ...STATUS_CFG_BASE.planlandı, label: t('teacher.calendar.planned') },
+    tamamlandı: { ...STATUS_CFG_BASE.tamamlandı, label: t('teacher.calendar.completed') },
+    iptal:      { ...STATUS_CFG_BASE.iptal, label: t('teacher.calendar.cancelled') },
+  };
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [payment, setPayment] = useState(null);
@@ -50,7 +57,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
   }, [lesson.id, lesson.studentId]);
 
   const handleDelete = async () => {
-    if (!confirm('Bu dersi silmek istediğinizden emin misiniz?')) return;
+    if (!confirm(t('teacher.calendar.confirmDelete'))) return;
     setLoading(true);
     await base44.entities.Lesson.delete(lesson.id);
     setLoading(false);
@@ -73,8 +80,12 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
   };
 
   const dateObj = lesson.date ? parseISO(lesson.date) : null;
-  const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-  const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const dayNames = t('teacher.calendar.completed') === 'Completed'
+    ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    : ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const months = t('teacher.calendar.completed') === 'Completed'
+    ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    : ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   const dateLabel = dateObj
     ? `${dateObj.getDate()} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()} ${dayNames[dateObj.getDay()]}`
     : lesson.date;
@@ -162,7 +173,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
 
         {/* Ücret */}
         <div>
-          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>ÜCRET</div>
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>{t('teacher.calendar.fee')}</div>
           <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span style={{ color: '#9ca3af', fontSize: '0.82rem' }}>₺</span>
             <span style={{ color: '#111827', fontWeight: 700, fontSize: '0.95rem' }}>{fee || '—'}</span>
@@ -171,20 +182,20 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
 
         {/* Ödeme */}
         <div>
-          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>ÖDEME</div>
+          <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>{t('teacher.calendar.payment')}</div>
           {paymentLoading ? (
             <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>Yükleniyor...</span>
+              <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>{t('teacher.calendar.loading')}</span>
             </div>
           ) : payment ? (
             <>
               <div style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                 <Check size={14} color='#10b981' />
-                <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>Ödendi</span>
+                <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>{t('teacher.calendar.paid')}</span>
               </div>
               <div style={{ marginTop: '0.4rem', padding: '0.5rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>ÖDEME TARİHİ</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.calendar.paymentDate')}</div>
                   <div style={{ color: '#374151', fontSize: '0.8rem', fontWeight: 600, marginTop: '0.1rem' }}>{payment.date}</div>
                 </div>
                 <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>{payment.amount} ₺</span>
@@ -193,7 +204,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
           ) : (
             <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
               <X size={14} color='#ef4444' />
-              <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>Ödenmedi</span>
+              <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>{t('teacher.calendar.unpaid')}</span>
             </div>
           )}
         </div>
@@ -201,7 +212,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
         {/* Nerede kaldık */}
         <div>
           <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📎 NEREDE KALDIK?
+            {t('teacher.calendar.whereWeLeft')}
           </div>
           <textarea
             defaultValue={lesson.notes || ''}
@@ -214,7 +225,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
         {/* Öğretmen notu */}
         <div>
           <div style={{ color: '#9ca3af', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📄 ÖĞRETMEN NOTU (VELİ GÖRÜR)
+            {t('teacher.calendar.teacherNote')}
           </div>
           <textarea
             placeholder='Veli ile paylaşılacak ders notu...'
@@ -230,7 +241,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
               <Clock size={14} color='#4f46e5' />
             </div>
             <div>
-              <div style={{ color: '#111827', fontSize: '0.78rem', fontWeight: 700 }}>ÖNCEKİ DERS</div>
+              <div style={{ color: '#111827', fontSize: '0.78rem', fontWeight: 700 }}>{t('teacher.calendar.previousLesson')}</div>
               <div style={{ color: '#9ca3af', fontSize: '0.68rem' }}>{dateLabel}</div>
             </div>
           </div>
@@ -241,21 +252,21 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             {lesson.type === 'online'
-              ? <><Video size={14} color='#4f46e5' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>Online Ders</span></>
-              : <><MapPin size={14} color='#f97316' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>Yüz Yüze</span></>
+              ? <><Video size={14} color='#4f46e5' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>{t('teacher.calendar.onlineLesson')}</span></>
+              : <><MapPin size={14} color='#f97316' /><span style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>{t('teacher.calendar.faceToFace')}</span></>
             }
           </div>
           {lesson.type === 'online' && lesson.meetingLink && (
             <button onClick={copyLink}
               style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               {copied ? <Check size={12} color='#10b981' /> : <Copy size={12} />}
-              {copied ? 'Kopyalandı' : 'Kopyala'}
+              {copied ? t('teacher.calendar.copied') : t('teacher.calendar.copy')}
             </button>
           )}
           {lesson.type === 'online' && lesson.meetingLink && (
             <a href={lesson.meetingLink} target='_blank' rel='noreferrer'
               style={{ color: '#4f46e5', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <ExternalLink size={12} /> Aç
+              <ExternalLink size={12} /> {t('teacher.calendar.open')}
             </a>
           )}
         </div>
@@ -267,7 +278,7 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
           style={{ width: '100%', background: 'white', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: 10, padding: '0.55rem', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', transition: 'all 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.background = '#fff5f5'}
           onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-          <Trash2 size={13} /> Dersi Sil
+          <Trash2 size={13} /> {t('teacher.calendar.deleteLesson')}
         </button>
       </div>
     </div>
@@ -278,6 +289,14 @@ function LessonDetailPanel({ lesson, students, onClose, onEdit, onDeleted, onSta
 export default function TeacherCalendar() {
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
+  const DAYS_SHORT_LOC = i18n.language?.startsWith('tr') ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const STATUS_CFG = {
+    planlandı:  { ...STATUS_CFG_BASE.planlandı, label: t('teacher.calendar.planned') },
+    tamamlandı: { ...STATUS_CFG_BASE.tamamlandı, label: t('teacher.calendar.completed') },
+    iptal:      { ...STATUS_CFG_BASE.iptal, label: t('teacher.calendar.cancelled') },
+  };
   const [view, setView] = useState('weekly');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
@@ -347,10 +366,10 @@ export default function TeacherCalendar() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const navLabel = () => {
-    if (view === 'daily') return format(currentDate, 'd MMMM yyyy', { locale: tr });
+    if (view === 'daily') return format(currentDate, 'd MMMM yyyy', { locale: dateLocale });
     const ws = weekStart;
     const we = addDays(weekStart, 6);
-    return `${format(ws, 'd MMM', { locale: tr })} – ${format(we, 'd MMM', { locale: tr })}`;
+    return `${format(ws, 'd MMM', { locale: dateLocale })} – ${format(we, 'd MMM', { locale: dateLocale })}`;
   };
 
   const SLOT_H = 80;
@@ -413,7 +432,7 @@ export default function TeacherCalendar() {
                 onMouseEnter={e => { if (!today) e.currentTarget.style.background = '#fafafa'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = today ? '#f5f3ff' : 'white'; }}>
                 <div style={{ color: '#9ca3af', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>
-                  {DAYS_SHORT[dayIdx]}
+                  {DAYS_SHORT_LOC[dayIdx]}
                 </div>
                 <div style={{
                   width: 28, height: 28, borderRadius: '50%', margin: '0 auto',
@@ -509,7 +528,7 @@ export default function TeacherCalendar() {
 
         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', background: 'white', border: '1px solid #e5e7eb', borderRadius: 9, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-            {(isMobile ? [['daily', 'Gün']] : [['daily', 'Günlük'], ['weekly', 'Haftalık']]).map(([v, lbl]) => (
+            {(isMobile ? [['daily', t('teacher.calendar.daily')]] : [['daily', t('teacher.calendar.daily')], ['weekly', t('teacher.calendar.weekly')]]).map(([v, lbl]) => (
               <button key={v} onClick={() => setView(v)}
                 style={{ padding: '0.4rem 0.85rem', border: 'none', background: view === v ? '#4f46e5' : 'transparent', color: view === v ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s' }}>
                 {lbl}
@@ -519,12 +538,12 @@ export default function TeacherCalendar() {
           {!isMobile && (
             <button onClick={() => setCurrentDate(new Date())}
               style={{ background: 'white', border: '1px solid #e5e7eb', color: '#4f46e5', borderRadius: 9, padding: '0.4rem 0.75rem', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-              Bugün
+              {t('teacher.calendar.today')}
             </button>
           )}
           <button onClick={() => openAdd(currentDate)}
             style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: 9, padding: '0.45rem 0.9rem', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem', boxShadow: '0 4px 12px rgba(79,70,229,0.35)' }}>
-            <Plus size={14} /> Ders Ekle
+            <Plus size={14} /> {t('teacher.calendar.addLesson')}
           </button>
         </div>
       </div>
@@ -563,13 +582,13 @@ export default function TeacherCalendar() {
                   onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f3f4f6'; }}
                   onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}>
                   <span style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.5px', color: isSelected ? 'rgba(255,255,255,0.8)' : '#9ca3af', textTransform: 'uppercase' }}>
-                    {DAYS_SHORT[dayIdx]}
+                    {DAYS_SHORT_LOC[dayIdx]}
                   </span>
                   <span style={{ fontSize: '0.95rem', fontWeight: 800, color: isSelected ? 'white' : today ? '#4f46e5' : '#374151', lineHeight: 1.2 }}>
                     {format(day, 'd')}
                   </span>
                   <span style={{ fontSize: '0.45rem', fontWeight: 700, color: isSelected ? 'rgba(255,255,255,0.7)' : '#9ca3af', textTransform: 'uppercase' }}>
-                    {format(day, 'MMM', { locale: tr }).toUpperCase()}
+                    {format(day, 'MMM', { locale: dateLocale }).toUpperCase()}
                   </span>
                   {today && !isSelected && (
                     <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#4f46e5', marginTop: '0.15rem' }} />

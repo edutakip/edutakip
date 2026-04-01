@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2, ChevronRight, ChevronLeft, User, CreditCard, Calendar, BookOpen, DollarSign, Check, CalendarDays } from 'lucide-react';
 import { showToast } from '@/lib/toast';
@@ -8,16 +9,19 @@ import { parseISO } from 'date-fns';
 
 const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
-const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-const DAY_FULL = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const DAYS_TR = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+const DAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_FULL_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const DAY_FULL_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
-const GRADES = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
+const GRADES_TR = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
+const GRADES_EN = ['Primary (1-4)', 'Middle (5-8)', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'University', 'Adult'];
 
-const STEPS = [
-  { num: 1, label: 'Temel Bilgiler', icon: User },
-  { num: 2, label: 'Veli & İletişim', icon: User },
-  { num: 3, label: 'Ders Programı', icon: Calendar },
-  { num: 4, label: 'Kaynaklar & Bakiye', icon: CreditCard },
+const STEPS_DATA = [
+  { num: 1, icon: User, key: 'step1' },
+  { num: 2, icon: User, key: 'step2' },
+  { num: 3, icon: Calendar, key: 'step3' },
+  { num: 4, icon: CreditCard, key: 'step4' },
 ];
 
 const inp = {
@@ -56,6 +60,12 @@ function getNextOccurrences(dayIdx, weeksCount = 4) {
 }
 
 export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
+  const { t, i18n } = useTranslation();
+  const isEn = !i18n.language?.startsWith('tr');
+  const DAYS = isEn ? DAYS_EN : DAYS_TR;
+  const DAY_FULL = isEn ? DAY_FULL_EN : DAY_FULL_TR;
+  const GRADES = isEn ? GRADES_EN : GRADES_TR;
+  const STEPS = STEPS_DATA.map(s => ({ ...s, label: t(`teacher.addStudentModal.${s.key}`) }));
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [existingLessons, setExistingLessons] = useState([]);
@@ -243,9 +253,9 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
             <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
               <CalendarDays size={26} color='#a5b4fc' />
             </div>
-            <h3 style={{ color: 'white', fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.5rem' }}>Dersler Takvime Eklensin mi?</h3>
+            <h3 style={{ color: 'white', fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.5rem' }}>{t('teacher.addStudentModal.addToCalendar')}</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', lineHeight: '1.6' }}>
-              Seçilen {form.schedule.length} ders saati için önümüzdeki 4 haftanın dersleri takvime eklenecek.
+              {t('teacher.addStudentModal.calendarDesc').replace('{{count}}', form.schedule.length)}
             </p>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -258,11 +268,11 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={onClose}
               style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer' }}>
-              Hayır, Atla
+              {t('teacher.addStudentModal.skip')}
             </button>
             <button onClick={addToCalendar} disabled={addingToCalendar}
               style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-              {addingToCalendar ? <><Loader2 size={15} className='animate-spin' /> Ekleniyor...</> : <><Check size={15} /> Evet, Ekle</>}
+              {addingToCalendar ? <><Loader2 size={15} className='animate-spin' /> {t('teacher.addStudentModal.adding_calendar')}</> : <><Check size={15} /> {t('teacher.addStudentModal.yesAdd')}</>}
             </button>
           </div>
         </div>
@@ -286,7 +296,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
             left: Math.min(timePicker.rect.left, window.innerWidth - 140),
           }}>
             <div style={{ color: 'rgba(165,180,252,0.7)', fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', paddingLeft: '0.25rem' }}>
-              {DAY_FULL[timePicker.day]} — Saat Seçin
+              {DAY_FULL[timePicker.day]} — {t('teacher.addStudentModal.select_time')}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.3rem' }}>
               {getTimeOptions(timePicker.hourTime).map(t => (
@@ -303,7 +313,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: '800' }}>Yeni Öğrenci Ekle</h2>
+          <h2 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: '800' }}>{t('teacher.addStudentModal.title')}</h2>
           <button onClick={onClose}
             style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.2)'; e.currentTarget.style.color = '#f87171'; }}
@@ -340,27 +350,27 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               <SectionTitle icon={User} title="Kimlik Bilgileri" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <Field label="Öğrenci Adı Soyadı *">
+                  <Field label={t('teacher.addStudentModal.studentName')}>
                     <input style={inp} placeholder="Ad Soyad" value={form.name} onChange={e => u('name', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                 </div>
-                <Field label="Sınıf Seviyesi">
+                <Field label={t('teacher.addStudentModal.gradeLevel')}>
                   <select style={selStyle} value={form.grade} onChange={e => u('grade', e.target.value)}>
-                    <option value="">Seçin...</option>
+                    <option value="">{t('teacher.addStudentModal.selectGrade')}</option>
                     {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </Field>
-                <Field label="Ders Konusu">
-                  <input style={inp} placeholder="Matematik, Fizik..." value={form.subject} onChange={e => u('subject', e.target.value)}
+                <Field label={t('teacher.addStudentModal.subject')}>
+                  <input style={inp} placeholder={t('teacher.addStudentModal.subjectPlaceholder')} value={form.subject} onChange={e => u('subject', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
               </div>
             </div>
             <div>
-              <SectionTitle icon={CreditCard} title="Ders & Ücret" />
+              <SectionTitle icon={CreditCard} title={t('teacher.addStudentModal.lessonFeeSection')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-                <Field label="Ders Saat Ücreti (₺)">
+                <Field label={t('teacher.addStudentModal.feePerLesson')}>
                   <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
@@ -372,7 +382,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
                     ))}
                   </div>
                 </Field>
-                <Field label="Ders Süresi (dk)">
+                <Field label={t('teacher.addStudentModal.lessonDuration')}>
                   <input style={inp} type="number" placeholder="60" value={form.lessonDuration} onChange={e => u('lessonDuration', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   <div style={{ marginTop: '0.4rem', display: 'flex', gap: '0.4rem' }}>
@@ -398,30 +408,30 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
         {step === 2 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <SectionTitle icon={User} title="Veli Bilgileri" />
+              <SectionTitle icon={User} title={t('teacher.addStudentModal.parentInfo')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <Field label="Veli Adı Soyadı">
+                  <Field label={t('teacher.addStudentModal.parentName')}>
                     <input style={inp} placeholder="Veli adı soyadı" value={form.parentName} onChange={e => u('parentName', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                 </div>
-                <Field label="Veli Telefon">
+                <Field label={t('teacher.addStudentModal.parentPhone')}>
                   <input style={inp} placeholder="5XX XXX XXXX" value={form.parentPhone} onChange={e => {
                     const val = e.target.value.replace(/^0+/, '');
                     u('parentPhone', val);
                   }}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
-                <Field label="Veli E-posta">
+                <Field label={t('teacher.addStudentModal.parentEmail')}>
                   <input style={inp} type="email" placeholder="veli@mail.com" value={form.parentEmail} onChange={e => u('parentEmail', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
               </div>
             </div>
             <div>
-              <SectionTitle icon={BookOpen} title="Notlar" />
-              <textarea style={{ ...inp, resize: 'vertical', minHeight: '90px' }} placeholder="Öğrenci hakkında notlar..."
+              <SectionTitle icon={BookOpen} title={t('teacher.addStudentModal.notes')} />
+              <textarea style={{ ...inp, resize: 'vertical', minHeight: '90px' }} placeholder={t('teacher.addStudentModal.notesPlaceholder')}
                 value={form.notes} onChange={e => u('notes', e.target.value)}
                 onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
             </div>
@@ -432,9 +442,9 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
         {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <SectionTitle icon={Calendar} title="Haftalık Ders Programı" />
+              <SectionTitle icon={Calendar} title={t('teacher.addStudentModal.weeklySchedule')} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginTop: '-0.75rem', marginBottom: '1rem' }}>
-                Bir saate tıklayarak tam başlangıç saatini seçin. Mavi hücreler dolu saatleri gösterir.
+                {t('teacher.addStudentModal.scheduleHint')}
               </p>
               <div style={{ overflowX: 'auto', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
@@ -495,20 +505,20 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
 
             {/* Finansal Bilgiler */}
             <div>
-              <SectionTitle icon={DollarSign} title="Finansal Bilgiler" />
+              <SectionTitle icon={DollarSign} title={t('teacher.addStudentModal.financialInfo')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-                <Field label="Ders Saat Ücreti (₺)">
+                <Field label={t('teacher.addStudentModal.feePerLesson')}>
                   <input style={inp} type="number" placeholder="0" value={form.feePerLesson} onChange={e => u('feePerLesson', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
-                <Field label="Ders Süresi (dakika)">
+                <Field label={t('teacher.addStudentModal.lessonDuration')}>
                   <input style={inp} type="number" placeholder="60" value={form.lessonDuration || 60} onChange={e => u('lessonDuration', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
               </div>
               {form.feePerLesson && form.schedule.length > 0 && (
                 <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '10px' }}>
-                  <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Aylık Tahmini Gelir</div>
+                  <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{t('teacher.addStudentModal.estimatedMonthly')}</div>
                   <div style={{ color: '#c7d2fe', fontWeight: '900', fontSize: '1.4rem' }}>
                     ₺{((Number(form.feePerLesson) || 0) * form.schedule.length * 4.3).toLocaleString('tr-TR')}
                   </div>
@@ -525,23 +535,23 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
         {step === 4 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <SectionTitle icon={BookOpen} title="Kaynaklar" />
-              <Field label="Kullanılan Kaynak / Kitap">
-                <input style={inp} placeholder="Ör: Palme Yayınları, Karekök..." value={form.resourceName} onChange={e => u('resourceName', e.target.value)}
+              <SectionTitle icon={BookOpen} title={t('teacher.addStudentModal.resources')} />
+              <Field label={t('teacher.addStudentModal.book')}>
+                <input style={inp} placeholder={t('teacher.addStudentModal.bookPlaceholder')} value={form.resourceName} onChange={e => u('resourceName', e.target.value)}
                   onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
               </Field>
             </div>
             <div>
-              <SectionTitle icon={CreditCard} title="Başlangıç Bakiyesi" />
+              <SectionTitle icon={CreditCard} title={t('teacher.addStudentModal.initialBalance')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-                <Field label="Tutar (₺)">
+                <Field label={t('teacher.addStudentModal.balanceAmount')}>
                   <input style={inp} type="number" placeholder="0" value={form.initialBalance} onChange={e => u('initialBalance', e.target.value)}
                     onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                 </Field>
-                <Field label="Tür">
+                <Field label={t('teacher.addStudentModal.balanceType')}>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {[{ val: 'borc', label: 'Borç', color: '#f87171', activeBg: 'rgba(239,68,68,0.2)', activeBorder: '#f87171' },
-                      { val: 'kredi', label: 'Kredi', color: '#34d399', activeBg: 'rgba(16,185,129,0.2)', activeBorder: '#34d399' }].map(opt => (
+                    {[{ val: 'borc', label: t('teacher.addStudentModal.debt'), color: '#f87171', activeBg: 'rgba(239,68,68,0.2)', activeBorder: '#f87171' },
+                      { val: 'kredi', label: t('teacher.addStudentModal.credit'), color: '#34d399', activeBg: 'rgba(16,185,129,0.2)', activeBorder: '#34d399' }].map(opt => (
                       <button key={opt.val} onClick={() => u('initialBalanceType', opt.val)}
                         style={{
                           flex: 1, padding: '0.65rem', borderRadius: '10px', border: `1.5px solid ${form.initialBalanceType === opt.val ? opt.activeBorder : 'rgba(255,255,255,0.1)'}`,
@@ -555,20 +565,20 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               </div>
               {form.initialBalance > 0 && (
                 <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: form.initialBalanceType === 'borc' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', border: `1px solid ${form.initialBalanceType === 'borc' ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}`, borderRadius: '10px', color: form.initialBalanceType === 'borc' ? '#f87171' : '#34d399', fontSize: '0.78rem', fontWeight: '600' }}>
-                  {form.initialBalanceType === 'borc' ? `Öğrenci ₺${form.initialBalance} borçla başlayacak` : `Öğrenci ₺${form.initialBalance} alacakla başlayacak`}
+                  {form.initialBalanceType === 'borc' ? t('teacher.addStudentModal.debtStart').replace('{{amount}}', form.initialBalance) : t('teacher.addStudentModal.creditStart').replace('{{amount}}', form.initialBalance)}
                 </div>
               )}
             </div>
 
             {/* Özet */}
             <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px' }}>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '1px', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Özet</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '1px', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{t('teacher.addStudentModal.summary')}</div>
               {[
-                { label: 'Öğrenci', value: form.name },
-                { label: 'Sınıf', value: form.grade },
-                { label: 'Ders', value: form.subject },
-                { label: 'Ders Saat Ücreti', value: form.feePerLesson ? `₺${form.feePerLesson}` : '-' },
-                { label: 'Haftalık Ders', value: `${form.schedule.length || 0} ders` },
+                { label: t('teacher.addStudentModal.studentLabel'), value: form.name },
+                { label: t('teacher.addStudentModal.gradeLabel'), value: form.grade },
+                { label: t('teacher.addStudentModal.lessonLabel'), value: form.subject },
+                { label: t('teacher.addStudentModal.hourlyFee'), value: form.feePerLesson ? `₺${form.feePerLesson}` : '-' },
+                { label: t('teacher.addStudentModal.weeklyLessons'), value: `${form.schedule.length || 0} ${t('teacher.addStudentModal.lessons')}` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem' }}>{label}</span>
@@ -592,17 +602,17 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', gap: '0.75rem' }}>
           <button onClick={step === 1 ? onClose : () => setStep(s => s - 1)}
             style={{ padding: '0.75rem 1.5rem', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer' }}>
-            {step === 1 ? 'İptal' : <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><ChevronLeft size={15} /> Geri</span>}
+            {step === 1 ? t('teacher.addStudentModal.cancel') : <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><ChevronLeft size={15} /> {t('teacher.addStudentModal.back')}</span>}
           </button>
           {step < 4 ? (
             <button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
               style={{ padding: '0.75rem 1.75rem', borderRadius: '12px', border: 'none', background: canNext() ? '#f97316' : 'rgba(255,255,255,0.1)', color: canNext() ? 'white' : 'rgba(255,255,255,0.3)', fontWeight: '700', fontSize: '0.875rem', cursor: canNext() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.15s' }}>
-              Devam <ChevronRight size={15} />
+              {t('teacher.addStudentModal.continue')} <ChevronRight size={15} />
             </button>
           ) : (
             <button onClick={save} disabled={loading || !form.name}
               style={{ padding: '0.75rem 1.75rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.4)' }}>
-              {loading ? <><Loader2 size={15} className='animate-spin' /> Ekleniyor...</> : 'Öğrenci Ekle'}
+              {loading ? <><Loader2 size={15} className='animate-spin' /> {t('teacher.addStudentModal.adding')}</> : t('teacher.addStudentModal.addStudent')}
             </button>
           )}
         </div>

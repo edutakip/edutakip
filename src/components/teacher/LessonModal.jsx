@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import { format, addWeeks, parseISO } from 'date-fns';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
@@ -8,6 +9,7 @@ import { isPro } from '@/lib/subscription';
 import ProUpgradeModal from '../ProUpgradeModal';
 
 export default function LessonModal({ students, defaultDate, existingLesson, onClose, onSaved }) {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = React.useState(null);
   const [showProModal, setShowProModal] = React.useState(false);
 
@@ -215,23 +217,23 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
             <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
               <CalendarDays size={26} color='#4f46e5' />
             </div>
-            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1rem', marginBottom: '0.5rem' }}>Gelecek Dersler Güncellensin mi?</h3>
+            <h3 style={{ color: '#111827', fontWeight: '800', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('teacher.lessonModal.confirmFuture')}</h3>
             <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: '1.6' }}>
-              Bu dersin değişiklikleri aynı öğrencinin ilerleyen haftalardaki planlanmış derslerine de uygulanacak mı?
+              {t('teacher.lessonModal.confirmFutureDesc')}
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <button onClick={() => doSave(true)} disabled={loading}
               style={{ padding: '0.75rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-              {loading ? <Loader2 size={14} className='animate-spin' /> : null} Evet, Gelecek Dersleri de Güncelle
+              {loading ? <Loader2 size={14} className='animate-spin' /> : null} {t('teacher.lessonModal.updateFuture')}
             </button>
             <button onClick={() => doSave(false)} disabled={loading}
               style={{ padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>
-              Hayır, Sadece Bu Dersi Güncelle
+              {t('teacher.lessonModal.updateOnlyCurrent')}
             </button>
             <button onClick={() => setConfirmStep(false)} disabled={loading}
               style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: 'none', color: '#9ca3af', fontWeight: '500', fontSize: '0.8rem', cursor: 'pointer' }}>
-              Geri Dön
+              {t('teacher.lessonModal.goBack')}
             </button>
           </div>
         </div>
@@ -245,8 +247,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '1rem' : '1.5rem' }}>
           <div>
-            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>{isEditing ? 'Dersi Düzenle' : 'Ders Planla'}</h2>
-            <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>{isEditing ? 'Ders bilgilerini güncelle' : 'Yeni ders oluştur'}</p>
+            <h2 style={{ color: '#111827', fontSize: '1.15rem', fontWeight: '800' }}>{isEditing ? t('teacher.lessonModal.editTitle') : t('teacher.lessonModal.newTitle')}</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.1rem' }}>{isEditing ? t('teacher.lessonModal.editSubtitle') : t('teacher.lessonModal.newSubtitle')}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', cursor: 'pointer', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
@@ -258,11 +260,11 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.85rem' : '1rem', paddingBottom: isMobile ? '5.5rem' : 0 }}>
           {/* Student */}
           <div>
-            <label style={lbl}>Öğrenci</label>
+            <label style={lbl}>{t('teacher.lessonModal.student')}</label>
             <select style={inp} value={form.studentId} onChange={e => u('studentId', e.target.value)}
               onFocus={e => e.target.style.borderColor = '#4f46e5'}
               onBlur={e => e.target.style.borderColor = '#e5e7eb'}>
-              <option value=''>Öğrenci seçin...</option>
+              <option value=''>{t('teacher.lessonModal.selectStudent')}</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
@@ -272,7 +274,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
             const s = students.find(st => st.id === form.studentId);
             return s?.parentPhone ? (
               <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '10px', padding: '0.55rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Veli Tel:</span>
+                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonModal.parentPhone')}:</span>
                 <a href={`tel:${s.parentPhone}`} style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: '600', textDecoration: 'none' }}>{s.parentPhone}</a>
                 {s.parentName && <span style={{ color: '#86efac', fontSize: '0.78rem' }}>({s.parentName})</span>}
               </div>
@@ -282,9 +284,9 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           {/* Date + Time */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr 1fr', gap: '0.75rem' }}>
             {[
-              { label: 'Tarih', type: 'date', val: form.date, key: 'date' },
-              { label: 'Başlangıç', type: 'time', val: form.startTime, key: 'startTime' },
-              { label: 'Bitiş', type: 'time', val: form.endTime, key: 'endTime' },
+              { label: t('teacher.lessonModal.date'), type: 'date', val: form.date, key: 'date' },
+              { label: t('teacher.lessonModal.start'), type: 'time', val: form.startTime, key: 'startTime' },
+              { label: t('teacher.lessonModal.end'), type: 'time', val: form.endTime, key: 'endTime' },
             ].map(({ label, type, val, key }) => (
               <div key={key}>
                 <label style={lbl}>{label}</label>
@@ -298,13 +300,13 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           {/* Subject & Fee */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 0.8fr', gap: '0.75rem' }}>
             <div>
-              <label style={lbl}>Konu</label>
-              <input style={inp} placeholder='Ders konusu...' value={form.subject} onChange={e => u('subject', e.target.value)}
+              <label style={lbl}>{t('teacher.lessonModal.subject')}</label>
+              <input style={inp} placeholder={t('teacher.lessonModal.subjectPlaceholder')} value={form.subject} onChange={e => u('subject', e.target.value)}
                 onFocus={e => e.target.style.borderColor = '#4f46e5'}
                 onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
             </div>
             <div>
-              <label style={lbl}>Ders Ücreti (₺)</label>
+              <label style={lbl}>{t('teacher.lessonModal.lessonFee')}</label>
               <input style={inp} type='number' placeholder={students.find(s => s.id === form.studentId)?.feePerLesson || '0'} value={form.lessonFee} onChange={e => u('lessonFee', e.target.value)}
                 onFocus={e => e.target.style.borderColor = '#4f46e5'}
                 onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
@@ -313,9 +315,9 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
           {/* Type */}
           <div>
-            <label style={lbl}>Ders Türü</label>
+            <label style={lbl}>{t('teacher.lessonModal.lessonType')}</label>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              {[{ v: 'yuzyuze', label: 'Yüz Yüze', icon: MapPin }, { v: 'online', label: 'Online', icon: Video }].map(({ v, label, icon: Icon }) => (
+              {[{ v: 'yuzyuze', label: t('teacher.lessonModal.faceToFace'), icon: MapPin }, { v: 'online', label: t('teacher.lessonModal.online'), icon: Video }].map(({ v, label, icon: Icon }) => (
                 <button key={v} onClick={() => handleTypeChange(v)} style={{
                   flex: 1, padding: '0.6rem', borderRadius: '10px', border: '1.5px solid',
                   borderColor: form.type === v ? '#4f46e5' : '#e5e7eb',
@@ -333,7 +335,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           {/* Meeting link */}
           {form.type === 'online' && (
             <div>
-              <label style={lbl}>Zoom Linki</label>
+              <label style={lbl}>{t('teacher.lessonModal.meetingLink')}</label>
               <div style={{ display: 'flex', gap: '0.5rem', flexDirection: isMobile ? 'column' : 'row' }}>
                 <input style={{ ...inp, flex: 1 }} placeholder='Oluşturuluyor...' value={meetingLink} onChange={e => setMeetingLink(e.target.value)} />
                 <button onClick={generateZoom} disabled={zoomLoading} style={{ padding: '0.6rem 0.85rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#f9fafb', color: '#6b7280', cursor: 'pointer', width: isMobile ? '100%' : 'auto' }}>
@@ -346,8 +348,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
           {/* Location */}
           {form.type === 'yuzyuze' && (
             <div>
-              <label style={lbl}>Konum</label>
-              <input style={inp} placeholder='Adres veya yer...' value={form.location} onChange={e => u('location', e.target.value)}
+              <label style={lbl}>{t('teacher.lessonModal.location')}</label>
+              <input style={inp} placeholder={t('teacher.lessonModal.locationPlaceholder')} value={form.location} onChange={e => u('location', e.target.value)}
                 onFocus={e => e.target.style.borderColor = '#4f46e5'}
                 onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
             </div>
@@ -355,8 +357,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
           {/* Notes */}
           <div>
-            <label style={lbl}>Notlar</label>
-            <textarea style={{ ...inp, resize: 'vertical', minHeight: '72px' }} placeholder='Ders notları...' value={form.notes} onChange={e => u('notes', e.target.value)}
+            <label style={lbl}>{t('teacher.lessonModal.notes')}</label>
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: '72px' }} placeholder={t('teacher.lessonModal.notesPlaceholder')} value={form.notes} onChange={e => u('notes', e.target.value)}
               onFocus={e => e.target.style.borderColor = '#4f46e5'}
               onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
@@ -368,11 +370,11 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
                   <input type='checkbox' checked={recurring} onChange={e => setRecurring(e.target.checked)}
                     style={{ width: '16px', height: '16px', accentColor: '#4f46e5' }} />
                   <RefreshCw size={14} color='#4f46e5' />
-                  <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>Sonraki haftalara da ekle</span>
+                  <span style={{ color: '#374151', fontSize: '0.85rem', fontWeight: '500' }}>{t('teacher.lessonModal.recurringLesson')}</span>
                 </label>
                 {recurring && (
                   <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                    <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>Toplam hafta:</span>
+                    <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>{t('teacher.lessonModal.totalWeeks')}:</span>
                     {[2, 4, 8, 12].map(w => (
                       <button key={w} onClick={() => setRecurringWeeks(w)} style={{
                         padding: '0.2rem 0.6rem', borderRadius: '7px', border: '1.5px solid',
@@ -392,8 +394,8 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
                   <Lock size={15} color='#92400e' />
                 </div>
                 <div>
-                  <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400e', margin: 0 }}>Pro Özellik: Tekrarlayan Dersler</p>
-                  <p style={{ fontSize: '0.73rem', color: '#b45309', margin: 0, marginTop: '0.1rem' }}>Sonraki haftalara otomatik ders ekle — Pro'ya geç</p>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400e', margin: 0 }}>{t('teacher.lessonModal.proFeature')}</p>
+                  <p style={{ fontSize: '0.73rem', color: '#b45309', margin: 0, marginTop: '0.1rem' }}>{t('teacher.lessonModal.proFeatureDesc')}</p>
                 </div>
               </button>
             )
@@ -406,7 +408,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
               boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s', width: '100%',
             }}>
-              {loading ? <><Loader2 size={16} className='animate-spin' /> Kaydediliyor...</> : isEditing ? 'Güncelle' : 'Dersi Kaydet'}
+              {loading ? <><Loader2 size={16} className='animate-spin' /> {t('teacher.lessonModal.saving')}</> : isEditing ? t('teacher.lessonModal.update') : t('teacher.lessonModal.save')}
             </button>
           </div>
         </div>

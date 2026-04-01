@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, Loader2, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import WhatsAppMessageModal from './WhatsAppMessageModal';
 import { isPro } from '@/lib/subscription';
 import ProUpgradeModal from '../ProUpgradeModal';
 
-const STEPS = ['Ders Bilgisi', 'Performans', 'Detaylar', 'Rapor'];
+// STEPS is now dynamic, defined inside component
 
-const RATING_LABELS = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
+const RATING_LABELS_TR = { 1: 'Zayıf', 2: 'Orta', 3: 'İyi', 4: 'Çok İyi', 5: 'Mükemmel' };
+const RATING_LABELS_EN = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
 
-const CHOICES = {
-  understood:   [{ v: 'tam',    l: 'Tam Anladı',        icon: '✅' }, { v: 'kismen', l: 'Kısmen Anladı',     icon: '🔶' }, { v: 'tekrar', l: 'Tekrar Gerekli',    icon: '🔁' }],
-  participation:[{ v: 'aktif',  l: 'Aktif Katılım',     icon: '🙋' }, { v: 'orta',   l: 'Orta Katılım',      icon: '😐' }, { v: 'pasif',  l: 'Pasif',             icon: '😶' }],
-  motivation:   [{ v: 'yuksek',l: 'Yüksek',             icon: '🔥' }, { v: 'normal', l: 'Normal',            icon: '👍' }, { v: 'dusuk',  l: 'Düşük',             icon: '😞' }],
-};
+// CHOICES is now dynamic, defined inside component
 
-function ChoiceGroup({ label, field, value, onChange }) {
+function ChoiceGroup({ label, field, value, onChange, CHOICES }) {
   return (
     <div>
       <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-        {CHOICES[field].map(opt => (
+        {(CHOICES[field] || []).map(opt => (
           <button key={opt.v} onClick={() => onChange(opt.v)}
             style={{ padding: '0.5rem 1rem', borderRadius: 10, border: `1.5px solid ${value === opt.v ? '#4f46e5' : '#e5e7eb'}`, background: value === opt.v ? '#eef2ff' : 'white', color: value === opt.v ? '#4338ca' : '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             {opt.icon} {opt.l}
@@ -34,7 +32,7 @@ function ChoiceGroup({ label, field, value, onChange }) {
 function StarRating({ value, onChange }) {
   return (
     <div>
-      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Genel Performans Puanı</label>
+      <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.overallRating')}</label>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
         {[1,2,3,4,5].map(n => (
           <button key={n} onClick={() => onChange(n)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.1rem', fontSize: '1.75rem', lineHeight: 1, transition: 'transform 0.1s' }}
@@ -50,6 +48,15 @@ function StarRating({ value, onChange }) {
 }
 
 export default function LessonReportModal({ lesson, onClose, onSaved }) {
+  const { t, i18n } = useTranslation();
+  const isEn = !i18n.language?.startsWith('tr');
+  const RATING_LABELS = isEn ? RATING_LABELS_EN : RATING_LABELS_TR;
+  const STEPS = [t('teacher.lessonReport.step1'), t('teacher.lessonReport.step2'), t('teacher.lessonReport.step3'), t('teacher.lessonReport.step4')];
+  const CHOICES = {
+    understood:   [{ v: 'tam', l: t('teacher.lessonReport.fullyUnderstood'), icon: '✅' }, { v: 'kismen', l: t('teacher.lessonReport.partiallyUnderstood'), icon: '🔶' }, { v: 'tekrar', l: t('teacher.lessonReport.needsReview'), icon: '🔁' }],
+    participation:[{ v: 'aktif', l: t('teacher.lessonReport.activeParticipation'), icon: '🙋' }, { v: 'orta', l: t('teacher.lessonReport.mediumParticipation'), icon: '😐' }, { v: 'pasif', l: t('teacher.lessonReport.passive'), icon: '😶' }],
+    motivation:   [{ v: 'yuksek', l: t('teacher.lessonReport.high'), icon: '🔥' }, { v: 'normal', l: t('teacher.lessonReport.normal'), icon: '👍' }, { v: 'dusuk', l: t('teacher.lessonReport.low'), icon: '😞' }],
+  };
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     topics: '',
@@ -341,7 +348,7 @@ ZORUNLU KURALLAR:
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.2s infinite' }} />
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.4s infinite' }} />
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>AI rapor oluşturuluyor...</p>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>{t('teacher.lessonReport.generatingAI')}</p>
           </div>
 
           {/* SUCCESS içeriği */}
@@ -378,8 +385,8 @@ ZORUNLU KURALLAR:
             {/* Yazı */}
             <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.4rem',
               animation: showSuccess ? 'fade-in-up 0.4s ease 0.5s both' : 'none' }}>
-              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Raporunuz Oluşturuldu!</h2>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>Raporu düzenleyebilir ve veliye iletebilirsiniz</p>
+              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{t('teacher.lessonReport.reportCreated')}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>{t('teacher.lessonReport.reportCreatedDesc')}</p>
             </div>
           </div>
         </div>
@@ -391,7 +398,7 @@ ZORUNLU KURALLAR:
         {/* Header */}
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.15rem' }}>Ders Değerlendirmesi</h2>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.15rem' }}>{t('teacher.lessonReport.title')}</h2>
             <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>{lesson.studentName} · {lesson.date} · {lesson.startTime?.slice(0,5)}</p>
           </div>
           <button onClick={onClose} style={{ background: '#f3f4f6', border: 'none', borderRadius: 8, padding: '0.4rem', cursor: 'pointer', display: 'flex' }}>
@@ -419,17 +426,17 @@ ZORUNLU KURALLAR:
           {step === 0 && (
             <>
               <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>İşlenen Konular</label>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.topicsCovered')}</label>
                 <textarea value={form.topics} onChange={e => u('topics', e.target.value)}
-                  placeholder="Örn: Present Simple zamanı + Çiftlik hayvanları..." rows={3} style={inp} />
+                  placeholder={t('teacher.lessonReport.topicsPlaceholder')} rows={3} style={inp} />
               </div>
               <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Katılım Durumu</label>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.attendance')}</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {['katıldı', 'geç kaldı', 'katılmadı'].map(opt => (
-                    <button key={opt} onClick={() => u('attendance', opt)}
-                      style={{ border: `1.5px solid ${form.attendance === opt ? '#4f46e5' : '#e5e7eb'}`, background: form.attendance === opt ? '#eef2ff' : 'white', color: form.attendance === opt ? '#4338ca' : '#6b7280', borderRadius: 10, padding: '0.45rem 0.85rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
-                      {opt}
+                  {[{ v: 'katıldı', l: t('teacher.lessonReport.attended') }, { v: 'geç kaldı', l: t('teacher.lessonReport.late') }, { v: 'katılmadı', l: t('teacher.lessonReport.absent') }].map(opt => (
+                    <button key={opt.v} onClick={() => u('attendance', opt.v)}
+                      style={{ border: `1.5px solid ${form.attendance === opt.v ? '#4f46e5' : '#e5e7eb'}`, background: form.attendance === opt.v ? '#eef2ff' : 'white', color: form.attendance === opt.v ? '#4338ca' : '#6b7280', borderRadius: 10, padding: '0.45rem 0.85rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
+                      {opt.l}
                     </button>
                   ))}
                 </div>
@@ -441,9 +448,9 @@ ZORUNLU KURALLAR:
           {step === 1 && (
             <>
               <StarRating value={form.rating} onChange={v => u('rating', v)} />
-              <ChoiceGroup label="Konuyu Anladı mı?" field="understood" value={form.understood} onChange={v => u('understood', v)} />
-              <ChoiceGroup label="Katılım Seviyesi" field="participation" value={form.participation} onChange={v => u('participation', v)} />
-              <ChoiceGroup label="Motivasyon" field="motivation" value={form.motivation} onChange={v => u('motivation', v)} />
+              <ChoiceGroup label={t('teacher.lessonReport.understood')} field="understood" value={form.understood} onChange={v => u('understood', v)} CHOICES={CHOICES} />
+              <ChoiceGroup label={t('teacher.lessonReport.participationLevel')} field="participation" value={form.participation} onChange={v => u('participation', v)} CHOICES={CHOICES} />
+              <ChoiceGroup label={t('teacher.lessonReport.motivation')} field="motivation" value={form.motivation} onChange={v => u('motivation', v)} CHOICES={CHOICES} />
             </>
           )}
 
@@ -451,19 +458,19 @@ ZORUNLU KURALLAR:
           {step === 2 && (
             <>
               <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Zorlandığı Nokta <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.challenge')} <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>{t('teacher.lessonReport.optional')}</span></label>
                 <textarea value={form.challenge} onChange={e => u('challenge', e.target.value)}
-                  placeholder="Öğrencinin zorlandığı veya dikkat edilmesi gereken bir alan..." rows={3} style={inp} />
+                  placeholder={t('teacher.lessonReport.challengePlaceholder')} rows={3} style={inp} />
               </div>
               <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Verilen Ödev <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.homework')} <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>{t('teacher.lessonReport.optional')}</span></label>
                 <textarea value={form.homework} onChange={e => u('homework', e.target.value)}
-                  placeholder="Aktivite kitabı sayfa 63..." rows={2} style={inp} />
+                  placeholder={t('teacher.lessonReport.homeworkPlaceholder')} rows={2} style={inp} />
               </div>
               <div>
-                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sonraki Ders Hedefi <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>(opsiyonel)</span></label>
+                <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('teacher.lessonReport.nextGoal')} <span style={{ color: '#9ca3af', fontWeight: 400, textTransform: 'none' }}>{t('teacher.lessonReport.optional')}</span></label>
                 <textarea value={form.nextGoal} onChange={e => u('nextGoal', e.target.value)}
-                  placeholder="Sayfa 52'den devam, telaffuza odaklanacağız..." rows={2} style={inp} />
+                  placeholder={t('teacher.lessonReport.nextGoalPlaceholder')} rows={2} style={inp} />
               </div>
             </>
           )}
@@ -474,8 +481,8 @@ ZORUNLU KURALLAR:
               <div style={{ background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', borderRadius: 14, padding: '1rem', border: '1.5px solid #c7d2fe', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={18} color='#4f46e5' />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#4338ca' }}>AI tarafından oluşturuldu</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6366f1' }}>Metni düzenleyebilir veya olduğu gibi kullanabilirsiniz</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#4338ca' }}>{t('teacher.lessonReport.aiGenerated')}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6366f1' }}>{t('teacher.lessonReport.aiEditNote')}</div>
                 </div>
               </div>
               <textarea value={generatedReport} onChange={e => setGeneratedReport(e.target.value)}
@@ -489,14 +496,14 @@ ZORUNLU KURALLAR:
           {step > 0 ? (
             <button onClick={() => setStep(s => s - 1)}
               style={{ padding: '0.6rem 1.1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>
-              Geri
+              {t('teacher.lessonReport.back')}
             </button>
           ) : <div />}
 
           {step < 2 && (
             <button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
               style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: canNext() ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#e5e7eb', color: canNext() ? 'white' : '#9ca3af', fontWeight: 700, fontSize: '0.85rem', cursor: canNext() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              İleri <ChevronRight size={15} />
+              {t('teacher.lessonReport.next')} <ChevronRight size={15} />
             </button>
           )}
 
@@ -506,7 +513,7 @@ ZORUNLU KURALLAR:
                 <button onClick={handleSaveWithoutReport} disabled={loading}
                   style={{ padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
-                  Kaydet ve Gönder
+                  {t('teacher.lessonReport.saveWithoutReport')}
                 </button>
                 <button onClick={() => setShowProModal(true)}
                   style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(249,115,22,0.35)', position: 'relative', overflow: 'hidden', animation: 'proButtonPulse 2s ease-in-out infinite' }}>
@@ -530,7 +537,7 @@ ZORUNLU KURALLAR:
                   `}</style>
                   <span className="pro-btn-shimmer" style={{ position: 'absolute', inset: 0 }} />
                   <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    🔒 Pro ile AI Rapor Oluştur
+                    {t('teacher.lessonReport.proAiReport')}
                   </span>
                 </button>
               </div>
@@ -538,7 +545,7 @@ ZORUNLU KURALLAR:
               <button onClick={generateReport} disabled={generating}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
                 {generating ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={15} />}
-                {generating ? 'Rapor Oluşturuluyor...' : 'AI ile Rapor Oluştur'}
+                {generating ? t('teacher.lessonReport.generating') : t('teacher.lessonReport.generateReport')}
               </button>
             )
           )}
@@ -547,7 +554,7 @@ ZORUNLU KURALLAR:
             <button onClick={handleSave} disabled={loading || !generatedReport}
               style={{ padding: '0.6rem 1.25rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
               {loading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={15} />}
-              Kaydet ve Veliye Gönder
+              {t('teacher.lessonReport.saveAndSend')}
             </button>
           )}
         </div>

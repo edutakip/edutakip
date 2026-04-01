@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Send, Search, MessageCircle, Phone, Video, MoreVertical, Smile, Paperclip, ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function TeacherMessages() {
+  const { t } = useTranslation();
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -70,10 +72,11 @@ export default function TeacherMessages() {
   const formatTime = (d) => new Date(d).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   const formatDate = (d) => {
     const today = new Date(); const date = new Date(d);
-    if (date.toDateString() === today.toDateString()) return 'Bugün';
+    if (date.toDateString() === today.toDateString()) return t('teacher.lessons.today');
     const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-    if (date.toDateString() === yesterday.toDateString()) return 'Dün';
-    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+    const isEn = !t('teacher.messages.parentComm').includes('Veli');
+    if (date.toDateString() === yesterday.toDateString()) return isEn ? 'Yesterday' : 'Dün';
+    return date.toLocaleDateString(isEn ? 'en-US' : 'tr-TR', { day: 'numeric', month: 'long' });
   };
 
   const filteredStudents = students.filter(s =>
@@ -100,7 +103,7 @@ export default function TeacherMessages() {
             {avatar(me?.full_name || 'T', 40, '#6366f1')}
             <div>
               <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '0.95rem', margin: 0 }}>{me?.full_name || 'Öğretmen'}</p>
-              <p style={{ color: '#8696a0', fontSize: '0.72rem', margin: 0 }}>Veli İletişim</p>
+              <p style={{ color: '#8696a0', fontSize: '0.72rem', margin: 0 }}>{t('teacher.messages.parentComm')}</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -113,7 +116,7 @@ export default function TeacherMessages() {
           <div style={{ background: '#1e1b4b', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.9rem' }}>
             <Search size={16} color='#8696a0' />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder='Ara veya yeni sohbet başlat'
+              placeholder={t('teacher.messages.searchPlaceholder')}
               style={{ background: 'none', border: 'none', outline: 'none', color: '#e9edef', fontSize: '0.875rem', flex: 1 }} />
           </div>
         </div>
@@ -122,7 +125,7 @@ export default function TeacherMessages() {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {filteredStudents.length === 0 && (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#8696a0', fontSize: '0.85rem' }}>
-              {search ? 'Sonuç bulunamadı' : 'Aktif öğrenci yok'}
+              {search ? t('teacher.messages.noResults') : t('teacher.messages.noActiveStudents')}
             </div>
           )}
           {filteredStudents.map(s => {
@@ -159,12 +162,12 @@ export default function TeacherMessages() {
             <MessageCircle size={36} color='#6366f1' strokeWidth={1.5} />
           </div>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontWeight: '700', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>EduTakip Mesajlaşma</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', margin: 0 }}>Sol taraftan bir öğrenci seçin</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', fontWeight: '700', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>{t('teacher.messages.messagingTitle')}</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', margin: 0 }}>{t('teacher.messages.selectStudent')}</p>
           </div>
           <div style={{ width: '200px', height: '1px', background: 'rgba(99,102,241,0.2)' }} />
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            🔒 Mesajlarınız güvende
+            {t('teacher.messages.messagesSecure')}
           </p>
         </div>
       ) : (
@@ -186,7 +189,7 @@ export default function TeacherMessages() {
             {avatar(selectedStudent.parentName || selectedStudent.name, 40, getColor(selectedStudent.id))}
             <div style={{ flex: 1 }}>
               <p style={{ color: '#e9edef', fontWeight: '700', fontSize: '0.95rem', margin: 0 }}>{selectedStudent.parentName || 'Veli'}</p>
-              <p style={{ color: '#8696a0', fontSize: '0.75rem', margin: 0 }}>{selectedStudent.name} · {selectedStudent.parentEmail || 'E-posta yok'}</p>
+              <p style={{ color: '#8696a0', fontSize: '0.75rem', margin: 0 }}>{selectedStudent.name} · {selectedStudent.parentEmail || t('teacher.messages.noEmail')}</p>
             </div>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', color: '#aebac1' }}><Search size={20} /></button>
@@ -201,7 +204,7 @@ export default function TeacherMessages() {
                 <div style={{ background: 'rgba(99,102,241,0.1)', borderRadius: '12px', padding: '0.6rem 1.25rem', display: 'inline-block', border: '1px solid rgba(99,102,241,0.2)' }}>
                   <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>🔒 Mesajlar güvende</span>
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginTop: '1.5rem' }}>Henüz mesaj yok. İlk mesajı siz başlatın!</p>
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginTop: '1.5rem' }}>{t('teacher.messages.noMessages')}</p>
               </div>
             )}
             {messages.map((msg, i) => {
@@ -252,7 +255,7 @@ export default function TeacherMessages() {
                 value={newMsg}
                 onChange={e => setNewMsg(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                placeholder="Mesaj"
+                placeholder={t('teacher.messages.messagePlaceholder')}
                 rows={1}
                 style={{
                   flex: 1, resize: 'none', background: 'none', border: 'none', outline: 'none',

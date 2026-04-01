@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO, differenceInMinutes, isToday, isPast } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { Plus, CheckCircle, XCircle, Filter, BookOpen, Pencil, ClipboardList, Clock, Phone, ChevronDown } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
 import LessonReportModal from '../components/teacher/LessonReportModal';
 
-const STATUS_CONFIG = {
-  planlandı:  { bg: '#e0e7ff', color: '#4338ca', dot: '#6366f1', label: 'Planlandı' },
-  tamamlandı: { bg: '#d1fae5', color: '#065f46', dot: '#10b981', label: 'Tamamlandı' },
-  iptal:      { bg: '#fee2e2', color: '#b91c1c', dot: '#ef4444', label: 'İptal' },
+const STATUS_CONFIG_TR = {
+  planlandı:  { bg: '#e0e7ff', color: '#4338ca', dot: '#6366f1' },
+  tamamlandı: { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
+  iptal:      { bg: '#fee2e2', color: '#b91c1c', dot: '#ef4444' },
 };
 
 export default function TeacherLessons() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
+  const STATUS_CONFIG = {
+    planlandı:  { ...STATUS_CONFIG_TR.planlandı, label: t('teacher.lessons.planned') },
+    tamamlandı: { ...STATUS_CONFIG_TR.tamamlandı, label: t('teacher.lessons.completed') },
+    iptal:      { ...STATUS_CONFIG_TR.iptal, label: t('teacher.lessons.cancelled') },
+  };
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -160,22 +168,22 @@ export default function TeacherLessons() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.2rem' }}>Dersler</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{filtered.length} ders · {lessons.filter(l => l.status === 'tamamlandı').length} tamamlandı</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.2rem' }}>{t('teacher.lessons.title')}</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{filtered.length} {t('teacher.lessons.title').toLowerCase()} · {lessons.filter(l => l.status === 'tamamlandı').length} {t('teacher.lessons.completed').toLowerCase()}</p>
         </div>
         <button onClick={() => { setEditLesson(null); setShowModal(true); }}
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.7rem 1.4rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }}>
-          <Plus size={16} /> Ders Planla
+          <Plus size={16} /> {t('teacher.lessons.planLesson')}
         </button>
       </div>
 
       {/* Özet kutucuklar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
         {[
-          { label: 'Toplam Ders', value: lessons.length, color: '#6366f1', bg: '#eef2ff' },
-          { label: 'Planlandı', value: lessons.filter(l => l.status === 'planlandı').length, color: '#4338ca', bg: '#e0e7ff' },
-          { label: 'Tamamlandı', value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#059669', bg: '#d1fae5' },
-          { label: 'İptal', value: lessons.filter(l => l.status === 'iptal').length, color: '#dc2626', bg: '#fee2e2' },
+          { label: t('teacher.lessons.total'), value: lessons.length, color: '#6366f1', bg: '#eef2ff' },
+          { label: t('teacher.lessons.planned'), value: lessons.filter(l => l.status === 'planlandı').length, color: '#4338ca', bg: '#e0e7ff' },
+          { label: t('teacher.lessons.completed'), value: lessons.filter(l => l.status === 'tamamlandı').length, color: '#059669', bg: '#d1fae5' },
+          { label: t('teacher.lessons.cancelled'), value: lessons.filter(l => l.status === 'iptal').length, color: '#dc2626', bg: '#fee2e2' },
         ].map(({ label, value, color, bg }) => (
           <div key={label} style={{ background: 'white', borderRadius: 14, padding: '1rem 1.25rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '0.4rem' }}>{label}</div>
@@ -187,11 +195,11 @@ export default function TeacherLessons() {
       {/* Filtreler */}
       <div style={{ background: '#fff', borderRadius: '14px', padding: '0.85rem 1.25rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.82rem', fontWeight: '600' }}>
-          <Filter size={14} /> Filtre:
+          <Filter size={14} /> {t('teacher.lessons.filter')}:
         </div>
         {/* Status toggle */}
         <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: '0.2rem', gap: '0.1rem' }}>
-          {[['all','Tümü'],['planlandı','Planlandı'],['tamamlandı','Tamamlandı'],['iptal','İptal']].map(([v,l]) => (
+          {[['all', t('teacher.lessons.all')],['planlandı', t('teacher.lessons.planned')],['tamamlandı', t('teacher.lessons.completed')],['iptal', t('teacher.lessons.cancelled')]].map(([v,l]) => (
             <button key={v} onClick={() => setStatusFilter(v)}
               style={{ padding: '0.35rem 0.75rem', borderRadius: 8, border: 'none', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s', background: statusFilter === v ? 'white' : 'transparent', color: statusFilter === v ? '#111827' : '#9ca3af', boxShadow: statusFilter === v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
               {l}
@@ -199,7 +207,7 @@ export default function TeacherLessons() {
           ))}
         </div>
         <select value={studentFilter} onChange={e => setStudentFilter(e.target.value)} style={selStyle}>
-          <option value="all">Tüm Öğrenciler</option>
+          <option value="all">{t('teacher.lessons.allStudents')}</option>
           {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={selStyle} />
@@ -207,7 +215,7 @@ export default function TeacherLessons() {
         {hasFilter && (
           <button onClick={() => { setStatusFilter('all'); setStudentFilter('all'); setDateFrom(''); setDateTo(''); }}
             style={{ padding: '0.45rem 0.85rem', borderRadius: '10px', border: '1.5px solid #fca5a5', fontSize: '0.8rem', color: '#ef4444', background: '#fef2f2', cursor: 'pointer', fontWeight: '600' }}>
-            ✕ Temizle
+            ✕ {t('teacher.lessons.clearFilter')}
           </button>
         )}
       </div>
@@ -216,7 +224,7 @@ export default function TeacherLessons() {
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
           <BookOpen size={40} style={{ margin: '0 auto 1rem', opacity: 0.25 }} />
-          <p style={{ fontWeight: '600', fontSize: '1rem' }}>Ders kaydı bulunamadı</p>
+          <p style={{ fontWeight: '600', fontSize: '1rem' }}>{t('teacher.lessons.noLessonsFound')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -224,7 +232,7 @@ export default function TeacherLessons() {
             let dayLabel = '';
             try {
               const d = parseISO(date);
-              dayLabel = isToday(d) ? 'Bugün' : format(d, 'd MMMM yyyy, EEEE', { locale: tr });
+              dayLabel = isToday(d) ? t('teacher.lessons.today') : format(d, 'd MMMM yyyy, EEEE', { locale: dateLocale });
             } catch {}
 
             return (
@@ -233,7 +241,7 @@ export default function TeacherLessons() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <div style={{ color: isToday(parseISO(date)) ? '#4f46e5' : '#374151', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{dayLabel}</div>
                   <div style={{ flex: 1, height: 1, background: '#f1f5f9' }} />
-                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{dayLessons.length} ders</div>
+                  <div style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{dayLessons.length} {t('teacher.lessons.title').toLowerCase()}</div>
                 </div>
 
                 {/* O güne ait dersler */}
@@ -279,7 +287,7 @@ export default function TeacherLessons() {
                             </span>
                             {!isCancelled && (
                               <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.25rem 0.65rem', borderRadius: 20, background: isPaid ? '#d1fae5' : '#fef9c3', color: isPaid ? '#065f46' : '#854d0e' }}>
-                                {isPaid ? '✓ Ödendi' : 'Bekliyor'}
+                                {isPaid ? t('teacher.lessons.paid') : t('teacher.lessons.pending')}
                               </span>
                             )}
                           </div>
@@ -300,18 +308,18 @@ export default function TeacherLessons() {
                             <div style={{ flex: 1 }} />
                             {isScheduled && (
                               <>
-                                <ActionBtn icon={<CheckCircle size={13} />} label="Tamamlandı" color="#059669" bg="#d1fae5" onClick={() => markDone(lesson)} />
-                                <ActionBtn icon={<XCircle size={13} />} label="İptal Et" color="#dc2626" bg="#fee2e2" onClick={() => markCancel(lesson)} />
+                                <ActionBtn icon={<CheckCircle size={13} />} label={t('teacher.lessons.done')} color="#059669" bg="#d1fae5" onClick={() => markDone(lesson)} />
+                                <ActionBtn icon={<XCircle size={13} />} label={t('teacher.lessons.cancel')} color="#dc2626" bg="#fee2e2" onClick={() => markCancel(lesson)} />
                               </>
                             )}
                             {isCompleted && (
                               <>
-                                <ActionBtn label="Geri Al" color="#6b7280" bg="#f3f4f6" onClick={() => markUndone(lesson)} />
-                                <ActionBtn icon={<ClipboardList size={13} />} label="Değerlendir" color="#7c3aed" bg="#ede9fe" onClick={() => setReportLesson(lesson)} />
+                                <ActionBtn label={t('teacher.lessons.undo')} color="#6b7280" bg="#f3f4f6" onClick={() => markUndone(lesson)} />
+                                <ActionBtn icon={<ClipboardList size={13} />} label={t('teacher.lessons.evaluate')} color="#7c3aed" bg="#ede9fe" onClick={() => setReportLesson(lesson)} />
                               </>
                             
                             )}
-                            <ActionBtn icon={<Pencil size={12} />} label="Düzenle" color="#374151" bg="#f3f4f6" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
+                            <ActionBtn icon={<Pencil size={12} />} label={t('teacher.lessons.edit')} color="#374151" bg="#f3f4f6" onClick={() => { setEditLesson(lesson); setShowModal(true); }} />
                           </div>
                         )}
                       </div>

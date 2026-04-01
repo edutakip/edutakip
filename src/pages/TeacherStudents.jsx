@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Search, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import StudentCard from '../components/teacher/StudentCard';
 import AddStudentModal from '../components/teacher/AddStudentModal';
 import PaymentModal from '../components/teacher/PaymentModal';
@@ -18,6 +19,7 @@ function useWindowWidth() {
 }
 
 export default function TeacherStudents() {
+  const { t } = useTranslation();
   const [students, setStudents] = useState([]);
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
@@ -49,8 +51,8 @@ export default function TeacherStudents() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'center' : 'flex-start', marginBottom: isMobile ? '1.25rem' : '2rem' }}>
         <div>
-          <h1 style={{ color: 'var(--text-primary)', fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '800', marginBottom: '0.3rem' }}>Öğrencilerim</h1>
-          {!isMobile && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Tüm öğrencilerinizi ve ders durumlarını buradan yönetin.</p>}
+          <h1 style={{ color: 'var(--text-primary)', fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '800', marginBottom: '0.3rem' }}>{t('teacher.students.title')}</h1>
+          {!isMobile && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{t('teacher.students.subtitle')}</p>}
         </div>
 
         <button onClick={() => setShowAdd(true)}
@@ -67,7 +69,7 @@ export default function TeacherStudents() {
             flexShrink: 0,
             boxShadow: '0 4px 12px rgba(79,70,229,0.35)',
           }}>
-          <Plus size={15} /> Yeni Öğrenci Ekle
+          <Plus size={15} /> {t('teacher.students.addNew')}
         </button>
       </div>
 
@@ -75,11 +77,11 @@ export default function TeacherStudents() {
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
           <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Öğrenci ara...'
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('teacher.students.searchPlaceholder')}
             style={{ width: '100%', padding: '0.6rem 0.75rem 0.6rem 2.25rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.875rem', outline: 'none' }} />
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {[{ v: 'active', l: 'Aktif' }, { v: 'archived', l: 'Arşivlenmiş' }, { v: 'all', l: 'Tümü' }].map(({ v, l }) => (
+          {[{ v: 'active', l: t('teacher.students.active') }, { v: 'archived', l: t('teacher.students.archived') }, { v: 'all', l: t('teacher.students.all') }].map(({ v, l }) => (
             <button key={v} onClick={() => setFilter(v)}
               style={{ padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid', borderColor: filter === v ? 'var(--accent)' : 'var(--border)', background: filter === v ? 'var(--accent-light)' : 'transparent', color: filter === v ? 'var(--accent)' : 'var(--text-secondary)', fontWeight: '600', fontSize: '0.82rem', cursor: 'pointer' }}>
               {l}
@@ -116,8 +118,8 @@ export default function TeacherStudents() {
             <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Plus size={24} color='#818cf8' />
             </div>
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', fontWeight: '600' }}>Yeni Öğrenci Ekle</span>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>Tıkla ve ekle</span>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', fontWeight: '600' }}>{t('teacher.students.addNew')}</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>{t('teacher.students.clickToAdd')}</span>
           </div>
         )}
       </div>

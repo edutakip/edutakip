@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO, isToday, isTomorrow, differenceInMinutes } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
 import { Users, CalendarCheck, CheckCircle, DollarSign, ChevronRight, MessageCircle, Plus } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import LessonModal from '../components/teacher/LessonModal';
 import PendingLessonsPrompt from '../components/teacher/PendingLessonsPrompt';
+import { useTranslation } from 'react-i18next';
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
   const [lessons, setLessons] = useState([]);
   const [students, setStudents] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -76,9 +79,9 @@ export default function TeacherDashboard() {
   const getDayLabel = (dateStr) => {
     try {
       const d = parseISO(dateStr);
-      if (isToday(d)) return 'Bugün';
-      if (isTomorrow(d)) return 'Yarın';
-      return format(d, 'EEE, d MMM', { locale: tr });
+      if (isToday(d)) return t('teacher.lessons.today');
+      if (isTomorrow(d)) return t('teacher.dashboard.tomorrow');
+      return format(d, 'EEE, d MMM', { locale: dateLocale });
     } catch { return dateStr; }
   };
 
@@ -119,40 +122,40 @@ export default function TeacherDashboard() {
   const hour = new Date().getHours();
   const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
 
-  const greetings = { morning: 'Günaydın', afternoon: 'Tünaydın', evening: 'İyi Akşamlar' };
+  const greetings = { morning: t('teacher.dashboard.morning'), afternoon: t('teacher.dashboard.afternoon'), evening: t('teacher.dashboard.evening') };
   const colors = { morning: { primary: '#f97316', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #1a1035 100%)', accent: '#fb923c' }, afternoon: { primary: '#6366f1', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f1035 100%)', accent: '#818cf8' }, evening: { primary: '#8b5cf6', gradient: 'linear-gradient(135deg, #0f0f1a 0%, #1a1035 60%, #1a0f2e 100%)', accent: '#a78bfa' } };
   const theme = colors[timeOfDay];
 
   const briefCards = [
     {
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-      title: 'Bugün',
-      main: todayLessons.length === 0 ? 'Ders yok' : `${todayLessons.length} ders`,
-      detail: nextLesson ? `Sıradaki: ${nextLesson.startTime?.slice(0,5)} — ${nextLesson.studentName}` : completedToday > 0 ? `${completedToday} ders tamamlandı` : firstLesson ? `İlk ders ${firstLesson.startTime?.slice(0,5)}'de` : 'Bugün ders planlanmamış',
+      title: t('teacher.dashboard.today'),
+      main: todayLessons.length === 0 ? t('teacher.dashboard.noLesson') : `${todayLessons.length} ${t('teacher.dashboard.lessons')}`,
+      detail: nextLesson ? `Sıradaki: ${nextLesson.startTime?.slice(0,5)} — ${nextLesson.studentName}` : completedToday > 0 ? `${completedToday} ${t('teacher.dashboard.lessonsCompleted')}` : firstLesson ? `${t('teacher.dashboard.firstLesson')} ${firstLesson.startTime?.slice(0,5)}'de` : t('teacher.dashboard.noLessonsToday'),
     },
     {
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-      title: 'Öğrenciler',
-      main: `${students.length} aktif`,
-      detail: studentBalances.length > 0 ? `${studentBalances.length} öğrencide bekleyen ödeme` : 'Tüm ödemeler güncel',
+      title: t('teacher.dashboard.students'),
+      main: `${students.length} ${t('teacher.dashboard.active')}`,
+      detail: studentBalances.length > 0 ? `${studentBalances.length} ${t('teacher.dashboard.pendingPayment')}` : t('teacher.dashboard.allPaymentsCurrent'),
     },
     {
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-      title: 'Bu Hafta',
-      main: `${thisWeekLessons} ders`,
-      detail: `Bu ay ${completedThisMonth} ders tamamlandı`,
+      title: t('teacher.dashboard.thisWeek'),
+      main: `${thisWeekLessons} ${t('teacher.dashboard.lessons')}`,
+      detail: `Bu ay ${completedThisMonth} ${t('teacher.dashboard.lessonsCompleted')}`,
     },
     {
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-      title: 'Bekleyen',
+      title: t('teacher.dashboard.pending'),
       main: `₺${totalUnpaid.toLocaleString('tr-TR')}`,
-      detail: studentBalances.length > 0 ? `${studentBalances.length} öğrenciden tahsil edilecek` : 'Bekleyen ödeme yok',
+      detail: studentBalances.length > 0 ? `${studentBalances.length} ${t('teacher.dashboard.toCollect')}` : t('teacher.dashboard.noPendingPayment'),
     },
     {
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-      title: 'Yarın',
-      main: tomorrowLessons.length === 0 ? 'Ders yok' : `${tomorrowLessons.length} ders`,
-      detail: tomorrowLessons[0] ? `İlk ders: ${tomorrowLessons.sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''))[0].startTime?.slice(0,5)} — ${tomorrowLessons[0].studentName}` : 'Dinlenme günü!',
+      title: t('teacher.dashboard.tomorrow'),
+      main: tomorrowLessons.length === 0 ? t('teacher.dashboard.noLesson') : `${tomorrowLessons.length} ${t('teacher.dashboard.lessons')}`,
+      detail: tomorrowLessons[0] ? `${t('teacher.dashboard.firstLessonTomorrow')}: ${tomorrowLessons.sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''))[0].startTime?.slice(0,5)} — ${tomorrowLessons[0].studentName}` : t('teacher.dashboard.restDay'),
     },
   ];
 
@@ -170,10 +173,10 @@ export default function TeacherDashboard() {
   const getAvatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || '#fbbf24';
 
   const statCards = [
-    { label: 'Aktif Öğrenci', value: activeStudents, icon: Users, iconColor: '#0ea5e9', iconBg: '#e0f2fe', page: 'TeacherStudents' },
-    { label: 'Bugünkü Dersler', value: todayLessons.length, icon: CalendarCheck, iconColor: '#6366f1', iconBg: '#eef2ff', page: 'TeacherCalendar' },
-    { label: 'Bu Ay Tamamlanan', value: completedThisMonth, icon: CheckCircle, iconColor: '#10b981', iconBg: '#d1fae5', page: 'TeacherLessons' },
-    { label: 'Ödenmemiş Bakiye', value: `₺${totalUnpaid.toLocaleString('tr-TR')}`, icon: DollarSign, iconColor: '#f59e0b', iconBg: '#fef3c7', page: 'TeacherFinance' },
+    { label: t('teacher.dashboard.activeStudents'), value: activeStudents, icon: Users, iconColor: '#0ea5e9', iconBg: '#e0f2fe', page: 'TeacherStudents' },
+    { label: t('teacher.dashboard.todayLessons'), value: todayLessons.length, icon: CalendarCheck, iconColor: '#6366f1', iconBg: '#eef2ff', page: 'TeacherCalendar' },
+    { label: t('teacher.dashboard.completedThisMonth'), value: completedThisMonth, icon: CheckCircle, iconColor: '#10b981', iconBg: '#d1fae5', page: 'TeacherLessons' },
+    { label: t('teacher.dashboard.unpaidBalance'), value: `₺${totalUnpaid.toLocaleString('tr-TR')}`, icon: DollarSign, iconColor: '#f59e0b', iconBg: '#fef3c7', page: 'TeacherFinance' },
   ];
 
   return (
@@ -181,12 +184,12 @@ export default function TeacherDashboard() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.8rem' : 0, marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>Genel Bakış</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{format(new Date(), 'EEEE, d MMMM yyyy', { locale: tr })}</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>{t('teacher.dashboard.title')}</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{format(new Date(), 'EEEE, d MMMM yyyy', { locale: dateLocale })}</p>
         </div>
         <button onClick={() => setShowModal(true)}
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: '12px', padding: '0.65rem 1.3rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 14px rgba(79,70,229,0.3)', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
-          <Plus size={16} /> Ders Ekle
+          <Plus size={16} /> {t('teacher.dashboard.addLesson')}
         </button>
       </div>
 
@@ -237,13 +240,13 @@ export default function TeacherDashboard() {
           <div style={{ flexShrink: 0, minWidth: 200 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'shimmer 2s ease-in-out infinite' }} />
-              <span style={{ fontSize: '0.68rem', fontWeight: '700', color: theme.accent, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Günün Özeti</span>
+              <span style={{ fontSize: '0.68rem', fontWeight: '700', color: theme.accent, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{t('teacher.dashboard.dailySummary')}</span>
             </div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem', lineHeight: 1.2 }}>
               {greetings[timeOfDay]}!
             </h2>
             <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>
-              {format(new Date(), 'EEEE, d MMMM', { locale: tr })} · {format(new Date(), 'HH:mm')}
+              {format(new Date(), 'EEEE, d MMMM', { locale: dateLocale })} · {format(new Date(), 'HH:mm')}
             </p>
           </div>
 
@@ -256,13 +259,13 @@ export default function TeacherDashboard() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: '0.95rem', color: 'white', fontWeight: '600', marginBottom: '0.4rem', lineHeight: 1.5 }}>
               {todayLessons.length > 0
-                ? `Bugün ${todayLessons.length} dersiniz var${firstLesson ? `, ilki saat ${firstLesson.startTime?.slice(0,5)}'de.` : '.'}`
-                : 'Bugün planlanmış dersiniz yok.'}
+                ? `${t('teacher.dashboard.today')} ${todayLessons.length} ${t('teacher.dashboard.lessons')}${firstLesson ? `, ${t('teacher.dashboard.firstLesson')} ${firstLesson.startTime?.slice(0,5)}'de.` : '.'}`
+                : t('teacher.dashboard.noLessonsTodayDesc')}
             </p>
             <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', fontWeight: '500', lineHeight: 1.5 }}>
               {studentBalances.length > 0
-                ? `${studentBalances.length} öğrencinizin bekleyen ödemesi var.`
-                : 'Tüm ödemeler güncel, harika!'}
+                ? `${studentBalances.length} ${t('teacher.dashboard.pendingPaymentsDesc').replace('{{count}}', studentBalances.length)}`
+                : t('teacher.dashboard.allPaymentsCurrentDesc')}
             </p>
           </div>
 
@@ -316,13 +319,13 @@ export default function TeacherDashboard() {
         {/* Upcoming Lessons */}
         <div style={{ background: '#ffffff', borderRadius: '16px', padding: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>Yaklaşan Dersler</h2>
+            <h2 style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>{t('teacher.dashboard.upcomingLessons')}</h2>
             <Link to={createPageUrl('TeacherCalendar')} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#6366f1', fontSize: '0.82rem', fontWeight: '600', textDecoration: 'none' }}>
-              Tümü <ChevronRight size={14} />
+              {t('teacher.dashboard.viewAll')} <ChevronRight size={14} />
             </Link>
           </div>
           {upcomingLessons.length === 0 ? (
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>Yaklaşan ders yok</p>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>{t('teacher.dashboard.noUpcomingLessons')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
               {upcomingLessons.map(lesson => {
@@ -354,13 +357,13 @@ export default function TeacherDashboard() {
         {/* Unpaid Balances */}
         <div style={{ background: '#ffffff', borderRadius: '16px', padding: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>Ödenmemiş Bakiyeler</h2>
+            <h2 style={{ fontSize: '1rem', fontWeight: '700', color: '#111827' }}>{t('teacher.dashboard.unpaidBalances')}</h2>
             <Link to={createPageUrl('TeacherFinance')} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#f59e0b', fontSize: '0.82rem', fontWeight: '600', textDecoration: 'none' }}>
-              Tümü <ChevronRight size={14} />
+              {t('teacher.dashboard.viewAll')} <ChevronRight size={14} />
             </Link>
           </div>
           {studentBalances.length === 0 ? (
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>Ödenmemiş bakiye yok 🎉</p>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>{t('teacher.dashboard.noUnpaidBalance')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
               {studentBalances.map(({ student, balance }, i) => (
@@ -370,7 +373,7 @@ export default function TeacherDashboard() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#111827' }}>{student.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.1rem' }}>{format(new Date(), 'MMMM yyyy', { locale: tr })}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.1rem' }}>{format(new Date(), 'MMMM yyyy', { locale: dateLocale })}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#f59e0b' }}>₺{balance.toLocaleString('tr-TR')}</span>
@@ -394,13 +397,13 @@ export default function TeacherDashboard() {
           <div style={{ background: 'white', borderRadius: 20, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginTop: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
               <div>
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '0.2rem' }}>Aylık Hedef Takibi</h2>
-                <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{format(new Date(), 'MMMM yyyy', { locale: tr })}</p>
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '0.2rem' }}>{t('teacher.dashboard.monthlyGoal')}</h2>
+                <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{format(new Date(), 'MMMM yyyy', { locale: dateLocale })}</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {isAchieved && (
                   <span style={{ background: '#d1fae5', color: '#059669', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: 20 }}>
-                    🎯 Hedefe Ulaşıldı!
+                    {t('teacher.dashboard.goalAchieved')}
                   </span>
                 )}
                 {editingGoal ? (
@@ -416,18 +419,18 @@ export default function TeacherDashboard() {
                       if (val > 0) { setMonthlyGoal(val); localStorage.setItem('monthlyGoal', val); }
                       setEditingGoal(false);
                     }} style={{ background: '#6366f1', border: 'none', color: 'white', borderRadius: 8, padding: '0.35rem 0.7rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
-                      Kaydet
+                      {t('teacher.dashboard.save')}
                     </button>
                     <button onClick={() => setEditingGoal(false)}
                       style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 8, padding: '0.35rem 0.7rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
-                      İptal
+                      {t('teacher.dashboard.cancel')}
                     </button>
                   </div>
                 ) : (
                   <button onClick={() => { setGoalInput(String(monthlyGoal)); setEditingGoal(true); }}
                     style={{ background: '#f3f4f6', border: 'none', color: '#6b7280', borderRadius: 8, padding: '0.35rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    Hedef Düzenle
+                    {t('teacher.dashboard.editGoal')}
                   </button>
                 )}
               </div>
@@ -436,9 +439,9 @@ export default function TeacherDashboard() {
             {/* İstatistikler */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.25rem' }}>
               {[
-                { label: 'Tamamlanan', value: completedThisMonth, color: '#6366f1' },
-                { label: 'Hedef', value: monthlyGoal, color: '#374151' },
-                { label: 'Kalan', value: remaining, color: remaining === 0 ? '#10b981' : '#f59e0b' },
+                { label: t('teacher.dashboard.completed'), value: completedThisMonth, color: '#6366f1' },
+                { label: t('teacher.dashboard.goal'), value: monthlyGoal, color: '#374151' },
+                { label: t('teacher.dashboard.remaining'), value: remaining, color: remaining === 0 ? '#10b981' : '#f59e0b' },
               ].map(({ label, value, color }) => (
                 <div key={label} style={{ textAlign: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: 12 }}>
                   <div style={{ fontSize: '1.6rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
@@ -450,7 +453,7 @@ export default function TeacherDashboard() {
             {/* Progress bar */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 600 }}>{completedThisMonth} / {monthlyGoal} ders</span>
+                <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 600 }}>{completedThisMonth} / {monthlyGoal} {t('teacher.dashboard.lessons')}</span>
                 <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isAchieved ? '#10b981' : '#6366f1' }}>{pct}%</span>
               </div>
               <div style={{ height: 12, background: '#f3f4f6', borderRadius: 10, overflow: 'hidden' }}>

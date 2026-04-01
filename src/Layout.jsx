@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
@@ -125,23 +126,7 @@ const PAGE_PREFETCH = {
 
 const LESSON_TRACKING_PAGES = ['TeacherLessons', 'TeacherHomework', 'TeacherReports'];
 
-const TEACHER_NAV = [
-  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-  {
-    label: 'Ders Yönetimi', icon: BookOpen,
-    submenu: [
-      { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-      { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
-      { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
-    ],
-  },
-  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
-  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
-  { label: 'EduTakip Asistan', icon: Bot, page: 'TeacherAssistant' },
-  { label: 'Akıllı Zam Önerisi', icon: TrendingUp, page: 'Page1' },
-];
+// Nav items defined inside component using t() — see below
 
 const PARENT_NAV = [
   { label: 'Ana Sayfa', icon: Home, page: 'ParentDashboard' },
@@ -158,13 +143,7 @@ const PARENT_MOBILE_NAV = [
   { label: 'Mesajlar', shortLabel: 'Mesaj', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
-const TEACHER_MOBILE_NAV = [
-  { label: 'Genel Bakış', icon: LayoutDashboard, page: 'TeacherDashboard' },
-  { label: 'Ders Yönetimi', icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
-  { label: 'Takvim', icon: CalendarDays, page: 'TeacherCalendar' },
-  { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
-  { label: 'Mesajlar', icon: MessageCircle, page: 'TeacherMessages' },
-];
+// TEACHER_MOBILE_NAV defined inside component using t()
 
 const FAB_ACTIONS = [
   { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
@@ -173,6 +152,34 @@ const FAB_ACTIONS = [
 ];
 
 export default function Layout({ children, currentPageName }) {
+  const { t } = useTranslation();
+
+  const TEACHER_MOBILE_NAV = [
+    { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'] },
+    { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
+    { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
+  ];
+
+  const TEACHER_NAV = [
+    { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
+    { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
+    {
+      label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen,
+      submenu: [
+        { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
+        { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
+        { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
+      ],
+    },
+    { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
+    { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
+    { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
+    { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
+  ];
+
   const [collapsed, setCollapsed] = useState(false);
   const [role] = useState(() => localStorage.getItem('tilki_role') || '');
   const [user, setUser] = useState(null);
@@ -253,7 +260,7 @@ export default function Layout({ children, currentPageName }) {
           <div>
             <h1 style={{ color: 'white', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.3px', lineHeight: 1 }}>EduTakip</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
-              {role === 'teacher' ? 'Öğretmen Paneli' : 'Veli Paneli'}
+              {role === 'teacher' ? t('teacher.layout.teacherPanel') : t('teacher.layout.parentPanel')}
             </p>
           </div>
         )}
@@ -267,7 +274,7 @@ export default function Layout({ children, currentPageName }) {
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}
             onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
-            <LogOut size={12} /> Çıkış Yap
+            <LogOut size={12} /> {t('teacher.layout.logout')}
           </button>
         </div>
       )}
@@ -437,7 +444,7 @@ export default function Layout({ children, currentPageName }) {
             onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.6)'}>
             <LogOut size={isNarrowMobile ? 17 : 19} />
-            <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>Çıkış</span>
+            <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>{t('teacher.layout.logout')}</span>
           </button>
         </nav>
       </div>
@@ -559,7 +566,7 @@ export default function Layout({ children, currentPageName }) {
               transition: 'color 0.2s ease',
             }}>
             <LogOut size={18} />
-            <span style={{ fontSize: '0.55rem', fontWeight: '500' }}>Çıkış</span>
+            <span style={{ fontSize: '0.55rem', fontWeight: '500' }}>{t('teacher.layout.logout')}</span>
           </button>
         </nav>
 
