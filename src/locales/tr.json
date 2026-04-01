@@ -233,12 +233,10 @@
     "updated": "Son güncelleme: 1 Nisan 2026",
     "sections": [
       { "title": "1. Ücretsiz Deneme Süresi", "body": "Tüm yeni kullanıcılara 30 günlük ücretsiz deneme sunulmaktadır. Bu süre içinde herhangi bir ücretlendirme yapılmaz ve iptal için iade talebi gerekmez." },
-      { "title": "2. İade Hakkı", "body": "Ödeme tarihinden itibaren 7 gün içinde herhangi bir neden belirtmeksizin tam iade talep edebilirsiniz. 7 günlük süre geçtikten sonra yapılan iade talepleri değerlendirmeye alınmaz." },
-      { "title": "3. Kısmi İade", "body": "Ay ortasında aboneliği iptal eden kullanıcılara kalan süre için kısmi iade yapılmaz; mevcut dönem sonuna kadar hizmete erişim aktif kalır." },
-      { "title": "4. İade Süreci", "body": "İade talebi için destek@edutakip.com adresine e-posta gönderin. Ödeme hesabınızı ve talep nedeninizi belirtin. Geçerli talepler 5-10 iş günü içinde işleme alınır ve ödeme yöntemini bağlı hesabınıza iade edilir." },
-      { "title": "5. İade Dışı Durumlar", "body": "Aşağıdaki durumlarda iade yapılmaz: Kullanım koşullarını ihlal nedeniyle kapatılan hesaplar, hile, sahtekârlık veya kötüye kullanım tespit edilen durumlar, ücretsiz deneme süresi içindeki işlemler." },
-      { "title": "6. Teknik Sorunlar", "body": "Platformdan kaynaklanan teknik bir sorun nedeniyle hizmetten yararlanamadığınızı belgelerseniz, etkilenen dönem için iade veya kredi sağlanabilir." },
-      { "title": "7. İletişim", "body": "Geri ödeme talepleriniz ve sorularınız için destek@edutakip.com adresine ulaşabilirsiniz. Çalışma saatlerimiz: Pazartesi–Cuma, 09:00–18:00 (Türkiye saati)." }
+      { "title": "2. İade Hakkı", "body": "Ödeme tarihinden itibaren 14 gün içinde herhangi bir neden belirtmeksizin tam iade talep edebilirsiniz. İade talebinizi destek@edutakip.com adresine gönderin; talebiniz en geç 5-10 iş günü içinde işleme alınır." },
+      { "title": "3. İptal", "body": "Aboneliğinizi istediğiniz zaman iptal edebilirsiniz. İptal ettiğinizde mevcut dönemin sonuna kadar hizmete erişiminiz devam eder." },
+      { "title": "4. İade Süreci", "body": "İade talebi için destek@edutakip.com adresine e-posta gönderin. Geçerli talepler 5-10 iş günü içinde işleme alınır ve ödeme yönteminize iade edilir." },
+      { "title": "5. İletişim", "body": "Geri ödeme talepleriniz ve sorularınız için destek@edutakip.com adresine ulaşabilirsiniz. Çalışma saatlerimiz: Pazartesi–Cuma, 09:00–18:00 (Türkiye saati)." }
     ]
   }
 }

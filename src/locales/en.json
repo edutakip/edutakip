@@ -233,12 +233,10 @@
     "updated": "Last updated: April 1, 2026",
     "sections": [
       { "title": "1. Free Trial Period", "body": "A 30-day free trial is offered to all new users. No charges are made during this period and no refund request is needed for cancellation." },
-      { "title": "2. Right to Refund", "body": "You may request a full refund within 7 days of the payment date without stating any reason. Refund requests made after the 7-day period will not be considered." },
-      { "title": "3. Partial Refund", "body": "No partial refunds are made for the remaining period to users who cancel mid-month; access to the service remains active until the end of the current period." },
-      { "title": "4. Refund Process", "body": "Send an email to support@edutakip.com for a refund request. State your payment account and reason for request. Valid requests are processed within 5-10 business days and refunded to your linked payment account." },
-      { "title": "5. Non-Refundable Cases", "body": "No refund will be made in the following cases: Accounts closed due to violation of terms of use, cases where fraud, deception or misuse is detected, transactions within the free trial period." },
-      { "title": "6. Technical Issues", "body": "If you document that you were unable to benefit from the service due to a technical issue originating from the platform, a refund or credit may be provided for the affected period." },
-      { "title": "7. Contact", "body": "For refund requests and questions, you can reach us at support@edutakip.com. Working hours: Monday–Friday, 09:00–18:00 (Turkey time)." }
+      { "title": "2. Right to Refund", "body": "You may request a full refund within 14 days of the payment date without stating any reason. Send your refund request to support@edutakip.com and it will be processed within 5-10 business days." },
+      { "title": "3. Cancellation", "body": "You may cancel your subscription at any time. Upon cancellation, you will retain access to the service until the end of the current billing period." },
+      { "title": "4. Refund Process", "body": "To request a refund, send an email to support@edutakip.com. Valid requests are processed within 5-10 business days and refunded to your original payment method." },
+      { "title": "5. Contact", "body": "For refund requests and questions, you can reach us at support@edutakip.com. Working hours: Monday–Friday, 09:00–18:00 (Turkey time)." }
     ]
   }
 }
