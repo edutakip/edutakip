@@ -443,9 +443,11 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
     description: editingHw?.description || '',
     dueDate: editingHw?.dueDate || '',
   });
+  const [attachedFiles, setAttachedFiles] = useState([]);
   const [visible, setVisible] = useState(false);
   const [datePreset, setDatePreset] = useState('');
   const modalRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   usePortalLock(modalRef);
 
@@ -582,13 +584,38 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
                 Ek Dosyalar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
               </label>
-              <div style={{ border:'2px dashed #e5e7eb', borderRadius:14, padding:'1.5rem', textAlign:'center', background:'#fafafa', cursor:'pointer', transition:'all 0.2s' }}
+              <label style={{ border:'2px dashed #e5e7eb', borderRadius:14, padding:'1.5rem', textAlign:'center', background:'#fafafa', cursor:'pointer', transition:'all 0.2s', display:'block' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
                 <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
                 <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>Dosyaları sürükleyin veya tıklayın</p>
                 <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>Fotoğraf (maks 25, 10MB) veya PDF (maks 3, 50MB)</p>
-              </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const newFiles = Array.from(e.target.files);
+                    setAttachedFiles(prev => [...prev, ...newFiles].slice(0, 28));
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              {attachedFiles.length > 0 && (
+                <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
+                  {attachedFiles.map((f, i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:'0.35rem', background:'#fff7ed', border:'1px solid #fed7aa', borderRadius:8, padding:'0.3rem 0.6rem', fontSize:'0.75rem', color:'#c2410c', fontWeight:600 }}>
+                      <span>{f.type.startsWith('image/') ? '🖼️' : '📄'}</span>
+                      <span style={{ maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</span>
+                      <button onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))} style={{ background:'none', border:'none', cursor:'pointer', padding:0, display:'flex', color:'#f97316' }}>
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Teslim tarihi */}
@@ -639,17 +666,20 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
           {/* Save button */}
           <div style={{ padding:'0 1.5rem 1.5rem' }}>
-            <button onClick={() => onSave(form)} disabled={!canSave} style={{
-              width:'100%', padding:'0.95rem',
-              background: canSave ? 'linear-gradient(135deg, #f97316, #ea580c)' : '#f3f4f6',
-              border:'none', borderRadius:14,
-              color: canSave ? 'white' : '#9ca3af',
-              fontSize:'0.95rem', fontWeight:800,
-              cursor: canSave ? 'pointer' : 'default',
-              display:'flex', alignItems:'center', justifyContent:'center', gap:'0.6rem',
-              boxShadow: canSave ? '0 8px 24px rgba(249,115,22,0.35)' : 'none',
-              transition:'all 0.2s',
-            }}
+            <button
+              onClick={() => onSave(form, attachedFiles)}
+              disabled={!canSave}
+              style={{
+                width:'100%', padding:'0.95rem',
+                background: canSave ? 'linear-gradient(135deg, #f97316, #ea580c)' : '#f3f4f6',
+                border:'none', borderRadius:14,
+                color: canSave ? 'white' : '#9ca3af',
+                fontSize:'0.95rem', fontWeight:800,
+                cursor: canSave ? 'pointer' : 'default',
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'0.6rem',
+                boxShadow: canSave ? '0 8px 24px rgba(249,115,22,0.35)' : 'none',
+                transition:'all 0.2s',
+              }}
               onMouseEnter={e => canSave && (e.currentTarget.style.transform = 'scale(1.02)')}
               onMouseLeave={e => canSave && (e.currentTarget.style.transform = 'scale(1)')}>
               <Send size={18} />
@@ -714,13 +744,22 @@ export default function TeacherHomework() {
     setHomeworks(updated);
   };
 
-  const handleSave = async (form) => {
+  const handleSave = async (form, files = []) => {
     const student = students.find(s => s.id === form.studentId);
+    // Upload any attached files
+    let uploadedUrls = [];
+    for (const f of files) {
+      try {
+        const res = await base44.integrations.Core.UploadFile({ file: f });
+        if (res?.file_url) uploadedUrls.push(res.file_url);
+      } catch (e) { console.warn('Dosya yüklenemedi:', f.name, e); }
+    }
+    const dataToSave = { ...form, ...(uploadedUrls.length > 0 ? { attachments: uploadedUrls } : {}) };
     if (editingHw) {
-      await base44.entities.Homework.update(editingHw.id, { ...form, studentName: student?.name || editingHw.studentName });
+      await base44.entities.Homework.update(editingHw.id, { ...dataToSave, studentName: student?.name || editingHw.studentName });
       showToast({ message: 'Ödev güncellendi ✓' });
     } else {
-      await base44.entities.Homework.create({ ...form, studentName: student?.name || '', teacherEmail: me.email, status: 'verildi' });
+      await base44.entities.Homework.create({ ...dataToSave, studentName: student?.name || '', teacherEmail: me.email, status: 'verildi' });
       showToast({ message: `📚 Ödev verildi — ${student?.name}` });
     }
     setShowModal(false);
