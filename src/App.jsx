@@ -14,6 +14,10 @@ import AdminPanel from './pages/AdminPanel';
 import TeacherAssistant from './pages/TeacherAssistant';
 import Page1 from './pages/Page1';
 import AdvertiseDemo from './pages/AdvertiseDemo';
+import PricingPage from './pages/PricingPage';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -200,6 +204,10 @@ function App() {
           <UpdateBanner />
           <Routes>
             <Route path="/advertise" element={<AdvertiseDemo />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund" element={<RefundPolicy />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>
