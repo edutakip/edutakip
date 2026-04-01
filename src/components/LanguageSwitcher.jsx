@@ -28,8 +28,6 @@ export default function LanguageSwitcher({ style = {} }) {
         transition: 'all 0.15s',
         ...style,
       }}
-      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
     >
       {current === 'tr' ? '🇬🇧 EN' : '🇹🇷 TR'}
     </button>
