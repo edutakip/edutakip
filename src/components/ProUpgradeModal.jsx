@@ -13,32 +13,24 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
   const total = studentCount * PER_STUDENT_PRICE;
   const sliderPct = ((studentCount - 1) / (60 - 1)) * 100;
 
-  const handleStartTrial = async () => {
+  const handleStartCheckout = async () => {
     setLoading(true);
-    const me = await base44.auth.me();
-    // Daha önce deneme sürümü kullandıysa engelle
-    if (me.trialUsed) {
+    try {
+      const response = await base44.functions.invoke('paddleCheckout', {
+        studentCount,
+      });
+
+      if (response.data?.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        alert('Ödeme sayfasına yönlendirilirken hata oluştu. Lütfen tekrar deneyin.');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Ödeme sayfasına yönlendirilirken hata oluştu. Lütfen tekrar deneyin.');
       setLoading(false);
-      alert('Deneme sürenizi daha önce kullandınız. Lütfen Pro plana geçmek için bizimle iletişime geçin.');
-      return;
     }
-    const trialEndDate = format(addDays(new Date(), 30), 'yyyy-MM-dd');
-    await base44.auth.updateMe({
-      plan: 'trialing',
-      studentLimit: studentCount,
-      trialStudentCount: studentCount,
-      trialEndDate,
-      trialUsed: true,
-      aiReportsEnabled: true,
-      detailedFinanceEnabled: true,
-      whatsappEnabled: true,
-    });
-    setLoading(false);
-    setSuccess(true);
-    setTimeout(() => {
-      onUpgraded?.();
-      onClose();
-    }, 1800);
   };
 
   const reasonMessages = {
@@ -134,11 +126,11 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
               ))}
             </div>
 
-            <button onClick={handleStartTrial} disabled={loading}
+            <button onClick={handleStartCheckout} disabled={loading}
               style={{ width: '100%', padding: '0.95rem', borderRadius: 999, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: loading ? 'wait' : 'pointer', boxShadow: '0 8px 20px rgba(249,115,22,0.3)', transition: 'all 0.15s' }}>
-              {loading ? 'Başlatılıyor...' : '30 Gün Ücretsiz Başla'}
+              {loading ? 'Ödeme sayfasına yönlendiriliyorsunuz...' : 'Pro Paketine Geçiş Yap'}
             </button>
-            <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.6rem' }}>Kredi kartı gerekmez · 30 gün sonra ödeme</p>
+            <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.6rem' }}>Güvenli Paddle ödeme sistemi ile · İstediğiniz zaman iptal edin</p>
           </>
         )}
       </div>
