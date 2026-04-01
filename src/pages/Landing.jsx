@@ -460,7 +460,8 @@ export default function Landing() {
           {[
           { title: 'Ürün', links: [['#features', 'Özellikler'], ['#pricing', 'Fiyatlar'], ['#screenshots', 'Ekran Görüntüleri']] },
           { title: 'Özellikler', links: [['#', 'Öğrenci Yönetimi'], ['#', 'Ders Planlaması'], ['#', 'Finans Takibi'], ['#', 'AI Asistan']] },
-          { title: 'Destek', links: [['#', 'Yardım Merkezi'], ['#', 'İletişim'], ['#', 'Gizlilik Politikası']] }].
+          { title: 'Destek', links: [['#', 'Yardım Merkezi'], ['#', 'İletişim'], ['/privacy', 'Gizlilik Politikası']] },
+          { title: 'Yasal', links: [['/terms', 'Kullanım Koşulları'], ['/privacy', 'Gizlilik Politikası'], ['/refund', 'İade Politikası'], ['/pricing', 'Fiyatlandırma']] }].
           map(({ title, links }) =>
           <div key={title}>
               <h4 style={{ color: '#fff', fontSize: '.88rem', fontWeight: 700, marginBottom: 14 }}>{title}</h4>
@@ -474,6 +475,12 @@ export default function Landing() {
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, fontSize: '.82rem' }}>
           <span>© 2026 EduTakip. Tüm hakları saklıdır.</span>
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <a href="/terms" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', fontSize: '.82rem' }}>Kullanım Koşulları</a>
+            <a href="/privacy" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', fontSize: '.82rem' }}>Gizlilik Politikası</a>
+            <a href="/refund" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', fontSize: '.82rem' }}>İade Politikası</a>
+            <a href="/pricing" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', fontSize: '.82rem' }}>Fiyatlandırma</a>
+          </div>
           <span>🇹🇷 Türkiye'de geliştirildi</span>
         </div>
       </footer>
