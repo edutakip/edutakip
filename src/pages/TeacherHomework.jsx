@@ -584,25 +584,31 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
                 Ek Dosyalar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
               </label>
-              <label style={{ border:'2px dashed #e5e7eb', borderRadius:14, padding:'1.5rem', textAlign:'center', background:'#fafafa', cursor:'pointer', transition:'all 0.2s', display:'block' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
-                <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
-                <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>Dosyaları sürükleyin veya tıklayın</p>
-                <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>Fotoğraf (maks 25, 10MB) veya PDF (maks 3, 50MB)</p>
+              {/* Hidden input rendered outside the locked modal via portal */}
+              {ReactDOM.createPortal(
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
                   accept="image/*,application/pdf"
-                  style={{ display: 'none' }}
+                  style={{ position:'fixed', top:'-9999px', left:'-9999px', opacity:0, width:1, height:1 }}
                   onChange={e => {
                     const newFiles = Array.from(e.target.files);
                     setAttachedFiles(prev => [...prev, ...newFiles].slice(0, 28));
                     e.target.value = '';
                   }}
-                />
-              </label>
+                />,
+                document.body
+              )}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{ border:'2px dashed #e5e7eb', borderRadius:14, padding:'1.5rem', textAlign:'center', background:'#fafafa', cursor:'pointer', transition:'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
+                <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
+                <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>Dosyaları sürükleyin veya tıklayın</p>
+                <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>Fotoğraf (maks 25, 10MB) veya PDF (maks 3, 50MB)</p>
+              </div>
               {attachedFiles.length > 0 && (
                 <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
                   {attachedFiles.map((f, i) => (
