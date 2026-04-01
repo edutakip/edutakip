@@ -288,6 +288,37 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
             </div>
           )}
 
+          {/* Attachments from parent */}
+          {hw?.attachments?.length > 0 && (
+            <div style={{ background:'#f0fdf4', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bbf7d0', animation:'slideUp 0.4s ease 0.28s both' }}>
+              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
+                📎 Veli Yükledi ({hw.attachments.length} dosya)
+              </p>
+              <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem' }}>
+                {hw.attachments.map((url, i) => {
+                  const isImage = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url);
+                  const filename = url.split('/').pop()?.split('?')[0] || `Dosya ${i + 1}`;
+                  return (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'white', borderRadius:8, padding:'0.5rem 0.75rem', border:'1px solid #bbf7d0', textDecoration:'none', transition:'all 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background='#dcfce7'}
+                      onMouseLeave={e => e.currentTarget.style.background='white'}>
+                      <span style={{ fontSize:'1rem' }}>{isImage ? '🖼️' : '📄'}</span>
+                      <span style={{ fontSize:'0.78rem', color:'#065f46', fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{filename}</span>
+                      <span style={{ fontSize:'0.65rem', color:'#059669', fontWeight:700, flexShrink:0 }}>Aç →</span>
+                    </a>
+                  );
+                })}
+              </div>
+              {hw.parentNote && (
+                <div style={{ marginTop:'0.75rem', padding:'0.6rem 0.75rem', background:'white', borderRadius:8, border:'1px solid #bbf7d0' }}>
+                  <span style={{ fontSize:'0.72rem', color:'#6b7280', fontWeight:600 }}>💬 Veli notu: </span>
+                  <span style={{ fontSize:'0.78rem', color:'#374151' }}>{hw.parentNote}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Parent phone */}
           {student?.parentPhone && (
             <a href={`tel:${student.parentPhone}`} style={{

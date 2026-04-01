@@ -118,26 +118,23 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      // Dosyaları base44 storage'a yükle
       let attachmentUrls = [];
       if (files.length > 0) {
-        try {
-          const uploadPromises = files.map(f => base44.storage.uploadFile(f));
-          attachmentUrls = await Promise.all(uploadPromises);
-        } catch (uploadErr) {
-          console.warn('Dosya yüklenemedi, devam ediliyor:', uploadErr);
-          // Dosya yüklenemese de notu ve statüsü kaydet
-          attachmentUrls = [];
+        for (const f of files) {
+          try {
+            const res = await base44.integrations.Core.UploadFile({ file: f });
+            if (res?.file_url) attachmentUrls.push(res.file_url);
+          } catch (e) {
+            console.warn('Dosya yüklenemedi:', f.name, e);
+          }
         }
       }
 
       const updateData = {
         parentNote: teacherNote || hw.parentNote || '',
         status: 'tamamlandı',
+        attachments: attachmentUrls.length > 0 ? attachmentUrls : (hw.attachments || []),
       };
-      if (attachmentUrls.length > 0) {
-        updateData.attachments = attachmentUrls;
-      }
 
       await base44.entities.Homework.update(hw.id, updateData);
       setSubmitted(true);
@@ -330,11 +327,12 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
           </div>
 
           {/* Drop zone */}
-          <label
+          <div
             className="hw-file-zone"
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
             style={{
               border: `2px dashed ${dragging ? '#6366f1' : '#c7d2fe'}`,
               borderRadius: '10px',
@@ -344,7 +342,6 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
               transition: 'all 0.2s',
               background: dragging ? '#eef2ff' : 'white',
               marginBottom: files.length > 0 ? '0.75rem' : 0,
-              display: 'block',
             }}
           >
             <div style={{
@@ -360,15 +357,15 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
             <div style={{ color: '#9ca3af', fontSize: '0.7rem' }}>
               Fotoğraf (maks {MAX_PHOTOS}, {MAX_PHOTO_MB}MB) veya PDF (maks {MAX_PDF}, {MAX_PDF_MB}MB)
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,application/pdf"
-              style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
-              onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
-            />
-          </label>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,application/pdf"
+            style={{ display: 'none' }}
+            onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
+          />
 
           {/* File list */}
           {files.length > 0 && (

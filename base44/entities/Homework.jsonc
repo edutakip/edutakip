@@ -1,0 +1,56 @@
+{
+  "name": "Homework",
+  "type": "object",
+  "properties": {
+    "studentId": {
+      "type": "string"
+    },
+    "studentName": {
+      "type": "string"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "lessonId": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "\u00d6dev ba\u015fl\u0131\u011f\u0131"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u00d6dev detay\u0131"
+    },
+    "dueDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "verildi",
+        "goruldu",
+        "tamamland\u0131",
+        "gecikmi\u015f"
+      ],
+      "default": "verildi"
+    },
+    "parentNote": {
+      "type": "string",
+      "description": "Velinin notu"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Velinin y\u00fckledi\u011fi dosya URL'leri"
+    }
+  },
+  "required": [
+    "studentId",
+    "teacherEmail",
+    "title"
+  ]
+}
