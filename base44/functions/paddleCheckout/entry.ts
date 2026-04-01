@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PADDLE_API_KEY = Deno.env.get('PADDLE_API_KEY');
 const PRICE_ID = 'pri_01kn585navhk2x41damh8mawjn';
-const SUCCESS_URL = 'https://edutakip.com';
+const SUCCESS_URL = 'https://edutakip.com/TeacherDashboard';
 const CANCEL_URL = 'https://edutakip.com/pricing';
 
 Deno.serve(async (req) => {
@@ -38,7 +38,6 @@ Deno.serve(async (req) => {
             quantity: studentCount,
           },
         ],
-        customer_email: user.email,
         success_url: SUCCESS_URL,
         cancel_url: CANCEL_URL,
         custom_data: {
