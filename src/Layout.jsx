@@ -590,7 +590,7 @@ export default function Layout({ children, currentPageName }) {
                   );
                 }
               }
-              return <span>{item.label}{item.submenu || item.financeSubmenu ? ' ›' : ''}</span>;
+              return <span style={{ whiteSpace: 'nowrap' }}>{item.label}{item.submenu || item.financeSubmenu ? ' ›' : ''}</span>;
             };
 
             return (
