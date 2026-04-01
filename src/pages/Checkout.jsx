@@ -12,7 +12,10 @@ export default function Checkout() {
   useEffect(() => {
     const checkTransaction = async () => {
       try {
-        const transactionId = searchParams.get('transaction_id');
+        // Tüm parametreleri görmek için
+        console.log('URL params:', Object.fromEntries(searchParams));
+        
+        const transactionId = searchParams.get('transaction_id') || searchParams.get('_transaction_id');
         const user = await base44.auth.me();
 
         if (!user) {
@@ -23,7 +26,7 @@ export default function Checkout() {
 
         if (!transactionId) {
           setStatus('error');
-          setMessage('Transaction ID bulunamadı.');
+          setMessage('Transaction ID bulunamadı. URL params: ' + Object.keys([...searchParams.entries()]).join(', '));
           return;
         }
 
