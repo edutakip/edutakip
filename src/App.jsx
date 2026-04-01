@@ -18,6 +18,7 @@ import PricingPage from './pages/PricingPage';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
+import Checkout from './pages/Checkout';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -208,6 +209,7 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>
