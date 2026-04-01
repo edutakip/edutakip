@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp } from 'lucide-react';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
@@ -140,6 +140,7 @@ const TEACHER_NAV = [
   { label: 'Finans', icon: DollarSign, page: 'TeacherFinance' },
   { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
   { label: 'EduTakip Asistan', icon: Bot, page: 'TeacherAssistant' },
+  { label: 'Akıllı Zam Önerisi', icon: TrendingUp, page: 'Page1' },
 ];
 
 const PARENT_NAV = [
