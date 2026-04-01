@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight, Upload, Search, Filter, Sparkles, Bell, Send, Eye, Award, ArrowRight, FileText, Image as ImageIcon, Paperclip } from 'lucide-react';
+import TeacherAssessmentSection from '../components/teacher/TeacherAssessmentSection';
 import { showToast } from '@/lib/toast';
 import { format, parseISO, isPast, isToday, isTomorrow, differenceInDays, addDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -26,6 +27,15 @@ const STATUS_CONFIG = {
   tamamlandı:      { label: 'Tamamlandı',      color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
   gecikmiş:        { label: 'Gecikmiş',        color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
   degerlendirildi: { label: 'Değerlendirildi', color: '#7c3aed', bg: '#f5f3ff', dot: '#8b5cf6', icon: Award,        gradient: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' },
+};
+
+// Mapping for step tracker
+const stepIndexMap = {
+  verildi:         0,
+  goruldu:         1,
+  tamamlandı:      2,
+  degerlendirildi: 3,
+  gecikmiş:        0,
 };
 
 const avatarColors = ['#f97316', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
@@ -139,14 +149,6 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
     { key: 'degerlendirildi', label: 'Değerlendirildi', icon: Award },
   ];
 
-  // Map status → step index
-  const stepIndexMap = {
-    verildi:         0,
-    goruldu:         1,
-    tamamlandı:      2,
-    degerlendirildi: 3,
-    gecikmiş:        0, // gecikmiş stays at step 0 visually
-  };
   const stepIndex = stepIndexMap[hw?.status] ?? 0;
 
   const panel = (
@@ -288,22 +290,35 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
             </div>
           )}
 
-          {/* Attachments from parent */}
+          {/* Attachments from parent — with thumbnails */}
           {hw?.attachments?.length > 0 && (
             <div style={{ background:'#f0fdf4', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bbf7d0', animation:'slideUp 0.4s ease 0.28s both' }}>
               <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
                 📎 Veli Yükledi ({hw.attachments.length} dosya)
               </p>
+              {/* Thumbnail grid for images */}
+              {hw.attachments.some(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) && (
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(80px, 1fr))', gap:'0.4rem', marginBottom:'0.5rem' }}>
+                  {hw.attachments.filter(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'block', aspectRatio:'1/1', borderRadius:8, overflow:'hidden', border:'2px solid #bbf7d0', cursor:'pointer' }}>
+                      <img src={url} alt={`Ödev ${i+1}`}
+                        style={{ width:'100%', height:'100%', objectFit:'cover' }}
+                        onError={e => { e.target.style.display='none'; }} />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {/* PDF files */}
               <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem' }}>
-                {hw.attachments.map((url, i) => {
-                  const isImage = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url);
+                {hw.attachments.filter(url => !/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => {
                   const filename = url.split('/').pop()?.split('?')[0] || `Dosya ${i + 1}`;
                   return (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                       style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'white', borderRadius:8, padding:'0.5rem 0.75rem', border:'1px solid #bbf7d0', textDecoration:'none', transition:'all 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background='#dcfce7'}
                       onMouseLeave={e => e.currentTarget.style.background='white'}>
-                      <span style={{ fontSize:'1rem' }}>{isImage ? '🖼️' : '📄'}</span>
+                      <span style={{ fontSize:'1rem' }}>📄</span>
                       <span style={{ fontSize:'0.78rem', color:'#065f46', fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{filename}</span>
                       <span style={{ fontSize:'0.65rem', color:'#059669', fontWeight:700, flexShrink:0 }}>Aç →</span>
                     </a>
@@ -318,6 +333,45 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
               )}
             </div>
           )}
+
+          {/* AI Evaluation */}
+          {hw?.aiEvaluation && (
+            <div style={{ background:'#faf5ff', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #e9d5ff', animation:'slideUp 0.4s ease 0.3s both' }}>
+              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#7c3aed', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem', display:'flex', alignItems:'center', gap:'0.4rem' }}>
+                🤖 EduTakip AI Değerlendirmesi
+              </p>
+              {hw.aiEvaluation.warning && (
+                <div style={{ background:'#fef3c7', border:'1px solid #fde68a', borderRadius:8, padding:'0.6rem 0.75rem', marginBottom:'0.75rem' }}>
+                  <p style={{ fontSize:'0.78rem', color:'#92400e', fontStyle:'italic' }}>⚠️ {hw.aiEvaluation.warning}</p>
+                </div>
+              )}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', marginBottom:'0.75rem' }}>
+                <div style={{ background:'white', borderRadius:8, padding:'0.6rem', textAlign:'center', border:'1px solid #e9d5ff' }}>
+                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>Efor</p>
+                  <p style={{ fontSize:'0.95rem', fontWeight:800, color: hw.aiEvaluation.effort === 'Yüksek' ? '#059669' : hw.aiEvaluation.effort === 'Orta' ? '#d97706' : '#dc2626' }}>
+                    {hw.aiEvaluation.effort || '—'}
+                  </p>
+                </div>
+                <div style={{ background:'white', borderRadius:8, padding:'0.6rem', textAlign:'center', border:'1px solid #e9d5ff' }}>
+                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>Anlama</p>
+                  <p style={{ fontSize:'0.95rem', fontWeight:800, color: hw.aiEvaluation.understanding === 'İyi' ? '#059669' : hw.aiEvaluation.understanding === 'Orta' ? '#d97706' : '#dc2626' }}>
+                    {hw.aiEvaluation.understanding || '—'}
+                  </p>
+                </div>
+              </div>
+              {hw.aiEvaluation.feedback && (
+                <p style={{ fontSize:'0.82rem', color:'#374151', lineHeight:1.65, background:'white', borderRadius:8, padding:'0.65rem', border:'1px solid #e9d5ff' }}>
+                  {hw.aiEvaluation.feedback}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Teacher Assessment */}
+          <TeacherAssessmentSection hw={hw} onAssessmentSaved={(updated) => {
+            // Update local hw ref so panel reflects change
+            Object.assign(hw, updated);
+          }} />
 
           {/* Parent phone */}
           {student?.parentPhone && (

@@ -67,7 +67,8 @@ function Countdown({ dueDate }) {
 
 // ── Homework Modal (Portal) ───────────────────────────────────
 function HomeworkModal({ hw, student, onClose, onSubmitted }) {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // yeni seçilen dosyalar
+  const [existingUrls, setExistingUrls] = useState(hw.attachments || []); // daha önce yüklenmiş URL'ler
   const [teacherNote, setTeacherNote] = useState(hw.parentNote || '');
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -114,26 +115,29 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
     addFiles(e.dataTransfer.files);
   };
 
+  const removeExisting = (idx) => setExistingUrls(prev => prev.filter((_, i) => i !== idx));
+
   // ── Tamamla → status: 'tamamlandı' ──────────────────────────
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      let attachmentUrls = [];
-      if (files.length > 0) {
-        for (const f of files) {
-          try {
-            const res = await base44.integrations.Core.UploadFile({ file: f });
-            if (res?.file_url) attachmentUrls.push(res.file_url);
-          } catch (e) {
-            console.warn('Dosya yüklenemedi:', f.name, e);
-          }
+      // Yeni dosyaları yükle
+      let newUrls = [];
+      for (const f of files) {
+        try {
+          const res = await base44.integrations.Core.UploadFile({ file: f });
+          if (res?.file_url) newUrls.push(res.file_url);
+        } catch (e) {
+          console.warn('Dosya yüklenemedi:', f.name, e);
         }
       }
 
+      const allAttachments = [...existingUrls, ...newUrls];
+
       const updateData = {
-        parentNote: teacherNote || hw.parentNote || '',
+        parentNote: teacherNote,
         status: 'tamamlandı',
-        attachments: attachmentUrls.length > 0 ? attachmentUrls : (hw.attachments || []),
+        attachments: allAttachments,
       };
 
       await base44.entities.Homework.update(hw.id, updateData);
@@ -326,6 +330,40 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
             ÇÖZÜMLERİNİ YÜKLE
           </div>
 
+          {/* Daha önce yüklenen dosyalar */}
+          {existingUrls.length > 0 && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: 700, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Yüklenen Dosyalar
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
+                {existingUrls.map((url, i) => {
+                  const isImage = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url);
+                  return (
+                    <div key={i} style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 8, overflow: 'hidden', border: '2px solid #c7d2fe', background: '#eef2ff' }}>
+                      {isImage ? (
+                        <img src={url} alt={`Dosya ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.15rem' }}>
+                          <span style={{ fontSize: '1.4rem' }}>📄</span>
+                          <span style={{ fontSize: '0.5rem', color: '#6366f1', fontWeight: 600 }}>PDF</span>
+                        </div>
+                      )}
+                      <button onClick={() => removeExisting(i)} style={{
+                        position: 'absolute', top: 2, right: 2,
+                        background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%',
+                        width: 18, height: 18, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <X size={10} color="white" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Drop zone */}
           <div
             className="hw-file-zone"
@@ -367,44 +405,38 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
             onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
           />
 
-          {/* File list */}
+          {/* Yeni seçilen dosyalar — thumbnail grid */}
           {files.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {files.map((f, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: 'white', borderRadius: '8px',
-                  padding: '0.45rem 0.65rem',
-                  border: '1px solid #e0e7ff',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-                    <span style={{ fontSize: '0.9rem' }}>
-                      {f.type.startsWith('image/') ? '🖼️' : '📄'}
-                    </span>
-                    <span style={{
-                      fontSize: '0.72rem', color: '#374151',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {f.name}
-                    </span>
-                    <span style={{ fontSize: '0.65rem', color: '#9ca3af', flexShrink: 0 }}>
-                      {(f.size / 1024 / 1024).toFixed(1)}MB
-                    </span>
-                  </div>
-                  <button
-                    className="hw-remove-btn"
-                    onClick={() => removeFile(i)}
-                    style={{
-                      background: '#f1f5f9', border: 'none', borderRadius: '6px',
-                      width: '22px', height: '22px', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, transition: 'background 0.15s',
-                    }}
-                  >
-                    <X size={11} color="#6b7280" />
-                  </button>
-                </div>
-              ))}
+            <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: 700, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Yeni Eklenecek
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
+                {files.map((f, i) => {
+                  const isImage = f.type.startsWith('image/');
+                  const previewUrl = isImage ? URL.createObjectURL(f) : null;
+                  return (
+                    <div key={i} style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 8, overflow: 'hidden', border: '2px solid #a5f3fc', background: '#ecfeff' }}>
+                      {isImage && previewUrl ? (
+                        <img src={previewUrl} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.15rem' }}>
+                          <span style={{ fontSize: '1.4rem' }}>📄</span>
+                          <span style={{ fontSize: '0.5rem', color: '#0891b2', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%', textAlign: 'center' }}>{f.name.split('.').pop()?.toUpperCase()}</span>
+                        </div>
+                      )}
+                      <button className="hw-remove-btn" onClick={() => removeFile(i)} style={{
+                        position: 'absolute', top: 2, right: 2,
+                        background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%',
+                        width: 18, height: 18, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <X size={10} color="white" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -452,7 +484,7 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
             boxShadow: submitted ? '0 4px 16px rgba(22,163,74,0.3)' : '0 4px 16px rgba(79,70,229,0.25)',
           }}
         >
-          {submitted ? '✓ Gönderildi!' : submitting ? 'Gönderiliyor...' : 'Tamamla'}
+          {submitted ? '✓ Gönderildi!' : submitting ? 'Gönderiliyor...' : hw.status === 'tamamlandı' ? 'Güncelle' : 'Tamamla'}
         </button>
       </div>
     </div>

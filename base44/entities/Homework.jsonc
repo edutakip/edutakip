@@ -46,6 +46,38 @@
         "type": "string"
       },
       "description": "Velinin y\u00fckledi\u011fi dosya URL'leri"
+    },
+    "aiEvaluation": {
+      "type": "object",
+      "description": "AI de\u011ferlendirme sonucu",
+      "properties": {
+        "effort": {
+          "type": "string"
+        },
+        "understanding": {
+          "type": "string"
+        },
+        "feedback": {
+          "type": "string"
+        },
+        "warning": {
+          "type": "string"
+        }
+      }
+    },
+    "teacherAssessment": {
+      "type": "string",
+      "enum": [
+        "yetersiz",
+        "gelistirilmeli",
+        "iyi",
+        "cok_iyi"
+      ],
+      "description": "\u00d6\u011fretmenin manuel de\u011ferlendirmesi"
+    },
+    "teacherNote": {
+      "type": "string",
+      "description": "\u00d6\u011fretmenin de\u011ferlendirme notu"
     }
   },
   "required": [
