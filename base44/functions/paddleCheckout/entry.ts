@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
     }
 
     const transactionData = await transactionResponse.json();
+    console.log('Paddle response:', JSON.stringify(transactionData, null, 2));
 
     return Response.json({
       transaction_id: transactionData.data?.id,
