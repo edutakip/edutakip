@@ -1,0 +1,233 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "screenshots": "Screenshots",
+    "pricing": "Pricing",
+    "parentLogin": "Parent Login",
+    "teacherLogin": "Teacher Login"
+  },
+  "hero": {
+    "badge": "Designed for Private Tutors",
+    "title": "Manage All Your Students",
+    "titleHighlight": "In One Platform",
+    "titleEnd": "",
+    "subtitle": "With EduTakip, easily and professionally manage your tutoring business — from lesson planning and financial tracking to progress reports and an AI-powered assistant.",
+    "teacherBtn": "Teacher Panel",
+    "parentBtn": "Parent Panel",
+    "stat1": "Student Tracking",
+    "stat2": "Attendance Tracking",
+    "stat3": "AI Assistant",
+    "stat4": "Starting Price"
+  },
+  "features": {
+    "sectionBadge": "Features",
+    "title": "Everything in One Place",
+    "subtitle": "Powerful tools that simplify every step of private tutoring, all in one platform.",
+    "lessonMgmt": {
+      "title": "Lesson Management",
+      "desc": "Easily schedule lessons, record topics and notes. Supports face-to-face and online lesson types. Add recurring lessons automatically.",
+      "tag": "Weekly Recurrence"
+    },
+    "studentMgmt": {
+      "title": "Student Management",
+      "desc": "Track all your students in a card view. Access grade level, hourly fee, monthly earnings and balance information at a glance.",
+      "tag": "Card View"
+    },
+    "finance": {
+      "title": "Financial Tracking",
+      "desc": "View your monthly income charts, track pending payments and analyze earnings per student. Create regular income projections.",
+      "tag": "Income Analysis"
+    },
+    "reports": {
+      "title": "Progress Reports",
+      "desc": "Create detailed progress reports after each lesson. Define topics covered, assessments, homework and the next lesson goal. Share with parents.",
+      "tag": "Parent Sharing"
+    },
+    "calendar": {
+      "title": "Smart Calendar",
+      "desc": "Track all your lessons in weekly and daily views. Instantly update lesson status (completed, absent, cancelled).",
+      "tag": "Weekly View"
+    },
+    "ai": {
+      "title": "AI-Powered Assistant",
+      "desc": "Get instant answers to questions like \"Who hasn't paid this month?\", \"What are my lessons today?\", \"Which students are struggling most?\"",
+      "tag": "AI Powered"
+    }
+  },
+  "howItWorks": {
+    "sectionBadge": "How It Works",
+    "title": "Get Started in 3 Steps",
+    "subtitle": "Set up in minutes and start using right away.",
+    "step1": {
+      "title": "Add Your Students",
+      "desc": "Easily save student information, parent contact details, weekly schedule and financial details with a 4-step wizard interface. A unique invite code is generated for each student.",
+      "badge": "✅ Setup takes 2 minutes"
+    },
+    "step2": {
+      "title": "Plan Your Lessons",
+      "desc": "Create new lessons in seconds via the calendar or the \"Schedule Lesson\" button. Set topic, fee, location and lesson type. Use \"Add to next weeks too\" for recurring lessons.",
+      "badge": "✅ Automatic recurrence support"
+    },
+    "step3": {
+      "title": "Track and Grow",
+      "desc": "Check your daily summary from the overview panel, analyze your income from the finance screen, document student progress with reports, and ask your AI assistant anything.",
+      "badge": "✅ Real-time statistics"
+    }
+  },
+  "screenshots": {
+    "sectionBadge": "Interface",
+    "title": "Modern and User-Friendly",
+    "subtitle": "An intuitive and elegant teacher panel that works seamlessly on all devices."
+  },
+  "testimonials": {
+    "sectionBadge": "Reviews",
+    "title": "What Teachers Say",
+    "subtitle": "Real experiences about EduTakip, trusted by thousands of teachers.",
+    "t1": {
+      "name": "Ayşe H.",
+      "role": "English Private Tutor",
+      "text": "Thanks to EduTakip, I no longer forget payments. Financial tracking is incredibly easy — I see every student's balance at a glance."
+    },
+    "t2": {
+      "name": "Mehmet K.",
+      "role": "Math Teacher",
+      "text": "The progress reports feature is amazing! I can now send professional reports to parents. My students' families are very happy."
+    },
+    "t3": {
+      "name": "Zeynep A.",
+      "role": "Physics & Chemistry Teacher",
+      "text": "I ask the AI assistant \"Who hasn't paid this month?\" and get an instant answer. No more taking notes in a notebook!"
+    }
+  },
+  "pricing": {
+    "sectionBadge": "Pricing",
+    "title": "Transparent Pricing",
+    "subtitle": "First month free — no credit card required",
+    "freePlan": {
+      "name": "Free",
+      "period": "forever",
+      "desc": "Ideal to get started",
+      "features": ["Up to 5 students", "Lesson calendar", "Basic financial tracking", "WhatsApp notifications"],
+      "cta": "Get Started"
+    },
+    "proPlan": {
+      "title": "Pro Plan Calculator",
+      "badge": "EARLY BIRD OFFER",
+      "perStudent": "student / month + VAT",
+      "studentCount": "Number of active students",
+      "monthlyTotal": "Monthly Total",
+      "timeSaved": "Time Saved",
+      "features": ["30-day free trial", "All features full version", "Inactive students free", "Cancel anytime", "AI lesson reports", "Advanced finance analytics", "Parent panel", "Priority support"],
+      "cta": "Start 30 Days Free",
+      "noCard": "No credit card required"
+    }
+  },
+  "cta": {
+    "title": "Professionally Manage Your Students Today",
+    "subtitle": "Registration is free and requires no credit card. Get started in minutes.",
+    "primaryBtn": "🚀 Create Free Account",
+    "secondaryBtn": "Explore Features",
+    "trust1": "🔒 Secure & Encrypted",
+    "trust2": "💳 No credit card required",
+    "trust3": "⚡ Setup in 2 minutes",
+    "trust4": "🇹🇷 Turkish support"
+  },
+  "footer": {
+    "desc": "The smart management platform that simplifies the workflow of private tutors.",
+    "product": "Product",
+    "features": "Features",
+    "support": "Support",
+    "legal": "Legal",
+    "helpCenter": "Help Center",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "refund": "Refund Policy",
+    "pricingLink": "Pricing",
+    "screenshotsLink": "Screenshots",
+    "studentMgmt": "Student Management",
+    "lessonPlanning": "Lesson Planning",
+    "financeTracking": "Finance Tracking",
+    "aiAssistant": "AI Assistant",
+    "copyright": "© 2026 EduTakip. All rights reserved.",
+    "madeIn": "🇹🇷 Built in Turkey"
+  },
+  "pricingPage": {
+    "badge": "Pricing",
+    "title": "Transparent & Flexible Pricing",
+    "subtitle": "Pay only for your active students. Inactive students are free. First 30 days completely free.",
+    "free": {
+      "name": "Free",
+      "desc": "Ideal to get started",
+      "period": "forever",
+      "features": ["Up to 3 active students", "Lesson calendar", "Basic financial tracking", "Parent panel"],
+      "cta": "Get Started"
+    },
+    "pro": {
+      "badge": "MOST POPULAR",
+      "title": "Pro Plan Calculator",
+      "perStudent": "student / month + VAT",
+      "studentCountLabel": "Number of active students",
+      "netAmount": "Net Amount",
+      "vat": "VAT (20%)",
+      "total": "Monthly Total (VAT Included)",
+      "features": ["30-day free trial", "All features", "Inactive students free", "Cancel anytime", "AI lesson reports", "Advanced finance", "Parent panel", "Priority support"],
+      "cta": "Start 30 Days Free",
+      "noCard": "No credit card required"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Are inactive students charged?",
+      "a1": "No. You only pay for students with \"active\" status.",
+      "q2": "Can I add students mid-month?",
+      "a2": "Yes. Students added mid-month are charged on a pro-rata basis for the remaining days.",
+      "q3": "Can I cancel anytime?",
+      "a3": "Yes, you can cancel your subscription at any time. You'll retain access until the end of the current period.",
+      "q4": "How is VAT calculated?",
+      "a4": "20% VAT is added to the displayed prices. The total amount including VAT is shown on the payment page."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "updated": "Last updated: April 1, 2026",
+    "sections": [
+      { "title": "1. Scope of Service", "body": "EduTakip is a management platform for private tutors. The platform provides tools such as student tracking, lesson planning, financial management, progress reports and parent communication." },
+      { "title": "2. Membership and Account", "body": "By registering on the platform, you are deemed to have accepted these terms. You are responsible for the security of your account; do not share your password with anyone." },
+      { "title": "3. Subscription and Payment", "body": "The free plan offers service for up to 3 active students. The Pro plan charges a monthly fee per active student. A 30-day free trial is offered. Payment renews automatically; you will be charged for the next period unless you cancel." },
+      { "title": "4. Cancellation and Refund", "body": "You may cancel your subscription at any time. Your access to the platform continues until the end of the current period. For our refund policy, please review our separate Refund Policy page." },
+      { "title": "5. Data and Privacy", "body": "Student and parent information entered into the system is exclusive to you and is not shared with other users. For detailed information, please review our Privacy Policy." },
+      { "title": "6. Usage Restrictions", "body": "You may not use the platform for illegal purposes, in ways that harm third parties, or in a manner that overloads the system. Violations may result in account suspension." },
+      { "title": "7. Limitation of Liability", "body": "EduTakip does not guarantee uninterrupted or error-free operation of the platform. Maximum liability for data losses due to technical failures is limited to one month's subscription fee." },
+      { "title": "8. Changes", "body": "These terms may be updated without prior notice. You can access current terms on the platform. Continued use of the platform means you accept the updated terms." },
+      { "title": "9. Contact", "body": "For questions, you can reach us at support@edutakip.com." }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: April 1, 2026",
+    "sections": [
+      { "title": "1. Data Collected", "body": "Data such as name-surname, email, student information, lesson records and payment history are collected. This data is used solely for the purpose of providing services." },
+      { "title": "2. Use of Data", "body": "Collected data is processed to provide platform access, improve service quality and provide technical support. It is not used for advertising or third-party marketing." },
+      { "title": "3. Data Security", "body": "Your data is stored with SSL encryption on secure servers. Technical and administrative measures are taken against unauthorized access." },
+      { "title": "4. Sharing with Third Parties", "body": "Your personal data will not be shared with third parties without your explicit consent, except for legal obligations." },
+      { "title": "5. Cookies", "body": "The platform uses cookies for session management and preference records. You can manage your cookie settings from your browser." },
+      { "title": "6. Retention Period", "body": "Your data is retained while your account is active. Upon account deletion request, all your data will be removed from the system within 30 days." },
+      { "title": "7. Your Rights (KVKK)", "body": "Under Law No. 6698 (KVKK), you have the right to access, correct, delete and transfer your data. You can apply to support@edutakip.com for your requests." },
+      { "title": "8. Contact", "body": "For privacy-related questions, you can write to support@edutakip.com." }
+    ]
+  },
+  "refund": {
+    "title": "Refund Policy",
+    "updated": "Last updated: April 1, 2026",
+    "sections": [
+      { "title": "1. Free Trial Period", "body": "A 30-day free trial is offered to all new users. No charges are made during this period and no refund request is needed for cancellation." },
+      { "title": "2. Right to Refund", "body": "You may request a full refund within 7 days of the payment date without stating any reason. Refund requests made after the 7-day period will not be considered." },
+      { "title": "3. Partial Refund", "body": "No partial refunds are made for the remaining period to users who cancel mid-month; access to the service remains active until the end of the current period." },
+      { "title": "4. Refund Process", "body": "Send an email to support@edutakip.com for a refund request. State your payment account and reason for request. Valid requests are processed within 5-10 business days and refunded to your linked payment account." },
+      { "title": "5. Non-Refundable Cases", "body": "No refund will be made in the following cases: Accounts closed due to violation of terms of use, cases where fraud, deception or misuse is detected, transactions within the free trial period." },
+      { "title": "6. Technical Issues", "body": "If you document that you were unable to benefit from the service due to a technical issue originating from the platform, a refund or credit may be provided for the affected period." },
+      { "title": "7. Contact", "body": "For refund requests and questions, you can reach us at support@edutakip.com. Working hours: Monday–Friday, 09:00–18:00 (Turkey time)." }
+    ]
+  }
+}

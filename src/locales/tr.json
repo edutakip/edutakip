@@ -1,0 +1,233 @@
+{
+  "nav": {
+    "features": "Özellikler",
+    "howItWorks": "Nasıl Çalışır",
+    "screenshots": "Ekran Görüntüleri",
+    "pricing": "Fiyatlar",
+    "parentLogin": "Veli Girişi",
+    "teacherLogin": "Öğretmen Girişi"
+  },
+  "hero": {
+    "badge": "Özel Ders Öğretmenleri İçin Tasarlandı",
+    "title": "Tüm Öğrencilerinizi",
+    "titleHighlight": "Tek Platformda",
+    "titleEnd": "Yönetin",
+    "subtitle": "EduTakip ile ders planlamasından finansal takibe, gelişim raporlarından AI destekli asistana kadar özel ders işinizi kolayca ve profesyonelce yönetin.",
+    "teacherBtn": "Öğretmen Paneli",
+    "parentBtn": "Veli Paneli",
+    "stat1": "Öğrenci Takibi",
+    "stat2": "Devam Takibi",
+    "stat3": "Destekli Asistan",
+    "stat4": "Başlangıç Ücreti"
+  },
+  "features": {
+    "sectionBadge": "Özellikler",
+    "title": "Her Şey Bir Arada",
+    "subtitle": "Özel ders vermenin her adımını kolaylaştıran güçlü araçlar, tek bir platformda.",
+    "lessonMgmt": {
+      "title": "Ders Yönetimi",
+      "desc": "Dersleri kolayca planlayın, konu ve notlarını kaydedin. Yüz yüze veya online ders tiplerini destekleyin. Tekrarlayan dersleri otomatik ekleyin.",
+      "tag": "Haftalık Tekrar"
+    },
+    "studentMgmt": {
+      "title": "Öğrenci Yönetimi",
+      "desc": "Tüm öğrencilerinizi kart görünümünde takip edin. Sınıf seviyesi, ders saati ücreti, aylık kazanç ve bakiye bilgilerine tek bakışta ulaşın.",
+      "tag": "Kart Görünümü"
+    },
+    "finance": {
+      "title": "Finans Takibi",
+      "desc": "Aylık gelir grafiklerinizi görün, bekleyen ödemeleri takip edin ve öğrenci bazlı kazanç analizinizi yapın. Düzenli gelir projeksiyonu oluşturun.",
+      "tag": "Gelir Analizi"
+    },
+    "reports": {
+      "title": "Gelişim Raporları",
+      "desc": "Her ders sonrası ayrıntılı gelişim raporu oluşturun. İşlenen konular, değerlendirme, ödev ve bir sonraki ders hedefini belirleyin. Veliyle paylaşın.",
+      "tag": "Veli Paylaşımı"
+    },
+    "calendar": {
+      "title": "Akıllı Takvim",
+      "desc": "Haftalık ve günlük görünümde tüm derslerinizi takip edin. Ders durumunu (tamamlandı, gelmedi, iptal) anında güncelleyin.",
+      "tag": "Haftalık Görünüm"
+    },
+    "ai": {
+      "title": "AI Destekli Asistan",
+      "desc": "\"Bu ay kim ödeme yapmadı?\", \"Bugünkü derslerim neler?\", \"En çok zorlanan öğrencilerim kimler?\" gibi sorularınızı anında cevaplayın.",
+      "tag": "AI Destekli"
+    }
+  },
+  "howItWorks": {
+    "sectionBadge": "Nasıl Çalışır",
+    "title": "3 Adımda Başlayın",
+    "subtitle": "Dakikalar içinde kurulum yapın ve hemen kullanmaya başlayın.",
+    "step1": {
+      "title": "Öğrencilerinizi Ekleyin",
+      "desc": "4 adımlı sihirbaz arayüzü ile öğrenci bilgilerini, veli iletişim bilgilerini, haftalık ders programını ve finansal detayları kolayca kaydedin. Her öğrenciye özel davet kodu oluşturulur.",
+      "badge": "✅ Kurulum 2 dakika sürer"
+    },
+    "step2": {
+      "title": "Derslerinizi Planlayın",
+      "desc": "Takvim üzerinden veya \"Ders Planla\" butonu ile saniyeler içinde yeni ders oluşturun. Konu, ücret, yer ve ders türünü belirleyin. Tekrarlayan dersler için \"Sonraki haftalara da ekle\" seçeneğini kullanın.",
+      "badge": "✅ Otomatik tekrarlama desteği"
+    },
+    "step3": {
+      "title": "Takip Edin ve Büyüyün",
+      "desc": "Genel bakış panelinden günlük özetinize bakın, finans ekranından gelirlerinizi analiz edin, gelişim raporlarıyla öğrencilerinizin ilerlemesini belgeleyin ve AI asistanınıza istediğiniz soruyu sorun.",
+      "badge": "✅ Gerçek zamanlı istatistikler"
+    }
+  },
+  "screenshots": {
+    "sectionBadge": "Arayüz",
+    "title": "Modern ve Kullanıcı Dostu",
+    "subtitle": "Tüm cihazlarda sorunsuz çalışan, sezgisel ve şık bir öğretmen paneli."
+  },
+  "testimonials": {
+    "sectionBadge": "Yorumlar",
+    "title": "Öğretmenler Ne Diyor?",
+    "subtitle": "Binlerce öğretmenin güvendiği EduTakip hakkında gerçek deneyimler.",
+    "t1": {
+      "name": "Ayşe H.",
+      "role": "İngilizce Özel Ders Öğretmeni",
+      "text": "EduTakip sayesinde artık ödemeleri unutmuyorum. Finans takibi inanılmaz kolay, her öğrencinin bakiyesini tek bakışta görüyorum."
+    },
+    "t2": {
+      "name": "Mehmet K.",
+      "role": "Matematik Öğretmeni",
+      "text": "Gelişim raporları özelliği harika! Velilere artık profesyonel raporlar gönderebiliyorum. Öğrencilerimin aileleri çok memnun."
+    },
+    "t3": {
+      "name": "Zeynep A.",
+      "role": "Fizik & Kimya Öğretmeni",
+      "text": "AI asistana \"Bu ay kim ödeme yapmadı?\" diye soruyorum ve anında yanıt alıyorum. Artık deftere not almak yok!"
+    }
+  },
+  "pricing": {
+    "sectionBadge": "Fiyatlandırma",
+    "title": "Şeffaf Fiyatlandırma",
+    "subtitle": "İlk ay ücretsiz — kredi kartı gerekmez",
+    "freePlan": {
+      "name": "Ücretsiz",
+      "period": "sonsuza kadar",
+      "desc": "Başlamak için ideal",
+      "features": ["5 öğrenciye kadar", "Ders takvimi", "Temel finans takibi", "WhatsApp bildirimleri"],
+      "cta": "Hemen Başla"
+    },
+    "proPlan": {
+      "title": "Pro Paket Hesaplayıcı",
+      "badge": "İLK ÖĞRETMENLERE ÖZEL",
+      "perStudent": "öğrenci / ay + KDV",
+      "studentCount": "Aktif öğrenci sayısı",
+      "monthlyTotal": "Aylık Toplam Tutar",
+      "timeSaved": "Kazancınız",
+      "features": ["30 gün ücretsiz deneme", "Tüm özellikler tam sürüm", "Pasif öğrenciler ücretsiz", "İstediğiniz zaman iptal edin", "AI ders raporu", "Gelişmiş finans analizi", "Veli paneli", "Öncelikli destek"],
+      "cta": "30 Gün Ücretsiz Başlayın",
+      "noCard": "Kredi kartı gerekmez"
+    }
+  },
+  "cta": {
+    "title": "Öğrencilerinizi Bugün Profesyonelce Yönetin",
+    "subtitle": "Kayıt olmak ücretsiz ve kredi kartı gerektirmez. Dakikalar içinde başlayın.",
+    "primaryBtn": "🚀 Ücretsiz Hesap Aç",
+    "secondaryBtn": "Özellikleri Keşfet",
+    "trust1": "🔒 Güvenli & Şifreli",
+    "trust2": "💳 Kredi kartı gerekmez",
+    "trust3": "⚡ 2 dakikada kurulum",
+    "trust4": "🇹🇷 Türkçe destek"
+  },
+  "footer": {
+    "desc": "Özel ders öğretmenlerinin iş süreçlerini kolaylaştıran akıllı yönetim platformu.",
+    "product": "Ürün",
+    "features": "Özellikler",
+    "support": "Destek",
+    "legal": "Yasal",
+    "helpCenter": "Yardım Merkezi",
+    "contact": "İletişim",
+    "privacyPolicy": "Gizlilik Politikası",
+    "terms": "Kullanım Koşulları",
+    "refund": "İade Politikası",
+    "pricingLink": "Fiyatlandırma",
+    "screenshotsLink": "Ekran Görüntüleri",
+    "studentMgmt": "Öğrenci Yönetimi",
+    "lessonPlanning": "Ders Planlaması",
+    "financeTracking": "Finans Takibi",
+    "aiAssistant": "AI Asistan",
+    "copyright": "© 2026 EduTakip. Tüm hakları saklıdır.",
+    "madeIn": "🇹🇷 Türkiye'de geliştirildi"
+  },
+  "pricingPage": {
+    "badge": "Fiyatlandırma",
+    "title": "Şeffaf & Esnek Fiyatlandırma",
+    "subtitle": "Sadece aktif öğrenci sayınız kadar ödeyin. Pasif öğrenciler ücretsiz. İlk 30 gün tamamen ücretsiz.",
+    "free": {
+      "name": "Ücretsiz",
+      "desc": "Başlamak için ideal",
+      "period": "sonsuza kadar",
+      "features": ["3 aktif öğrenciye kadar", "Ders takvimi", "Temel finans takibi", "Veli paneli"],
+      "cta": "Hemen Başla"
+    },
+    "pro": {
+      "badge": "EN POPÜLER",
+      "title": "Pro Paket Hesaplayıcı",
+      "perStudent": "öğrenci / ay + KDV",
+      "studentCountLabel": "Aktif öğrenci sayısı",
+      "netAmount": "Net Tutar",
+      "vat": "KDV (%20)",
+      "total": "Aylık Toplam (KDV Dahil)",
+      "features": ["30 gün ücretsiz deneme", "Tüm özellikler", "Pasif öğrenciler ücretsiz", "İstediğiniz zaman iptal", "AI ders raporu", "Gelişmiş finans", "Veli paneli", "Öncelikli destek"],
+      "cta": "30 Gün Ücretsiz Başlayın",
+      "noCard": "Kredi kartı gerekmez"
+    },
+    "faq": {
+      "title": "Sıkça Sorulan Sorular",
+      "q1": "Pasif öğrenciler ücretlendirilir mi?",
+      "a1": "Hayır. Sadece \"aktif\" statüsündeki öğrenciler için ücret ödersiniz.",
+      "q2": "Ay ortasında öğrenci ekleyebilir miyim?",
+      "a2": "Evet. Ay ortasında eklenen öğrenciler için kalan günler oranında pro-rata ücretlendirme yapılır.",
+      "q3": "İstediğim zaman iptal edebilir miyim?",
+      "a3": "Evet, herhangi bir zamanda aboneliğinizi iptal edebilirsiniz. Kalan süre aktif kalır.",
+      "q4": "KDV nasıl hesaplanıyor?",
+      "a4": "Gösterilen fiyatlara %20 KDV eklenmektedir. Ödeme sayfasında toplam tutar KDV dahil gösterilir."
+    }
+  },
+  "terms": {
+    "title": "Kullanım Koşulları",
+    "updated": "Son güncelleme: 1 Nisan 2026",
+    "sections": [
+      { "title": "1. Hizmetin Kapsamı", "body": "EduTakip, özel ders öğretmenlerine yönelik bir yönetim platformudur. Platform; öğrenci takibi, ders planlaması, finans yönetimi, gelişim raporları ve veli iletişimi gibi araçlar sunar." },
+      { "title": "2. Üyelik ve Hesap", "body": "Platforma kayıt olarak bu koşulları kabul etmiş sayılırsınız. Hesabınızın güvenliğinden siz sorumlusunuz; şifrenizi kimseyle paylaşmayınız." },
+      { "title": "3. Abonelik ve Ödeme", "body": "Ücretsiz planda 3 aktif öğrenciye kadar hizmet sunulmaktadır. Pro planda aktif öğrenci başına aylık ücret alınır. İlk 30 gün ücretsiz deneme hakkı sunulur. Ödeme otomatik yenilenir; iptal etmezseniz bir sonraki dönem için ücretlendirilirsiniz." },
+      { "title": "4. İptal ve İade", "body": "Aboneliğinizi istediğiniz zaman iptal edebilirsiniz. Mevcut dönem sona erene kadar platforma erişiminiz devam eder. İade politikamız için ayrı İade Politikası sayfamızı inceleyiniz." },
+      { "title": "5. Veri ve Gizlilik", "body": "Sisteme girdiğiniz öğrenci ve veli bilgileri yalnızca size özel olup başka kullanıcılarla paylaşılmaz. Detaylı bilgi için Gizlilik Politikamızı inceleyiniz." },
+      { "title": "6. Kullanım Kısıtlamaları", "body": "Platformu yasa dışı amaçlarla, üçüncü şahıslara zarar verecek şekilde veya sistemi aşırı yükleyecek biçimde kullanamazsınız. İhlal durumunda hesabınız askıya alınabilir." },
+      { "title": "7. Sorumluluk Sınırı", "body": "EduTakip, platformun kesintisiz veya hatasız çalışacağını garanti etmez. Teknik arızalar nedeniyle oluşan veri kayıplarında azami sorumluluk bir aylık abonelik ücretiyle sınırlıdır." },
+      { "title": "8. Değişiklikler", "body": "Bu koşullar önceden haber verilmeksizin güncellenebilir. Güncel koşullara platform üzerinden ulaşabilirsiniz. Platforma kullanmaya devam etmeniz güncel koşulları kabul ettiğiniz anlamına gelir." },
+      { "title": "9. İletişim", "body": "Sorularınız için destek@edutakip.com adresine ulaşabilirsiniz." }
+    ]
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "updated": "Son güncelleme: 1 Nisan 2026",
+    "sections": [
+      { "title": "1. Toplanan Veriler", "body": "Ad-soyad, e-posta, öğrenci bilgileri, ders kayıtları ve ödeme geçmişi gibi veriler toplanır. Bu veriler yalnızca hizmet sunumu amacıyla kullanılır." },
+      { "title": "2. Verilerin Kullanımı", "body": "Toplanan veriler; platforma erişim sağlamak, hizmet kalitesini artırmak ve teknik destek vermek amacıyla işlenir. Reklam veya üçüncü taraf pazarlama için kullanılmaz." },
+      { "title": "3. Veri Güvenliği", "body": "Verileriniz SSL şifrelemesi ve güvenli sunucularda saklanır. Yetkisiz erişime karşı teknik ve idari tedbirler alınmaktadır." },
+      { "title": "4. Üçüncü Taraflarla Paylaşım", "body": "Kişisel verileriniz; yasal zorunluluklar dışında, açık rızanız olmaksızın üçüncü taraflarla paylaşılmaz." },
+      { "title": "5. Çerezler", "body": "Platform, oturum yönetimi ve tercih kayıtları için çerez kullanır. Tarayıcınızdan çerez ayarlarınızı yönetebilirsiniz." },
+      { "title": "6. Saklama Süresi", "body": "Verileriniz hesabınız aktif olduğu sürece saklanır. Hesap silme talebinde tüm verileriniz 30 gün içinde sistemden kaldırılır." },
+      { "title": "7. Haklarınız (KVKK)", "body": "6698 sayılı KVKK kapsamında verilerinize erişme, düzeltme, silme ve taşıma haklarına sahipsiniz. Talepleriniz için destek@edutakip.com adresine başvurabilirsiniz." },
+      { "title": "8. İletişim", "body": "Gizlilik konusundaki sorularınız için destek@edutakip.com adresine yazabilirsiniz." }
+    ]
+  },
+  "refund": {
+    "title": "Geri Ödeme Politikası",
+    "updated": "Son güncelleme: 1 Nisan 2026",
+    "sections": [
+      { "title": "1. Ücretsiz Deneme Süresi", "body": "Tüm yeni kullanıcılara 30 günlük ücretsiz deneme sunulmaktadır. Bu süre içinde herhangi bir ücretlendirme yapılmaz ve iptal için iade talebi gerekmez." },
+      { "title": "2. İade Hakkı", "body": "Ödeme tarihinden itibaren 7 gün içinde herhangi bir neden belirtmeksizin tam iade talep edebilirsiniz. 7 günlük süre geçtikten sonra yapılan iade talepleri değerlendirmeye alınmaz." },
+      { "title": "3. Kısmi İade", "body": "Ay ortasında aboneliği iptal eden kullanıcılara kalan süre için kısmi iade yapılmaz; mevcut dönem sonuna kadar hizmete erişim aktif kalır." },
+      { "title": "4. İade Süreci", "body": "İade talebi için destek@edutakip.com adresine e-posta gönderin. Ödeme hesabınızı ve talep nedeninizi belirtin. Geçerli talepler 5-10 iş günü içinde işleme alınır ve ödeme yöntemini bağlı hesabınıza iade edilir." },
+      { "title": "5. İade Dışı Durumlar", "body": "Aşağıdaki durumlarda iade yapılmaz: Kullanım koşullarını ihlal nedeniyle kapatılan hesaplar, hile, sahtekârlık veya kötüye kullanım tespit edilen durumlar, ücretsiz deneme süresi içindeki işlemler." },
+      { "title": "6. Teknik Sorunlar", "body": "Platformdan kaynaklanan teknik bir sorun nedeniyle hizmetten yararlanamadığınızı belgelerseniz, etkilenen dönem için iade veya kredi sağlanabilir." },
+      { "title": "7. İletişim", "body": "Geri ödeme talepleriniz ve sorularınız için destek@edutakip.com adresine ulaşabilirsiniz. Çalışma saatlerimiz: Pazartesi–Cuma, 09:00–18:00 (Türkiye saati)." }
+    ]
+  }
+}
