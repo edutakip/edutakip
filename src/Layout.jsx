@@ -616,7 +616,7 @@ export default function Layout({ children, currentPageName }) {
                     zIndex: 0, transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
                   }} />
                 )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem', fontSize: '0.52rem', fontWeight: isActive ? '700' : '500' }}>
+                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem', fontSize: '0.6rem', fontWeight: isActive ? '700' : '500' }}>
                   <Icon size={17} />
                   {renderLabel()}
                 </span>
@@ -628,7 +628,7 @@ export default function Layout({ children, currentPageName }) {
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '0.15rem', padding: '0.3rem 0.4rem', cursor: 'pointer',
               color: 'rgba(255,150,150,0.55)', background: 'none', border: 'none', flex: 1, height: '100%',
-              transition: 'color 0.2s ease', fontSize: '0.52rem', fontWeight: '500',
+              transition: 'color 0.2s ease', fontSize: '0.6rem', fontWeight: '500',
             }}>
             <LogOut size={17} />
             <span>{t('teacher.layout.logout')}</span>
