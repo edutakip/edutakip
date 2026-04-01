@@ -29,7 +29,10 @@ export default function LanguageSwitcher({ style = {} }) {
         ...style,
       }}
     >
-      {current === 'tr' ? '🇬🇧 EN' : '🇹🇷 TR'}
+      <span style={{ fontFamily: "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif" }}>
+        {current === 'tr' ? '🇬🇧' : '🇹🇷'}
+      </span>
+      {current === 'tr' ? 'EN' : 'TR'}
     </button>
   );
 }
