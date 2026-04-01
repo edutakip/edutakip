@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
+import { useTranslation } from 'react-i18next';
 import { Plus, BookOpen, CheckCircle, Clock, AlertCircle, Trash2, X, Pencil, Calendar, User, ChevronRight, Upload, Search, Filter, Sparkles, Bell, Send, Eye, Award, ArrowRight, FileText, Image as ImageIcon, Paperclip } from 'lucide-react';
 import TeacherAssessmentSection from '../components/teacher/TeacherAssessmentSection';
 import { showToast } from '@/lib/toast';
@@ -8,26 +9,26 @@ import { format, parseISO, isPast, isToday, isTomorrow, differenceInDays, addDay
 import { tr } from 'date-fns/locale';
 
 /* ─── Helpers ─────────────────────────────────────────── */
-function getDueDateLabel(dueDate) {
+function getDueDateLabel(dueDate, t, locale) {
   if (!dueDate) return null;
   try {
     const d = parseISO(dueDate);
-    if (isToday(d)) return { text: 'Bugün son gün!', color: '#dc2626', bg: '#fef2f2', urgent: true };
-    if (isTomorrow(d)) return { text: 'Yarın son gün', color: '#d97706', bg: '#fffbeb', urgent: true };
+    if (isToday(d)) return { text: t('teacher.homework.dueToday'), color: '#dc2626', bg: '#fef2f2', urgent: true };
+    if (isTomorrow(d)) return { text: t('teacher.homework.dueTomorrow'), color: '#d97706', bg: '#fffbeb', urgent: true };
     const diff = differenceInDays(d, new Date());
-    if (diff < 0) return { text: `${Math.abs(diff)} gün geçti`, color: '#b91c1c', bg: '#fef2f2', urgent: true };
-    if (diff <= 3) return { text: `${diff} gün kaldı`, color: '#d97706', bg: '#fffbeb', urgent: false };
-    return { text: format(d, 'd MMM', { locale: tr }), color: '#6b7280', bg: '#f3f4f6', urgent: false };
+    if (diff < 0) return { text: `${Math.abs(diff)} ${t('teacher.homework.daysAgo')}`, color: '#b91c1c', bg: '#fef2f2', urgent: true };
+    if (diff <= 3) return { text: `${diff} ${t('teacher.homework.daysLeft')}`, color: '#d97706', bg: '#fffbeb', urgent: false };
+    return { text: format(d, 'd MMM', { locale }), color: '#6b7280', bg: '#f3f4f6', urgent: false };
   } catch { return null; }
 }
 
-const STATUS_CONFIG = {
-  verildi:         { label: 'Bekliyor',        color: '#4f46e5', bg: '#eef2ff', dot: '#6366f1', icon: Clock,        gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
-  goruldu:         { label: 'Görüldü',         color: '#b45309', bg: '#fef9c3', dot: '#ca8a04', icon: Eye,          gradient: 'linear-gradient(135deg, #b45309, #ca8a04)' },
-  tamamlandı:      { label: 'Tamamlandı',      color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
-  gecikmiş:        { label: 'Gecikmiş',        color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
-  degerlendirildi: { label: 'Değerlendirildi', color: '#7c3aed', bg: '#f5f3ff', dot: '#8b5cf6', icon: Award,        gradient: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' },
-};
+const getStatusConfig = (t) => ({
+  verildi:         { label: t('teacher.homework.statusPending'),    color: '#4f46e5', bg: '#eef2ff', dot: '#6366f1', icon: Clock,        gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
+  goruldu:         { label: t('teacher.homework.statusSeen'),       color: '#b45309', bg: '#fef9c3', dot: '#ca8a04', icon: Eye,          gradient: 'linear-gradient(135deg, #b45309, #ca8a04)' },
+  tamamlandı:      { label: t('teacher.homework.statusCompleted'),  color: '#059669', bg: '#ecfdf5', dot: '#10b981', icon: CheckCircle,  gradient: 'linear-gradient(135deg, #059669, #10b981)' },
+  gecikmiş:        { label: t('teacher.homework.statusLate'),       color: '#dc2626', bg: '#fef2f2', dot: '#ef4444', icon: AlertCircle,  gradient: 'linear-gradient(135deg, #dc2626, #ef4444)' },
+  degerlendirildi: { label: t('teacher.homework.statusEvaluated'),  color: '#7c3aed', bg: '#f5f3ff', dot: '#8b5cf6', icon: Award,        gradient: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' },
+});
 
 // Mapping for step tracker
 const stepIndexMap = {
@@ -79,6 +80,9 @@ function usePortalLock(contentRef) {
 
 /* ─── Slide Panel ────────────────────────────────────── */
 function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit }) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : undefined;
+  const STATUS_CONFIG = getStatusConfig(t);
   const [visible, setVisible] = useState(false);
   const panelRef = useRef(null);
 
@@ -94,14 +98,14 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
   const cfg = STATUS_CONFIG[hw?.status] || STATUS_CONFIG.verildi;
   const Icon = cfg.icon;
   const student = students.find(s => s.id === hw?.studentId);
-  const dueDateInfo = getDueDateLabel(hw?.dueDate);
+  const dueDateInfo = getDueDateLabel(hw?.dueDate, t, dateLocale);
   const avatarColor = getAvatarColor(hw?.studentName);
 
   const steps = [
-    { key: 'verildi',         label: 'İletildi',        icon: Send },
-    { key: 'goruldu',         label: 'Görüldü',         icon: Eye },
-    { key: 'tamamlandı',      label: 'Teslim',          icon: CheckCircle },
-    { key: 'degerlendirildi', label: 'Değerlendirildi', icon: Award },
+    { key: 'verildi',         label: t('teacher.homework.stepSent'),       icon: Send },
+    { key: 'goruldu',         label: t('teacher.homework.stepSeen'),       icon: Eye },
+    { key: 'tamamlandı',      label: t('teacher.homework.stepSubmitted'),  icon: CheckCircle },
+    { key: 'degerlendirildi', label: t('teacher.homework.stepEvaluated'),  icon: Award },
   ];
 
   const stepIndex = stepIndexMap[hw?.status] ?? 0;
@@ -177,7 +181,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
 
           {/* Steps tracker */}
           <div style={{ background:'white', borderRadius:16, padding:'1.25rem', boxShadow:'0 4px 24px rgba(0,0,0,0.08)', marginBottom:'1.25rem', animation:'slideUp 0.4s ease 0.1s both' }}>
-            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'1rem' }}>Ödev Takibi</p>
+            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'1rem' }}>{t('teacher.homework.tracking')}</p>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               {steps.map((s, i) => {
                 const StepIcon = s.icon;
@@ -219,7 +223,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
               <div style={{ background:dueDateInfo.bg, borderRadius:12, padding:'0.85rem', border:`1px solid ${dueDateInfo.color}20` }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'0.35rem', marginBottom:'0.25rem' }}>
                   <Calendar size={13} color={dueDateInfo.color} />
-                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:dueDateInfo.color, textTransform:'uppercase', letterSpacing:'0.5px' }}>Teslim</span>
+                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:dueDateInfo.color, textTransform:'uppercase', letterSpacing:'0.5px' }}>{t('teacher.homework.due')}</span>
                 </div>
                 <div style={{ fontSize:'0.95rem', fontWeight:800, color:dueDateInfo.color }}>{dueDateInfo.text}</div>
               </div>
@@ -228,10 +232,10 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
               <div style={{ background:'#f8fafc', borderRadius:12, padding:'0.85rem' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'0.35rem', marginBottom:'0.25rem' }}>
                   <Clock size={13} color="#6b7280" />
-                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.5px' }}>Tarih</span>
+                  <span style={{ fontSize:'0.65rem', fontWeight:700, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.5px' }}>{t('teacher.homework.date')}</span>
                 </div>
                 <div style={{ fontSize:'0.85rem', fontWeight:700, color:'#374151' }}>
-                  {format(parseISO(hw.dueDate), 'd MMMM yyyy', { locale: tr })}
+                  {format(parseISO(hw.dueDate), 'd MMMM yyyy', { locale: dateLocale })}
                 </div>
               </div>
             )}
@@ -240,7 +244,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
           {/* Description */}
           {hw?.description && (
             <div style={{ background:'#f8fafc', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', animation:'slideUp 0.4s ease 0.25s both' }}>
-              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.5rem' }}>Açıklama</p>
+              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.5rem' }}>{t('teacher.homework.description')}</p>
               <p style={{ fontSize:'0.875rem', color:'#374151', lineHeight:1.7 }}>{hw.description}</p>
             </div>
           )}
@@ -249,7 +253,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
           {hw?.teacherAttachments?.length > 0 && (
             <div style={{ background:'#eff6ff', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bfdbfe', animation:'slideUp 0.4s ease 0.28s both' }}>
               <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#1d4ed8', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
-                📎 Öğretmen Yükledi ({hw.teacherAttachments.length} dosya)
+                📎 {t('teacher.homework.teacherUploaded')} ({hw.teacherAttachments.length} {t('teacher.homework.files')})
               </p>
               {hw.teacherAttachments.some(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) && (
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(80px, 1fr))', gap:'0.4rem', marginBottom:'0.5rem' }}>
@@ -271,19 +275,19 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
                       onMouseLeave={e => e.currentTarget.style.background='white'}>
                       <span style={{ fontSize:'1rem' }}>📄</span>
                       <span style={{ fontSize:'0.78rem', color:'#1e40af', fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{filename}</span>
-                      <span style={{ fontSize:'0.65rem', color:'#1d4ed8', fontWeight:700, flexShrink:0 }}>Aç →</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                      <span style={{ fontSize:'0.65rem', color:'#1d4ed8', fontWeight:700, flexShrink:0 }}>{t('teacher.homework.open')} →</span>
+                      </a>
+                      );
+                      })}
+                      </div>
+                      </div>
+                      )}
 
-          {/* Velinin yüklediği dosyalar */}
+                      {/* Velinin yüklediği dosyalar */}
           {hw?.attachments?.length > 0 && (
             <div style={{ background:'#f0fdf4', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bbf7d0', animation:'slideUp 0.4s ease 0.28s both' }}>
               <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
-                📎 Veli Yükledi ({hw.attachments.length} dosya)
+                📎 {t('teacher.homework.parentUploaded')} ({hw.attachments.length} {t('teacher.homework.files')})
               </p>
               {hw.attachments.some(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) && (
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(80px, 1fr))', gap:'0.4rem', marginBottom:'0.5rem' }}>
@@ -305,14 +309,14 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
                       onMouseLeave={e => e.currentTarget.style.background='white'}>
                       <span style={{ fontSize:'1rem' }}>📄</span>
                       <span style={{ fontSize:'0.78rem', color:'#065f46', fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{filename}</span>
-                      <span style={{ fontSize:'0.65rem', color:'#059669', fontWeight:700, flexShrink:0 }}>Aç →</span>
+                      <span style={{ fontSize:'0.65rem', color:'#059669', fontWeight:700, flexShrink:0 }}>{t('teacher.homework.open')} →</span>
                     </a>
                   );
                 })}
               </div>
               {hw.parentNote && (
                 <div style={{ marginTop:'0.75rem', padding:'0.6rem 0.75rem', background:'white', borderRadius:8, border:'1px solid #bbf7d0' }}>
-                  <span style={{ fontSize:'0.72rem', color:'#6b7280', fontWeight:600 }}>💬 Veli notu: </span>
+                  <span style={{ fontSize:'0.72rem', color:'#6b7280', fontWeight:600 }}>💬 {t('teacher.homework.parentNote')}: </span>
                   <span style={{ fontSize:'0.78rem', color:'#374151' }}>{hw.parentNote}</span>
                 </div>
               )}
@@ -323,7 +327,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
           {hw?.aiEvaluation && (
             <div style={{ background:'#faf5ff', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #e9d5ff', animation:'slideUp 0.4s ease 0.3s both' }}>
               <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#7c3aed', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem', display:'flex', alignItems:'center', gap:'0.4rem' }}>
-                🤖 EduTakip AI Değerlendirmesi
+                🤖 {t('teacher.homework.aiEvaluation')}
               </p>
               {hw.aiEvaluation.warning && (
                 <div style={{ background:'#fef3c7', border:'1px solid #fde68a', borderRadius:8, padding:'0.6rem 0.75rem', marginBottom:'0.75rem' }}>
@@ -332,13 +336,13 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
               )}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', marginBottom:'0.75rem' }}>
                 <div style={{ background:'white', borderRadius:8, padding:'0.6rem', textAlign:'center', border:'1px solid #e9d5ff' }}>
-                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>Efor</p>
+                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>{t('teacher.homework.effort')}</p>
                   <p style={{ fontSize:'0.95rem', fontWeight:800, color: hw.aiEvaluation.effort === 'Yüksek' ? '#059669' : hw.aiEvaluation.effort === 'Orta' ? '#d97706' : '#dc2626' }}>
                     {hw.aiEvaluation.effort || '—'}
                   </p>
                 </div>
                 <div style={{ background:'white', borderRadius:8, padding:'0.6rem', textAlign:'center', border:'1px solid #e9d5ff' }}>
-                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>Anlama</p>
+                  <p style={{ fontSize:'0.6rem', color:'#9ca3af', fontWeight:700, textTransform:'uppercase', marginBottom:'0.2rem' }}>{t('teacher.homework.understanding')}</p>
                   <p style={{ fontSize:'0.95rem', fontWeight:800, color: hw.aiEvaluation.understanding === 'İyi' ? '#059669' : hw.aiEvaluation.understanding === 'Orta' ? '#d97706' : '#dc2626' }}>
                     {hw.aiEvaluation.understanding || '—'}
                   </p>
@@ -371,7 +375,7 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 4.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 11a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 18z"/></svg>
               </div>
               <div>
-                <div style={{ fontSize:'0.65rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.5px' }}>Veli İletişim</div>
+                <div style={{ fontSize:'0.65rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.5px' }}>{t('teacher.homework.parentContact')}</div>
                 <div style={{ fontSize:'0.875rem', fontWeight:700, color:'#065f46' }}>{student.parentPhone}</div>
               </div>
               <ArrowRight size={16} color="#10b981" style={{ marginLeft:'auto' }} />
@@ -380,33 +384,33 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
 
           {/* Actions */}
           <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem', animation:'slideUp 0.4s ease 0.35s both' }}>
-            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.25rem' }}>İşlemler</p>
+            <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.25rem' }}>{t('teacher.homework.actions')}</p>
             {hw?.status !== 'tamamlandı' && hw?.status !== 'degerlendirildi' && (
               <button onClick={() => onStatusChange(hw, 'tamamlandı')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'linear-gradient(135deg, #059669, #10b981)', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer', boxShadow:'0 4px 14px rgba(16,185,129,0.3)' }}>
                 <CheckCircle size={18} color="white" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'white' }}>Tamamlandı Olarak İşaretle</span>
+                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'white' }}>{t('teacher.homework.markCompleted')}</span>
               </button>
             )}
             {(hw?.status === 'tamamlandı' || hw?.status === 'goruldu') && (
               <button onClick={() => onStatusChange(hw, 'verildi')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#f3f4f6', border:'none', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
                 <Clock size={18} color="#6b7280" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#374151' }}>Bekliyor'a Geri Al</span>
+                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#374151' }}>{t('teacher.homework.revertToPending')}</span>
               </button>
             )}
             {hw?.status !== 'gecikmiş' && hw?.status !== 'tamamlandı' && hw?.status !== 'degerlendirildi' && (
               <button onClick={() => onStatusChange(hw, 'gecikmiş')} style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'#fef2f2', border:'1px solid #fecaca', borderRadius:12, padding:'0.85rem 1rem', cursor:'pointer' }}>
                 <AlertCircle size={18} color="#dc2626" />
-                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#dc2626' }}>Gecikmiş Olarak İşaretle</span>
+                <span style={{ fontSize:'0.875rem', fontWeight:700, color:'#dc2626' }}>{t('teacher.homework.markLate')}</span>
               </button>
             )}
             <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.25rem' }}>
               <button onClick={() => onEdit(hw)} style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'0.4rem', background:'white', border:'1.5px solid #e5e7eb', borderRadius:12, padding:'0.75rem', cursor:'pointer' }}>
                 <Pencil size={15} color="#374151" />
-                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#374151' }}>Düzenle</span>
+                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#374151' }}>{t('teacher.lessons.edit')}</span>
               </button>
               <button onClick={() => onDelete(hw)} style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'0.4rem', background:'#fef2f2', border:'1.5px solid #fecaca', borderRadius:12, padding:'0.75rem', cursor:'pointer' }}>
                 <Trash2 size={15} color="#dc2626" />
-                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#dc2626' }}>Sil</span>
+                <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#dc2626' }}>{t('teacher.homework.delete')}</span>
               </button>
             </div>
           </div>
@@ -422,6 +426,8 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
 
 /* ─── Add/Edit Modal ─────────────────────────────────── */
 function HomeworkModal({ editingHw, students, onClose, onSave }) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : undefined;
   const [form, setForm] = useState({
     studentId: editingHw?.studentId || '',
     title: editingHw?.title || '',
@@ -441,10 +447,10 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
   const handleClose = () => { setVisible(false); setTimeout(onClose, 300); };
 
   const presets = [
-    { label: 'Bu gece', icon: '🌙', date: format(new Date(), 'yyyy-MM-dd') },
-    { label: 'Yarın', icon: '☀️', date: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
-    { label: 'Bu hafta sonu', icon: '📅', date: format(addDays(new Date(), (6 - new Date().getDay() + 6) % 7 || 7), 'yyyy-MM-dd') },
-    { label: 'Haftaya', icon: '🗓️', date: format(addDays(new Date(), 7), 'yyyy-MM-dd') },
+    { label: t('teacher.homework.tonight'), icon: '🌙', date: format(new Date(), 'yyyy-MM-dd') },
+    { label: t('teacher.homework.tomorrow'), icon: '☀️', date: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
+    { label: t('teacher.homework.thisWeekend'), icon: '📅', date: format(addDays(new Date(), (6 - new Date().getDay() + 6) % 7 || 7), 'yyyy-MM-dd') },
+    { label: t('teacher.homework.nextWeek'), icon: '🗓️', date: format(addDays(new Date(), 7), 'yyyy-MM-dd') },
   ];
 
   const handlePreset = (preset) => {
@@ -495,10 +501,10 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
               <div>
                 <h2 style={{ fontSize:'1.25rem', fontWeight:800, color:'#111827', marginBottom:'0.15rem' }}>
-                  {editingHw ? '✏️ Ödevi Düzenle' : '📚 Yeni Ödev'}
+                  {editingHw ? `✏️ ${t('teacher.homework.editHomework')}` : `📚 ${t('teacher.homework.newHomework')}`}
                 </h2>
                 <p style={{ fontSize:'0.78rem', color:'#9ca3af', fontWeight:500 }}>
-                  {editingHw ? 'Ödev bilgilerini güncelleyin' : 'Öğrencine ödev ver'}
+                  {editingHw ? t('teacher.homework.editSubtitle') : t('teacher.homework.newSubtitle')}
                 </p>
               </div>
               <button onClick={handleClose} style={{ background:'#f3f4f6', border:'none', borderRadius:12, padding:'0.5rem', cursor:'pointer', display:'flex', transition:'all 0.15s' }}
@@ -510,7 +516,7 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
             {/* Öğrenci seçimi */}
             <div style={{ marginBottom:'1.1rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Öğrenci Seçin</label>
+              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>{t('teacher.homework.selectStudent')}</label>
               <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem' }}>
                 {students.map(s => {
                   const selected = form.studentId === s.id;
@@ -536,11 +542,11 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
             {/* Başlık */}
             <div style={{ marginBottom:'1.1rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Ödev Açıklaması</label>
+              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>{t('teacher.homework.homeworkDesc')}</label>
               <textarea
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="Örneğin: Matematik 10. Sınıf, Sayfa 45, Soru 1-10"
+                placeholder={t('teacher.homework.descPlaceholder')}
                 rows={3}
                 style={{ width:'100%', background:'#f8fafc', border:'1.5px solid #e5e7eb', borderRadius:14, padding:'0.75rem 1rem', fontSize:'0.9rem', color:'#111827', outline:'none', resize:'none', boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.6, transition:'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor='#f97316'}
@@ -551,12 +557,12 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
             {/* Detay */}
             <div style={{ marginBottom:'1.1rem' }}>
               <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
-                Ek Notlar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
+                {t('teacher.homework.additionalNotes')} <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>({t('teacher.lessonReport.optional')})</span>
               </label>
               <textarea
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Ödev hakkında ek bilgiler..."
+                placeholder={t('teacher.homework.additionalNotesPlaceholder')}
                 rows={2}
                 style={{ width:'100%', background:'#f8fafc', border:'1.5px solid #e5e7eb', borderRadius:14, padding:'0.75rem 1rem', fontSize:'0.875rem', color:'#111827', outline:'none', resize:'none', boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.6, transition:'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor='#f97316'}
@@ -567,7 +573,7 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
             {/* Dosya yükleme */}
             <div style={{ marginBottom:'1.25rem' }}>
               <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.5rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>
-                Ek Dosyalar <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(opsiyonel)</span>
+                {t('teacher.homework.attachments')} <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', letterSpacing:0 }}>({t('teacher.lessonReport.optional')})</span>
               </label>
               {/* Hidden input rendered outside the locked modal via portal */}
               {ReactDOM.createPortal(
@@ -591,8 +597,8 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
                 onMouseEnter={e => { e.currentTarget.style.borderColor='#f97316'; e.currentTarget.style.background='#fff7ed'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.background='#fafafa'; }}>
                 <Upload size={22} color="#9ca3af" style={{ marginBottom:'0.5rem' }} />
-                <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>Dosyaları sürükleyin veya tıklayın</p>
-                <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>Fotoğraf (maks 25, 10MB) veya PDF (maks 3, 50MB)</p>
+                <p style={{ fontSize:'0.82rem', color:'#6b7280', marginBottom:'0.2rem', fontWeight:600 }}>{t('teacher.homework.dropFiles')}</p>
+                <p style={{ fontSize:'0.72rem', color:'#9ca3af' }}>{t('teacher.homework.fileLimit')}</p>
               </div>
               {attachedFiles.length > 0 && (
                 <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
@@ -611,7 +617,7 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
             {/* Teslim tarihi */}
             <div style={{ marginBottom:'1.5rem' }}>
-              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.6rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>Teslim Tarihi</label>
+              <label style={{ fontSize:'0.7rem', fontWeight:700, color:'#374151', display:'block', marginBottom:'0.6rem', textTransform:'uppercase', letterSpacing:'0.8px' }}>{t('teacher.homework.dueDate')}</label>
               <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', marginBottom:'0.75rem' }}>
                 {presets.map(p => (
                   <button key={p.label} onClick={() => handlePreset(p)} style={{
@@ -624,25 +630,25 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
                     display:'flex', alignItems:'center', gap:'0.3rem',
                   }}>
                     {p.icon} {p.label}
-                  </button>
-                ))}
-                <button onClick={() => setDatePreset('custom')} style={{
-                  padding:'0.45rem 0.85rem', borderRadius:20, border:'2px solid',
-                  borderColor: datePreset === 'custom' ? '#f97316' : '#f1f5f9',
-                  background: datePreset === 'custom' ? '#fff7ed' : 'white',
-                  color: datePreset === 'custom' ? '#f97316' : '#6b7280',
-                  fontSize:'0.8rem', fontWeight: datePreset === 'custom' ? 700 : 500,
-                  cursor:'pointer', transition:'all 0.15s',
-                  display:'flex', alignItems:'center', gap:'0.3rem',
-                }}>
-                  📅 Özel Tarih
+                    </button>
+                    ))}
+                    <button onClick={() => setDatePreset('custom')} style={{
+                    padding:'0.45rem 0.85rem', borderRadius:20, border:'2px solid',
+                    borderColor: datePreset === 'custom' ? '#f97316' : '#f1f5f9',
+                    background: datePreset === 'custom' ? '#fff7ed' : 'white',
+                    color: datePreset === 'custom' ? '#f97316' : '#6b7280',
+                    fontSize:'0.8rem', fontWeight: datePreset === 'custom' ? 700 : 500,
+                    cursor:'pointer', transition:'all 0.15s',
+                    display:'flex', alignItems:'center', gap:'0.3rem',
+                    }}>
+                    📅 {t('teacher.homework.customDate')}
                 </button>
               </div>
               {form.dueDate && (
                 <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', padding:'0.6rem 0.875rem', background:'#fff7ed', borderRadius:10, border:'1.5px solid #fed7aa' }}>
                   <Calendar size={14} color="#f97316" />
                   <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#c2410c' }}>
-                    {format(parseISO(form.dueDate), 'd MMMM EEEE, HH:mm', { locale: tr }).replace('00:00', '23:59')}
+                    {format(parseISO(form.dueDate), 'd MMMM EEEE, HH:mm', { locale: dateLocale }).replace('00:00', '23:59')}
                   </span>
                 </div>
               )}
@@ -674,7 +680,7 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
               onMouseEnter={e => canSave && (e.currentTarget.style.transform = 'scale(1.02)')}
               onMouseLeave={e => canSave && (e.currentTarget.style.transform = 'scale(1)')}>
               <Send size={18} />
-              {editingHw ? 'Güncelle' : 'Ödev Ver'}
+              {editingHw ? t('teacher.homework.update') : t('teacher.homework.giveHomework')}
             </button>
           </div>
         </div>
@@ -687,6 +693,9 @@ function HomeworkModal({ editingHw, students, onClose, onSave }) {
 
 /* ─── Main Page ──────────────────────────────────────── */
 export default function TeacherHomework() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('tr') ? tr : undefined;
+  const STATUS_CONFIG = getStatusConfig(t);
   const [homeworks, setHomeworks] = useState([]);
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -793,7 +802,7 @@ export default function TeacherHomework() {
 
   // Group by student
   const grouped = filtered.reduce((acc, hw) => {
-    const key = hw.studentName || 'Bilinmiyor';
+  const key = hw.studentName || t('teacher.homework.unknown');
     if (!acc[key]) acc[key] = [];
     acc[key].push(hw);
     return acc;
@@ -823,9 +832,9 @@ export default function TeacherHomework() {
                   <BookOpen size={24} color="white" />
                 </div>
                 <div>
-                  <h1 style={{ fontSize:'1.75rem', fontWeight:900, color:'#111827', lineHeight:1 }}>Ödevler</h1>
+                  <h1 style={{ fontSize:'1.75rem', fontWeight:900, color:'#111827', lineHeight:1 }}>{t('teacher.layout.homework')}</h1>
                   <p style={{ fontSize:'0.82rem', color:'#9ca3af', fontWeight:500, marginTop:'0.2rem' }}>
-                    {format(new Date(), "d MMMM yyyy, EEEE", { locale: tr })}
+                    {format(new Date(), "d MMMM yyyy, EEEE", { locale: dateLocale })}
                   </p>
                 </div>
               </div>
@@ -840,7 +849,7 @@ export default function TeacherHomework() {
             }}
               onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px) scale(1.02)'}
               onMouseLeave={e => e.currentTarget.style.transform='translateY(0) scale(1)'}>
-              <Plus size={18} /> Yeni Ödev
+              <Plus size={18} /> {t('teacher.homework.newHomework')}
             </button>
           </div>
         </div>
@@ -848,11 +857,11 @@ export default function TeacherHomework() {
         {/* ── Stats Cards ──────────────────────────────── */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:'0.85rem', marginBottom:'1.75rem' }}>
           {[
-            { key:'all',       label:'Toplam',      icon:'📋', color:'#374151', bg:'white',   border:'#f1f5f9', shadow:'rgba(0,0,0,0.06)' },
-            { key:'verildi',   label:'Bekliyor',    icon:'⏳', color:'#4f46e5', bg:'#eef2ff', border:'#c7d2fe', shadow:'rgba(99,102,241,0.12)' },
-            { key:'goruldu',   label:'Görüldü',     icon:'👁️', color:'#b45309', bg:'#fef9c3', border:'#fde68a', shadow:'rgba(180,83,9,0.12)' },
-            { key:'gecikmiş',  label:'Gecikmiş',    icon:'🚨', color:'#dc2626', bg:'#fef2f2', border:'#fecaca', shadow:'rgba(220,38,38,0.12)' },
-            { key:'tamamlandı',label:'Tamamlandı',  icon:'✅', color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', shadow:'rgba(5,150,105,0.12)' },
+            { key:'all',       label:t('teacher.homework.total'),        icon:'📋', color:'#374151', bg:'white',   border:'#f1f5f9', shadow:'rgba(0,0,0,0.06)' },
+            { key:'verildi',   label:t('teacher.homework.statusPending'), icon:'⏳', color:'#4f46e5', bg:'#eef2ff', border:'#c7d2fe', shadow:'rgba(99,102,241,0.12)' },
+            { key:'goruldu',   label:t('teacher.homework.statusSeen'),    icon:'👁️', color:'#b45309', bg:'#fef9c3', border:'#fde68a', shadow:'rgba(180,83,9,0.12)' },
+            { key:'gecikmiş',  label:t('teacher.homework.statusLate'),    icon:'🚨', color:'#dc2626', bg:'#fef2f2', border:'#fecaca', shadow:'rgba(220,38,38,0.12)' },
+            { key:'tamamlandı',label:t('teacher.homework.statusCompleted'),icon:'✅', color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', shadow:'rgba(5,150,105,0.12)' },
           ].map(({ key, label, icon, color, bg, border, shadow }, idx) => (
             <div key={key} className="filter-tab" onClick={() => setFilter(key)} style={{
               background: filter === key ? bg : 'white',
@@ -880,7 +889,7 @@ export default function TeacherHomework() {
           <input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Ödev veya öğrenci ara..."
+            placeholder={t('teacher.homework.searchPlaceholder')}
             style={{
               width:'100%', background:'white',
               border:'1.5px solid #f1f5f9', borderRadius:14,
@@ -904,9 +913,9 @@ export default function TeacherHomework() {
         {filtered.length === 0 ? (
           <div style={{ background:'white', borderRadius:20, padding:'4rem 2rem', textAlign:'center', border:'1.5px solid #f1f5f9', animation: loaded ? 'fadeUp 0.5s ease 0.3s both' : 'none' }}>
             <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>📭</div>
-            <p style={{ fontWeight:800, fontSize:'1.1rem', color:'#374151', marginBottom:'0.4rem' }}>Ödev bulunamadı</p>
+            <p style={{ fontWeight:800, fontSize:'1.1rem', color:'#374151', marginBottom:'0.4rem' }}>{t('teacher.homework.notFound')}</p>
             <p style={{ color:'#9ca3af', fontSize:'0.875rem' }}>
-              {searchQuery ? `"${searchQuery}" için sonuç yok` : 'Henüz ödev eklenmemiş'}
+              {searchQuery ? `"${searchQuery}" ${t('teacher.homework.noResults')}` : t('teacher.homework.noHomeworkYet')}
             </p>
           </div>
         ) : (
@@ -921,7 +930,7 @@ export default function TeacherHomework() {
                     </div>
                     <span style={{ fontSize:'0.9rem', fontWeight:800, color:'#111827' }}>{studentName}</span>
                     <div style={{ flex:1, height:1, background:'linear-gradient(to right, #f1f5f9, transparent)' }} />
-                    <span style={{ fontSize:'0.72rem', fontWeight:700, color:'#9ca3af' }}>{hws.length} ödev</span>
+                    <span style={{ fontSize:'0.72rem', fontWeight:700, color:'#9ca3af' }}>{hws.length} {t('teacher.homework.homeworkCount')}</span>
                   </div>
 
                   <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>

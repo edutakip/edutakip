@@ -347,11 +347,11 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <SectionTitle icon={User} title="Kimlik Bilgileri" />
+              <SectionTitle icon={User} title={t('teacher.addStudentModal.identityInfo')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <Field label={t('teacher.addStudentModal.studentName')}>
-                    <input style={inp} placeholder="Ad Soyad" value={form.name} onChange={e => u('name', e.target.value)}
+                    <input style={inp} placeholder={t('teacher.addStudentModal.namePlaceholder')} value={form.name} onChange={e => u('name', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                 </div>
@@ -397,7 +397,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               </div>
               {form.feePerLesson > 0 && (
                 <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', color: '#34d399', fontSize: '0.78rem', fontWeight: '600' }}>
-                  Tahmini aylık gelir: ₺{Math.round(Number(form.feePerLesson) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
+                  {t('teacher.addStudentModal.estimatedMonthly')}: ₺{Math.round(Number(form.feePerLesson) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
                 </div>
               )}
             </div>
@@ -412,7 +412,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <Field label={t('teacher.addStudentModal.parentName')}>
-                    <input style={inp} placeholder="Veli adı soyadı" value={form.parentName} onChange={e => u('parentName', e.target.value)}
+                    <input style={inp} placeholder={t('teacher.addStudentModal.parentNamePlaceholder')} value={form.parentName} onChange={e => u('parentName', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                 </div>
@@ -450,7 +450,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
                   <thead>
                     <tr>
-                      <th style={{ color: 'rgba(255,255,255,0.3)', padding: '0.5rem 0.4rem', textAlign: 'left', fontWeight: '600' }}>Saat</th>
+                      <th style={{ color: 'rgba(255,255,255,0.3)', padding: '0.5rem 0.4rem', textAlign: 'left', fontWeight: '600' }}>{t('teacher.addStudentModal.hour')}</th>
                       {DAYS.map((d, i) => (
                         <th key={i} style={{ color: 'rgba(165,180,252,0.8)', padding: '0.5rem 0.4rem', textAlign: 'center', fontWeight: '700', background: 'rgba(99,102,241,0.08)', borderRadius: '8px' }}>{d}</th>
                       ))}
@@ -468,7 +468,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
                             <td key={di} style={{ padding: '0.25rem' }}>
                               <div
                                 onClick={(e) => handleCellClick(di, hourTime, e)}
-                                title={occupied.length ? occupied.map(l => l.studentName).join(', ') : 'Tıkla ve saat seç'}
+                                title={occupied.length ? occupied.map(l => l.studentName).join(', ') : t('teacher.addStudentModal.clickToAdd')}
                                 style={{
                                   width: '100%', minWidth: '38px', height: '32px', borderRadius: '8px',
                                   cursor: occupied.length ? 'not-allowed' : 'pointer',
@@ -490,7 +490,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               </div>
               {form.schedule.length > 0 && (
                 <div style={{ padding: '0.85rem 1rem', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '10px', marginTop: '1rem' }}>
-                  <div style={{ color: '#a5b4fc', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem' }}>✓ Seçilen saatler:</div>
+                  <div style={{ color: '#a5b4fc', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem' }}>✓ {t('teacher.addStudentModal.selectedTimes')}:</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                     {form.schedule.map((s, i) => (
                       <span key={i} onClick={() => u('schedule', form.schedule.filter((_, idx) => idx !== i))}

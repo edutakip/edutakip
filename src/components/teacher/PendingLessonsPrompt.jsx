@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle, XCircle, ClipboardList, Clock } from 'lucide-react';
 import LessonReportModal from './LessonReportModal';
+import { useTranslation } from 'react-i18next';
 
 export default function PendingLessonsPrompt({ onDone }) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState([]);
   const [current, setCurrent] = useState(null);
   const [showReport, setShowReport] = useState(false);
@@ -82,11 +84,11 @@ export default function PendingLessonsPrompt({ onDone }) {
     nextLesson();
   };
 
-  const formatDate = (d, t) => {
+  const formatDate = (d, time) => {
     if (!d) return '';
-    const days = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const date = new Date(d);
-    return `${days[date.getDay()]} ${d.split('-').reverse().join('.')} ${t ? t.slice(0,5) : ''}`;
+    return `${days[date.getDay()]} ${d.split('-').reverse().join('.')} ${time ? time.slice(0,5) : ''}`;
   };
 
   return (
@@ -105,10 +107,10 @@ export default function PendingLessonsPrompt({ onDone }) {
           </div>
 
           <h2 style={{ fontSize: '1.15rem', fontWeight: '800', color: '#111827', marginBottom: '0.4rem' }}>
-            Tamamlanmayan Ders
+            {t('teacher.pendingPrompt.title')}
           </h2>
           <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-            Bu ders gerçekleşti mi?
+            {t('teacher.pendingPrompt.question')}
           </p>
 
           {/* Lesson Card */}
@@ -119,7 +121,7 @@ export default function PendingLessonsPrompt({ onDone }) {
             </div>
             {pending.length > 1 && (
               <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#9ca3af' }}>
-                +{pending.length - 1} tane daha bekliyor
+                +{pending.length - 1} {t('teacher.pendingPrompt.moreWaiting')}
               </div>
             )}
           </div>
@@ -127,17 +129,17 @@ export default function PendingLessonsPrompt({ onDone }) {
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={markCancel}
               style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: '1.5px solid #fee2e2', background: 'white', color: '#dc2626', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-              <XCircle size={16} /> Gerçekleşmedi
+              <XCircle size={16} /> {t('teacher.pendingPrompt.didNotHappen')}
             </button>
             <button onClick={markDone}
               style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}>
-              <CheckCircle size={16} /> Gerçekleşti
+              <CheckCircle size={16} /> {t('teacher.pendingPrompt.happened')}
             </button>
           </div>
 
           <button onClick={() => setDismissed(true)}
             style={{ width: '100%', marginTop: '0.75rem', padding: '0.5rem', background: 'none', border: 'none', color: '#9ca3af', fontSize: '0.8rem', cursor: 'pointer' }}>
-            Sonra hatırlat
+            {t('teacher.pendingPrompt.remindLater')}
           </button>
         </div>
       </div>

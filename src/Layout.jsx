@@ -145,10 +145,10 @@ const PARENT_MOBILE_NAV = [
 
 // TEACHER_MOBILE_NAV defined inside component using t()
 
-const FAB_ACTIONS = [
-  { label: 'Ders Ekle',  color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
-  { label: 'Ödeme Al',   color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
-  { label: 'Ödev Ver',   color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
+const FAB_ACTIONS_KEYS = [
+  { labelKey: 'teacher.fab.addLesson',    color: '#4f46e5', bg: '#eef2ff', Icon: CalendarDays, action: 'lessonModal'   },
+  { labelKey: 'teacher.fab.collectPayment', color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
+  { labelKey: 'teacher.fab.giveHomework', color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -638,7 +638,7 @@ export default function Layout({ children, currentPageName }) {
         {/* FAB */}
         {fabOpen && <div onClick={() => setFabOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />}
         <div className="app-fab" style={{ position: 'fixed', bottom: '5rem', right: '1rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-          {fabOpen && FAB_ACTIONS.map((a, i) => {
+          {fabOpen && FAB_ACTIONS_KEYS.map((a, i) => {
             const Icon = a.Icon;
             const handleClick = () => {
               if (a.action === 'lessonModal') setShowLessonModal(true);
@@ -648,7 +648,7 @@ export default function Layout({ children, currentPageName }) {
             };
             return (
               <div key={i} onClick={handleClick} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
+                <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{t(a.labelKey)}</span>
                 <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                   <Icon size={18} color={a.color} />
                 </div>
@@ -765,7 +765,7 @@ export default function Layout({ children, currentPageName }) {
         />
       )}
       <div className="app-fab" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-        {fabOpen && FAB_ACTIONS.map((a, i) => {
+        {fabOpen && FAB_ACTIONS_KEYS.map((a, i) => {
           const Icon = a.Icon;
           const handleClick = () => {
             if (a.action === 'lessonModal') setShowLessonModal(true);
@@ -776,7 +776,7 @@ export default function Layout({ children, currentPageName }) {
           return (
             <div key={i} onClick={handleClick}
               style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{a.label}</span>
+              <span style={{ background: 'white', color: '#374151', fontSize: '0.82rem', fontWeight: 700, padding: '0.4rem 0.85rem', borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.12)', whiteSpace: 'nowrap' }}>{t(a.labelKey)}</span>
               <div style={{ width: 44, height: 44, borderRadius: '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                 <Icon size={18} color={a.color} />
               </div>
