@@ -78,7 +78,18 @@
   "screenshots": {
     "sectionBadge": "Interface",
     "title": "Modern and User-Friendly",
-    "subtitle": "An intuitive and elegant teacher panel that works seamlessly on all devices."
+    "subtitle": "An intuitive and elegant teacher panel that works seamlessly on all devices.",
+    "tabs": ["All", "Students", "Lessons", "Finance", "Reports"],
+    "cards": [
+      { "label": "Overview", "sub": "EduTakip Dashboard", "overlay": "📊 Daily Summary Panel", "cat": "genel" },
+      { "label": "My Students", "sub": "EduTakip – Student Cards", "overlay": "🎓 All Student Cards", "cat": "ogrenci" },
+      { "label": "Lessons", "sub": "EduTakip – Lesson List", "overlay": "📋 Lesson List & Tracking", "cat": "ders" },
+      { "label": "Calendar", "sub": "EduTakip – Weekly Calendar", "overlay": "📅 Weekly Lesson Calendar", "cat": "ders" },
+      { "label": "Finance Management", "sub": "EduTakip – Income Analysis", "overlay": "📈 Monthly Income Chart", "cat": "finans" },
+      { "label": "Progress Reports", "sub": "EduTakip – Performance Tracking", "overlay": "⭐ Student Progress Reports", "cat": "rapor" },
+      { "label": "Add New Student", "sub": "EduTakip – 4-Step Registration", "overlay": "👤 Quick Student Registration", "cat": "ogrenci" },
+      { "label": "EduTakip Assistant", "sub": "AI-Powered Teacher Assistant", "overlay": "🧠 Ask Your AI Assistant", "cat": "ai" }
+    ]
   },
   "testimonials": {
     "sectionBadge": "Reviews",

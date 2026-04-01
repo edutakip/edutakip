@@ -78,7 +78,18 @@
   "screenshots": {
     "sectionBadge": "Arayüz",
     "title": "Modern ve Kullanıcı Dostu",
-    "subtitle": "Tüm cihazlarda sorunsuz çalışan, sezgisel ve şık bir öğretmen paneli."
+    "subtitle": "Tüm cihazlarda sorunsuz çalışan, sezgisel ve şık bir öğretmen paneli.",
+    "tabs": ["Tümü", "Öğrenciler", "Dersler", "Finans", "Raporlar"],
+    "cards": [
+      { "label": "Genel Bakış", "sub": "EduTakip Dashboard", "overlay": "📊 Günlük Özet Paneli", "cat": "genel" },
+      { "label": "Öğrencilerim", "sub": "EduTakip – Öğrenci Kartları", "overlay": "🎓 Tüm Öğrenci Kartları", "cat": "ogrenci" },
+      { "label": "Dersler", "sub": "EduTakip – Ders Listesi", "overlay": "📋 Ders Listesi ve Takibi", "cat": "ders" },
+      { "label": "Takvim", "sub": "EduTakip – Haftalık Takvim", "overlay": "📅 Haftalık Ders Takvimi", "cat": "ders" },
+      { "label": "Finans Yönetimi", "sub": "EduTakip – Gelir Analizi", "overlay": "📈 Aylık Gelir Grafiği", "cat": "finans" },
+      { "label": "Gelişim Raporları", "sub": "EduTakip – Performans Takibi", "overlay": "⭐ Öğrenci Gelişim Raporları", "cat": "rapor" },
+      { "label": "Yeni Öğrenci Ekle", "sub": "EduTakip – 4 Adımlı Kayıt", "overlay": "👤 Hızlı Öğrenci Kaydı", "cat": "ogrenci" },
+      { "label": "EduTakip Asistan", "sub": "AI Destekli Öğretmen Asistanı", "overlay": "🧠 AI Asistanınıza Sorun", "cat": "ai" }
+    ]
   },
   "testimonials": {
     "sectionBadge": "Yorumlar",

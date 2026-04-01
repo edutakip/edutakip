@@ -276,45 +276,46 @@ export default function Landing() {
           <h2 style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.25, margin: '14px 0 16px' }}>{t('screenshots.title')}</h2>
           <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>{t('screenshots.subtitle')}</p>
         </div>
-        <div className="anim-scroll" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '40px 0 36px', justifyContent: 'center' }}>
-          {['Tümü', 'Öğrenciler', 'Dersler', 'Finans', 'Raporlar'].map((label, i) =>
-            <button key={label} className={`tab-btn${i === 0 ? ' active' : ''}`} onClick={(e) => {
-              document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
-              e.currentTarget.classList.add('active');
-              const cats = { Tümü: 'all', Öğrenciler: 'ogrenci', Dersler: 'ders', Finans: 'finans', Raporlar: 'rapor' };
-              const cat = cats[label];
-              document.querySelectorAll('.sc-card').forEach((card) => {
-                card.style.display = cat === 'all' || card.dataset.cat === cat ? 'flex' : 'none';
-              });
-            }}>{label}</button>
-          )}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
-          {[
-            { icon: '🏠', label: 'Genel Bakış', sub: 'EduTakip Dashboard', overlay: '📊 Günlük Özet Paneli', cat: 'genel', delay: 'd1' },
-            { icon: '👥', label: 'Öğrencilerim', sub: 'EduTakip – Öğrenci Kartları', overlay: '🎓 Tüm Öğrenci Kartları', cat: 'ogrenci', delay: 'd2' },
-            { icon: '📚', label: 'Dersler', sub: 'EduTakip – Ders Listesi', overlay: '📋 Ders Listesi ve Takibi', cat: 'ders', delay: 'd3' },
-            { icon: '🗓️', label: 'Takvim', sub: 'EduTakip – Haftalık Takvim', overlay: '📅 Haftalık Ders Takvimi', cat: 'ders', delay: 'd4' },
-            { icon: '💰', label: 'Finans Yönetimi', sub: 'EduTakip – Gelir Analizi', overlay: '📈 Aylık Gelir Grafiği', cat: 'finans', delay: 'd1' },
-            { icon: '📊', label: 'Gelişim Raporları', sub: 'EduTakip – Performans Takibi', overlay: '⭐ Öğrenci Gelişim Raporları', cat: 'rapor', delay: 'd2' },
-            { icon: '➕', label: 'Yeni Öğrenci Ekle', sub: 'EduTakip – 4 Adımlı Kayıt', overlay: '👤 Hızlı Öğrenci Kaydı', cat: 'ogrenci', delay: 'd3' },
-            { icon: '🤖', label: 'EduTakip Asistan', sub: 'AI Destekli Öğretmen Asistanı', overlay: '🧠 AI Asistanınıza Sorun', cat: 'ai', delay: 'd4' },
-          ].map(({ icon, label, sub, overlay, cat, delay }) =>
-            <div key={label} data-cat={cat} className={`sc-card anim-scroll ${delay}`}
-              style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)', borderRadius: 16, aspectRatio: '16/10', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'transform .3s,box-shadow .3s', border: '1px solid rgba(124,58,237,.3)' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: 'rgba(0,0,0,.3)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
-                {['#ff5f57', '#febc2e', '#28c840'].map((c) => <div key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c }} />)}
+        {(() => {
+          const tabs = t('screenshots.tabs', { returnObjects: true });
+          const cards = t('screenshots.cards', { returnObjects: true });
+          const icons = ['🏠', '👥', '📚', '🗓️', '💰', '📊', '➕', '🤖'];
+          const delays = ['d1', 'd2', 'd3', 'd4', 'd1', 'd2', 'd3', 'd4'];
+          const catKeys = ['all', 'ogrenci', 'ders', 'ders', 'finans', 'rapor', 'ogrenci', 'ai'];
+          return (
+            <>
+              <div className="anim-scroll" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '40px 0 36px', justifyContent: 'center' }}>
+                {Array.isArray(tabs) && tabs.map((label, i) =>
+                  <button key={i} className={`tab-btn${i === 0 ? ' active' : ''}`} onClick={(e) => {
+                    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    const cat = catKeys[i] || 'all';
+                    document.querySelectorAll('.sc-card').forEach((card) => {
+                      card.style.display = i === 0 || card.dataset.cat === cat ? 'flex' : 'none';
+                    });
+                  }}>{label}</button>
+                )}
               </div>
-              <div style={{ fontSize: '2.5rem', marginBottom: 12, marginTop: 20 }}>{icon}</div>
-              <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{label}</div>
-              <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.55)', marginTop: 4 }}>{sub}</div>
-              <div style={{ width: '85%', marginTop: 12 }}>
-                {['75%', '50%', '100%'].map((w, i) => <div key={i} style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,.15)', marginBottom: 8, width: w }} />)}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
+                {Array.isArray(cards) && cards.map((card, idx) => (
+                  <div key={idx} data-cat={card.cat} className={`sc-card anim-scroll ${delays[idx]}`}
+                    style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)', borderRadius: 16, aspectRatio: '16/10', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'transform .3s,box-shadow .3s', border: '1px solid rgba(124,58,237,.3)' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: 'rgba(0,0,0,.3)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
+                      {['#ff5f57', '#febc2e', '#28c840'].map((c) => <div key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c }} />)}
+                    </div>
+                    <div style={{ fontSize: '2.5rem', marginBottom: 12, marginTop: 20 }}>{icons[idx]}</div>
+                    <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{card.label}</div>
+                    <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.55)', marginTop: 4 }}>{card.sub}</div>
+                    <div style={{ width: '85%', marginTop: 12 }}>
+                      {['75%', '50%', '100%'].map((w, i) => <div key={i} style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,.15)', marginBottom: 8, width: w }} />)}
+                    </div>
+                    <div className="sc-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(124,58,237,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity .3s', fontSize: '.85rem', fontWeight: 600, color: '#fff' }}>{card.overlay}</div>
+                  </div>
+                ))}
               </div>
-              <div className="sc-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(124,58,237,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity .3s', fontSize: '.85rem', fontWeight: 600, color: '#fff' }}>{overlay}</div>
-            </div>
-          )}
-        </div>
+            </>
+          );
+        })()}
       </AnimSection>
 
       {/* TESTIMONIALS */}
