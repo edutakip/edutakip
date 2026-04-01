@@ -245,26 +245,56 @@ function SlidePanel({ hw, students, onClose, onStatusChange, onDelete, onEdit })
             </div>
           )}
 
-          {/* Attachments from parent — with thumbnails */}
+          {/* Öğretmenin yüklediği dosyalar */}
+          {hw?.teacherAttachments?.length > 0 && (
+            <div style={{ background:'#eff6ff', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bfdbfe', animation:'slideUp 0.4s ease 0.28s both' }}>
+              <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#1d4ed8', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
+                📎 Öğretmen Yükledi ({hw.teacherAttachments.length} dosya)
+              </p>
+              {hw.teacherAttachments.some(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) && (
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(80px, 1fr))', gap:'0.4rem', marginBottom:'0.5rem' }}>
+                  {hw.teacherAttachments.filter(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'block', aspectRatio:'1/1', borderRadius:8, overflow:'hidden', border:'2px solid #bfdbfe', cursor:'pointer' }}>
+                      <img src={url} alt={`Dosya ${i+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { e.target.style.display='none'; }} />
+                    </a>
+                  ))}
+                </div>
+              )}
+              <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem' }}>
+                {hw.teacherAttachments.filter(url => !/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => {
+                  const filename = url.split('/').pop()?.split('?')[0] || `Dosya ${i + 1}`;
+                  return (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'white', borderRadius:8, padding:'0.5rem 0.75rem', border:'1px solid #bfdbfe', textDecoration:'none', transition:'all 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background='#dbeafe'}
+                      onMouseLeave={e => e.currentTarget.style.background='white'}>
+                      <span style={{ fontSize:'1rem' }}>📄</span>
+                      <span style={{ fontSize:'0.78rem', color:'#1e40af', fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{filename}</span>
+                      <span style={{ fontSize:'0.65rem', color:'#1d4ed8', fontWeight:700, flexShrink:0 }}>Aç →</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Velinin yüklediği dosyalar */}
           {hw?.attachments?.length > 0 && (
             <div style={{ background:'#f0fdf4', borderRadius:12, padding:'1rem', marginBottom:'1.25rem', border:'1px solid #bbf7d0', animation:'slideUp 0.4s ease 0.28s both' }}>
               <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'0.75rem' }}>
                 📎 Veli Yükledi ({hw.attachments.length} dosya)
               </p>
-              {/* Thumbnail grid for images */}
               {hw.attachments.some(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) && (
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(80px, 1fr))', gap:'0.4rem', marginBottom:'0.5rem' }}>
                   {hw.attachments.filter(url => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                       style={{ display:'block', aspectRatio:'1/1', borderRadius:8, overflow:'hidden', border:'2px solid #bbf7d0', cursor:'pointer' }}>
-                      <img src={url} alt={`Ödev ${i+1}`}
-                        style={{ width:'100%', height:'100%', objectFit:'cover' }}
-                        onError={e => { e.target.style.display='none'; }} />
+                      <img src={url} alt={`Ödev ${i+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { e.target.style.display='none'; }} />
                     </a>
                   ))}
                 </div>
               )}
-              {/* PDF files */}
               <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem' }}>
                 {hw.attachments.filter(url => !/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)).map((url, i) => {
                   const filename = url.split('/').pop()?.split('?')[0] || `Dosya ${i + 1}`;
@@ -715,7 +745,7 @@ export default function TeacherHomework() {
         if (res?.file_url) uploadedUrls.push(res.file_url);
       } catch (e) { console.warn('Dosya yüklenemedi:', f.name, e); }
     }
-    const dataToSave = { ...form, ...(uploadedUrls.length > 0 ? { attachments: uploadedUrls } : {}) };
+    const dataToSave = { ...form, ...(uploadedUrls.length > 0 ? { teacherAttachments: uploadedUrls } : {}) };
     if (editingHw) {
       await base44.entities.Homework.update(editingHw.id, { ...dataToSave, studentName: student?.name || editingHw.studentName });
       showToast({ message: 'Ödev güncellendi ✓' });

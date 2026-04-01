@@ -68,7 +68,7 @@ function Countdown({ dueDate }) {
 // ── Homework Modal (Portal) ───────────────────────────────────
 function HomeworkModal({ hw, student, onClose, onSubmitted }) {
   const [files, setFiles] = useState([]); // yeni seçilen dosyalar
-  const [existingUrls, setExistingUrls] = useState(hw.attachments || []); // daha önce yüklenmiş URL'ler
+  const [existingUrls, setExistingUrls] = useState(hw.attachments || []); // velinin daha önce yüklediği URL'ler
   const [teacherNote, setTeacherNote] = useState(hw.parentNote || '');
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -314,6 +314,38 @@ function HomeworkModal({ hw, student, onClose, onSubmitted }) {
             {hw.description || hw.title}
           </div>
         </div>
+
+        {/* Öğretmenin yüklediği dosyalar */}
+        {hw.teacherAttachments?.length > 0 && (
+          <div style={{
+            background: '#eff6ff',
+            borderRadius: '14px',
+            padding: '1rem',
+            marginBottom: '0.85rem',
+            border: '1.5px solid #bfdbfe',
+          }}>
+            <div style={{ color: '#1d4ed8', fontWeight: '800', fontSize: '0.75rem', marginBottom: '0.6rem', letterSpacing: '0.07em' }}>
+              📎 ÖĞRETMEN EKLEDİ
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
+              {hw.teacherAttachments.map((url, i) => {
+                const isImage = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url);
+                return isImage ? (
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'block', aspectRatio: '1/1', borderRadius: 8, overflow: 'hidden', border: '2px solid #bfdbfe' }}>
+                    <img src={url} alt={`Dosya ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </a>
+                ) : (
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', aspectRatio: '1/1', borderRadius: 8, border: '2px solid #bfdbfe', background: 'white', textDecoration: 'none', gap: '0.2rem' }}>
+                    <span style={{ fontSize: '1.4rem' }}>📄</span>
+                    <span style={{ fontSize: '0.5rem', color: '#1d4ed8', fontWeight: 600 }}>Aç</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Upload section */}
         <div style={{
