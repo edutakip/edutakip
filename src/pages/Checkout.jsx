@@ -41,6 +41,15 @@ export default function Checkout() {
 
     const initPaddle = async () => {
       if (window.Paddle) {
+        // Suppress network errors from Paddle's internal requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          return originalFetch.apply(this, args).catch(err => {
+            console.warn('[Paddle Network]', err.message);
+            return new Response('', { status: 200 });
+          });
+        };
+
         window.Paddle.Initialize({
           token: PADDLE_CLIENT_TOKEN,
           checkout: {
