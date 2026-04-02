@@ -693,28 +693,16 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             );
           })}
-          {/* Profil butonu */}
+          {/* Çıkış butonu */}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
-              color: 'rgba(249,115,22,0.9)', background: 'none', border: 'none',
-              transition: 'color 0.15s ease', fontSize: '0.62rem', fontWeight: '500',
+              color: '#f97316', background: 'none', border: 'none',
+              transition: 'color 0.15s ease', fontSize: '0.62rem', fontWeight: '600',
             }}>
-            {user?.full_name ? (
-              <div style={{
-                width: 22, height: 22, borderRadius: '50%',
-                background: 'rgba(249,115,22,0.2)',
-                border: '1.5px solid rgba(249,115,22,0.5)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.7rem', fontWeight: 800, color: '#f97316',
-              }}>
-                {user.full_name.charAt(0).toUpperCase()}
-              </div>
-            ) : (
-              <LogOut size={20} strokeWidth={1.75} />
-            )}
-            <span style={{ color: '#f97316', fontWeight: '600' }}>Profil</span>
+            <LogOut size={20} strokeWidth={1.75} />
+            <span>Çıkış</span>
           </button>
         </nav>
 
