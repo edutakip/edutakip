@@ -489,31 +489,73 @@ export default function Layout({ children, currentPageName }) {
           zIndex: 51,
           background: '#1a1a2e',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
-          padding: '0.65rem 1rem',
+          padding: '0.55rem 1rem',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '0.75rem',
         }}>
-          <div>
+          {/* Sol: başlık */}
+          <div style={{ flexShrink: 0 }}>
             <h1 style={{ color: 'white', fontWeight: 900, fontSize: '1rem', letterSpacing: '-0.3px', margin: 0, lineHeight: 1 }}>EduTakip</h1>
             <div style={{ width: 32, height: 2.5, background: '#6366f1', borderRadius: 2, marginTop: 3 }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            {plan === 'trialing' && daysLeft !== null && (
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24' }}>
-                {daysLeft} gün
-              </span>
-            )}
-            {showSubscriptionChip && (
-              <MobileSubscriptionButton plan={plan} user={user} />
-            )}
+
+          {/* Orta: deneme süresi progress bar (sadece trialing/free/expired) */}
+          {showSubscriptionChip && (
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {plan === 'trialing' && daysLeft !== null && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Deneme Süresi</span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24' }}>{daysLeft} gün kaldı</span>
+                  </div>
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.max(5, Math.min(100, (daysLeft / 30) * 100))}%`,
+                      borderRadius: 999,
+                      background: daysLeft < 5 ? 'linear-gradient(90deg,#f97316,#ef4444)' : 'linear-gradient(90deg,#6366f1,#a78bfa)',
+                      transition: 'width 0.4s ease',
+                    }} />
+                  </div>
+                </>
+              )}
+              {plan === 'free' && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Ücretsiz Plan</span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#a5b4fc' }}>3 öğrenci limiti</span>
+                  </div>
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999 }}>
+                    <div style={{ height: '100%', width: '30%', borderRadius: 999, background: 'linear-gradient(90deg,#6366f1,#a78bfa)' }} />
+                  </div>
+                </>
+              )}
+              {plan === 'expired' && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Abonelik</span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#fca5a5' }}>Süresi doldu</span>
+                  </div>
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999 }}>
+                    <div style={{ height: '100%', width: '100%', borderRadius: 999, background: 'linear-gradient(90deg,#ef4444,#dc2626)' }} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Sağ: buton veya PRO rozeti */}
+          <div style={{ flexShrink: 0 }}>
+            {showSubscriptionChip && <MobileSubscriptionButton plan={plan} user={user} />}
             {plan === 'pro' && (
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6ee7b7', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '0.2rem 0.6rem' }}>
-                PRO
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6ee7b7', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '0.25rem 0.7rem' }}>
+                PRO ✓
               </span>
             )}
           </div>
         </header>
 
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '56px', paddingBottom: '80px' }}>
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '66px', paddingBottom: '80px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
