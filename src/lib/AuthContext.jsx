@@ -92,7 +92,23 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      
+      // Yeni öğretmen ise otomatik deneme sürümü başlat
+      if (currentUser.role === 'teacher' && !currentUser.plan) {
+        try {
+          await base44.functions.invoke('initializeTeacherTrial', {});
+          // Güncellenmiş user data'sı al
+          const updatedUser = await base44.auth.me();
+          setUser(updatedUser);
+        } catch (err) {
+          console.warn('Trial initialization failed:', err);
+          // Yine de devam et, trial olmasa da giriş yapsın
+          setUser(currentUser);
+        }
+      } else {
+        setUser(currentUser);
+      }
+      
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {
