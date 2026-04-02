@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         student_count: String(studentCount),
       },
       checkout: {
-        url: true,
+        url: 'https://edutakip.base44.app/checkout',
       },
     });
 
