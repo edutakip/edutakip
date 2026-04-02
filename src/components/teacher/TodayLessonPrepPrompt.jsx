@@ -64,12 +64,13 @@ export default function TodayLessonPrepPrompt({ onClose }) {
         </div>
 
         <style>{`
-          .lesson-list::-webkit-scrollbar { width: 6px; }
-          .lesson-list::-webkit-scrollbar-track { background: transparent; }
-          .lesson-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-          .lesson-list::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+          .lesson-list {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .lesson-list::-webkit-scrollbar { display: none; }
         `}</style>
-        <div className="lesson-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+        <div className="lesson-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '360px', overflowY: 'auto' }}>
            {lessons.map((item) => {
             const isExpanded = expandedId === item.lesson.studentId;
             const lesson = item.lesson;
