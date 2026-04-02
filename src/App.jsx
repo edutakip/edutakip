@@ -19,6 +19,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import Checkout from './pages/Checkout';
+import SubscriptionManagement from './pages/SubscriptionManagement';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -192,6 +193,7 @@ const AuthenticatedApp = () => {
       <Route path="/adminreis" element={<AdminPanel />} />
       <Route path="/TeacherAssistant" element={<LayoutWrapper currentPageName="TeacherAssistant"><TeacherAssistant /></LayoutWrapper>} />
       <Route path="/Page1" element={<LayoutWrapper currentPageName="Page1"><Page1 /></LayoutWrapper>} />
+      <Route path="/SubscriptionManagement" element={<LayoutWrapper currentPageName="SubscriptionManagement"><SubscriptionManagement /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
