@@ -152,30 +152,20 @@ const FAB_ACTIONS_KEYS = [
   { labelKey: 'teacher.fab.giveHomework', color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
 ];
 
-function MobileSubscriptionButton({ plan, user }) {
-  const [showModal, setShowModal] = React.useState(false);
+function MobileSubscriptionButton({ plan, onOpenModal }) {
   const label = plan === 'expired' ? 'Yenile' : 'Abone Ol';
   return (
-    <>
-      <button onClick={() => setShowModal(true)} style={{
-        display: 'flex', alignItems: 'center', gap: '0.35rem',
-        padding: '0.35rem 0.75rem', borderRadius: 10,
-        border: 'none', cursor: 'pointer',
-        background: plan === 'expired' ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#f59e0b,#f97316)',
-        color: 'white', fontWeight: 800, fontSize: '0.8rem',
-        boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
-      }}>
-        <span style={{ fontSize: '0.85rem' }}>👑</span>
-        {label}
-      </button>
-      {showModal && (
-        <ProUpgradeModal
-          reason='limit'
-          onClose={() => setShowModal(false)}
-          onUpgraded={() => setShowModal(false)}
-        />
-      )}
-    </>
+    <button onClick={onOpenModal} style={{
+      display: 'flex', alignItems: 'center', gap: '0.35rem',
+      padding: '0.35rem 0.75rem', borderRadius: 10,
+      border: 'none', cursor: 'pointer',
+      background: plan === 'expired' ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#f59e0b,#f97316)',
+      color: 'white', fontWeight: 800, fontSize: '0.8rem',
+      boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+    }}>
+      <span style={{ fontSize: '0.85rem' }}>👑</span>
+      {label}
+    </button>
   );
 }
 
@@ -219,6 +209,7 @@ export default function Layout({ children, currentPageName }) {
   const [selectedPayStudent, setSelectedPayStudent] = useState(null);
   const [derslerOpen, setDerslerOpen] = useState(false);
   const [finansOpen, setFinansOpen] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
 
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
@@ -499,7 +490,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{ marginLeft: 6, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24', fontWeight: 800 }}>{daysLeft} gün kaldı</span>
                 )}
               </span>
-              <MobileSubscriptionButton plan={plan} user={user} />
+              <MobileSubscriptionButton plan={plan} onOpenModal={() => setShowProModal(true)} />
             </div>
             <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999, overflow: 'hidden' }}>
               <div style={{
@@ -728,6 +719,13 @@ export default function Layout({ children, currentPageName }) {
             student={selectedPayStudent}
             onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
             onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
+          />
+        )}
+        {showProModal && (
+          <ProUpgradeModal
+            reason='limit'
+            onClose={() => setShowProModal(false)}
+            onUpgraded={() => setShowProModal(false)}
           />
         )}
       </div>
