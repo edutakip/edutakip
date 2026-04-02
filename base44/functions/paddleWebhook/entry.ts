@@ -95,9 +95,6 @@ async function handleSubscriptionEvent(base44, event) {
     if (subscription.status === 'active') {
       updateData.plan = 'pro';
       updateData.subscriptionStatus = 'active';
-    } else if (subscription.status === 'trialing') {
-      updateData.plan = 'trialing';
-      updateData.subscriptionStatus = 'trialing';
     } else {
       updateData.plan = 'expired';
       updateData.subscriptionStatus = subscription.status;

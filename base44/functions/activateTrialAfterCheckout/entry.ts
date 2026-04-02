@@ -48,19 +48,13 @@ Deno.serve(async (req) => {
       // Yine de devam et — trialing başlamış olabilir
     }
 
-    // Trialın bitiş tarihini hesapla (30 gün)
-    const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + 30);
-
     const updateData = {
-      plan: 'trialing',
+      plan: 'pro',
       studentLimit: txStudentCount,
-      subscriptionStatus: 'trialing',
-      trialEndDate: trialEndDate.toISOString(),
+      subscriptionStatus: 'active',
       aiReportsEnabled: true,
       detailedFinanceEnabled: true,
       whatsappEnabled: true,
-      trialUsed: true,
       paddleCustomerId: tx?.customer_id,
     };
 
@@ -69,9 +63,9 @@ Deno.serve(async (req) => {
     }
 
     await base44.asServiceRole.entities.User.update(user.id, updateData);
-    console.log(`[activateTrial] User ${user.email} activated with plan=trialing, ${txStudentCount} students`);
+    console.log(`[activateTrial] User ${user.email} activated with plan=pro, ${txStudentCount} students`);
 
-    return Response.json({ success: true, plan: 'trialing', studentLimit: txStudentCount });
+    return Response.json({ success: true, plan: 'pro', studentLimit: txStudentCount });
   } catch (error) {
     console.error('[activateTrial] Error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });

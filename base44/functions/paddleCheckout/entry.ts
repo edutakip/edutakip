@@ -69,10 +69,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Could not resolve customer ID' }, { status: 500 });
     }
 
-    // Step 3: Create transaction
-    // Note: No address_id means this will be a 'draft' transaction.
-    // Paddle will still return a checkout.url you can redirect the customer to,
-    // where they will complete their address and payment details.
+    // Step 3: Create transaction (no trial — we provide trial via our platform)
     const txRes = await paddleRequest('POST', '/transactions', {
       items: [{ price_id: PRICE_ID, quantity: studentCount }],
       customer_id: customerId,
