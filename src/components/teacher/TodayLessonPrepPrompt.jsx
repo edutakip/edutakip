@@ -63,14 +63,14 @@ export default function TodayLessonPrepPrompt({ onClose }) {
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-          <style>{`
-            div::-webkit-scrollbar { width: 6px; }
-            div::-webkit-scrollbar-track { background: transparent; }
-            div::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-            div::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-          `}</style>
-          {lessons.map((item) => {
+        <style>{`
+          .lesson-list::-webkit-scrollbar { width: 6px; }
+          .lesson-list::-webkit-scrollbar-track { background: transparent; }
+          .lesson-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+          .lesson-list::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        `}</style>
+        <div className="lesson-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+           {lessons.map((item) => {
             const isExpanded = expandedId === item.lesson.studentId;
             const lesson = item.lesson;
             const prev = item.previousLesson;
