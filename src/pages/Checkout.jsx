@@ -3,7 +3,7 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
-const PADDLE_CLIENT_TOKEN = 'live_b02b6af18c4afe6b5d2cef4e7d1'; // replace with your actual client-side token from Paddle dashboard
+const PADDLE_CLIENT_TOKEN = 'live_fb6aea95ebc444b408a9cb2b68c';
 
 export default function Checkout() {
   const navigate = useNavigate();
