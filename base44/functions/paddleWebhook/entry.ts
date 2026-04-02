@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const WEBHOOK_SECRET = (Deno.env.get('PADDLE_WEBHOOK_SECRET') || 'ntfset_01kn57v2v7961mm11w040xmw7z').trim();
+const WEBHOOK_SECRET = (Deno.env.get('PADDLE_WEBHOOK_SECRET') || '').trim();
 
 // Paddle webhook imza doğrulaması (Paddle v2 formatı: h1=HASH;ts=TIMESTAMP)
 async function verifyPaddleSignature(body, signatureHeader) {
