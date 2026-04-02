@@ -484,50 +484,46 @@ export default function Layout({ children, currentPageName }) {
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
 
-        {/* ── Üst başlık bar ── */}
-        <header style={{
-          position: 'fixed', top: 0, left: 0, right: 0,
-          zIndex: 51,
-          background: '#1a1a2e',
-          borderBottom: showSubscriptionChip ? 'none' : '1px solid rgba(255,255,255,0.08)',
-        }}>
-          {/* Ana satır */}
-          <div style={{ padding: '0.65rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h1 style={{ color: 'white', fontWeight: 900, fontSize: '1rem', letterSpacing: '-0.3px', margin: 0, lineHeight: 1 }}>EduTakip</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {showSubscriptionChip && <MobileSubscriptionButton plan={plan} user={user} />}
-              {plan === 'pro' && (
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6ee7b7', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '0.25rem 0.7rem' }}>
-                  PRO ✓
-                </span>
-              )}
+        {/* ── Üst şerit (sadece pro değilse) ── */}
+        {showSubscriptionChip && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 51,
+            background: '#1a1a2e',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            padding: '0.5rem 1rem',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
+                {plan === 'trialing' ? 'Deneme Süresi' : plan === 'expired' ? 'Abonelik Süresi Doldu' : 'Ücretsiz Plan'}
+                {plan === 'trialing' && daysLeft !== null && (
+                  <span style={{ marginLeft: 6, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24', fontWeight: 800 }}>{daysLeft} gün kaldı</span>
+                )}
+              </span>
+              <MobileSubscriptionButton plan={plan} user={user} />
+            </div>
+            <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: 999,
+                width: plan === 'expired' ? '100%' : plan === 'trialing' && daysLeft !== null ? `${Math.max(5, Math.min(100, (daysLeft / 30) * 100))}%` : '30%',
+                background: plan === 'expired' ? 'linear-gradient(90deg,#ef4444,#dc2626)' : plan === 'trialing' && daysLeft !== null && daysLeft < 5 ? 'linear-gradient(90deg,#f97316,#ef4444)' : 'linear-gradient(90deg,#6366f1,#a78bfa)',
+              }} />
             </div>
           </div>
+        )}
+        {plan === 'pro' && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 51,
+            background: '#1a1a2e',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            padding: '0.6rem 1rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <h1 style={{ color: 'white', fontWeight: 900, fontSize: '1rem', margin: 0 }}>EduTakip</h1>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6ee7b7', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '0.25rem 0.7rem' }}>PRO ✓</span>
+          </div>
+        )}
 
-          {/* Deneme/plan şeridi */}
-          {showSubscriptionChip && (
-            <div style={{ padding: '0 1rem 0.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
-                  {plan === 'trialing' ? 'Deneme Süresi' : plan === 'expired' ? 'Abonelik' : 'Ücretsiz Plan'}
-                </span>
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: plan === 'expired' ? '#fca5a5' : plan === 'trialing' ? (daysLeft < 5 ? '#fca5a5' : '#fbbf24') : '#a5b4fc' }}>
-                  {plan === 'trialing' && daysLeft !== null ? `${daysLeft} gün kaldı` : plan === 'expired' ? 'Süresi doldu' : '3 öğrenci limiti'}
-                </span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%',
-                  borderRadius: 999,
-                  width: plan === 'expired' ? '100%' : plan === 'trialing' && daysLeft !== null ? `${Math.max(5, Math.min(100, (daysLeft / 30) * 100))}%` : '30%',
-                  background: plan === 'expired' ? 'linear-gradient(90deg,#ef4444,#dc2626)' : plan === 'trialing' && daysLeft < 5 ? 'linear-gradient(90deg,#f97316,#ef4444)' : 'linear-gradient(90deg,#6366f1,#a78bfa)',
-                }} />
-              </div>
-            </div>
-          )}
-        </header>
-
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: showSubscriptionChip ? '80px' : '56px', paddingBottom: '80px' }}>
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '62px', paddingBottom: '80px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
