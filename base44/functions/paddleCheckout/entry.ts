@@ -73,15 +73,19 @@ Deno.serve(async (req) => {
     // Note: No address_id means this will be a 'draft' transaction.
     // Paddle will still return a checkout.url you can redirect the customer to,
     // where they will complete their address and payment details.
+    const successUrl = `https://edutakip.com/checkout?success=true&_ptxn={checkout.transaction_id}`;
+
     const txRes = await paddleRequest('POST', '/transactions', {
-      items: [{ price_id: PRICE_ID, quantity: studentCount }], // Use studentCount for per-seat billing
+      items: [{ price_id: PRICE_ID, quantity: studentCount }],
       customer_id: customerId,
       custom_data: {
         user_id: user.id,
         user_email: user.email,
         student_count: String(studentCount),
       },
-      // Do NOT pass checkout.url — it is a read-only field returned by Paddle
+      checkout: {
+        url: successUrl,
+      },
     });
 
     if (!txRes.ok) {
