@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const PADDLE_API_KEY = Deno.env.get('PADDLE_API_KEY');
+const PADDLE_API_KEY = (Deno.env.get('PADDLE_API_KEY') || '').trim();
 const PRICE_ID = 'pri_01kn585navhk2x41damh8mawjn';
 const PADDLE_BASE = 'https://api.paddle.com';
 
@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     const studentCount = Math.max(1, Math.min(60, parseInt(body.studentCount) || 10));
 
     console.log(`[paddleCheckout] user=${user.email}, studentCount=${studentCount}`);
+    console.log(`[paddleCheckout] API key length=${PADDLE_API_KEY.length}, starts="${PADDLE_API_KEY.slice(0,12)}...", ends="...${PADDLE_API_KEY.slice(-6)}"`);
 
     // Step 1: Look up existing customer by email
     let customerId = null;
