@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
@@ -9,13 +9,27 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
+  const activatedRef = useRef(false);
+
+  const activateUser = async (transactionId) => {
+    if (activatedRef.current) return;
+    activatedRef.current = true;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const studentCount = parseInt(params.get('studentCount')) || 10;
+      await base44.functions.invoke('activateTrialAfterCheckout', { transactionId, studentCount });
+      console.log('[Checkout] User activated successfully');
+    } catch (err) {
+      console.error('[Checkout] Activation error:', err);
+      // Sessizce devam et — webhook sonunda düzeltir
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const transactionId = params.get('_ptxn');
 
-    // Initialize Paddle and let it auto-detect _ptxn
-    const initPaddle = () => {
+    const initPaddle = async () => {
       if (window.Paddle) {
         window.Paddle.Initialize({
           token: PADDLE_CLIENT_TOKEN,
@@ -24,11 +38,13 @@ export default function Checkout() {
               displayMode: 'overlay',
               theme: 'light',
               locale: 'tr',
-              successUrl: `${window.location.origin}/checkout?success=true`,
+              successUrl: `${window.location.origin}/checkout?success=true&_ptxn=${transactionId || ''}`,
             },
           },
-          eventCallback: (event) => {
+          eventCallback: async (event) => {
             if (event.name === 'checkout.completed') {
+              const txId = event.data?.transaction_id || transactionId;
+              if (txId) await activateUser(txId);
               setStatus('success');
               setTimeout(() => navigate('/TeacherDashboard'), 3000);
             }
@@ -36,13 +52,13 @@ export default function Checkout() {
         });
 
         if (transactionId) {
-          // Paddle will auto-detect _ptxn and open the overlay
           setStatus('idle');
         } else if (params.get('success') === 'true') {
+          const successTxId = params.get('_ptxn');
+          if (successTxId) await activateUser(successTxId);
           setStatus('success');
           setTimeout(() => navigate('/TeacherDashboard'), 3000);
         } else {
-          // No transaction param — redirect home
           navigate('/');
         }
       } else {
@@ -51,7 +67,6 @@ export default function Checkout() {
       }
     };
 
-    // Give Paddle.js a moment to load if not ready yet
     if (window.Paddle) {
       initPaddle();
     } else {
