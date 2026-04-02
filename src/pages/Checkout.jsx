@@ -30,8 +30,8 @@ export default function Checkout() {
     const transactionId = params.get('_ptxn');
     const isSuccess = params.get('success') === 'true';
 
-    // Success durumunda hiçbir setvay etme, doğrudan yönlendir
-    if (isSuccess && transactionId) {
+    // Success durumunda sadece bir kez çalışacak şekilde
+    if (isSuccess && transactionId && !activatedRef.current) {
       activateUser(transactionId).finally(() => {
         // 1.5 saniye bekle, sonra dashboard'a git
         setTimeout(() => navigate('/TeacherDashboard'), 1500);
