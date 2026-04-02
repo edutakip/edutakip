@@ -152,16 +152,19 @@ const FAB_ACTIONS_KEYS = [
   { labelKey: 'teacher.fab.giveHomework', color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
 ];
 
-function MobileSubscriptionButton({ plan, onOpenModal }) {
-  const label = plan === 'expired' ? 'Yenile' : 'Abone Ol';
+function MobileSubscriptionButton({ plan, daysLeft, onOpenModal }) {
+  const label = plan === 'expired' ? 'Yenile' : plan === 'trialing' && daysLeft !== null ? `${daysLeft}g • Abone Ol` : 'Abone Ol';
   return (
     <button onClick={onOpenModal} style={{
       display: 'flex', alignItems: 'center', gap: '0.35rem',
-      padding: '0.35rem 0.75rem', borderRadius: 10,
+      padding: '0.4rem 0.85rem', borderRadius: 10,
       border: 'none', cursor: 'pointer',
       background: plan === 'expired' ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#f59e0b,#f97316)',
       color: 'white', fontWeight: 800, fontSize: '0.8rem',
       boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+      position: 'relative', zIndex: 10, flexShrink: 0,
+      WebkitTapHighlightColor: 'transparent',
+      touchAction: 'manipulation',
     }}>
       <span style={{ fontSize: '0.85rem' }}>👑</span>
       {label}
@@ -490,7 +493,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{ marginLeft: 6, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24', fontWeight: 800 }}>{daysLeft} gün kaldı</span>
                 )}
               </span>
-              <MobileSubscriptionButton plan={plan} onOpenModal={() => setShowProModal(true)} />
+              <MobileSubscriptionButton plan={plan} daysLeft={daysLeft} onOpenModal={() => setShowProModal(true)} />
             </div>
             <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 999, overflow: 'hidden' }}>
               <div style={{
