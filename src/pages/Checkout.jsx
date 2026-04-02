@@ -28,6 +28,16 @@ export default function Checkout() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const transactionId = params.get('_ptxn');
+    const isSuccess = params.get('success') === 'true';
+
+    // Success durumunda hiçbir setvay etme, doğrudan yönlendir
+    if (isSuccess && transactionId) {
+      activateUser(transactionId).finally(() => {
+        // 1.5 saniye bekle, sonra dashboard'a git
+        setTimeout(() => navigate('/TeacherDashboard'), 1500);
+      });
+      return;
+    }
 
     const initPaddle = async () => {
       if (window.Paddle) {
@@ -38,26 +48,20 @@ export default function Checkout() {
               displayMode: 'overlay',
               theme: 'light',
               locale: 'tr',
-              successUrl: `${window.location.origin}/checkout?success=true&_ptxn=${transactionId || ''}`,
             },
           },
           eventCallback: async (event) => {
             if (event.name === 'checkout.completed') {
-              const txId = event.data?.transaction_id || transactionId;
+              const txId = event.data?.transaction_id;
               if (txId) await activateUser(txId);
-              setStatus('success');
-              setTimeout(() => navigate('/TeacherDashboard'), 3000);
+              // Yönlendir, state update etme
+              setTimeout(() => navigate('/TeacherDashboard'), 1500);
             }
           },
         });
 
         if (transactionId) {
           setStatus('idle');
-        } else if (params.get('success') === 'true') {
-          const successTxId = params.get('_ptxn');
-          if (successTxId) await activateUser(successTxId);
-          setStatus('success');
-          setTimeout(() => navigate('/TeacherDashboard'), 3000);
         } else {
           navigate('/');
         }
