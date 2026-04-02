@@ -3,41 +3,66 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
+const PADDLE_CLIENT_TOKEN = 'live_b02b6af18c4afe6b5d2cef4e7d1'; // replace with your actual client-side token from Paddle dashboard
+
 export default function Checkout() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('processing');
+  const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const checkPayment = async () => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const transactionId = params.get('_ptxn');
-        
-        console.log('Checkout params:', Object.fromEntries(params));
-        
-        const user = await base44.auth.me();
-        if (!user) {
-          setStatus('error');
-          setMessage('Kullanıcı oturumu bulunamadı.');
-          return;
-        }
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get('_ptxn');
 
-        // Webhook tarafından user güncellenecek, 3 saniye bekle ve dashboard'a dön
-        setStatus('processing');
-        setMessage('Ödeme işleniyor...');
-        
-        setTimeout(() => {
-          navigate('/TeacherDashboard');
-        }, 3000);
-      } catch (error) {
-        console.error('Checkout error:', error);
+    // Initialize Paddle and let it auto-detect _ptxn
+    const initPaddle = () => {
+      if (window.Paddle) {
+        window.Paddle.Initialize({
+          token: PADDLE_CLIENT_TOKEN,
+          checkout: {
+            settings: {
+              displayMode: 'overlay',
+              theme: 'light',
+              locale: 'tr',
+              successUrl: `${window.location.origin}/checkout?success=true`,
+            },
+          },
+          eventCallback: (event) => {
+            if (event.name === 'checkout.completed') {
+              setStatus('success');
+              setTimeout(() => navigate('/TeacherDashboard'), 3000);
+            }
+          },
+        });
+
+        if (transactionId) {
+          // Paddle will auto-detect _ptxn and open the overlay
+          setStatus('idle');
+        } else if (params.get('success') === 'true') {
+          setStatus('success');
+          setTimeout(() => navigate('/TeacherDashboard'), 3000);
+        } else {
+          // No transaction param — redirect home
+          navigate('/');
+        }
+      } else {
         setStatus('error');
-        setMessage('Bir hata oluştu.');
+        setMessage('Paddle yüklenemedi. Lütfen sayfayı yenileyin.');
       }
     };
 
-    checkPayment();
+    // Give Paddle.js a moment to load if not ready yet
+    if (window.Paddle) {
+      initPaddle();
+    } else {
+      const interval = setInterval(() => {
+        if (window.Paddle) {
+          clearInterval(interval);
+          initPaddle();
+        }
+      }, 100);
+      setTimeout(() => { clearInterval(interval); initPaddle(); }, 5000);
+    }
   }, [navigate]);
 
   return (
@@ -57,11 +82,28 @@ export default function Checkout() {
         maxWidth: 400,
         boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }}>
-        {status === 'processing' && (
+        {status === 'loading' && (
           <>
             <Loader2 size={48} color='#4f46e5' style={{ margin: '0 auto 1rem', animation: 'spin 1s linear infinite' }} />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>Ödeme İşleniyor</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>Yükleniyor...</h2>
+          </>
+        )}
+
+        {status === 'idle' && (
+          <>
+            <Loader2 size={48} color='#4f46e5' style={{ margin: '0 auto 1rem', animation: 'spin 1s linear infinite' }} />
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>Ödeme Sayfası Açılıyor</h2>
             <p style={{ color: '#9ca3af' }}>Lütfen bekleyin...</p>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <CheckCircle size={32} color='#10b981' />
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>Ödeme Tamamlandı!</h2>
+            <p style={{ color: '#9ca3af' }}>Hesabınız aktifleştirildi. Yönlendiriliyorsunuz...</p>
           </>
         )}
 
