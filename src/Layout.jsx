@@ -7,6 +7,7 @@ import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 import { showToast } from '@/lib/toast';
 import SubscriptionWidget from './components/SubscriptionWidget';
+import ProUpgradeModal from './components/ProUpgradeModal';
 
 // ── Page transition wrapper ───────────────────────────────────
 function PageTransition({ children, pageKey }) {
@@ -150,6 +151,33 @@ const FAB_ACTIONS_KEYS = [
   { labelKey: 'teacher.fab.collectPayment', color: '#10b981', bg: '#ecfdf5', Icon: DollarSign,   action: 'paymentModal'  },
   { labelKey: 'teacher.fab.giveHomework', color: '#f97316', bg: '#fff7ed', Icon: BookOpen,     action: 'homeworkModal' },
 ];
+
+function MobileSubscriptionButton({ plan, user }) {
+  const [showModal, setShowModal] = React.useState(false);
+  const label = plan === 'expired' ? 'Yenile' : 'Abone Ol';
+  return (
+    <>
+      <button onClick={() => setShowModal(true)} style={{
+        display: 'flex', alignItems: 'center', gap: '0.35rem',
+        padding: '0.35rem 0.75rem', borderRadius: 10,
+        border: 'none', cursor: 'pointer',
+        background: plan === 'expired' ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#f59e0b,#f97316)',
+        color: 'white', fontWeight: 800, fontSize: '0.8rem',
+        boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+      }}>
+        <span style={{ fontSize: '0.85rem' }}>👑</span>
+        {label}
+      </button>
+      {showModal && (
+        <ProUpgradeModal
+          reason='limit'
+          onClose={() => setShowModal(false)}
+          onUpgraded={() => setShowModal(false)}
+        />
+      )}
+    </>
+  );
+}
 
 export default function Layout({ children, currentPageName }) {
   const { t } = useTranslation();
@@ -381,24 +409,34 @@ export default function Layout({ children, currentPageName }) {
 
   // ── Veli: her zaman alt nav ───────────────────────────────
   if (isParent) {
-    const parentMobileNav = isNarrowMobile ? PARENT_MOBILE_NAV : PARENT_NAV;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
+        {/* Üst başlık */}
+        <header style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 51,
+          background: '#1a1a2e',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          padding: '0.65rem 1rem',
+          display: 'flex', alignItems: 'center',
+        }}>
+          <div>
+            <h1 style={{ color: 'white', fontWeight: 900, fontSize: '1rem', letterSpacing: '-0.3px', margin: 0, lineHeight: 1 }}>EduTakip</h1>
+            <div style={{ width: 32, height: 2.5, background: '#6366f1', borderRadius: 2, marginTop: 3 }} />
+          </div>
+        </header>
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '56px', paddingBottom: '80px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
+        {/* Alt tab bar */}
         <nav style={{
-          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 32px)', maxWidth: '480px',
-          background: 'rgba(22,18,60,0.78)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.13)',
-          borderRadius: '28px',
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: '#1a1a2e',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '64px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          height: '64px',
         }}>
-          {parentMobileNav.map((item, i) => {
+          {PARENT_NAV.map((item, i) => {
             const Icon = item.icon;
             const isActive = item.page === currentPageName;
             return (
@@ -406,46 +444,24 @@ export default function Layout({ children, currentPageName }) {
                 onClick={(e) => handleNav(e, item.page)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer',
-                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
-                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.45)',
-                  transition: 'color 0.2s ease',
+                  gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
+                  color: isActive ? 'white' : 'rgba(255,255,255,0.45)',
+                  textDecoration: 'none', transition: 'color 0.15s ease',
                 }}>
-                {isActive && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: isNarrowMobile ? '46px' : '58px', height: isNarrowMobile ? '40px' : '48px',
-                    borderRadius: '18px',
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                    zIndex: 0,
-                    transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                  }} />
-                )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
-                  <Icon size={isNarrowMobile ? 17 : 19} />
-                  <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: isActive ? '700' : '500', whiteSpace: 'nowrap' }}>
-                    {isNarrowMobile ? item.shortLabel : item.label}
-                  </span>
-                </span>
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+                <span style={{ fontSize: '0.62rem', fontWeight: isActive ? '700' : '400', whiteSpace: 'nowrap' }}>{item.label}</span>
               </Link>
             );
           })}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.2rem', padding: isNarrowMobile ? '0.28rem 0.45rem' : '0.35rem 0.9rem', cursor: 'pointer', transition: 'color 0.2s ease',
-              color: 'rgba(255,150,150,0.6)', background: 'none', border: 'none', flex: 1, height: '100%',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = '#fca5a5'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,150,150,0.6)'}>
-            <LogOut size={isNarrowMobile ? 17 : 19} />
-            <span style={{ fontSize: isNarrowMobile ? '0.52rem' : '0.58rem', fontWeight: '500', whiteSpace: 'nowrap' }}>{t('teacher.layout.logout')}</span>
+              gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
+              color: '#f97316', background: 'none', border: 'none',
+              transition: 'color 0.15s ease', fontSize: '0.62rem', fontWeight: '600',
+            }}>
+            <LogOut size={20} strokeWidth={1.75} />
+            <span>Çıkış</span>
           </button>
         </nav>
       </div>
@@ -454,26 +470,64 @@ export default function Layout({ children, currentPageName }) {
 
   // ── Öğretmen: tablet/mobil → alt nav, masaüstü → sidebar ──
   if (isMobile) {
+    // Abonelik durumu için header bilgisi
+    const plan = user?.plan || 'free';
+    const daysLeft = user ? (() => {
+      if (plan !== 'trialing' || !user.trial_end_date) return null;
+      const diff = Math.ceil((new Date(user.trial_end_date) - new Date()) / (1000 * 60 * 60 * 24));
+      return Math.max(0, diff);
+    })() : null;
+    const showSubscriptionChip = plan === 'trialing' || plan === 'expired' || plan === 'free';
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
-        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingBottom: '96px' }}>
+
+        {/* ── Üst başlık bar ── */}
+        <header style={{
+          position: 'fixed', top: 0, left: 0, right: 0,
+          zIndex: 51,
+          background: '#1a1a2e',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          padding: '0.65rem 1rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div>
+            <h1 style={{ color: 'white', fontWeight: 900, fontSize: '1rem', letterSpacing: '-0.3px', margin: 0, lineHeight: 1 }}>EduTakip</h1>
+            <div style={{ width: 32, height: 2.5, background: '#6366f1', borderRadius: 2, marginTop: 3 }} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            {plan === 'trialing' && daysLeft !== null && (
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24' }}>
+                {daysLeft} gün
+              </span>
+            )}
+            {showSubscriptionChip && (
+              <MobileSubscriptionButton plan={plan} user={user} />
+            )}
+            {plan === 'pro' && (
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6ee7b7', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '0.2rem 0.6rem' }}>
+                PRO
+              </span>
+            )}
+          </div>
+        </header>
+
+        <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '56px', paddingBottom: '80px' }}>
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </main>
 
-        {/* Alt nav — öğretmen mobil */}
         {/* Finans alt menü popup */}
         {finansOpen && (
           <>
             <div onClick={() => setFinansOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
             <div style={{
-              position: 'fixed', bottom: '92px', left: '50%', transform: 'translateX(-50%)',
+              position: 'fixed', bottom: '72px', left: '50%', transform: 'translateX(-50%)',
               zIndex: 100, display: 'flex', flexDirection: 'column', gap: '0.5rem',
-              background: 'rgba(22,18,60,0.92)',
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '20px', padding: '0.6rem',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              background: '#1a1a2e',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '16px', padding: '0.5rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
               minWidth: '180px',
             }}>
               {[
@@ -487,10 +541,10 @@ export default function Layout({ children, currentPageName }) {
                     onClick={(e) => { handleNav(e, item.page); setFinansOpen(false); }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '0.65rem',
-                      padding: '0.55rem 0.85rem', borderRadius: '12px',
+                      padding: '0.6rem 0.85rem', borderRadius: '10px',
                       color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.75)',
                       textDecoration: 'none', fontSize: '0.85rem', fontWeight: isActive ? '700' : '500',
-                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      background: isActive ? 'rgba(99,102,241,0.2)' : 'transparent',
                       transition: 'all 0.15s',
                     }}>
                     <Icon size={16} />
@@ -507,13 +561,12 @@ export default function Layout({ children, currentPageName }) {
           <>
             <div onClick={() => setDerslerOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
             <div style={{
-              position: 'fixed', bottom: '92px', left: '50%', transform: 'translateX(-50%)',
+              position: 'fixed', bottom: '72px', left: '50%', transform: 'translateX(-50%)',
               zIndex: 100, display: 'flex', flexDirection: 'column', gap: '0.5rem',
-              background: 'rgba(22,18,60,0.92)',
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '20px', padding: '0.6rem',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              background: '#1a1a2e',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '16px', padding: '0.5rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
               minWidth: '160px',
             }}>
               {[
@@ -529,10 +582,10 @@ export default function Layout({ children, currentPageName }) {
                     onClick={(e) => { handleNav(e, item.page); setDerslerOpen(false); }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '0.65rem',
-                      padding: '0.55rem 0.85rem', borderRadius: '12px',
+                      padding: '0.6rem 0.85rem', borderRadius: '10px',
                       color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.75)',
                       textDecoration: 'none', fontSize: '0.85rem', fontWeight: isActive ? '700' : '500',
-                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      background: isActive ? 'rgba(99,102,241,0.2)' : 'transparent',
                       transition: 'all 0.15s',
                     }}>
                     <Icon size={16} />
@@ -544,15 +597,14 @@ export default function Layout({ children, currentPageName }) {
           </>
         )}
 
+        {/* ── Alt tab bar ── */}
         <nav style={{
-          position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 50, width: 'calc(100% - 16px)', maxWidth: '560px',
-          background: 'rgba(22,18,60,0.78)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.13)',
-          borderRadius: '28px',
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          zIndex: 50,
+          background: '#1a1a2e',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          height: '68px', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          height: '64px',
         }}>
           {TEACHER_MOBILE_NAV.map((item, i) => {
             const Icon = item.icon;
@@ -577,21 +629,9 @@ export default function Layout({ children, currentPageName }) {
               }
             };
 
-            // Split label into two lines if multiLine
-            const renderLabel = () => {
-              if (item.multiLine) {
-                const words = item.label.split(' ');
-                if (words.length >= 2) {
-                  const mid = Math.ceil(words.length / 2);
-                  return (
-                    <span style={{ textAlign: 'center', lineHeight: '1.2' }}>
-                      {words.slice(0, mid).join(' ')}<br/>{words.slice(mid).join(' ')}
-                    </span>
-                  );
-                }
-              }
-              return <span style={{ whiteSpace: 'nowrap' }}>{item.label}{item.submenu || item.financeSubmenu ? ' ›' : ''}</span>;
-            };
+            const labelText = item.submenu || item.financeSubmenu
+              ? item.label + ' ›'
+              : item.label;
 
             return (
               <Link key={i}
@@ -599,39 +639,40 @@ export default function Layout({ children, currentPageName }) {
                 onClick={handleClick}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.15rem', padding: '0.3rem 0.4rem', cursor: 'pointer',
-                  color: isActive ? '#c7d2fe' : 'rgba(255,255,255,0.4)',
-                  textDecoration: 'none', flex: 1, height: '100%', position: 'relative',
-                  transition: 'color 0.2s ease',
+                  gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
+                  color: isActive ? 'white' : 'rgba(255,255,255,0.45)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
                 }}>
-                {isActive && (
-                  <span style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '52px', height: '50px', borderRadius: '16px',
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    boxShadow: '0 2px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                    zIndex: 0, transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                  }} />
-                )}
-                <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem', fontSize: '0.6rem', fontWeight: isActive ? '700' : '500' }}>
-                  <Icon size={17} />
-                  {renderLabel()}
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+                <span style={{ fontSize: '0.62rem', fontWeight: isActive ? '700' : '400', whiteSpace: 'nowrap', letterSpacing: '0.1px' }}>
+                  {labelText}
                 </span>
               </Link>
             );
           })}
+          {/* Profil butonu */}
           <button onClick={handleLogout}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '0.15rem', padding: '0.3rem 0.4rem', cursor: 'pointer',
-              color: 'rgba(255,150,150,0.55)', background: 'none', border: 'none', flex: 1, height: '100%',
-              transition: 'color 0.2s ease', fontSize: '0.6rem', fontWeight: '500',
+              gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
+              color: 'rgba(249,115,22,0.9)', background: 'none', border: 'none',
+              transition: 'color 0.15s ease', fontSize: '0.62rem', fontWeight: '500',
             }}>
-            <LogOut size={17} />
-            <span>{t('teacher.layout.logout')}</span>
+            {user?.full_name ? (
+              <div style={{
+                width: 22, height: 22, borderRadius: '50%',
+                background: 'rgba(249,115,22,0.2)',
+                border: '1.5px solid rgba(249,115,22,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.7rem', fontWeight: 800, color: '#f97316',
+              }}>
+                {user.full_name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <LogOut size={20} strokeWidth={1.75} />
+            )}
+            <span style={{ color: '#f97316', fontWeight: '600' }}>Profil</span>
           </button>
         </nav>
 
