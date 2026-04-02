@@ -2,96 +2,100 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PADDLE_API_KEY = Deno.env.get('PADDLE_API_KEY');
 const PRICE_ID = 'pri_01kn585navhk2x41damh8mawjn';
+const PADDLE_BASE = 'https://api.paddle.com';
 
-// Detect sandbox vs live based on API key prefix
-// Sandbox keys start with "test_", live keys start with "live_"
-const isSandbox = PADDLE_API_KEY?.startsWith('test_');
-const PADDLE_BASE_URL = isSandbox
-  ? 'https://sandbox-api.paddle.com'
-  : 'https://api.paddle.com';
+async function paddleRequest(method, path, body) {
+  const url = `${PADDLE_BASE}${path}`;
+  const options = {
+    method,
+    headers: {
+      'Authorization': 'Bearer ' + PADDLE_API_KEY,
+      'Content-Type': 'application/json',
+    },
+  };
+  if (body) options.body = JSON.stringify(body);
+
+  console.log(`[Paddle] ${method} ${url}`);
+  if (body) console.log(`[Paddle] Request body:`, JSON.stringify(body));
+
+  const res = await fetch(url, options);
+  const text = await res.text();
+  console.log(`[Paddle] Response status: ${res.status}`);
+  console.log(`[Paddle] Response body: ${text}`);
+
+  let data;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+  return { ok: res.ok, status: res.status, data };
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const studentCount = Math.max(1, Math.min(60, parseInt(body.studentCount) || 10));
 
     console.log(`[paddleCheckout] user=${user.email}, studentCount=${studentCount}`);
-    console.log(`[paddleCheckout] environment=${isSandbox ? 'SANDBOX' : 'LIVE'}, baseUrl=${PADDLE_BASE_URL}`);
-    console.log(`[paddleCheckout] priceId=${PRICE_ID}`);
 
-    const requestBody = {
-      items: [
-        {
-          price_id: PRICE_ID,
-          quantity: studentCount,
-        },
-      ],
-      customer: {
+    // Step 1: Look up existing customer by email
+    let customerId = null;
+    const searchRes = await paddleRequest('GET', `/customers?search=${encodeURIComponent(user.email)}`, null);
+    if (!searchRes.ok) {
+      return Response.json({ error: 'Customer lookup failed', details: searchRes.data }, { status: 500 });
+    }
+
+    const existingCustomers = searchRes.data?.data || [];
+    if (existingCustomers.length > 0) {
+      customerId = existingCustomers[0].id;
+      console.log(`[paddleCheckout] Found existing customer: ${customerId}`);
+    } else {
+      // Step 2: Create new customer
+      const createRes = await paddleRequest('POST', '/customers', {
         email: user.email,
-      },
+        name: user.full_name || user.email,
+      });
+      if (!createRes.ok) {
+        return Response.json({ error: 'Customer creation failed', details: createRes.data }, { status: 500 });
+      }
+      customerId = createRes.data?.data?.id;
+      console.log(`[paddleCheckout] Created new customer: ${customerId}`);
+    }
+
+    if (!customerId) {
+      return Response.json({ error: 'Could not resolve customer ID' }, { status: 500 });
+    }
+
+    // Step 3: Create transaction
+    const txRes = await paddleRequest('POST', '/transactions', {
+      items: [{ price_id: PRICE_ID, quantity: 1 }],
+      customer_id: customerId,
       custom_data: {
         user_id: user.id,
         user_email: user.email,
         student_count: String(studentCount),
       },
       checkout: {
-        return_url: 'https://edutakip.com/checkout?transaction_id={transaction_id}',
+        url: true,
       },
-    };
-
-    console.log('[paddleCheckout] Request body:', JSON.stringify(requestBody));
-
-    const transactionResponse = await fetch(`${PADDLE_BASE_URL}/transactions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PADDLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
     });
 
-    const responseText = await transactionResponse.text();
-    console.log(`[paddleCheckout] Paddle response status: ${transactionResponse.status}`);
-    console.log(`[paddleCheckout] Paddle response body: ${responseText}`);
-
-    if (!transactionResponse.ok) {
-      let parsedError;
-      try {
-        parsedError = JSON.parse(responseText);
-      } catch {
-        parsedError = { raw: responseText };
-      }
-      console.error('[paddleCheckout] Paddle API error:', JSON.stringify(parsedError, null, 2));
-      return Response.json(
-        {
-          error: 'Paddle API error',
-          details: parsedError,
-          status: transactionResponse.status,
-        },
-        { status: 500 }
-      );
+    if (!txRes.ok) {
+      return Response.json({ error: 'Transaction creation failed', details: txRes.data }, { status: 500 });
     }
 
-    const transactionData = JSON.parse(responseText);
-    const checkoutUrl = transactionData.data?.checkout?.url;
-    console.log('[paddleCheckout] Success! checkout_url:', checkoutUrl);
+    const checkoutUrl = txRes.data?.data?.checkout?.url;
+    console.log(`[paddleCheckout] Success! checkout_url: ${checkoutUrl}`);
 
     return Response.json({
-      transaction_id: transactionData.data?.id,
+      transaction_id: txRes.data?.data?.id,
       checkout_url: checkoutUrl,
     });
+
   } catch (error) {
     console.error('[paddleCheckout] Unexpected error:', error.message, error.stack);
-    return Response.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return Response.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 });
