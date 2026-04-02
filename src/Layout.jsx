@@ -468,16 +468,17 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
+  // Abonelik durumu (her zaman hesaplanır)
+  const plan = user?.plan || 'free';
+  const daysLeft = (() => {
+    if (plan !== 'trialing' || !user?.trial_end_date) return null;
+    const diff = Math.ceil((new Date(user.trial_end_date) - new Date()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+  })();
+  const showSubscriptionChip = plan === 'trialing' || plan === 'expired' || plan === 'free';
+
   // ── Öğretmen: tablet/mobil → alt nav, masaüstü → sidebar ──
   if (isMobile) {
-    // Abonelik durumu için header bilgisi
-    const plan = user?.plan || 'free';
-    const daysLeft = user ? (() => {
-      if (plan !== 'trialing' || !user.trial_end_date) return null;
-      const diff = Math.ceil((new Date(user.trial_end_date) - new Date()) / (1000 * 60 * 60 * 24));
-      return Math.max(0, diff);
-    })() : null;
-    const showSubscriptionChip = plan === 'trialing' || plan === 'expired' || plan === 'free';
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
