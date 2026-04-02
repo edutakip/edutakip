@@ -1,0 +1,73 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "trialing",
+        "pro",
+        "expired"
+      ],
+      "default": "free",
+      "description": "Abonelik plan\u0131"
+    },
+    "studentLimit": {
+      "type": "number",
+      "default": 3,
+      "description": "Maksimum aktif \u00f6\u011frenci say\u0131s\u0131"
+    },
+    "trialEndDate": {
+      "type": "string",
+      "format": "date",
+      "description": "30 g\u00fcnl\u00fck deneme biti\u015f tarihi"
+    },
+    "trialUsed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Deneme s\u00fcr\u00fcm\u00fc kullan\u0131ld\u0131 m\u0131"
+    },
+    "aiReportsEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI ders raporu \u00f6zelli\u011fi aktif mi"
+    },
+    "detailedFinanceEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Detayl\u0131 finans analizi aktif mi"
+    },
+    "whatsappEnabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "WhatsApp entegrasyonu aktif mi"
+    },
+    "paddleCustomerId": {
+      "type": "string",
+      "description": "Paddle m\u00fc\u015fteri ID"
+    },
+    "paddleSubscriptionId": {
+      "type": "string",
+      "description": "Paddle abonelik ID"
+    },
+    "subscriptionStatus": {
+      "type": "string",
+      "enum": [
+        "active",
+        "trialing",
+        "canceled",
+        "past_due"
+      ],
+      "description": "Abonelik durumu"
+    }
+  }
+}
