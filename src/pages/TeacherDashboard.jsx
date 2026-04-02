@@ -7,6 +7,7 @@ import { createPageUrl } from '@/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import LessonModal from '../components/teacher/LessonModal';
 import PendingLessonsPrompt from '../components/teacher/PendingLessonsPrompt';
+import TodayLessonPrepPrompt from '../components/teacher/TodayLessonPrepPrompt';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
@@ -22,7 +23,16 @@ export default function TeacherDashboard() {
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState('');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [showLessonPrep, setShowLessonPrep] = useState(false);
   const isMobile = windowWidth < 640;
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const isDismissed = localStorage.getItem(`lessonPrepDismissed_${today}`);
+    if (!isDismissed && todayLessons.length > 0) {
+      setTimeout(() => setShowLessonPrep(true), 500);
+    }
+  }, [todayLessons.length]);
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => {
@@ -490,6 +500,7 @@ export default function TeacherDashboard() {
         <LessonModal students={students} defaultDate={format(new Date(), 'yyyy-MM-dd')} onClose={() => setShowModal(false)} onSaved={loadData} />
       )}
       <PendingLessonsPrompt onDone={loadData} />
+      {showLessonPrep && <TodayLessonPrepPrompt onClose={() => setShowLessonPrep(false)} />}
     </div>
   );
 }
