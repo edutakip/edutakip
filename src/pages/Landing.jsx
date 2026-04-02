@@ -34,6 +34,12 @@ export default function Landing() {
 
   useEffect(() => {
     document.body.style.background = '#fff';
+    // If Paddle redirected here with a _ptxn param, forward to /checkout
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('_ptxn')) {
+      window.location.href = '/checkout' + window.location.search;
+      return;
+    }
     const role = localStorage.getItem('tilki_role');
     if (role === 'teacher') window.location.href = createPageUrl('TeacherDashboard');
     else if (role === 'parent') window.location.href = createPageUrl('ParentDashboard');
