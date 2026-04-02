@@ -465,8 +465,11 @@ export default function Layout({ children, currentPageName }) {
   // Abonelik durumu (her zaman hesaplanır)
   const plan = user?.plan || 'free';
   const daysLeft = (() => {
-    if (plan !== 'trialing' || !user?.trial_end_date) return null;
-    const diff = Math.ceil((new Date(user.trial_end_date) - new Date()) / (1000 * 60 * 60 * 24));
+    if (plan !== 'trialing') return null;
+    // trialEndDate veya trial_end_date her ikisini de dene
+    const endDate = user?.trialEndDate || user?.trial_end_date;
+    if (!endDate) return null;
+    const diff = Math.ceil((new Date(endDate) - new Date()) / (1000 * 60 * 60 * 24));
     return Math.max(0, diff);
   })();
   const showSubscriptionChip = plan === 'trialing' || plan === 'expired' || plan === 'free';
