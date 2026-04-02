@@ -5,6 +5,7 @@ import AuthModal from '../components/AuthModal';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import ScreenshotMockup from '../components/ScreenshotMockup';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 function AnimSection({ children, id, style }) {
   const ref = useRef(null);
@@ -20,7 +21,7 @@ function AnimSection({ children, id, style }) {
 }
 
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedRole, setSelectedRole] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [studentCount, setStudentCount] = useState(20);
@@ -31,6 +32,22 @@ export default function Landing() {
   const sliderPct = (studentCount - 1) / (60 - 1) * 100;
   const isMobile = windowWidth < 768;
   const isNarrow = windowWidth < 430;
+
+  // SEO Meta Tags
+  const isEnglish = i18n.language === 'en';
+  usePageMeta({
+    title: isEnglish 
+      ? 'EduTakip - Teacher & Parent Lesson Management App | Private Tutor Software'
+      : 'EduTakip - Öğretmen & Veli Ders Takip Uygulaması | Özel Ders Yönetimi',
+    description: isEnglish
+      ? 'EduTakip: Complete lesson planning, student tracking, payment management, and AI assistant for teachers and parents. Start free trial today.'
+      : 'EduTakip: Öğretmenler için ders planlama, öğrenci takibi, ödeme yönetimi ve AI asistanı. Veliler için çocuklarının gelişim raporu. Ücretsiz deneme başlatın.',
+    keywords: isEnglish
+      ? 'teacher app, lesson management, student tracking, private tutor, education management, online teaching'
+      : 'öğretmen, veli, ders takip, özel ders, ders yönetimi, öğrenci takip sistemi, eğitim',
+    ogImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png',
+    canonical: 'https://edutakip.com'
+  });
 
   useEffect(() => {
     document.body.style.background = '#fff';
