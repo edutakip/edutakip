@@ -197,20 +197,7 @@ export default function TeacherDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.8rem' : 0, marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#111827', marginBottom: '0.25rem' }}>{t('teacher.dashboard.title')}</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-            {format(new Date(), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
-            {todayLessons.length > 0 && (
-              <button 
-                onClick={() => {
-                  const today = new Date().toISOString().split('T')[0];
-                  localStorage.removeItem(`lessonPrepDismissed_${today}`);
-                  setShowLessonPrep(true);
-                }}
-                style={{ marginLeft: '1rem', background: 'none', border: 'none', color: '#6366f1', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}>
-                Popupu yeniden göster
-              </button>
-            )}
-          </p>
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{format(new Date(), 'EEEE, d MMMM yyyy', { locale: dateLocale })}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: isMobile ? '100%' : 'auto' }}>
           <LanguageSwitcher />
