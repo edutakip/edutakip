@@ -26,14 +26,6 @@ export default function TeacherDashboard() {
   const [showLessonPrep, setShowLessonPrep] = useState(false);
   const isMobile = windowWidth < 640;
 
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const isDismissed = localStorage.getItem(`lessonPrepDismissed_${today}`);
-    if (!isDismissed && todayLessons.length > 0) {
-      setTimeout(() => setShowLessonPrep(true), 500);
-    }
-  }, [todayLessons.length]);
-
   useEffect(() => { loadData(); }, []);
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
@@ -182,6 +174,15 @@ export default function TeacherDashboard() {
   }, [briefCards.length]);
   const avatarColors = ['#fbbf24', '#34d399', '#60a5fa', '#f87171', '#a78bfa', '#fb923c'];
   const getAvatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || '#fbbf24';
+
+  // Ders hazırlık popup'ını göster
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const isDismissed = localStorage.getItem(`lessonPrepDismissed_${today}`);
+    if (!isDismissed && todayLessons.length > 0) {
+      setTimeout(() => setShowLessonPrep(true), 500);
+    }
+  }, [todayLessons.length]);
 
   const statCards = [
     { label: t('teacher.dashboard.activeStudents'), value: activeStudents, icon: Users, iconColor: '#0ea5e9', iconBg: '#e0f2fe', page: 'TeacherStudents' },
