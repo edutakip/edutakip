@@ -178,6 +178,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
       initialBalance: Number(form.initialBalance) || 0,
       initialBalanceType: form.initialBalanceType,
       teacherEmail: me.email,
+      user_email: me.email,
       inviteCode: generateCode(), inviteAccepted: false, status: 'active',
     });
 
