@@ -1,0 +1,52 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "studentId": {
+      "type": "string"
+    },
+    "studentName": {
+      "type": "string"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "parentEmail": {
+      "type": "string"
+    },
+    "senderEmail": {
+      "type": "string"
+    },
+    "senderRole": {
+      "type": "string",
+      "enum": [
+        "teacher",
+        "parent"
+      ]
+    },
+    "content": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "studentId",
+    "senderEmail",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

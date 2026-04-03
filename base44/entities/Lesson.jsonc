@@ -1,0 +1,87 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "studentId": {
+      "type": "string"
+    },
+    "studentName": {
+      "type": "string"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "startTime": {
+      "type": "string"
+    },
+    "endTime": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "online",
+        "yuzyuze"
+      ],
+      "default": "yuzyuze"
+    },
+    "location": {
+      "type": "string"
+    },
+    "meetingLink": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planland\u0131",
+        "tamamland\u0131",
+        "iptal"
+      ],
+      "default": "planland\u0131"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "number"
+    },
+    "lessonFee": {
+      "type": "number",
+      "description": "Bu dersin \u00fccreti (TL)"
+    },
+    "recurringGroupId": {
+      "type": "string"
+    },
+    "parentPhone": {
+      "type": "string"
+    },
+    "parentName": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "studentId",
+    "date",
+    "startTime"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

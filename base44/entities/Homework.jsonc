@@ -91,5 +91,17 @@
     "studentId",
     "teacherEmail",
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
 }

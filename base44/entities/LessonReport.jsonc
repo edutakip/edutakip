@@ -1,0 +1,81 @@
+{
+  "name": "LessonReport",
+  "type": "object",
+  "properties": {
+    "lessonId": {
+      "type": "string"
+    },
+    "studentId": {
+      "type": "string"
+    },
+    "studentName": {
+      "type": "string"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Genel performans puan\u0131 (1-5)"
+    },
+    "attendance": {
+      "type": "string",
+      "enum": [
+        "kat\u0131ld\u0131",
+        "ge\u00e7 kald\u0131",
+        "kat\u0131lmad\u0131"
+      ],
+      "default": "kat\u0131ld\u0131"
+    },
+    "generalNote": {
+      "type": "string",
+      "description": "Genel de\u011ferlendirme notu"
+    },
+    "strengths": {
+      "type": "string",
+      "description": "G\u00fc\u00e7l\u00fc y\u00f6nler"
+    },
+    "improvements": {
+      "type": "string",
+      "description": "Geli\u015ftirilmesi gereken alanlar"
+    },
+    "homework": {
+      "type": "string",
+      "description": "Verilen \u00f6dev"
+    },
+    "nextGoal": {
+      "type": "string",
+      "description": "Bir sonraki ders hedefi"
+    },
+    "topicsCovered": {
+      "type": "string",
+      "description": "\u0130\u015flenen konular"
+    }
+  },
+  "required": [
+    "lessonId",
+    "studentId",
+    "teacherEmail"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

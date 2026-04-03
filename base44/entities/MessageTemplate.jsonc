@@ -1,0 +1,44 @@
+{
+  "name": "MessageTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u015eablon ad\u0131"
+    },
+    "content": {
+      "type": "string",
+      "description": "Mesaj i\u00e7eri\u011fi"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "lesson",
+        "payment",
+        "report",
+        "genel"
+      ],
+      "default": "genel",
+      "description": "\u015eablon t\u00fcr\u00fc"
+    },
+    "teacherEmail": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

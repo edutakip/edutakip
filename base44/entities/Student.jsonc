@@ -1,0 +1,108 @@
+{
+  "name": "Student",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u00d6\u011frenci ad\u0131 soyad\u0131"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "grade": {
+      "type": "string",
+      "description": "S\u0131n\u0131f"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Bran\u015f/Ders konusu"
+    },
+    "feePerLesson": {
+      "type": "number",
+      "description": "Belirlenen ders s\u00fcresi (lessonDuration) ba\u015f\u0131na \u00fccret"
+    },
+    "lessonDuration": {
+      "type": "number",
+      "default": 60,
+      "description": "Bir dersin dakika cinsinden s\u00fcresi"
+    },
+    "weeklyLessons": {
+      "type": "number",
+      "default": 1
+    },
+    "monthlyFee": {
+      "type": "number"
+    },
+    "schedule": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Haftal\u0131k ders program\u0131 [{day, time}]"
+    },
+    "parentName": {
+      "type": "string"
+    },
+    "parentPhone": {
+      "type": "string"
+    },
+    "parentEmail": {
+      "type": "string"
+    },
+    "resourceName": {
+      "type": "string",
+      "description": "Kaynak ad\u0131"
+    },
+    "initialBalance": {
+      "type": "number",
+      "default": 0
+    },
+    "initialBalanceType": {
+      "type": "string",
+      "enum": [
+        "borc",
+        "kredi"
+      ],
+      "default": "borc"
+    },
+    "inviteCode": {
+      "type": "string"
+    },
+    "inviteAccepted": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

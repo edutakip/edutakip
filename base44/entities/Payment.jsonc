@@ -1,0 +1,73 @@
+{
+  "name": "Payment",
+  "type": "object",
+  "properties": {
+    "studentId": {
+      "type": "string"
+    },
+    "studentName": {
+      "type": "string"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "al\u0131nd\u0131",
+        "bekliyor",
+        "gecikmi\u015f"
+      ],
+      "default": "bekliyor"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "nakit",
+        "havale",
+        "di\u011fer"
+      ],
+      "default": "nakit"
+    },
+    "description": {
+      "type": "string"
+    },
+    "month": {
+      "type": "string"
+    },
+    "lessonId": {
+      "type": "string",
+      "description": "Ba\u011fl\u0131 oldu\u011fu dersin ID'si"
+    },
+    "parentPhone": {
+      "type": "string"
+    },
+    "parentName": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "studentId",
+    "amount",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "create": {},
+    "update": {
+      "data.teacherEmail": "{{user.email}}"
+    },
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}
