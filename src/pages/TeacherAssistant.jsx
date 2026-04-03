@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Bot, Sparkles, Lock } from 'lucide-react';
+import { Send, Bot, Sparkles, Lock, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import ProUpgradeModal from '@/components/ProUpgradeModal';
 import { isPro } from '@/lib/subscription';
+
+const WHATSAPP_TRIGGER = '[SHOW_WHATSAPP_BUTTON]';
 
 const FREE_QUESTION_LIMIT = 2;
 
@@ -18,8 +20,36 @@ const QUICK_PROMPTS = [
   { icon: '💡', text: 'Öğrenci motivasyonunu artırmak için öneriler ver' },
 ];
 
+function WhatsAppButton() {
+  const url = base44.agents.getWhatsAppConnectURL('edu_asistan');
+  return (
+    <div style={{ marginTop: '0.75rem' }}>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
+          background: 'linear-gradient(135deg, #25d366, #128c7e)',
+          color: 'white', borderRadius: '12px', padding: '0.65rem 1.25rem',
+          fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
+          boxShadow: '0 4px 14px rgba(37,211,102,0.4)',
+        }}
+      >
+        <MessageCircle size={18} />
+        WhatsApp'tan Devam Et
+      </a>
+    </div>
+  );
+}
+
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
+
+  const hasWhatsAppTrigger = !isUser && message.content?.includes(WHATSAPP_TRIGGER);
+  const displayContent = hasWhatsAppTrigger
+    ? message.content.replace(WHATSAPP_TRIGGER, '').trim()
+    : message.content;
 
   return (
     <div style={{
@@ -44,52 +74,55 @@ function MessageBubble({ message }) {
         </div>
       )}
 
-      <div style={{
-        maxWidth: '72%',
-        background: isUser
-          ? 'linear-gradient(135deg, #4f46e5, #7c3aed)'
-          : 'white',
-        color: isUser ? 'white' : '#111827',
-        borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-        padding: '0.85rem 1.1rem',
-        boxShadow: isUser
-          ? '0 2px 12px rgba(79,70,229,0.3)'
-          : '0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
-        fontSize: '0.88rem',
-        lineHeight: '1.65',
-      }}>
-        {isUser ? (
-          <p style={{ margin: 0 }}>{message.content}</p>
-        ) : (
-          <div className="assistant-markdown">
-            <ReactMarkdown
-              components={{
-                p: ({ children }) => <p style={{ margin: '0 0 0.5rem', lineHeight: 1.65 }}>{children}</p>,
-                ul: ({ children }) => <ul style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>{children}</ul>,
-                ol: ({ children }) => <ol style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>{children}</ol>,
-                li: ({ children }) => <li style={{ marginBottom: '0.25rem' }}>{children}</li>,
-                strong: ({ children }) => <strong style={{ fontWeight: 700, color: '#1e1b4b' }}>{children}</strong>,
-                code: ({ children }) => <code style={{ background: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: 4, fontSize: '0.82rem', color: '#4f46e5' }}>{children}</code>,
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
-          </div>
-        )}
-
-        {message.tool_calls?.length > 0 && message.tool_calls.some(t => t.status === 'running' || t.status === 'in_progress') && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', color: '#6366f1', fontSize: '0.78rem' }}>
-            <div style={{ display: 'flex', gap: '3px' }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: 5, height: 5, borderRadius: '50%', background: '#6366f1',
-                  animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-                }} />
-              ))}
+      <div style={{ maxWidth: '72%' }}>
+        <div style={{
+          background: isUser
+            ? 'linear-gradient(135deg, #4f46e5, #7c3aed)'
+            : 'white',
+          color: isUser ? 'white' : '#111827',
+          borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+          padding: '0.85rem 1.1rem',
+          boxShadow: isUser
+            ? '0 2px 12px rgba(79,70,229,0.3)'
+            : '0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+          fontSize: '0.88rem',
+          lineHeight: '1.65',
+        }}>
+          {isUser ? (
+            <p style={{ margin: 0 }}>{message.content}</p>
+          ) : (
+            <div className="assistant-markdown">
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p style={{ margin: '0 0 0.5rem', lineHeight: 1.65 }}>{children}</p>,
+                  ul: ({ children }) => <ul style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>{children}</ul>,
+                  ol: ({ children }) => <ol style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>{children}</ol>,
+                  li: ({ children }) => <li style={{ marginBottom: '0.25rem' }}>{children}</li>,
+                  strong: ({ children }) => <strong style={{ fontWeight: 700, color: '#1e1b4b' }}>{children}</strong>,
+                  code: ({ children }) => <code style={{ background: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: 4, fontSize: '0.82rem', color: '#4f46e5' }}>{children}</code>,
+                }}
+              >
+                {displayContent}
+              </ReactMarkdown>
             </div>
-            Veriler getiriliyor...
-          </div>
-        )}
+          )}
+
+          {message.tool_calls?.length > 0 && message.tool_calls.some(t => t.status === 'running' || t.status === 'in_progress') && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', color: '#6366f1', fontSize: '0.78rem' }}>
+              <div style={{ display: 'flex', gap: '3px' }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{
+                    width: 5, height: 5, borderRadius: '50%', background: '#6366f1',
+                    animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                  }} />
+                ))}
+              </div>
+              Veriler getiriliyor...
+            </div>
+          )}
+        </div>
+
+        {hasWhatsAppTrigger && <WhatsAppButton />}
       </div>
     </div>
   );
