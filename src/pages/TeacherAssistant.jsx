@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import ProUpgradeModal from '@/components/ProUpgradeModal';
 import { isPro } from '@/lib/subscription';
 
-const WHATSAPP_TRIGGER = '[SHOW_WHATSAPP_BUTTON]';
+const WHATSAPP_TRIGGER = 'SHOW_WHATSAPP_BUTTON';
 
 const FREE_QUESTION_LIMIT = 2;
 
@@ -48,7 +48,7 @@ function MessageBubble({ message }) {
 
   const hasWhatsAppTrigger = !isUser && message.content?.includes(WHATSAPP_TRIGGER);
   const displayContent = hasWhatsAppTrigger
-    ? message.content.replace(WHATSAPP_TRIGGER, '').trim()
+    ? message.content.replace(/\[?SHOW_WHATSAPP_BUTTON\]?/g, '').trim()
     : message.content;
 
   return (
