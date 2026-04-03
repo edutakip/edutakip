@@ -11,9 +11,21 @@ export default function Checkout() {
   const [message, setMessage] = useState('');
   const activatedRef = useRef(false);
 
+  const fireGoogleAdsConversion = (transactionId) => {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-952005080/KvrLCPaqj5UcENjj-cUD',
+        'value': 1.0,
+        'currency': 'TRY',
+        'transaction_id': transactionId,
+      });
+    }
+  };
+
   const activateUser = async (transactionId) => {
     if (activatedRef.current) return;
     activatedRef.current = true;
+    fireGoogleAdsConversion(transactionId);
     try {
       const params = new URLSearchParams(window.location.search);
       const studentCount = parseInt(params.get('studentCount')) || 10;
