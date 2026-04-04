@@ -70,18 +70,16 @@ export default function ParentDashboard() {
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <style>{`
             @keyframes shimmer {
-              0% { background-position: -300% center; }
-              100% { background-position: 300% center; }
+              0% { background-position: -200% center; }
+              100% { background-position: 200% center; }
             }
             @keyframes wave-shine {
-              0% { left: -100%; opacity: 0; }
-              20% { opacity: 1; }
-              80% { opacity: 1; }
-              100% { left: 150%; opacity: 0; }
+              0% { left: -100%; }
+              100% { left: 150%; }
             }
             @keyframes pulse-ring {
-              0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.7); }
-              70% { box-shadow: 0 0 0 12px rgba(124,58,237,0); }
+              0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+              70% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
               100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
             }
             @keyframes spin-loader {
@@ -99,26 +97,26 @@ export default function ParentDashboard() {
               position: relative;
               overflow: hidden;
               transition: transform 0.15s, box-shadow 0.15s;
-              background: linear-gradient(100deg, #4f46e5 0%, #7c3aed 40%, #a855f7 60%, #4f46e5 100%);
-              background-size: 300% auto;
+              background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #4f46e5 100%);
+              background-size: 200% auto;
               color: white;
-              box-shadow: 0 6px 20px rgba(79,70,229,0.45);
+              box-shadow: 0 6px 20px rgba(79,70,229,0.4);
               display: flex;
               align-items: center;
               justify-content: center;
               gap: 0.5rem;
-              animation: shimmer 2s linear infinite, pulse-ring 2s ease-out infinite;
+              animation: shimmer 3s linear infinite, pulse-ring 2.5s ease-out infinite;
             }
             .connect-btn::after {
               content: '';
               position: absolute;
               top: 0;
               left: -100%;
-              width: 60%;
+              width: 50%;
               height: 100%;
-              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
               transform: skewX(-20deg);
-              animation: wave-shine 2s ease-in-out infinite;
+              animation: wave-shine 3s ease-in-out infinite;
             }
             .connect-btn:not(:disabled):hover {
               transform: translateY(-2px);
