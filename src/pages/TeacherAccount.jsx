@@ -119,15 +119,15 @@ function ProfileTab({ user, onUpdate }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Şifre Değişikliği" icon={Lock} subtitle="Şifrenizi platformdan yönetin">
+      <SectionCard title="Şifre Değişikliği" icon={Lock} subtitle="Şifre sıfırlama e-postası alın">
         <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Lock size={18} color='#6366f1' />
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', margin: 0 }}>Şifrenizi sıfırlamak için</p>
-            <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>Çıkış yapıp giriş ekranındaki "Şifremi Unuttum" seçeneğini kullanın.</p>
+            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', margin: 0 }}>Şifre sıfırlama bağlantısı</p>
+            <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>Butona tıkladığınızda çıkış yapılır ve e-postanıza şifre sıfırlama bağlantısı gönderilir.</p>
           </div>
-          <button onClick={() => base44.auth.logout()} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            Çıkış Yap
+          <button onClick={() => base44.auth.logout('/forgot-password')} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            Şifremi Sıfırla
           </button>
         </div>
       </SectionCard>
