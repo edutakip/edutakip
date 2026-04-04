@@ -351,89 +351,62 @@ function SubscriptionTab({ user, students, onRefresh }) {
 }
 
 // ── Notifications Tab ──────────────────────────────────────────
-function NotificationsTab({ user, onUpdate }) {
-  const defaults = {
-    notif_lesson_reminder: true,
-    notif_payment_reminder: true,
-    notif_homework_due: false,
-    notif_weekly_summary: true,
-    notif_whatsapp: false,
-  };
-  const [prefs, setPrefs] = useState({ ...defaults, ...user });
-  const [saving, setSaving] = useState(false);
-
-  const toggle = (key) => setPrefs(p => ({ ...p, [key]: !p[key] }));
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updates = {
-        notif_lesson_reminder: prefs.notif_lesson_reminder,
-        notif_payment_reminder: prefs.notif_payment_reminder,
-        notif_homework_due: prefs.notif_homework_due,
-        notif_weekly_summary: prefs.notif_weekly_summary,
-        notif_whatsapp: prefs.notif_whatsapp,
-      };
-      await base44.auth.updateMe(updates);
-      onUpdate({ ...user, ...updates });
-      showToast({ message: 'Bildirim tercihleri kaydedildi' });
-    } catch (e) {
-      showToast({ message: 'Hata oluştu', type: 'error' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
+function NotificationsTab({ user }) {
   const notifItems = [
-    { key: 'notif_lesson_reminder', label: 'Ders Hatırlatıcısı', desc: 'Ders başlamadan önce bildirim al', icon: Calendar },
-    { key: 'notif_payment_reminder', label: 'Ödeme Hatırlatıcısı', desc: 'Geciken veya bekleyen ödemeler için uyarı', icon: CreditCard },
-    { key: 'notif_homework_due', label: 'Ödev Teslim Tarihi', desc: 'Yaklaşan ödev teslim tarihleri için bildirim', icon: TrendingUp },
-    { key: 'notif_weekly_summary', label: 'Haftalık Özet', desc: 'Her Pazartesi haftalık ders ve ödeme özeti', icon: Calendar },
+    {
+      label: 'Ders Hatırlatıcısı',
+      desc: 'Her sabah 08:00\'de o günkü dersleriniz e-posta ile gönderilir.',
+      icon: Calendar,
+      schedule: 'Her gün 08:00',
+      active: true,
+    },
+    {
+      label: 'Ödeme Hatırlatıcısı',
+      desc: 'Her sabah 09:00\'da geciken ve bekleyen ödemeleriniz e-posta ile bildirilir.',
+      icon: CreditCard,
+      schedule: 'Her gün 09:00',
+      active: true,
+    },
+    {
+      label: 'Haftalık Özet',
+      desc: 'Her Pazartesi 08:00\'de haftalık ders ve ödeme özetiniz e-posta ile gönderilir.',
+      icon: Calendar,
+      schedule: 'Her Pazartesi 08:00',
+      active: true,
+    },
   ];
 
   return (
     <>
-      <SectionCard title="Uygulama Bildirimleri" icon={Bell} subtitle="Hangi bildirimleri almak istediğinizi seçin">
+      <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '0.85rem 1rem', border: '1.5px solid #bbf7d0', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <CheckCircle size={16} color='#10b981' />
+        <div>
+          <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#065f46', margin: 0 }}>E-posta bildirimleri aktif</p>
+          <p style={{ fontSize: '0.75rem', color: '#6ee7b7', margin: '0.1rem 0 0' }}>Bildirimler <strong>{user?.email}</strong> adresine gönderilecek.</p>
+        </div>
+      </div>
+
+      <SectionCard title="Otomatik E-posta Bildirimleri" icon={Bell} subtitle="Sisteme kayıtlı bildirimler">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           {notifItems.map((item, i) => {
             const Icon = item.icon;
             return (
-              <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.9rem 0', borderBottom: i < notifItems.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 9, background: prefs[item.key] ? '#eef2ff' : '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon size={15} color={prefs[item.key] ? '#4f46e5' : '#d1d5db'} />
-                  </div>
-                  <div>
-                    <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', margin: 0 }}>{item.label}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.1rem 0 0' }}>{item.desc}</p>
-                  </div>
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.9rem 0', borderBottom: i < notifItems.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={15} color='#4f46e5' />
                 </div>
-                <button
-                  onClick={() => toggle(item.key)}
-                  style={{
-                    width: 44, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
-                    background: prefs[item.key] ? '#4f46e5' : '#e5e7eb',
-                    position: 'relative', transition: 'background 0.2s',
-                  }}
-                >
-                  <div style={{
-                    width: 18, height: 18, borderRadius: '50%', background: 'white',
-                    position: 'absolute', top: 3, left: prefs[item.key] ? 23 : 3,
-                    transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                  }} />
-                </button>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', margin: 0 }}>{item.label}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.1rem 0 0' }}>{item.desc}</p>
+                </div>
+                <span style={{ fontSize: '0.72rem', background: '#f0fdf4', color: '#16a34a', fontWeight: 700, padding: '0.25rem 0.6rem', borderRadius: 20, border: '1px solid #bbf7d0', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  ✓ {item.schedule}
+                </span>
               </div>
             );
           })}
         </div>
       </SectionCard>
-
-
-
-      <button onClick={handleSave} disabled={saving} style={{ ...primaryBtn, width: '100%' }}>
-        {saving ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={14} />}
-        {saving ? 'Kaydediliyor...' : 'Tercihleri Kaydet'}
-      </button>
     </>
   );
 }
