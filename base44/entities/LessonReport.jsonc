@@ -67,13 +67,9 @@
     "teacherEmail"
   ],
   "rls": {
-    "read": {
-      "data.teacherEmail": "{{user.email}}"
-    },
+    "read": {},
     "create": {},
-    "update": {
-      "data.teacherEmail": "{{user.email}}"
-    },
+    "update": {},
     "delete": {
       "data.teacherEmail": "{{user.email}}"
     }
