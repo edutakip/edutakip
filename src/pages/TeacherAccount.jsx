@@ -428,29 +428,7 @@ function NotificationsTab({ user, onUpdate }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="WhatsApp Bildirimleri" icon={Bell} subtitle="WhatsApp üzerinden bildirim tercihleri">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', margin: 0 }}>WhatsApp Bildirimleri</p>
-            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>Velilere WhatsApp üzerinden otomatik mesaj gönder {isPro(user) ? '' : '(Pro gerekli)'}</p>
-          </div>
-          <button
-            onClick={() => isPro(user) && toggle('notif_whatsapp')}
-            style={{
-              width: 44, height: 24, borderRadius: 999, border: 'none', cursor: isPro(user) ? 'pointer' : 'not-allowed', flexShrink: 0,
-              background: prefs.notif_whatsapp && isPro(user) ? '#25d366' : '#e5e7eb',
-              position: 'relative', transition: 'background 0.2s', opacity: isPro(user) ? 1 : 0.5,
-            }}
-          >
-            <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'white', position: 'absolute', top: 3, left: prefs.notif_whatsapp && isPro(user) ? 23 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }} />
-          </button>
-        </div>
-        {!isPro(user) && (
-          <div style={{ marginTop: '0.75rem', background: '#fef3c7', borderRadius: 10, padding: '0.65rem 0.85rem', fontSize: '0.78rem', color: '#92400e', fontWeight: 600 }}>
-            ⭐ Bu özellik Pro plana özeldir.
-          </div>
-        )}
-      </SectionCard>
+
 
       <button onClick={handleSave} disabled={saving} style={{ ...primaryBtn, width: '100%' }}>
         {saving ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={14} />}
