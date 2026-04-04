@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays, Lock } from 'lucide-react';
+import { X, Video, MapPin, RefreshCw, Loader2, CalendarDays, Lock, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import { format, addWeeks, parseISO } from 'date-fns';
@@ -62,10 +62,26 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const generateZoom = () => {
+  const generateZoom = async () => {
     setZoomLoading(true);
     try {
-      // Jitsi Meet — ücretsiz, API gerekmez, anında çalışır
+      const student = students.find(s => s.id === form.studentId);
+      const topic = student ? `${student.name} - EduTakip Dersi` : 'EduTakip Dersi';
+      const startTime = form.date && form.startTime
+        ? `${form.date}T${form.startTime}:00`
+        : new Date().toISOString();
+      const start = new Date(`${form.date}T${form.startTime}`);
+      const end = new Date(`${form.date}T${form.endTime}`);
+      const duration = Math.max(30, Math.round((end - start) / 60000));
+
+      const res = await base44.functions.invoke('createZoomMeeting', { topic, startTime, duration });
+      if (res.data?.join_url) {
+        setMeetingLink(res.data.join_url);
+      } else {
+        throw new Error('join_url yok');
+      }
+    } catch (e) {
+      // Zoom başarısız → Jitsi'ye fallback
       const studentName = form.studentId
         ? (students.find(s => s.id === form.studentId)?.name || 'Ders')
             .replace(/\s+/g, '-')
@@ -74,9 +90,10 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
       const dateStr = (form.date || '').replace(/-/g, '');
       const timeStr = (form.startTime || '').replace(':', '');
       const randomSuffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-      const roomName = `EduTakip-${studentName}-${dateStr}-${timeStr}-${randomSuffix}`;
-      setMeetingLink(`https://meet.jit.si/${roomName}`);
-    } finally { setZoomLoading(false); }
+      setMeetingLink(`https://meet.jit.si/EduTakip-${studentName}-${dateStr}-${timeStr}-${randomSuffix}`);
+    } finally {
+      setZoomLoading(false);
+    }
   };
 
   const handleTypeChange = (t) => {

@@ -9,6 +9,7 @@ import ProUpgradeModal from '@/components/ProUpgradeModal';
 import { isPro, getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import { showToast } from '@/lib/toast';
 import GoogleCalendarConnect from '@/components/teacher/GoogleCalendarConnect';
+import ZoomConnect from '@/components/teacher/ZoomConnect';
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: User },
@@ -549,6 +550,7 @@ export default function TeacherAccount() {
         {activeTab === 'integrations' && (
           <div>
             <GoogleCalendarConnect user={user} />
+            <ZoomConnect />
           </div>
         )}
       </div>
