@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Calendar, CheckCircle, DollarSign, AlertCircle, BookOpen, BarChart2, Settings, RefreshCw, ChevronRight, LogOut } from 'lucide-react';
 import { createPageUrl } from '@/utils';
@@ -9,10 +9,12 @@ export default function ParentDashboard() {
   const [lessons, setLessons] = useState([]);
   const [payments, setPayments] = useState([]);
   const [inviteCode, setInviteCode] = useState('');
+  const [codeDigits, setCodeDigits] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [showLessonRequest, setShowLessonRequest] = useState(false);
+  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -36,9 +38,10 @@ export default function ParentDashboard() {
   };
 
   const handleJoinWithCode = async () => {
-    if (!inviteCode.trim()) return;
+    const code = codeDigits.join('');
+    if (code.length < 6) return;
     setLoading(true); setError('');
-    const all = await base44.entities.Student.filter({ inviteCode: inviteCode.toUpperCase() });
+    const all = await base44.entities.Student.filter({ inviteCode: code.toUpperCase() });
     if (all.length === 0) {
       setError('Geçersiz davet kodu. Lütfen öğretmeninizden aldığınız kodu kontrol edin.');
       setLoading(false); return;
@@ -61,12 +64,51 @@ export default function ParentDashboard() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: '1.6' }}>
             Öğretmeninizin size verdiği davet kodunu girerek çocuğunuzun derslerini takip edebilirsiniz.
           </p>
-          <input
-            value={inviteCode} onChange={e => setInviteCode(e.target.value.toUpperCase())}
-            placeholder='Davet kodunu girin (örn: ABC123)'
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '1rem', textAlign: 'center', letterSpacing: '3px', fontWeight: '700', outline: 'none', marginBottom: '0.75rem' }}
-            onKeyDown={e => e.key === 'Enter' && handleJoinWithCode()}
-          />
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '0.75rem' }}>
+            {codeDigits.map((digit, idx) => (
+              <input
+                key={idx}
+                ref={inputRefs[idx]}
+                value={digit}
+                maxLength={1}
+                onChange={e => {
+                  const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                  const next = [...codeDigits];
+                  next[idx] = val.slice(-1);
+                  setCodeDigits(next);
+                  if (val && idx < 5) inputRefs[idx + 1].current?.focus();
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Backspace' && !digit && idx > 0) inputRefs[idx - 1].current?.focus();
+                  if (e.key === 'Enter') handleJoinWithCode();
+                }}
+                onPaste={e => {
+                  e.preventDefault();
+                  const pasted = e.clipboardData.getData('text').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+                  const next = [...codeDigits];
+                  pasted.split('').forEach((ch, i) => { if (i < 6) next[i] = ch; });
+                  setCodeDigits(next);
+                  const focusIdx = Math.min(pasted.length, 5);
+                  inputRefs[focusIdx].current?.focus();
+                }}
+                style={{
+                  width: '46px', height: '56px',
+                  borderRadius: '12px',
+                  border: digit ? '2px solid #6366f1' : '2px solid #e5e7eb',
+                  background: digit ? '#eef2ff' : 'var(--bg-hover)',
+                  color: '#111827',
+                  fontSize: '1.4rem',
+                  fontWeight: '800',
+                  textAlign: 'center',
+                  outline: 'none',
+                  transition: 'border-color 0.15s, background 0.15s',
+                  caretColor: 'transparent',
+                }}
+                onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+                onBlur={e => { e.target.style.boxShadow = 'none'; if (!digit) e.target.style.borderColor = '#e5e7eb'; }}
+              />
+            ))}
+          </div>
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <style>{`
             @keyframes shimmer {
@@ -135,7 +177,7 @@ export default function ParentDashboard() {
           `}</style>
           <button
             onClick={handleJoinWithCode}
-            disabled={loading || !inviteCode.trim()}
+            disabled={loading || codeDigits.join('').length < 6}
             className="connect-btn"
           >
             {loading ? (
