@@ -3,16 +3,18 @@ import { base44 } from '@/api/base44Client';
 import {
   User, Mail, Phone, Lock, Bell, Crown, Users, CreditCard,
   CheckCircle, XCircle, AlertTriangle, RefreshCw, Save, ChevronRight,
-  Zap, Clock, Calendar, TrendingUp, LogOut, Trash2, ExternalLink
+  Zap, Clock, Calendar, TrendingUp, LogOut, Trash2, ExternalLink, Link2
 } from 'lucide-react';
 import ProUpgradeModal from '@/components/ProUpgradeModal';
 import { isPro, getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import { showToast } from '@/lib/toast';
+import GoogleCalendarConnect from '@/components/teacher/GoogleCalendarConnect';
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: User },
   { id: 'subscription', label: 'Abonelik', icon: Crown },
   { id: 'notifications', label: 'Bildirimler', icon: Bell },
+  { id: 'integrations', label: 'Entegrasyonlar', icon: Link2 },
 ];
 
 const PLAN_STYLE = {
@@ -544,6 +546,11 @@ export default function TeacherAccount() {
         {activeTab === 'profile' && <ProfileTab user={user} onUpdate={setUser} />}
         {activeTab === 'subscription' && <SubscriptionTab user={user} students={students} onRefresh={load} />}
         {activeTab === 'notifications' && <NotificationsTab user={user} onUpdate={setUser} />}
+        {activeTab === 'integrations' && (
+          <div>
+            <GoogleCalendarConnect user={user} />
+          </div>
+        )}
       </div>
     </div>
   );

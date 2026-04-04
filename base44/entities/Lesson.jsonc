@@ -65,6 +65,10 @@
     },
     "parentName": {
       "type": "string"
+    },
+    "googleEventId": {
+      "type": "string",
+      "description": "Google Calendar etkinlik ID'si"
     }
   },
   "required": [
