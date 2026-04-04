@@ -68,9 +68,81 @@ export default function ParentDashboard() {
             onKeyDown={e => e.key === 'Enter' && handleJoinWithCode()}
           />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
-          <button onClick={handleJoinWithCode} disabled={loading || !inviteCode.trim()}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Bağlanıyor...' : 'Hesabıma Bağla'}
+          <style>{`
+            @keyframes shimmer {
+              0% { background-position: -200% center; }
+              100% { background-position: 200% center; }
+            }
+            @keyframes pulse-ring {
+              0% { transform: scale(1); opacity: 0.6; }
+              50% { transform: scale(1.08); opacity: 0.3; }
+              100% { transform: scale(1); opacity: 0.6; }
+            }
+            @keyframes spin-loader {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+            .connect-btn {
+              width: 100%;
+              padding: 0.9rem;
+              border-radius: 14px;
+              border: none;
+              cursor: pointer;
+              font-weight: 800;
+              font-size: 1rem;
+              position: relative;
+              overflow: hidden;
+              transition: transform 0.15s, box-shadow 0.15s;
+              background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #4f46e5 100%);
+              background-size: 200% auto;
+              color: white;
+              box-shadow: 0 6px 20px rgba(79,70,229,0.45);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.5rem;
+              animation: shimmer 3s linear infinite;
+            }
+            .connect-btn:not(:disabled):hover {
+              transform: translateY(-2px);
+              box-shadow: 0 10px 28px rgba(79,70,229,0.55);
+            }
+            .connect-btn:not(:disabled):active {
+              transform: translateY(0px);
+            }
+            .connect-btn:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+              animation: none;
+              background: #9ca3af;
+              box-shadow: none;
+            }
+            .connect-btn::before {
+              content: '';
+              position: absolute;
+              inset: -2px;
+              border-radius: 16px;
+              background: linear-gradient(135deg, #4f46e5, #7c3aed, #4f46e5);
+              z-index: -1;
+              animation: pulse-ring 2s ease-in-out infinite;
+            }
+          `}</style>
+          <button
+            onClick={handleJoinWithCode}
+            disabled={loading || !inviteCode.trim()}
+            className="connect-btn"
+          >
+            {loading ? (
+              <>
+                <div style={{ width: 18, height: 18, border: '2.5px solid rgba(255,255,255,0.3)', borderTop: '2.5px solid white', borderRadius: '50%', animation: 'spin-loader 0.8s linear infinite' }} />
+                Bağlanıyor...
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: '1.1rem' }}>🔗</span>
+                Hesabıma Bağla
+              </>
+            )}
           </button>
         </div>
       </div>
