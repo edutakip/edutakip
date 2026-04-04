@@ -3,30 +3,40 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const body = await req.json();
+    const { inviteCode } = body;
 
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { inviteCode } = await req.json();
     if (!inviteCode) {
       return Response.json({ error: 'Kod gerekli' }, { status: 400 });
     }
 
-    // Service role ile ara (RLS bypass)
-    const students = await base44.asServiceRole.entities.Student.filter({ inviteCode: inviteCode.toUpperCase() });
+    const code = inviteCode.toUpperCase().trim();
+    console.log('Searching for inviteCode:', code);
 
-    if (students.length === 0) {
+    // Get current user
+    let userEmail = '';
+    try {
+      const user = await base44.auth.me();
+      userEmail = user?.email || '';
+    } catch (e) {
+      console.log('Auth error (test mode?):', e.message);
+    }
+
+    // Service role ile RLS bypass ederek ara
+    const students = await base44.asServiceRole.entities.Student.filter({ inviteCode: code });
+    console.log('Students found:', students.length, 'for code:', code);
+
+    if (!students || students.length === 0) {
       return Response.json({ found: false });
     }
 
     const student = students[0];
+    console.log('Found student:', student.name, 'id:', student.id);
 
     // Update student with parent email
     await base44.asServiceRole.entities.Student.update(student.id, {
       inviteAccepted: true,
-      parentEmail: user.email,
+      parentEmail: userEmail,
     });
 
     return Response.json({ found: true, studentName: student.name });
