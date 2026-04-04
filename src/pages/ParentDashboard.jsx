@@ -70,13 +70,19 @@ export default function ParentDashboard() {
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</p>}
           <style>{`
             @keyframes shimmer {
-              0% { background-position: -200% center; }
-              100% { background-position: 200% center; }
+              0% { background-position: -300% center; }
+              100% { background-position: 300% center; }
+            }
+            @keyframes wave-shine {
+              0% { left: -100%; opacity: 0; }
+              20% { opacity: 1; }
+              80% { opacity: 1; }
+              100% { left: 150%; opacity: 0; }
             }
             @keyframes pulse-ring {
-              0% { transform: scale(1); opacity: 0.6; }
-              50% { transform: scale(1.08); opacity: 0.3; }
-              100% { transform: scale(1); opacity: 0.6; }
+              0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.7); }
+              70% { box-shadow: 0 0 0 12px rgba(124,58,237,0); }
+              100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
             }
             @keyframes spin-loader {
               from { transform: rotate(0deg); }
@@ -93,19 +99,30 @@ export default function ParentDashboard() {
               position: relative;
               overflow: hidden;
               transition: transform 0.15s, box-shadow 0.15s;
-              background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #4f46e5 100%);
-              background-size: 200% auto;
+              background: linear-gradient(100deg, #4f46e5 0%, #7c3aed 40%, #a855f7 60%, #4f46e5 100%);
+              background-size: 300% auto;
               color: white;
               box-shadow: 0 6px 20px rgba(79,70,229,0.45);
               display: flex;
               align-items: center;
               justify-content: center;
               gap: 0.5rem;
-              animation: shimmer 3s linear infinite;
+              animation: shimmer 2s linear infinite, pulse-ring 2s ease-out infinite;
+            }
+            .connect-btn::after {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: -100%;
+              width: 60%;
+              height: 100%;
+              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+              transform: skewX(-20deg);
+              animation: wave-shine 2s ease-in-out infinite;
             }
             .connect-btn:not(:disabled):hover {
               transform: translateY(-2px);
-              box-shadow: 0 10px 28px rgba(79,70,229,0.55);
+              box-shadow: 0 10px 28px rgba(79,70,229,0.6);
             }
             .connect-btn:not(:disabled):active {
               transform: translateY(0px);
@@ -116,15 +133,6 @@ export default function ParentDashboard() {
               animation: none;
               background: #9ca3af;
               box-shadow: none;
-            }
-            .connect-btn::before {
-              content: '';
-              position: absolute;
-              inset: -2px;
-              border-radius: 16px;
-              background: linear-gradient(135deg, #4f46e5, #7c3aed, #4f46e5);
-              z-index: -1;
-              animation: pulse-ring 2s ease-in-out infinite;
             }
           `}</style>
           <button
