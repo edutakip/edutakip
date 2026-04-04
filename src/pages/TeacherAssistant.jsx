@@ -18,6 +18,8 @@ const QUICK_PROMPTS = [
   { icon: '📊', text: 'En çok zorlanan öğrencilerim kimler?' },
   { icon: '📝', text: 'Tamamlanmamış ödevler var mı?' },
   { icon: '💡', text: 'Öğrenci motivasyonunu artırmak için öneriler ver' },
+  { icon: '📈', text: 'Hangi öğrencilerime akıllı zam önerisi yapabilirsin?' },
+  { icon: '🗓️', text: 'Bu haftaki ders programım nasıl görünüyor?' },
 ];
 
 function WhatsAppButton() {
