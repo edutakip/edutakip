@@ -41,13 +41,11 @@ export default function ParentDashboard() {
     const code = codeDigits.join('');
     if (code.length < 6) return;
     setLoading(true); setError('');
-    const all = await base44.entities.Student.filter({ inviteCode: code.toUpperCase() });
-    if (all.length === 0) {
+    const res = await base44.functions.invoke('joinWithInviteCode', { inviteCode: code });
+    if (!res.data?.found) {
       setError('Geçersiz davet kodu. Lütfen öğretmeninizden aldığınız kodu kontrol edin.');
       setLoading(false); return;
     }
-    const s = all[0];
-    await base44.entities.Student.update(s.id, { inviteAccepted: true, parentEmail: user?.email || '' });
     setLoading(false);
     loadStudentData(user?.email || '');
   };
