@@ -177,10 +177,10 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports'], multiLine: true },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports', 'TeacherMessages'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
-    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages', multiLine: true },
+    { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
   ];
 
   const TEACHER_NAV = [
@@ -582,6 +582,7 @@ export default function Layout({ children, currentPageName }) {
                 { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
                 { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
                 { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
+                { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
               ].map((item, i) => {
                 const Icon = item.icon;
                 const isActive = item.page === currentPageName;
