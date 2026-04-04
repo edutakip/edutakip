@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     }
 
     // Öğrenci bilgisini al
-    const student = await base44.entities.Student.list().then(students =>
+    const student = await base44.asServiceRole.entities.Student.list().then(students =>
       students.find(s => s.id === studentId && s.teacherEmail === user.email)
     );
 
@@ -26,19 +26,19 @@ Deno.serve(async (req) => {
     }
 
     // Öğrencinin ödeme geçmişini al
-    const payments = await base44.entities.Payment.filter({
+    const payments = await base44.asServiceRole.entities.Payment.filter({
       studentId: studentId,
       teacherEmail: user.email
     });
 
     // Öğrencinin ders geçmişini al
-    const lessons = await base44.entities.Lesson.filter({
+    const lessons = await base44.asServiceRole.entities.Lesson.filter({
       studentId: studentId,
       teacherEmail: user.email
     });
 
     // Öğrencinin ders raporlarını al
-    const reports = await base44.entities.LessonReport.filter({
+    const reports = await base44.asServiceRole.entities.LessonReport.filter({
       studentId: studentId,
       teacherEmail: user.email
     });

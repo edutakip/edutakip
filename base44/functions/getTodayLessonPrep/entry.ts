@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
 
     // Bugünün derslerini sorgula
-    const allLessons = await base44.entities.Lesson.filter({
+    const allLessons = await base44.asServiceRole.entities.Lesson.filter({
       teacherEmail: user.email,
       date: todayStr,
     });
@@ -31,11 +31,11 @@ Deno.serve(async (req) => {
     const lessonPrepData = await Promise.all(
       allLessons.map(async (lesson) => {
         // Öğrenci bilgisini al
-        const student = await base44.entities.Student.list()
+        const student = await base44.asServiceRole.entities.Student.list()
           .then(students => students.find(s => s.id === lesson.studentId));
 
         // Öğrencinin önceki ders raporlarını sırala (en yenisinden başlayarak)
-        const lessonReports = await base44.entities.LessonReport.filter({
+        const lessonReports = await base44.asServiceRole.entities.LessonReport.filter({
           studentId: lesson.studentId,
           teacherEmail: user.email,
         });
