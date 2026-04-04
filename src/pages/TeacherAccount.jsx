@@ -152,6 +152,18 @@ function SubscriptionTab({ user, students, onRefresh }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [subDetails, setSubDetails] = useState(null);
+  const [subLoading, setSubLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.paddleSubscriptionId) {
+      setSubLoading(true);
+      base44.functions.invoke('getSubscriptionDetails', {})
+        .then(res => setSubDetails(res.data))
+        .catch(() => {})
+        .finally(() => setSubLoading(false));
+    }
+  }, [user?.paddleSubscriptionId]);
 
   const plan = user?.plan || 'free';
   const planStyle = PLAN_STYLE[plan] || PLAN_STYLE.free;
@@ -245,22 +257,91 @@ function SubscriptionTab({ user, students, onRefresh }) {
       {/* Abonelik Detayları - Pro ise */}
       {(plan === 'pro') && (
         <SectionCard title="Abonelik Detayları" icon={CreditCard} subtitle="Ödeme ve fatura bilgileri">
-          <InfoRow label="Plan" value={`Pro — ${studentLimit} öğrenci`} />
-          {monthlyPrice && <InfoRow label="Aylık ücret" value={`${monthlyPrice.toLocaleString('tr-TR')} ₺`} highlight='#4f46e5' />}
-          {nextBillingDate && <InfoRow label="Sonraki ödeme tarihi" value={nextBillingDate} highlight='#059669' />}
-          {subscriptionStartDate && <InfoRow label="Abonelik başlangıcı" value={subscriptionStartDate} />}
-          {user?.paddleSubscriptionId && <InfoRow label="Abonelik ID" value={`...${user.paddleSubscriptionId.slice(-8)}`} />}
-          <InfoRow label="Durum" value="✓ Aktif" highlight='#10b981' />
+          {subLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#9ca3af', fontSize: '0.85rem', padding: '0.5rem 0' }}>
+              <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Yükleniyor...
+            </div>
+          ) : (
+            <>
+              <InfoRow label="Plan" value={`Pro — ${studentLimit} öğrenci`} />
+              {monthlyPrice && <InfoRow label="Aylık ücret" value={`${monthlyPrice.toLocaleString('tr-TR')} ₺`} highlight='#4f46e5' />}
+
+              {/* Canlı Paddle verisi */}
+              {subDetails?.nextBilledAt && (
+                <InfoRow
+                  label="Sonraki yenilenme tarihi"
+                  value={new Date(subDetails.nextBilledAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  highlight='#059669'
+                />
+              )}
+              {subDetails?.currentBillingPeriodStart && (
+                <InfoRow
+                  label="Mevcut dönem başlangıcı"
+                  value={new Date(subDetails.currentBillingPeriodStart).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                />
+              )}
+              {subDetails?.scheduledChange && (
+                <InfoRow
+                  label="Planlanan değişiklik"
+                  value={`${subDetails.scheduledChange.action === 'cancel' ? 'İptal' : 'Güncelleme'} — ${new Date(subDetails.scheduledChange.effective_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+                  highlight='#f97316'
+                />
+              )}
+              {subscriptionStartDate && <InfoRow label="Abonelik başlangıcı" value={subscriptionStartDate} />}
+              {user?.paddleSubscriptionId && <InfoRow label="Abonelik ID" value={`...${user.paddleSubscriptionId.slice(-8)}`} />}
+              <InfoRow label="Durum" value="✓ Aktif" highlight='#10b981' />
+
+              {/* Kart / Ödeme Yöntemi */}
+              {subDetails?.paymentMethod && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f3f4f6' }}>
+                  <p style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '0.65rem' }}>Ödeme Yöntemi</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f8fafc', borderRadius: 12, padding: '0.75rem 1rem' }}>
+                    <div style={{ width: 38, height: 26, background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CreditCard size={14} color='white' />
+                    </div>
+                    <div>
+                      {subDetails.paymentMethod.card ? (
+                        <>
+                          <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', margin: 0, textTransform: 'capitalize' }}>
+                            {subDetails.paymentMethod.card.brand} •••• {subDetails.paymentMethod.card.last4}
+                          </p>
+                          <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.1rem 0 0' }}>
+                            Son kullanma: {subDetails.paymentMethod.card.expiry}
+                          </p>
+                        </>
+                      ) : (
+                        <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', margin: 0, textTransform: 'capitalize' }}>
+                          {subDetails.paymentMethod.type}
+                        </p>
+                      )}
+                    </div>
+                    {subDetails.managementUrl && (
+                      <a
+                        href={subDetails.managementUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ marginLeft: 'auto', fontSize: '0.78rem', color: '#4f46e5', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}
+                      >
+                        Güncelle <ExternalLink size={11} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f3f4f6' }}>
-            <a
-              href="https://paddle.com/billing"
-              target="_blank"
-              rel="noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #d1fae5', background: '#ecfdf5', color: '#065f46', fontWeight: 700, fontSize: '0.83rem', textDecoration: 'none' }}
-            >
-              <ExternalLink size={13} /> Fatura Geçmişi
-            </a>
+            {(subDetails?.cancelUrl || subDetails?.managementUrl) && (
+              <a
+                href={subDetails.cancelUrl || subDetails.managementUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #d1fae5', background: '#ecfdf5', color: '#065f46', fontWeight: 700, fontSize: '0.83rem', textDecoration: 'none' }}
+              >
+                <ExternalLink size={13} /> Paddle Portalı
+              </a>
+            )}
             <button
               onClick={() => setShowCancelConfirm(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', borderRadius: 10, border: '1.5px solid #fee2e2', background: '#fef2f2', color: '#dc2626', fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer' }}
