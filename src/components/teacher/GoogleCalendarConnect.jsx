@@ -13,12 +13,8 @@ export default function GoogleCalendarConnect({ user }) {
   const checkConnection = async () => {
     setChecking(true);
     try {
-      const res = await base44.functions.invoke('syncLessonToCalendar', {
-        lessonId: '__check__',
-        action: 'create',
-      });
-      // If we get 'connected: false', not connected; otherwise connected
-      setConnected(res.data?.connected !== false && !res.data?.error?.includes('not connected'));
+      const res = await base44.functions.invoke('checkCalendarConnection', {});
+      setConnected(res.data?.connected === true);
     } catch (e) {
       setConnected(false);
     } finally {
