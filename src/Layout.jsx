@@ -640,7 +640,7 @@ export default function Layout({ children, currentPageName }) {
             };
 
             const labelText = item.submenu || item.financeSubmenu
-              ? item.label + ' ›'
+              ? item.label
               : item.label;
 
             return (
@@ -655,8 +655,8 @@ export default function Layout({ children, currentPageName }) {
                   transition: 'color 0.15s ease',
                 }}>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
-                <span style={{ fontSize: '0.62rem', fontWeight: isActive ? '700' : '400', whiteSpace: 'nowrap', letterSpacing: '0.1px' }}>
-                  {labelText}
+                <span style={{ fontSize: '0.58rem', fontWeight: isActive ? '700' : '400', whiteSpace: 'normal', letterSpacing: '0.1px', textAlign: 'center', lineHeight: 1.2, maxWidth: 44 }}>
+                  {(item.submenu || item.financeSubmenu) ? <>{item.label} ›</> : labelText}
                 </span>
               </Link>
             );
