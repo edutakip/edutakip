@@ -200,8 +200,8 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
     { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
-    { label: t('teacher.layout.myAccount'), icon: Settings, page: 'TeacherAccount' },
     { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
+    { label: t('teacher.layout.myAccount'), icon: Settings, page: 'TeacherAccount' },
   ];
 
   const [collapsed, setCollapsed] = useState(false);
