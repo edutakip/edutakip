@@ -668,8 +668,8 @@ export default function Layout({ children, currentPageName }) {
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
-              color: '#bf5fff',
-              filter: 'drop-shadow(0 0 6px rgba(167,60,255,0.8))',
+              color: '#818cf8',
+              filter: 'drop-shadow(0 0 6px rgba(99,102,241,0.7))',
               textDecoration: 'none',
               transition: 'color 0.15s ease',
             }}>
