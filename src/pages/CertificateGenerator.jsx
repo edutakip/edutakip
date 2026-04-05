@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { base44 } from '@/api/base44Client';
 
 // ── Certificate language translations ────────────────────────
 const CERT_LANGS = {
@@ -130,9 +131,9 @@ function SubjectInput({ value, onChange, isEn, inputStyle }) {
 }
 
 // ── Certificate Preview ───────────────────────────────────────
-function CertificatePreview({ form, certLang, theme }) {
+function CertificatePreview({ form, certLang, theme, customTheme }) {
   const c = CERT_LANGS[certLang];
-  const t = THEMES.find(t => t.id === theme) || THEMES[0];
+  const t = theme === '__custom__' && customTheme ? customTheme : (THEMES.find(t => t.id === theme) || THEMES[0]);
   const isRTL = c.dir === 'rtl';
   const isRoyal = theme === 'royal';
 
@@ -230,25 +231,45 @@ export default function CertificateGenerator() {
   const [form, setForm] = useState({ studentName: '', tutorName: '', course: '', date: new Date().toISOString().slice(0, 10), message: '' });
   const [certLang, setCertLang] = useState('en');
   const [theme, setTheme] = useState('classic');
+  const [customTheme, setCustomTheme] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [applyAnim, setApplyAnim] = useState(false);
+  const [applyLoading, setApplyLoading] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
-  const prevDesc = useRef('');
 
   const u = (key, val) => {
     setForm(f => ({ ...f, [key]: val }));
     if (key === 'designDesc') {
       setApplySuccess(false);
-      setApplyAnim(!!val);
     }
   };
 
-  const handleApplyDesc = () => {
-    // Animate success
-    setApplySuccess(true);
-    setTimeout(() => setApplySuccess(false), 2000);
-    // Scroll preview into view on mobile
-    document.getElementById('certificate-preview')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const handleApplyDesc = async () => {
+    if (!form.designDesc) return;
+    setApplyLoading(true);
+    setApplySuccess(false);
+    try {
+      const res = await base44.functions.invoke('generateCertificate', {
+        description: form.designDesc,
+        currentTheme: theme,
+        certLang,
+        form,
+      });
+      const generated = res.data;
+      if (generated && generated.id) {
+        setCustomTheme(generated);
+        setTheme('__custom__');
+        if (generated.suggestedMessage && !form.message) {
+          setForm(f => ({ ...f, message: generated.suggestedMessage }));
+        }
+        setApplySuccess(true);
+        setTimeout(() => setApplySuccess(false), 3000);
+        document.getElementById('certificate-preview')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setApplyLoading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -396,23 +417,24 @@ export default function CertificateGenerator() {
               />
               {form.designDesc && (
                 <button
-                  className="apply-btn"
+                  className={!applyLoading && !applySuccess ? 'apply-btn' : ''}
                   onClick={handleApplyDesc}
+                  disabled={applyLoading}
                   style={{
                     marginTop: '0.6rem',
                     width: '100%',
                     padding: '0.75rem 1rem',
                     borderRadius: 12,
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: applyLoading ? 'wait' : 'pointer',
                     fontWeight: 800,
                     fontSize: '0.9rem',
                     color: 'white',
                     background: applySuccess
                       ? 'linear-gradient(135deg, #10b981, #059669)'
-                      : 'linear-gradient(135deg, #6366f1, #8b5cf6, #6366f1)',
-                    backgroundSize: applySuccess ? '100%' : '200% auto',
-                    animation: applySuccess ? 'none' : 'applyPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                      : applyLoading
+                      ? 'linear-gradient(135deg, #818cf8, #a78bfa)'
+                      : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                     boxShadow: applySuccess
                       ? '0 4px 16px rgba(16,185,129,0.4)'
                       : '0 4px 16px rgba(99,102,241,0.35)',
@@ -421,9 +443,12 @@ export default function CertificateGenerator() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
+                    opacity: applyLoading ? 0.85 : 1,
                   }}
                 >
-                  {applySuccess ? (
+                  {applyLoading ? (
+                    <>{isEn ? '⏳ Generating...' : '⏳ Oluşturuluyor...'}</>
+                  ) : applySuccess ? (
                     <>✅ {isEn ? 'Applied!' : 'Uygulandı!'}</>
                   ) : (
                     <>{isEn ? '✨ Apply Description' : '✨ Uygula'}</>
@@ -492,7 +517,7 @@ export default function CertificateGenerator() {
                 {THEMES.find(t => t.id === theme)?.icon} {isEn ? THEMES.find(t => t.id === theme)?.labelEn : THEMES.find(t => t.id === theme)?.labelTr}
               </span>
             </div>
-            <CertificatePreview form={form} certLang={certLang} theme={theme} />
+            <CertificatePreview form={form} certLang={certLang} theme={theme} customTheme={customTheme} />
           </div>
         </div>
       </div>
