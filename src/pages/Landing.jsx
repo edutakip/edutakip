@@ -131,7 +131,6 @@ export default function Landing() {
             {[['#features', t('nav.features')], ['#how-it-works', t('nav.howItWorks')], ['#screenshots', t('nav.screenshots')], ['#pricing', t('nav.pricing')]].map(([href, label]) =>
               <li key={href}><a href={href} style={{ color: 'rgba(255,255,255,.75)', textDecoration: 'none', fontSize: '.9rem', fontWeight: 500 }}>{label}</a></li>
             )}
-            <li><a href="/CertificateGenerator" style={{ color: 'rgba(255,255,255,.75)', textDecoration: 'none', fontSize: '.9rem', fontWeight: 500 }}>🏅 {isEnglish ? 'Certificate' : 'Sertifika'}</a></li>
           </ul>
         )}
         {isMobile ? (
@@ -162,7 +161,7 @@ export default function Landing() {
 
         {isMobile && mobileMenuOpen && (
           <div style={{ position: 'absolute', top: 70, left: 0, right: 0, background: 'rgba(10,15,35,0.98)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(124,58,237,.3)', padding: '0.5rem 5% 1rem', zIndex: 998 }}>
-            {[['#features', t('nav.features')], ['#how-it-works', t('nav.howItWorks')], ['#screenshots', t('nav.screenshots')], ['#pricing', t('nav.pricing')], ['/CertificateGenerator', `🏅 ${isEnglish ? 'Certificate' : 'Sertifika'}`]].map(([href, label]) =>
+            {[['#features', t('nav.features')], ['#how-it-works', t('nav.howItWorks')], ['#screenshots', t('nav.screenshots')], ['#pricing', t('nav.pricing')], ].map(([href, label]) =>
               <a key={href} href={href} onClick={() => setMobileMenuOpen(false)}
                 style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,.85)', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.9rem 0', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
                 {label}

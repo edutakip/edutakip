@@ -181,6 +181,7 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
     { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
+    { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator', multiLine: false },
   ];
 
   const TEACHER_NAV = [
@@ -200,6 +201,8 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
     { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
     { label: 'Hesabım', icon: Settings, page: 'TeacherAccount' },
+    { label: 'Hesabım', icon: Settings, page: 'TeacherAccount' },
+    { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
   ];
 
   const [collapsed, setCollapsed] = useState(false);
