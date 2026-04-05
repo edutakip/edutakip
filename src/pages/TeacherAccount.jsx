@@ -480,6 +480,14 @@ function NotificationsTab({ user }) {
   );
 }
 
+// ── Plan styles ────────────────────────────────────────────────
+const PLAN_STYLE = {
+  free:     { gradient: 'linear-gradient(135deg,#6b7280,#9ca3af)', icon: '🆓' },
+  trialing: { gradient: 'linear-gradient(135deg,#f59e0b,#f97316)', icon: '⏳' },
+  pro:      { gradient: 'linear-gradient(135deg,#4f46e5,#7c3aed)', icon: '👑' },
+  expired:  { gradient: 'linear-gradient(135deg,#ef4444,#dc2626)', icon: '⚠️' },
+};
+
 // ── Styles ─────────────────────────────────────────────────────
 const labelStyle = {
   fontSize: '0.72rem', color: '#6b7280', fontWeight: 700,
