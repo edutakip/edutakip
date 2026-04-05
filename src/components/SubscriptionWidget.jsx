@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Zap, Crown, CheckCircle, Clock } from 'lucide-react';
 import { getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import ProUpgradeModal from './ProUpgradeModal';
+import { useTranslation } from 'react-i18next';
 
-const FREE_PERKS = [
+const FREE_PERKS_TR = [
   { text: '3 öğrenci limiti', locked: false },
   { text: 'AI ders raporları', locked: true },
   { text: 'EduTakip Asistan (AI)', locked: true },
@@ -11,8 +12,19 @@ const FREE_PERKS = [
   { text: 'WhatsApp bildirimleri', locked: true },
   { text: 'Detaylı finans analizi', locked: true },
 ];
+const FREE_PERKS_EN = [
+  { text: '3 student limit', locked: false },
+  { text: 'AI lesson reports', locked: true },
+  { text: 'EduTakip Assistant (AI)', locked: true },
+  { text: 'Auto lesson scheduling', locked: true },
+  { text: 'WhatsApp notifications', locked: true },
+  { text: 'Detailed finance analytics', locked: true },
+];
 
 export default function SubscriptionWidget({ user, collapsed }) {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const FREE_PERKS = isEn ? FREE_PERKS_EN : FREE_PERKS_TR;
   const [showModal, setShowModal] = useState(false);
 
   if (!user || collapsed) return null;
@@ -46,12 +58,12 @@ export default function SubscriptionWidget({ user, collapsed }) {
               {isTrialing && <Clock size={13} color='#a5b4fc' />}
               {isExpired && <CheckCircle size={13} color='#fca5a5' />}
               <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isPro ? '#6ee7b7' : isExpired ? '#fca5a5' : '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {isPro ? 'Pro Hesap' : isExpired ? 'Süresi Doldu' : 'Deneme Süresi'}
+                {isPro ? (isEn ? 'Pro Account' : 'Pro Hesap') : isExpired ? (isEn ? 'Expired' : 'Süresi Doldu') : (isEn ? 'Trial Period' : 'Deneme Süresi')}
               </span>
             </div>
             {isTrialing && daysLeft !== null && (
               <span style={{ fontSize: '0.72rem', fontWeight: 800, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24' }}>
-                {daysLeft > 0 ? `${daysLeft} gün kaldı` : 'Bugün bitiyor!'}
+                {daysLeft > 0 ? `${daysLeft} ${isEn ? 'days left' : 'gün kaldı'}` : (isEn ? 'Ends today!' : 'Bugün bitiyor!')}
               </span>
             )}
           </div>
@@ -70,7 +82,7 @@ export default function SubscriptionWidget({ user, collapsed }) {
               </div>
               <button onClick={() => setShowModal(true)}
                 style={{ width: '100%', padding: '0.55rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: 'white', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(249,115,22,0.35)' }}>
-                <Crown size={13} fill='white' /> Abone Ol
+                <Crown size={13} fill='white' /> {isEn ? 'Subscribe' : 'Abone Ol'}
               </button>
             </>
           )}
@@ -79,7 +91,7 @@ export default function SubscriptionWidget({ user, collapsed }) {
           {isExpired && (
             <button onClick={() => setShowModal(true)}
               style={{ width: '100%', marginTop: '0.65rem', padding: '0.55rem', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: 'white', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}>
-              Yenile
+              {isEn ? 'Renew' : 'Yenile'}
             </button>
           )}
         </div>
@@ -96,7 +108,7 @@ export default function SubscriptionWidget({ user, collapsed }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem' }}>
             <Zap size={13} color='#a5b4fc' fill='#a5b4fc' />
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ücretsiz Hesap</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{isEn ? 'Free Account' : 'Ücretsiz Hesap'}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.7rem' }}>
             <style>{`
@@ -124,7 +136,7 @@ export default function SubscriptionWidget({ user, collapsed }) {
                 50% { box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
               }
             `}</style>
-            <Crown size={13} fill='white' /> Pro Paket'e Geç
+            <Crown size={13} fill='white' /> {isEn ? 'Upgrade to Pro' : "Pro Paket'e Geç"}
           </button>
         </div>
       )}

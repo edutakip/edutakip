@@ -9,9 +9,10 @@ const WHATSAPP_TRIGGER = 'SHOW_WHATSAPP_BUTTON';
 
 const FREE_QUESTION_LIMIT = 2;
 
-const AGENT_NAME = 'edu_asistan';
+import { useTranslation } from 'react-i18next';
+const getAgentName = (lang) => lang === 'en' ? 'edu_asistan_en' : 'edu_asistan';
 
-const QUICK_PROMPTS = [
+const QUICK_PROMPTS_TR = [
   { icon: '👥', text: 'Bu ay kaç aktif öğrencim var?' },
   { icon: '💰', text: 'Bu ay kim ödeme yapmadı?' },
   { icon: '📅', text: 'Bugünkü derslerim neler?' },
@@ -20,6 +21,16 @@ const QUICK_PROMPTS = [
   { icon: '💡', text: 'Öğrenci motivasyonunu artırmak için öneriler ver' },
   { icon: '📈', text: 'Hangi öğrencilerime akıllı zam önerisi yapabilirsin?' },
   { icon: '🗓️', text: 'Bu haftaki ders programım nasıl görünüyor?' },
+];
+const QUICK_PROMPTS_EN = [
+  { icon: '👥', text: 'How many active students do I have this month?' },
+  { icon: '💰', text: 'Who hasn\'t paid this month?' },
+  { icon: '📅', text: 'What are my lessons today?' },
+  { icon: '📊', text: 'Which students are struggling the most?' },
+  { icon: '📝', text: 'Are there any incomplete homework assignments?' },
+  { icon: '💡', text: 'Give me tips to increase student motivation' },
+  { icon: '📈', text: 'Which students can you suggest a fee increase for?' },
+  { icon: '🗓️', text: 'How does my lesson schedule look this week?' },
 ];
 
 function WhatsAppButton() {
@@ -119,7 +130,7 @@ function MessageBubble({ message }) {
                   }} />
                 ))}
               </div>
-              Veriler getiriliyor...
+              {isEn ? 'Fetching data...' : 'Veriler getiriliyor...'}
             </div>
           )}
         </div>
@@ -162,6 +173,9 @@ function TypingIndicator() {
 }
 
 export default function TeacherAssistant() {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const AGENT_NAME = getAgentName(i18n.language);
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -299,8 +313,8 @@ export default function TeacherAssistant() {
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 800, color: '#111827', margin: 0 }}>EduTakip Asistanı</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 0 2px rgba(16,185,129,0.2)' }} />
-              <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Çevrimiçi</span>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 0 2px rgba(16,185,129,0.2)' }} />
+            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{isEn ? 'Online' : 'Çevrimiçi'}</span>
             </div>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#eef2ff', borderRadius: 20, padding: '0.35rem 0.85rem', border: '1px solid #c7d2fe' }}>
@@ -322,7 +336,7 @@ export default function TeacherAssistant() {
               <div style={{ textAlign: 'center', color: '#9ca3af' }}>
                 <div style={{ width: 36, height: 36, border: '3px solid #e5e7eb', borderTopColor: '#4f46e5', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 0.75rem' }} />
                 <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-                Asistan hazırlanıyor...
+                {isEn ? 'Preparing assistant...' : 'Asistan hazırlanıyor...'}
               </div>
             </div>
           ) : (
@@ -345,16 +359,16 @@ export default function TeacherAssistant() {
                       />
                     </div>
                     <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>
-                      Merhaba Hocam! 👋
+                      {isEn ? 'Hello Teacher! 👋' : 'Merhaba Hocam! 👋'}
                     </h3>
                     <p style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.7 }}>
-                      Ben EduTakip Asistanı. Öğrenci takibi, ödemeler, ders programı ve daha fazlası hakkında yardımcı olabilirim.
+                      {isEn ? "I'm the EduTakip Assistant. I can help you with student tracking, payments, lesson schedules and more." : 'Ben EduTakip Asistanı. Öğrenci takibi, ödemeler, ders programı ve daha fazlası hakkında yardımcı olabilirim.'}
                     </p>
                   </div>
 
                   {/* Quick prompts */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.65rem', width: '100%', maxWidth: 560 }}>
-                    {QUICK_PROMPTS.map((p, i) => (
+                    {(isEn ? QUICK_PROMPTS_EN : QUICK_PROMPTS_TR).map((p, i) => (
                       <button
                         key={i}
                         className="quick-prompt-btn"
@@ -417,8 +431,8 @@ export default function TeacherAssistant() {
                 <Lock size={13} color={isLimitReached ? '#92400e' : '#4f46e5'} />
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: isLimitReached ? '#92400e' : '#3730a3' }}>
                   {isLimitReached
-                    ? 'Ücretsiz soru limitine ulaştınız (2/2)'
-                    : `Ücretsiz soru: ${userQuestionCount}/${FREE_QUESTION_LIMIT}`}
+                    ? (isEn ? 'Free question limit reached (2/2)' : 'Ücretsiz soru limitine ulaştınız (2/2)')
+                    : (isEn ? `Free questions: ${userQuestionCount}/${FREE_QUESTION_LIMIT}` : `Ücretsiz soru: ${userQuestionCount}/${FREE_QUESTION_LIMIT}`)}
                 </span>
               </div>
               <button onClick={() => setShowProModal(true)} style={{
@@ -426,7 +440,7 @@ export default function TeacherAssistant() {
                 border: 'none', color: 'white', borderRadius: '8px',
                 padding: '0.3rem 0.8rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
               }}>
-                Pro'ya Geç
+                {isEn ? 'Upgrade to Pro' : "Pro'ya Geç"}
               </button>
             </div>
           )}
@@ -439,7 +453,7 @@ export default function TeacherAssistant() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
               boxShadow: '0 4px 14px rgba(249,115,22,0.35)',
             }}>
-              <Lock size={16} /> Devam etmek için Pro'ya geçin
+              <Lock size={16} /> {isEn ? 'Upgrade to Pro to continue' : "Devam etmek için Pro'ya geçin"}
             </button>
           ) : (
             <div style={{
@@ -458,7 +472,7 @@ export default function TeacherAssistant() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="EduTakip Asistanına bir şeyler sorun..."
+                placeholder={isEn ? "Ask the EduTakip Assistant anything..." : "EduTakip Asistanına bir şeyler sorun..."}
                 rows={1}
                 style={{
                   flex: 1,
@@ -500,7 +514,7 @@ export default function TeacherAssistant() {
             </div>
           )}
           <p style={{ textAlign: 'center', color: '#c4c9d4', fontSize: '0.7rem', marginTop: '0.5rem' }}>
-            EduTakip Asistanı yapay zeka tarafından desteklenmektedir ve hatalar yapabilir.
+            {isEn ? 'EduTakip Assistant is powered by AI and may make mistakes.' : 'EduTakip Asistanı yapay zeka tarafından desteklenmektedir ve hatalar yapabilir.'}
           </p>
         </div>
       </div>

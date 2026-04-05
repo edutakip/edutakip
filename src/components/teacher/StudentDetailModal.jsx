@@ -4,8 +4,10 @@ import { base44 } from '@/api/base44Client';
 import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight, History } from 'lucide-react';
 import PaymentHistoryModal from './PaymentHistoryModal';
 import ScheduleSlotEditor from './ScheduleSlotEditor';
+import { useTranslation } from 'react-i18next';
 
-const DAYS_FULL = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const DAYS_FULL_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const DAYS_FULL_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const GRADES = ['İlkokul (1-4)', 'Ortaokul (5-8)', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Üniversite', 'Yetişkin'];
 
 function useWindowSize() {
@@ -52,6 +54,9 @@ function Field({ label, children }) {
 }
 
 export default function StudentDetailModal({ student, onClose, onSaved }) {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const DAYS_FULL = isEn ? DAYS_FULL_EN : DAYS_FULL_TR;
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [payments, setPayments] = useState([]);
@@ -111,7 +116,9 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   };
 
   const statusColors = { tamamlandı: '#22c55e', planlandı: '#f59e0b', iptal: '#ef4444' };
-  const statusLabels = { tamamlandı: 'Tamamlandı', planlandı: 'Planlandı', iptal: 'İptal' };
+  const statusLabels = isEn
+    ? { tamamlandı: 'Completed', planlandı: 'Planned', iptal: 'Cancelled' }
+    : { tamamlandı: 'Tamamlandı', planlandı: 'Planlandı', iptal: 'İptal' };
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? '0' : '1rem', backdropFilter: 'blur(6px)' }}>
@@ -128,18 +135,18 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
               <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 {student.grade && <span style={{ border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.55)', fontSize: '0.6rem', fontWeight: '600', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>{student.grade}</span>}
                 <span style={{ border: `1px solid ${student.status === 'active' ? '#22c55e' : '#9ca3af'}`, color: student.status === 'active' ? '#22c55e' : '#9ca3af', fontSize: '0.6rem', fontWeight: '700', padding: '0.12rem 0.45rem', borderRadius: '5px' }}>
-                  {student.status === 'active' ? '● Aktif' : '● Arşiv'}
+                  {student.status === 'active' ? (isEn ? '● Active' : '● Aktif') : (isEn ? '● Archived' : '● Arşiv')}
                 </span>
                 {/* Mobil: butonlar ismin yanında */}
                 {isMobile && !editing && (
                   <>
                     <button onClick={() => setShowPaymentHistory(true)}
                       style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <History size={10} /> Geçmiş
+                      <History size={10} /> {isEn ? 'History' : 'Geçmiş'}
                     </button>
                     <button onClick={() => setEditing(true)}
                       style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Edit2 size={10} /> Düzenle
+                      <Edit2 size={10} /> {isEn ? 'Edit' : 'Düzenle'}
                     </button>
                   </>
                 )}
@@ -147,11 +154,11 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                   <>
                     <button onClick={() => { setEditing(false); setForm({ ...student }); }}
                       style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer' }}>
-                      İptal
+                      {isEn ? 'Cancel' : 'İptal'}
                     </button>
                     <button onClick={save} disabled={loading}
                       style={{ background: '#4f46e5', border: 'none', color: 'white', borderRadius: '7px', padding: '0.2rem 0.5rem', fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      {loading ? <Loader2 size={10} className='animate-spin' /> : <Save size={10} />} Kaydet
+                      {loading ? <Loader2 size={10} className='animate-spin' /> : <Save size={10} />} {isEn ? 'Save' : 'Kaydet'}
                     </button>
                   </>
                 )}
@@ -169,17 +176,17 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             {!isMobile && (!editing ? (
               <button onClick={() => setEditing(true)}
                 style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: '9px', padding: '0.5rem 1rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Edit2 size={12} /> Düzenle
+                <Edit2 size={12} /> {isEn ? 'Edit' : 'Düzenle'}
               </button>
             ) : (
               <>
                 <button onClick={() => { setEditing(false); setForm({ ...student }); }}
                   style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '9px', padding: '0.4rem 0.65rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer' }}>
-                  İptal
+                  {isEn ? 'Cancel' : 'İptal'}
                 </button>
                 <button onClick={save} disabled={loading}
                   style={{ background: '#4f46e5', border: 'none', color: 'white', borderRadius: '9px', padding: '0.4rem 0.65rem', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  {loading ? <Loader2 size={12} className='animate-spin' /> : <Save size={12} />} Kaydet
+                  {loading ? <Loader2 size={12} className='animate-spin' /> : <Save size={12} />} {isEn ? 'Save' : 'Kaydet'}
                 </button>
               </>
             ))}
@@ -202,10 +209,10 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '0.5rem' : '0.6rem', marginBottom: isMobile ? '1rem' : '1.5rem' }}>
                   {[
-                    { label: 'Ders Saat Ücreti', value: `₺${(student.feePerLesson || 0).toLocaleString()}`, color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)' },
-                    { label: 'Ders Süresi', value: `${student.lessonDuration || 60} dk`, color: '#a78bfa', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.3)' },
-                    { label: 'Haftalık Ders', value: `${student.weeklyLessons || 0}`, color: '#34d399', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)' },
-                    { label: 'Toplam Ders', value: `${lessons.length}+`, color: '#fb923c', bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.3)' },
+                    { label: isEn ? 'Hourly Fee' : 'Ders Saat Ücreti', value: `₺${(student.feePerLesson || 0).toLocaleString()}`, color: '#818cf8', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)' },
+                    { label: isEn ? 'Duration' : 'Ders Süresi', value: `${student.lessonDuration || 60} ${isEn ? 'min' : 'dk'}`, color: '#a78bfa', bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.3)' },
+                    { label: isEn ? 'Weekly' : 'Haftalık Ders', value: `${student.weeklyLessons || 0}`, color: '#34d399', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)' },
+                    { label: isEn ? 'Total Lessons' : 'Toplam Ders', value: `${lessons.length}+`, color: '#fb923c', bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.3)' },
                   ].map(({ label, value, color, bg, border }) => (
                     <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '12px', padding: isMobile ? '0.65rem 0.75rem' : '0.75rem' }}>
                       <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.58rem', fontWeight: '700', letterSpacing: '0.6px', marginBottom: '0.25rem', textTransform: 'uppercase' }}>{label}</div>
@@ -214,22 +221,22 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                   ))}
                 </div>
 
-                <Section title="Temel Bilgiler" icon={User}>
-                  <InfoRow label="Sınıf" value={student.grade} />
-                  <InfoRow label="Ders Konusu" value={student.subject} />
-                  <InfoRow label="Telefon" value={student.phone} />
-                  <InfoRow label="Kaynak" value={student.resourceName} />
+                <Section title={isEn ? "Basic Info" : "Temel Bilgiler"} icon={User}>
+                  <InfoRow label={isEn ? "Grade" : "Sınıf"} value={student.grade} />
+                  <InfoRow label={isEn ? "Subject" : "Ders Konusu"} value={student.subject} />
+                  <InfoRow label={isEn ? "Phone" : "Telefon"} value={student.phone} />
+                  <InfoRow label={isEn ? "Resource" : "Kaynak"} value={student.resourceName} />
                 </Section>
 
-                <Section title="Veli & İletişim" icon={Phone}>
-                  <InfoRow label="Veli Adı" value={student.parentName} />
-                  <InfoRow label="Veli Telefon" value={student.parentPhone} />
-                  <InfoRow label="Veli E-posta" value={student.parentEmail} />
+                <Section title={isEn ? "Parent & Contact" : "Veli & İletişim"} icon={Phone}>
+                  <InfoRow label={isEn ? "Parent Name" : "Veli Adı"} value={student.parentName} />
+                  <InfoRow label={isEn ? "Parent Phone" : "Veli Telefon"} value={student.parentPhone} />
+                  <InfoRow label={isEn ? "Parent Email" : "Veli E-posta"} value={student.parentEmail} />
                 </Section>
 
                 {student.schedule?.length > 0 && (
-                  <Section title="Ders Programı" icon={Calendar}>
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem', marginBottom: '0.6rem' }}>Saate tıklayarak düzenleyebilirsiniz</p>
+                  <Section title={isEn ? "Schedule" : "Ders Programı"} icon={Calendar}>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem', marginBottom: '0.6rem' }}>{isEn ? 'Click a time to edit' : 'Saate tıklayarak düzenleyebilirsiniz'}</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {student.schedule.map((s, i) => (
                         <span key={i}
@@ -245,7 +252,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                 )}
 
                 {student.notes && (
-                  <Section title="Notlar" icon={BookOpen}>
+                  <Section title={isEn ? "Notes" : "Notlar"} icon={BookOpen}>
                     <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.82rem', lineHeight: 1.6 }}>{student.notes}</p>
                   </Section>
                 )}
@@ -255,55 +262,55 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div style={{ gridColumn: '1/-1' }}>
-                    <Field label="Ad Soyad *">
+                    <Field label={isEn ? "Full Name *" : "Ad Soyad *"}>
                       <input style={inp} value={form.name || ''} onChange={e => u('name', e.target.value)}
                         onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                     </Field>
                   </div>
-                  <Field label="Sınıf">
+                  <Field label={isEn ? "Grade" : "Sınıf"}>
                     <select style={{ ...inp, appearance: 'none' }} value={form.grade || ''} onChange={e => u('grade', e.target.value)}>
-                      <option value="">Seçin</option>
+                      <option value="">{isEn ? 'Select' : 'Seçin'}</option>
                       {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </Field>
-                  <Field label="Konu">
+                  <Field label={isEn ? "Subject" : "Konu"}>
                     <input style={inp} value={form.subject || ''} onChange={e => u('subject', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Telefon">
+                  <Field label={isEn ? "Phone" : "Telefon"}>
                     <input style={inp} value={form.phone || ''} onChange={e => u('phone', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Ders Saat Ücreti (₺)">
+                  <Field label={isEn ? "Hourly Fee (₺)" : "Ders Saat Ücreti (₺)"}>
                     <input style={inp} type="number" value={form.feePerLesson || ''} onChange={e => u('feePerLesson', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Ders Süresi (dk)">
+                  <Field label={isEn ? "Duration (min)" : "Ders Süresi (dk)"}>
                     <input style={inp} type="number" value={form.lessonDuration || 60} onChange={e => u('lessonDuration', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Veli Adı">
+                  <Field label={isEn ? "Parent Name" : "Veli Adı"}>
                     <input style={inp} value={form.parentName || ''} onChange={e => u('parentName', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
-                  <Field label="Veli Telefon">
+                  <Field label={isEn ? "Parent Phone" : "Veli Telefon"}>
                     <input style={inp} value={form.parentPhone || ''} onChange={e => u('parentPhone', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
                   <div style={{ gridColumn: '1/-1' }}>
-                    <Field label="Veli E-posta">
+                    <Field label={isEn ? "Parent Email" : "Veli E-posta"}>
                       <input style={inp} type="email" value={form.parentEmail || ''} onChange={e => u('parentEmail', e.target.value)}
                         onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                     </Field>
                   </div>
                   <div style={{ gridColumn: '1/-1' }}>
-                    <Field label="Kaynak">
+                    <Field label={isEn ? "Resource" : "Kaynak"}>
                       <input style={inp} value={form.resourceName || ''} onChange={e => u('resourceName', e.target.value)}
                         onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                     </Field>
                   </div>
                   <div style={{ gridColumn: '1/-1' }}>
-                    <Field label="Notlar">
+                    <Field label={isEn ? "Notes" : "Notlar"}>
                       <textarea style={{ ...inp, resize: 'vertical', minHeight: '80px' }} value={form.notes || ''} onChange={e => u('notes', e.target.value)}
                         onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                     </Field>
@@ -317,12 +324,12 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
           <div style={{ marginTop: isMobile ? '0.25rem' : '0' }}>
             {isMobile && <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '0.75rem 0 1rem' }} />}
             {/* Finance Summary */}
-            <Section title="Finansal Özet" icon={DollarSign}>
+            <Section title={isEn ? "Financial Summary" : "Finansal Özet"} icon={DollarSign}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                 {[
-                  { label: 'Hak Edilen', value: `₺${earned.toLocaleString('tr-TR')}`, color: 'rgba(255,255,255,0.7)' },
-                  { label: 'Tahsil Edilen', value: `₺${collected.toLocaleString('tr-TR')}`, color: '#22c55e' },
-                  { label: 'Bakiye', value: `${balance < 0 ? '-' : '+'}₺${Math.abs(balance).toLocaleString('tr-TR')}`, color: balance < 0 ? '#f87171' : '#22c55e' },
+                  { label: isEn ? 'Earned' : 'Hak Edilen', value: `₺${earned.toLocaleString('tr-TR')}`, color: 'rgba(255,255,255,0.7)' },
+                  { label: isEn ? 'Collected' : 'Tahsil Edilen', value: `₺${collected.toLocaleString('tr-TR')}`, color: '#22c55e' },
+                  { label: isEn ? 'Balance' : 'Bakiye', value: `${balance < 0 ? '-' : '+'}₺${Math.abs(balance).toLocaleString('tr-TR')}`, color: balance < 0 ? '#f87171' : '#22c55e' },
                 ].map(({ label, value, color }, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>{label}</span>
@@ -333,9 +340,9 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             </Section>
 
             {/* Son Dersler */}
-            <Section title="Son Dersler" icon={Clock}>
+            <Section title={isEn ? "Recent Lessons" : "Son Dersler"} icon={Clock}>
               {lessons.length === 0 ? (
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem' }}>Henüz ders yok</p>
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem' }}>{isEn ? 'No lessons yet' : 'Henüz ders yok'}</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {lessons.slice(0, 6).map(l => (
@@ -356,7 +363,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
             {/* Archive */}
             <button onClick={toggleArchive} disabled={loading}
               style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', border: `1px solid ${student.status === 'active' ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)'}`, background: student.status === 'active' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)', color: student.status === 'active' ? '#f87171' : '#34d399', fontWeight: '600', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-              {student.status === 'active' ? <><Archive size={13} /> Arşivle</> : <><ArchiveRestore size={13} /> Aktife Al</>}
+              {student.status === 'active' ? <><Archive size={13} /> {isEn ? 'Archive' : 'Arşivle'}</> : <><ArchiveRestore size={13} /> {isEn ? 'Activate' : 'Aktife Al'}</>}
             </button>
             </div>
             </div>

@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { isPro, isTrialExpired } from "@/lib/subscription";
 import ProUpgradeModal from "@/components/ProUpgradeModal";
+import { useTranslation } from "react-i18next";
 
 // ─────────────────────────────────────────────
 // 81 İL — Türkiye'nin tüm illeri (alfabetik)
@@ -163,12 +164,14 @@ function IconStar() { return <span style={{ fontSize: 16 }}>✦</span>; }
 
 // ─── Mobil Engel Ekranı ───────────────────────────────────────
 function MobileBlock() {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", background: "linear-gradient(135deg, #f5f3ff, #eef2ff)", textAlign: "center" }}>
       <div style={{ fontSize: 56, marginBottom: "1.25rem" }}>💻</div>
-      <h2 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#1e1b4b", marginBottom: "0.75rem" }}>Masaüstü Gerekli</h2>
+      <h2 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#1e1b4b", marginBottom: "0.75rem" }}>{isEn ? 'Desktop Required' : 'Masaüstü Gerekli'}</h2>
       <p style={{ fontSize: "0.9rem", color: "#6b7280", maxWidth: 320, lineHeight: 1.6 }}>
-        Akıllı Zam Önerisi aracı masaüstü ve tablet ekranlar için tasarlanmıştır. Daha geniş bir ekranda tekrar deneyin.
+        {isEn ? 'The Smart Fee Suggestion tool is designed for desktop and tablet screens. Please try again on a larger screen.' : 'Akıllı Zam Önerisi aracı masaüstü ve tablet ekranlar için tasarlanmıştır. Daha geniş bir ekranda tekrar deneyin.'}
       </p>
     </div>
   );
@@ -176,6 +179,8 @@ function MobileBlock() {
 
 // ─── Ana Component ─────────────────────────────────────────────
 export default function Page1() {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const [user, setUser]                         = useState(null);
   const [userLoading, setUserLoading]           = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -309,14 +314,14 @@ export default function Page1() {
         <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", opacity: 0.4, minHeight: "100vh", background: "linear-gradient(135deg, #f5f3ff 0%, #eef2ff 50%, #f0f9ff 100%)" }}>
           <div style={S.header}>
             <div style={S.container}>
-              <div style={S.headerBadge}><span>✦</span><span>AI Destekli Analiz</span></div>
-              <h1 style={S.headerTitle}>Akıllı Zam Önerisi</h1>
-              <p style={S.headerSub}>Seçtiğiniz öğrenci için şehir, okul tipi ve piyasa koşullarına göre yeni ders ücreti önerisi alın.</p>
-            </div>
-          </div>
-        </div>
+              <div style={S.headerBadge}><span>✦</span><span>{isEn ? 'AI-Powered Analysis' : 'AI Destekli Analiz'}</span></div>
+                  <h1 style={S.headerTitle}>{isEn ? 'Smart Fee Suggestion' : 'Akıllı Zam Önerisi'}</h1>
+                  <p style={S.headerSub}>{isEn ? 'Get a new lesson fee suggestion for the selected student based on city, school type and market conditions.' : 'Seçtiğiniz öğrenci için şehir, okul tipi ve piyasa koşullarına göre yeni ders ücreti önerisi alın.'}</p>
+                </div>
+              </div>
+              </div>
 
-        {/* Pro Modal — otomatik açık */}
+              {/* Pro Modal — otomatik açık */}
         <ProUpgradeModal
           reason="finance"
           onClose={() => window.history.back()}
@@ -335,9 +340,9 @@ export default function Page1() {
         <div style={{ position: "absolute", top: -40, right: -40, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -20, right: 80, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
         <div style={S.container}>
-          <div style={S.headerBadge}><span>✦</span><span>AI Destekli Analiz</span></div>
-          <h1 style={S.headerTitle}>Akıllı Zam Önerisi</h1>
-          <p style={S.headerSub}>Seçtiğiniz öğrenci için şehir, okul tipi ve piyasa koşullarına göre yeni ders ücreti önerisi alın.</p>
+          <div style={S.headerBadge}><span>✦</span><span>{isEn ? 'AI-Powered Analysis' : 'AI Destekli Analiz'}</span></div>
+          <h1 style={S.headerTitle}>{isEn ? 'Smart Fee Suggestion' : 'Akıllı Zam Önerisi'}</h1>
+          <p style={S.headerSub}>{isEn ? 'Get a new lesson fee suggestion based on city, school type and market conditions.' : 'Seçtiğiniz öğrenci için şehir, okul tipi ve piyasa koşullarına göre yeni ders ücreti önerisi alın.'}</p>
         </div>
       </div>
 
@@ -345,22 +350,22 @@ export default function Page1() {
 
         {/* STUDENT SELECTION */}
         <div style={S.section}>
-          <div style={S.sectionLabel}><IconStar /> Öğrenci Seçimi</div>
+          <div style={S.sectionLabel}><IconStar /> {isEn ? 'Student Selection' : 'Öğrenci Seçimi'}</div>
           <div style={S.card}>
             {studentsError && (
               <div style={{ marginBottom: 12, padding: "8px 14px", background: "#fef3c7", borderRadius: 8, fontSize: 12, color: "#92400e", border: "1px solid #fde68a" }}>⚠️ {studentsError}</div>
             )}
             <div style={{ position: "relative", marginBottom: 16 }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#a5b4fc", fontSize: 16, pointerEvents: "none" }}>🔍</span>
-              <input style={S.searchInput} placeholder="İsim veya branş ile ara..." value={search} onChange={(e) => setSearch(e.target.value)} disabled={studentsLoading} />
+              <input style={S.searchInput} placeholder={isEn ? 'Search by name or subject...' : 'İsim veya branş ile ara...'} value={search} onChange={(e) => setSearch(e.target.value)} disabled={studentsLoading} />
             </div>
             {studentsLoading ? (
               <div style={{ textAlign: "center", padding: "32px 0", color: "#a5b4fc" }}>
                 <div style={{ fontSize: 28, marginBottom: 8, display: "inline-block", animation: "edu-spin 1s linear infinite" }}>⟳</div>
-                <div style={{ fontSize: 13 }}>Öğrenciler yükleniyor...</div>
+                <div style={{ fontSize: 13 }}>{isEn ? 'Loading students...' : 'Öğrenciler yükleniyor...'}</div>
               </div>
             ) : filteredStudents.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "32px 0", color: "#a5b4fc", fontSize: 13 }}>Arama sonucu bulunamadı.</div>
+              <div style={{ textAlign: "center", padding: "32px 0", color: "#a5b4fc", fontSize: 13 }}>{isEn ? 'No results found.' : 'Arama sonucu bulunamadı.'}</div>
             ) : (
               <div style={S.studentGrid}>
                 {filteredStudents.map((s) => {
@@ -390,24 +395,24 @@ export default function Page1() {
           <div style={S.summaryCard}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, color: "#a5b4fc", marginBottom: 4, textTransform: "uppercase" }}>Seçili Öğrenci</div>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, color: "#a5b4fc", marginBottom: 4, textTransform: "uppercase" }}>{isEn ? 'Selected Student' : 'Seçili Öğrenci'}</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 2 }}>{selectedStudent.name}</div>
                 <div style={{ fontSize: 13, color: "#c7d2fe" }}>{selectedStudent.subject}{selectedStudent.city ? ` · ${selectedStudent.city}` : ""}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, color: "#a5b4fc", textTransform: "uppercase" }}>Güncel Ücret</div>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, color: "#a5b4fc", textTransform: "uppercase" }}>{isEn ? 'Current Fee' : 'Güncel Ücret'}</div>
                 <div style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.1 }}>{selectedStudent.currentHourlyPrice} <span style={{ fontSize: 16, fontWeight: 500 }}>₺</span></div>
-                <div style={{ fontSize: 11, color: "#c7d2fe" }}>saat başı</div>
+                <div style={{ fontSize: 11, color: "#c7d2fe" }}>{isEn ? 'per hour' : 'saat başı'}</div>
               </div>
             </div>
             <Divider />
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {[
-                { label: "Ders Türü", val: selectedStudent.lessonType  || "—" },
-                { label: "Okul Tipi", val: selectedStudent.schoolType  || "—" },
-                { label: "Seviye",    val: selectedStudent.schoolLevel || "—" },
-                { label: "Son Zam",   val: monthsAgo !== null ? `${monthsAgo} ay önce` : "—" },
-                { label: "Haftalık",  val: selectedStudent.weeklyFrequency ? `${selectedStudent.weeklyFrequency} ders` : "—" },
+                { label: isEn ? "Lesson Type" : "Ders Türü", val: selectedStudent.lessonType  || "—" },
+                { label: isEn ? "School Type" : "Okul Tipi", val: selectedStudent.schoolType  || "—" },
+                { label: isEn ? "Level" : "Seviye",    val: selectedStudent.schoolLevel || "—" },
+                { label: isEn ? "Last Raise" : "Son Zam",   val: monthsAgo !== null ? `${monthsAgo} ${isEn ? 'months ago' : 'ay önce'}` : "—" },
+                { label: isEn ? "Weekly" : "Haftalık",  val: selectedStudent.weeklyFrequency ? `${selectedStudent.weeklyFrequency} ${isEn ? 'lessons' : 'ders'}` : "—" },
               ].map((item) => (
                 <div key={item.label} style={{ background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "8px 14px" }}>
                   <div style={{ fontSize: 10, color: "#a5b4fc", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8 }}>{item.label}</div>
@@ -420,62 +425,62 @@ export default function Page1() {
 
         {/* ANALYSIS FORM */}
         <div style={{ ...S.section, opacity: selectedStudent ? 1 : 0.45, pointerEvents: selectedStudent ? "auto" : "none", transition: "opacity 0.3s" }}>
-          <div style={S.sectionLabel}><IconStar /> Analiz Parametreleri</div>
+          <div style={S.sectionLabel}><IconStar /> {isEn ? 'Analysis Parameters' : 'Analiz Parametreleri'}</div>
           {!selectedStudent ? (
             <div style={{ ...S.card, textAlign: "center", padding: "48px 24px", color: "#a5b4fc" }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>👆</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#a5b4fc" }}>Analiz için önce bir öğrenci seçin</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#a5b4fc" }}>{isEn ? 'First select a student for analysis' : 'Analiz için önce bir öğrenci seçin'}</div>
             </div>
           ) : (
             <div style={S.card}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Zorunlu Bilgiler</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>{isEn ? 'Required Fields' : 'Zorunlu Bilgiler'}</div>
               <div style={S.grid2}>
                 <div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Şehir *</label>
+                    <label style={S.label}>{isEn ? 'City *' : 'Şehir *'}</label>
                     <select style={S.select} value={form.city} onChange={(e) => handleForm("city", e.target.value)}>
-                      <option value="">İl seçiniz</option>
+                      <option value="">{isEn ? 'Select city' : 'İl seçiniz'}</option>
                       {ALL_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Branş *</label>
+                    <label style={S.label}>{isEn ? 'Subject *' : 'Branş *'}</label>
                     <select style={S.select} value={form.subject} onChange={(e) => handleForm("subject", e.target.value)}>
-                      <option value="">Seçiniz</option>
+                      <option value="">{isEn ? 'Select' : 'Seçiniz'}</option>
                       {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Öğrenci Seviyesi *</label>
+                    <label style={S.label}>{isEn ? 'Student Level *' : 'Öğrenci Seviyesi *'}</label>
                     <select style={S.select} value={form.level} onChange={(e) => handleForm("level", e.target.value)}>
-                      <option value="">Seçiniz</option>
+                      <option value="">{isEn ? 'Select' : 'Seçiniz'}</option>
                       {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </div>
                 </div>
                 <div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Ders Tipi *</label>
+                    <label style={S.label}>{isEn ? 'Lesson Type *' : 'Ders Tipi *'}</label>
                     <select style={S.select} value={form.lessonType} onChange={(e) => handleForm("lessonType", e.target.value)}>
-                      <option value="">Seçiniz</option>
+                      <option value="">{isEn ? 'Select' : 'Seçiniz'}</option>
                       <option value="Online">Online</option>
-                      <option value="Yüz Yüze">Yüz Yüze</option>
+                      <option value="Yüz Yüze">{isEn ? 'Face to Face' : 'Yüz Yüze'}</option>
                     </select>
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Okul Tipi *</label>
+                    <label style={S.label}>{isEn ? 'School Type *' : 'Okul Tipi *'}</label>
                     <select style={S.select} value={form.schoolType} onChange={(e) => handleForm("schoolType", e.target.value)}>
-                      <option value="">Seçiniz</option>
-                      <option value="Devlet">Devlet</option>
-                      <option value="Kolej-Özel">Kolej-Özel</option>
+                      <option value="">{isEn ? 'Select' : 'Seçiniz'}</option>
+                      <option value="Devlet">{isEn ? 'Public School' : 'Devlet'}</option>
+                      <option value="Kolej-Özel">{isEn ? 'Private/College' : 'Kolej-Özel'}</option>
                     </select>
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Mevcut Ücret (₺/saat) *</label>
-                    <input style={S.input} type="number" min="0" value={form.currentPrice} onChange={(e) => handleForm("currentPrice", e.target.value)} placeholder="örn. 450" />
+                    <label style={S.label}>{isEn ? 'Current Fee (₺/hr) *' : 'Mevcut Ücret (₺/saat) *'}</label>
+                    <input style={S.input} type="number" min="0" value={form.currentPrice} onChange={(e) => handleForm("currentPrice", e.target.value)} placeholder={isEn ? 'e.g. 450' : 'örn. 450'} />
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Son Zam Tarihi</label>
+                    <label style={S.label}>{isEn ? 'Last Raise Date' : 'Son Zam Tarihi'}</label>
                     <input style={S.input} type="date" value={form.lastRaiseDate} onChange={(e) => handleForm("lastRaiseDate", e.target.value)} />
                   </div>
                 </div>
@@ -483,43 +488,43 @@ export default function Page1() {
 
               <Divider />
 
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#a5b4fc", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Opsiyonel Bilgiler</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#a5b4fc", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>{isEn ? 'Optional Fields' : 'Opsiyonel Bilgiler'}</div>
               <div style={S.grid2}>
                 <div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>İlçe</label>
-                    <input style={S.input} value={form.district} onChange={(e) => handleForm("district", e.target.value)} placeholder="örn. Kadıköy" />
+                    <label style={S.label}>{isEn ? 'District' : 'İlçe'}</label>
+                    <input style={S.input} value={form.district} onChange={(e) => handleForm("district", e.target.value)} placeholder={isEn ? 'e.g. Kadıköy' : 'örn. Kadıköy'} />
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Ailenin Gelir Durumu <span style={{ color: "#a5b4fc", fontWeight: 400 }}>(tonu etkiler, fiyatı değil)</span></label>
+                    <label style={S.label}>{isEn ? "Family Income" : "Ailenin Gelir Durumu"} <span style={{ color: "#a5b4fc", fontWeight: 400 }}>{isEn ? "(affects tone, not price)" : "(tonu etkiler, fiyatı değil)"}</span></label>
                     <select style={S.select} value={form.incomeLevel} onChange={(e) => handleForm("incomeLevel", e.target.value)}>
-                      <option value="">Belirtmek istemiyorum</option>
-                      <option value="Düşük">Düşük</option>
-                      <option value="Orta">Orta</option>
-                      <option value="Yüksek">Yüksek</option>
+                      <option value="">{isEn ? "Prefer not to say" : "Belirtmek istemiyorum"}</option>
+                      <option value="Düşük">{isEn ? "Low" : "Düşük"}</option>
+                      <option value="Orta">{isEn ? "Medium" : "Orta"}</option>
+                      <option value="Yüksek">{isEn ? "High" : "Yüksek"}</option>
                     </select>
                   </div>
                 </div>
                 <div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Haftalık Ders Sıklığı</label>
-                    <input style={S.input} type="number" min="1" value={form.weeklyFrequency} onChange={(e) => handleForm("weeklyFrequency", e.target.value)} placeholder="örn. 2" />
+                    <label style={S.label}>{isEn ? 'Weekly Frequency' : 'Haftalık Ders Sıklığı'}</label>
+                    <input style={S.input} type="number" min="1" value={form.weeklyFrequency} onChange={(e) => handleForm("weeklyFrequency", e.target.value)} placeholder={isEn ? 'e.g. 2' : 'örn. 2'} />
                   </div>
                   <div style={S.formGroup}>
-                    <label style={S.label}>Devam Süresi (ay)</label>
-                    <input style={S.input} type="number" min="1" value={form.duration} onChange={(e) => handleForm("duration", e.target.value)} placeholder="örn. 12" />
+                    <label style={S.label}>{isEn ? 'Duration (months)' : 'Devam Süresi (ay)'}</label>
+                    <input style={S.input} type="number" min="1" value={form.duration} onChange={(e) => handleForm("duration", e.target.value)} placeholder={isEn ? 'e.g. 12' : 'örn. 12'} />
                   </div>
                 </div>
               </div>
               <div style={S.formGroup}>
-                <label style={S.label}>Not / Ek Bilgi</label>
-                <textarea style={{ ...S.input, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={form.notes} onChange={(e) => handleForm("notes", e.target.value)} placeholder="Eklemek istediğiniz notlar..." />
+                <label style={S.label}>{isEn ? 'Note / Extra Info' : 'Not / Ek Bilgi'}</label>
+                <textarea style={{ ...S.input, minHeight: 70, resize: "vertical", lineHeight: 1.6 }} value={form.notes} onChange={(e) => handleForm("notes", e.target.value)} placeholder={isEn ? 'Any additional notes...' : 'Eklemek istediğiniz notlar...'} />
               </div>
 
               <button style={S.analyzeBtn(loading)} onClick={handleAnalyze} disabled={loading || !isFormReady}>
-                {loading ? <><span style={{ display: "inline-block", animation: "edu-spin 1s linear infinite" }}>⟳</span> Analiz ediliyor...</> : <>✦ Analiz Et</>}
+                {loading ? <><span style={{ display: "inline-block", animation: "edu-spin 1s linear infinite" }}>⟳</span> {isEn ? 'Analyzing...' : 'Analiz ediliyor...'}</> : <>✦ {isEn ? 'Analyze' : 'Analiz Et'}</>}
               </button>
-              {!isFormReady && <div style={{ textAlign: "center", fontSize: 12, color: "#a5b4fc", marginTop: 8 }}>Zorunlu alanların tamamı doldurulduğunda analiz aktif olacak</div>}
+              {!isFormReady && <div style={{ textAlign: "center", fontSize: 12, color: "#a5b4fc", marginTop: 8 }}>{isEn ? 'Analysis will be active when all required fields are filled' : 'Zorunlu alanların tamamı doldurulduğunda analiz aktif olacak'}</div>}
             </div>
           )}
         </div>
@@ -527,18 +532,18 @@ export default function Page1() {
         {/* RECOMMENDATION RESULTS */}
         {result && (
           <div id="edu-results" style={S.section}>
-            <div style={S.sectionLabel}><IconStar /> Öneri Sonuçları</div>
+            <div style={S.sectionLabel}><IconStar /> {isEn ? 'Recommendation Results' : 'Öneri Sonuçları'}</div>
             <div style={S.resultGrid}>
               {[
-                { type: "safe",     label: "Güvenli Öneri", price: result.safe,     pct: result.pctSafe,     emoji: "🛡️", desc: "Düşük risk, kolay kabul. Temkinli geçiş için ideal." },
-                { type: "balanced", label: "Dengeli Öneri", price: result.balanced, pct: result.pctBalanced, emoji: "⚖️", desc: "Piyasa ortalamalarıyla en uyumlu seçenek. En çok önerilen." },
-                { type: "upper",    label: "Üst Bant",      price: result.upper,    pct: result.pctUpper,    emoji: "🚀", desc: "Premium segment. Kolej/özel okul için değerlendirilebilir." },
+                { type: "safe",     label: isEn ? "Safe Suggestion" : "Güvenli Öneri", price: result.safe,     pct: result.pctSafe,     emoji: "🛡️", desc: isEn ? "Low risk, easy acceptance. Ideal for cautious transitions." : "Düşük risk, kolay kabul. Temkinli geçiş için ideal." },
+                { type: "balanced", label: isEn ? "Balanced Suggestion" : "Dengeli Öneri", price: result.balanced, pct: result.pctBalanced, emoji: "⚖️", desc: isEn ? "Best aligned with market averages. Most recommended." : "Piyasa ortalamalarıyla en uyumlu seçenek. En çok önerilen." },
+                { type: "upper",    label: isEn ? "Upper Band" : "Üst Bant",      price: result.upper,    pct: result.pctUpper,    emoji: "🚀", desc: isEn ? "Premium segment. Can be considered for college/private school students." : "Premium segment. Kolej/özel okul için değerlendirilebilir." },
               ].map(({ type, label, price, pct, emoji, desc }) => {
                 const isB = type === "balanced";
                 const sub = isB ? "#c7d2fe" : "#6b7280";
                 return (
                   <div key={type} style={S.resultCard(type)}>
-                    {isB && <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: "#fbbf24", color: "#78350f", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 10, letterSpacing: 0.8, textTransform: "uppercase", whiteSpace: "nowrap" }}>⭐ Önerilen</div>}
+                    {isB && <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: "#fbbf24", color: "#78350f", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 10, letterSpacing: 0.8, textTransform: "uppercase", whiteSpace: "nowrap" }}>⭐ {isEn ? 'Recommended' : 'Önerilen'}</div>}
                     <div style={{ fontSize: 12, fontWeight: 700, color: isB ? "#a5b4fc" : "#6366f1", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>{emoji} {label}</div>
                     <div style={{ fontSize: 38, fontWeight: 900, color: isB ? "#fff" : type === "upper" ? "#ea580c" : "#059669", lineHeight: 1 }}>
                       {price} <span style={{ fontSize: 16, fontWeight: 500, color: sub }}>₺</span>
@@ -548,11 +553,11 @@ export default function Page1() {
                     </div>
                     <div style={{ fontSize: 12, color: sub, lineHeight: 1.5, marginBottom: 12 }}>{desc}</div>
                     <div style={{ borderTop: `1px solid ${isB ? "rgba(255,255,255,0.15)" : "#f3f4f6"}`, paddingTop: 10, display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                      <span style={{ color: sub }}>Mevcut</span>
+                      <span style={{ color: sub }}>{isEn ? 'Current' : 'Mevcut'}</span>
                       <span style={{ fontWeight: 700, color: isB ? "#fff" : "#1e1b4b" }}>{result.base} ₺</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginTop: 4 }}>
-                      <span style={{ color: sub }}>Artış</span>
+                      <span style={{ color: sub }}>{isEn ? 'Increase' : 'Artış'}</span>
                       <span style={{ fontWeight: 700, color: isB ? "#86efac" : type === "upper" ? "#ea580c" : "#059669" }}>+{price - result.base} ₺</span>
                     </div>
                   </div>
@@ -565,12 +570,12 @@ export default function Page1() {
         {/* REASONING PANEL */}
         {result && (
           <div style={S.section}>
-            <div style={S.sectionLabel}><IconStar /> Analiz Gerekçesi</div>
+            <div style={S.sectionLabel}><IconStar /> {isEn ? 'Analysis Rationale' : 'Analiz Gerekçesi'}</div>
             <div style={S.card}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
                 <div style={{ fontSize: 28, flexShrink: 0 }}>🧠</div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b", marginBottom: 8 }}>{selectedStudent?.name} için otomatik değerlendirme</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b", marginBottom: 8 }}>{isEn ? `Automatic evaluation for ${selectedStudent?.name}` : `${selectedStudent?.name} için otomatik değerlendirme`}</div>
                   <p style={{ fontSize: 14, lineHeight: 1.8, color: "#374151", margin: 0 }}>{generateReasoning(form, result)}</p>
                   {form.incomeLevel && (
                     <div style={{ marginTop: 12, padding: "10px 14px", background: "#f0fdf4", borderRadius: 10, fontSize: 13, color: "#065f46", borderLeft: "3px solid #34d399" }}>
@@ -589,23 +594,23 @@ export default function Page1() {
         {/* PARENT MESSAGE GENERATOR */}
         {result && (
           <div style={S.section}>
-            <div style={S.sectionLabel}><IconStar /> Veliye Gönderilebilecek Mesaj</div>
+            <div style={S.sectionLabel}><IconStar /> {isEn ? 'Message to Parent' : 'Veliye Gönderilebilecek Mesaj'}</div>
             <div style={S.card}>
               <div style={{ display: "flex", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                {[{ key: "resmi", label: "📋 Resmi" }, { key: "samimi", label: "😊 Samimi" }, { key: "whatsapp", label: "💬 Kısa WhatsApp" }].map(({ key, label }) => (
+                {[{ key: "resmi", label: isEn ? "📋 Formal" : "📋 Resmi" }, { key: "samimi", label: isEn ? "😊 Friendly" : "😊 Samimi" }, { key: "whatsapp", label: isEn ? "💬 Short WhatsApp" : "💬 Kısa WhatsApp" }].map(({ key, label }) => (
                   <button key={key} style={S.msgTab(msgTone === key)} onClick={() => setMsgTone(key)}>{label}</button>
                 ))}
               </div>
               <div style={S.msgBox}>{generateMessage(selectedStudent, result, msgTone)}</div>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
-                <button style={S.copyBtn} onClick={handleCopy}>{copied ? "✓ Kopyalandı" : "📋 Kopyala"}</button>
+                <button style={S.copyBtn} onClick={handleCopy}>{copied ? (isEn ? "✓ Copied" : "✓ Kopyalandı") : (isEn ? "📋 Copy" : "📋 Kopyala")}</button>
               </div>
             </div>
           </div>
         )}
 
         <div style={S.disclaimer}>
-          <strong>Not:</strong> Bu sistem gerçek piyasa verilerine değil, genel parametrelere dayalı tahmini öneriler sunar. Nihai ücret kararı öğretmene aittir.
+          <strong>{isEn ? 'Note' : 'Not'}:</strong> {isEn ? 'This system provides estimated suggestions based on general parameters, not real market data. The final fee decision belongs to the teacher.' : 'Bu sistem gerçek piyasa verilerine değil, genel parametrelere dayalı tahmini öneriler sunar. Nihai ücret kararı öğretmene aittir.'}
         </div>
       </div>
 
