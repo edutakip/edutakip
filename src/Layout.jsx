@@ -200,8 +200,7 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
     { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
-    { label: 'Hesabım', icon: Settings, page: 'TeacherAccount' },
-    { label: 'Hesabım', icon: Settings, page: 'TeacherAccount' },
+    { label: t('teacher.layout.myAccount'), icon: Settings, page: 'TeacherAccount' },
     { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
   ];
 
