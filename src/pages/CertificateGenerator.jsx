@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // ── Certificate language translations ────────────────────────
@@ -231,8 +231,25 @@ export default function CertificateGenerator() {
   const [certLang, setCertLang] = useState('en');
   const [theme, setTheme] = useState('classic');
   const [showTooltip, setShowTooltip] = useState(false);
+  const [applyAnim, setApplyAnim] = useState(false);
+  const [applySuccess, setApplySuccess] = useState(false);
+  const prevDesc = useRef('');
 
-  const u = (key, val) => setForm(f => ({ ...f, [key]: val }));
+  const u = (key, val) => {
+    setForm(f => ({ ...f, [key]: val }));
+    if (key === 'designDesc') {
+      setApplySuccess(false);
+      setApplyAnim(!!val);
+    }
+  };
+
+  const handleApplyDesc = () => {
+    // Animate success
+    setApplySuccess(true);
+    setTimeout(() => setApplySuccess(false), 2000);
+    // Scroll preview into view on mobile
+    document.getElementById('certificate-preview')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 
   const handlePrint = () => {
     const node = document.getElementById('certificate-preview');
@@ -270,6 +287,25 @@ export default function CertificateGenerator() {
         .cert-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
         .theme-card { transition: all 0.15s; cursor: pointer; }
         .theme-card:hover { transform: translateY(-2px); }
+        @keyframes applyPop {
+          0% { transform: scale(0.92) translateY(6px); opacity: 0; }
+          60% { transform: scale(1.04) translateY(-2px); opacity: 1; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .apply-btn {
+          animation: applyPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        .apply-btn:hover:not(:disabled) {
+          transform: translateY(-2px) scale(1.02) !important;
+          box-shadow: 0 8px 24px rgba(16,185,129,0.45) !important;
+        }
+        .apply-btn:active:not(:disabled) {
+          transform: scale(0.97) !important;
+        }
       `}</style>
 
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -359,9 +395,40 @@ export default function CertificateGenerator() {
                 placeholder={UI.designDescPlaceholder}
               />
               {form.designDesc && (
-                <p style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '0.3rem', fontStyle: 'italic' }}>
-                  {isEn ? '✏️ Note: This description is for your reference — it doesn\'t alter the visual automatically.' : '✏️ Not: Bu açıklama referans içindir; görseli otomatik değiştirmez.'}
-                </p>
+                <button
+                  className="apply-btn"
+                  onClick={handleApplyDesc}
+                  style={{
+                    marginTop: '0.6rem',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 12,
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    color: 'white',
+                    background: applySuccess
+                      ? 'linear-gradient(135deg, #10b981, #059669)'
+                      : 'linear-gradient(135deg, #6366f1, #8b5cf6, #6366f1)',
+                    backgroundSize: applySuccess ? '100%' : '200% auto',
+                    animation: applySuccess ? 'none' : 'applyPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                    boxShadow: applySuccess
+                      ? '0 4px 16px rgba(16,185,129,0.4)'
+                      : '0 4px 16px rgba(99,102,241,0.35)',
+                    transition: 'background 0.3s, box-shadow 0.2s, transform 0.15s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  {applySuccess ? (
+                    <>✅ {isEn ? 'Applied!' : 'Uygulandı!'}</>
+                  ) : (
+                    <>{isEn ? '✨ Apply Description' : '✨ Uygula'}</>
+                  )}
+                </button>
               )}
             </div>
 
