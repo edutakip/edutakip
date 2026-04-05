@@ -533,18 +533,18 @@ export default function TeacherAccount() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '2rem 1.5rem' }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '1.25rem 1rem' }}>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 780, margin: '0 auto' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: '1.75rem' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.5px', margin: 0 }}>{isEn ? 'Account Settings' : 'Hesap Yönetimi'}</h1>
-          <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '0.3rem' }}>{isEn ? 'Manage your profile, subscription and notification preferences.' : 'Profil, abonelik ve bildirim tercihlerinizi yönetin.'}</p>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h1 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.5px', margin: 0 }}>{isEn ? 'Account Settings' : 'Hesap Yönetimi'}</h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginTop: '0.25rem' }}>{isEn ? 'Manage your profile, subscription and notification preferences.' : 'Profil, abonelik ve bildirim tercihlerinizi yönetin.'}</p>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'white', borderRadius: 14, padding: '0.4rem', border: '1.5px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+        {/* Tabs — scrollable on mobile */}
+        <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '1.25rem', background: 'white', borderRadius: 14, padding: '0.35rem', border: '1.5px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflowX: 'auto' }}>
           {[
             { id: 'profile', label: isEn ? 'Profile' : 'Profil', icon: User },
             { id: 'subscription', label: isEn ? 'Subscription' : 'Abonelik', icon: Crown },
@@ -555,15 +555,16 @@ export default function TeacherAccount() {
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                flex: 1, padding: '0.6rem 0.75rem', borderRadius: 10, border: 'none', cursor: 'pointer',
+                flexShrink: 0, padding: '0.55rem 0.75rem', borderRadius: 10, border: 'none', cursor: 'pointer',
                 background: isActive ? 'linear-gradient(135deg,#4f46e5,#7c3aed)' : 'transparent',
                 color: isActive ? 'white' : '#6b7280',
-                fontWeight: isActive ? 800 : 600, fontSize: '0.85rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem',
+                fontWeight: isActive ? 800 : 600, fontSize: '0.82rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
                 transition: 'all 0.15s',
                 boxShadow: isActive ? '0 2px 8px rgba(79,70,229,0.3)' : 'none',
+                whiteSpace: 'nowrap',
               }}>
-                <Icon size={15} />
+                <Icon size={14} />
                 {tab.label}
               </button>
             );

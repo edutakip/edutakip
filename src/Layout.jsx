@@ -661,17 +661,22 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             );
           })}
-          {/* Çıkış butonu */}
-          <button onClick={handleLogout}
+          {/* Hesabım butonu */}
+          <Link
+            to={createPageUrl('TeacherAccount')}
+            onClick={(e) => { setDerslerOpen(false); setFinansOpen(false); handleNav(e, 'TeacherAccount'); }}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
-              color: '#f97316', background: 'none', border: 'none',
-              transition: 'color 0.15s ease', fontSize: '0.62rem', fontWeight: '600',
+              color: currentPageName === 'TeacherAccount' ? 'white' : 'rgba(255,255,255,0.45)',
+              textDecoration: 'none',
+              transition: 'color 0.15s ease',
             }}>
-            <LogOut size={20} strokeWidth={1.75} />
-            <span>Çıkış</span>
-          </button>
+            <Settings size={20} strokeWidth={currentPageName === 'TeacherAccount' ? 2.5 : 1.75} />
+            <span style={{ fontSize: '0.62rem', fontWeight: currentPageName === 'TeacherAccount' ? '700' : '400', whiteSpace: 'nowrap' }}>
+              {t('teacher.layout.myAccount')}
+            </span>
+          </Link>
         </nav>
 
         {/* FAB */}
