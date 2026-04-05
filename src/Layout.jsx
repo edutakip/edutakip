@@ -579,11 +579,11 @@ export default function Layout({ children, currentPageName }) {
               minWidth: '160px',
             }}>
               {[
-                { label: 'Öğrencilerim', icon: Users, page: 'TeacherStudents' },
-                { label: 'Dersler', icon: BookOpen, page: 'TeacherLessons' },
-                { label: 'Ödevler', icon: GraduationCap, page: 'TeacherHomework' },
-                { label: 'Gelişim Raporları', icon: BarChart2, page: 'TeacherReports' },
-                { label: 'Veli İletişim', icon: MessageCircle, page: 'TeacherMessages' },
+                { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
+                { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
+                { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
+                { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
+                { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
               ].map((item, i) => {
                 const Icon = item.icon;
                 const isActive = item.page === currentPageName;
