@@ -668,12 +668,13 @@ export default function Layout({ children, currentPageName }) {
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '0.25rem', flex: 1, height: '100%', cursor: 'pointer',
-              color: currentPageName === 'TeacherAccount' ? 'white' : 'rgba(255,255,255,0.45)',
+              color: '#bf5fff',
+              filter: 'drop-shadow(0 0 6px rgba(167,60,255,0.8))',
               textDecoration: 'none',
               transition: 'color 0.15s ease',
             }}>
-            <Settings size={20} strokeWidth={currentPageName === 'TeacherAccount' ? 2.5 : 1.75} />
-            <span style={{ fontSize: '0.62rem', fontWeight: currentPageName === 'TeacherAccount' ? '700' : '400', whiteSpace: 'nowrap' }}>
+            <Settings size={20} strokeWidth={2} />
+            <span style={{ fontSize: '0.62rem', fontWeight: '700', whiteSpace: 'nowrap' }}>
               {t('teacher.layout.myAccount')}
             </span>
           </Link>
