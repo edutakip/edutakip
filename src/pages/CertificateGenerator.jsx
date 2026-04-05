@@ -228,6 +228,32 @@ export default function CertificateGenerator() {
   const { i18n } = useTranslation();
   const isEn = i18n.language === 'en';
 
+  // Mobil engeli (768px altı)
+  const [windowWidth, setWindowWidth] = React.useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  React.useEffect(() => {
+    const handler = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  if (windowWidth < 768) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: '#f8fafc', textAlign: 'center' }}>
+        <div>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🖥️</div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>
+            {isEn ? 'Desktop Only Feature' : 'Masaüstü / Tablet Gerekli'}
+          </h2>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem', maxWidth: 280, margin: '0 auto' }}>
+            {isEn
+              ? 'The Certificate Generator is available on tablets and desktops. Please switch to a larger device.'
+              : 'Sertifika Oluşturucu yalnızca tablet ve masaüstü cihazlarda kullanılabilir. Lütfen daha büyük bir ekrana geçin.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const [form, setForm] = useState({ studentName: '', tutorName: '', course: '', date: new Date().toISOString().slice(0, 10), message: '' });
   const [certLang, setCertLang] = useState('en');
   const [theme, setTheme] = useState('classic');

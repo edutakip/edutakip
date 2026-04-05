@@ -181,7 +181,6 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
     { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
-    { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator', multiLine: false },
   ];
 
   const TEACHER_NAV = [
