@@ -168,13 +168,23 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
       const baseLesson = { ...form, studentName: student?.name || '', teacherEmail: me.email, meetingLink, duration, lessonFee, recurringGroupId: groupId, parentPhone: student?.parentPhone || '', parentName: student?.parentName || '' };
       const dates = [form.date];
       if (recurring) for (let w = 1; w < recurringWeeks; w++) dates.push(format(addWeeks(new Date(form.date), w), 'yyyy-MM-dd'));
-      for (const d of dates) await base44.entities.Lesson.create({ ...baseLesson, date: d });
+      const createdLessons = [];
+      for (const d of dates) {
+        const created = await base44.entities.Lesson.create({ ...baseLesson, date: d });
+        if (created?.id) createdLessons.push(created.id);
+      }
+      // Sync all new lessons to Google Calendar (fire and forget)
+      for (const lid of createdLessons) {
+        base44.functions.invoke('syncLessonToCalendar', { lessonId: lid, action: 'create' }).catch(() => {});
+      }
     }
 
     setLoading(false);
 
     if (isEditing) {
       showToast({ message: 'Ders güncellendi' });
+      // Sync updated lesson to Google Calendar (fire and forget)
+      base44.functions.invoke('syncLessonToCalendar', { lessonId: existingLesson.id, action: 'update' }).catch(() => {});
     } else {
       const sName = students.find(s => s.id === form.studentId)?.name || '';
       showToast({ message: `Ders eklendi${sName ? ' — ' + sName : ''}` });

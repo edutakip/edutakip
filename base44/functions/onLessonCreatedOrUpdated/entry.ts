@@ -15,15 +15,31 @@ Deno.serve(async (req) => {
     const lesson = data;
     const action = event?.type === 'create' ? 'create' : 'update';
 
-    // Get access token for the teacher
+    // Find the teacher's user record to get their userId for token lookup
+    let teacherUsers;
+    try {
+      teacherUsers = await base44.asServiceRole.entities.User.filter({ email: lesson.teacherEmail });
+    } catch (e) {
+      return Response.json({ status: 'skipped', reason: 'teacher lookup failed' });
+    }
+
+    if (!teacherUsers || teacherUsers.length === 0) {
+      return Response.json({ status: 'skipped', reason: 'teacher not found' });
+    }
+
+    const teacherId = teacherUsers[0].id;
+
+    // Get access token for the teacher using their user ID
     let accessToken;
     try {
-      // We need to get the token as the teacher user
-      // Use service role to get teacher's connection
-      accessToken = await base44.asServiceRole.connectors.getCurrentAppUserAccessToken(CONNECTOR_ID);
+      accessToken = await base44.asServiceRole.connectors.getAppUserAccessToken(CONNECTOR_ID, teacherId);
     } catch (e) {
       // Teacher hasn't connected Google Calendar — skip silently
-      return Response.json({ status: 'skipped', reason: 'not connected' });
+      return Response.json({ status: 'skipped', reason: 'not connected: ' + e.message });
+    }
+
+    if (!accessToken) {
+      return Response.json({ status: 'skipped', reason: 'no access token' });
     }
 
     const authHeader = {
@@ -55,7 +71,7 @@ Deno.serve(async (req) => {
     let googleEventId = lesson.googleEventId;
 
     if (googleEventId && action === 'update') {
-      // Try to update
+      // Try to update existing event
       const updateRes = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events/${googleEventId}`,
         { method: 'PUT', headers: authHeader, body: JSON.stringify(eventPayload) }
