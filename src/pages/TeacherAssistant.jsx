@@ -57,6 +57,8 @@ function WhatsAppButton() {
 }
 
 function MessageBubble({ message }) {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const isUser = message.role === 'user';
 
   const hasWhatsAppTrigger = !isUser && message.content?.includes(WHATSAPP_TRIGGER);
