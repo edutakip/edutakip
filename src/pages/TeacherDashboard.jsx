@@ -279,7 +279,7 @@ export default function TeacherDashboard() {
             </p>
             <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', fontWeight: '500', lineHeight: 1.5 }}>
               {studentBalances.length > 0
-                ? `${studentBalances.length} ${t('teacher.dashboard.pendingPaymentsDesc').replace('{{count}}', studentBalances.length)}`
+                ? t('teacher.dashboard.pendingPaymentsDesc').replace('{{count}}', studentBalances.length)
                 : t('teacher.dashboard.allPaymentsCurrentDesc')}
             </p>
           </div>
