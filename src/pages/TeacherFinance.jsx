@@ -12,7 +12,7 @@ import { showToast } from '@/lib/toast';
 import { isPro } from '@/lib/subscription';
 import ProUpgradeModal from '../components/ProUpgradeModal';
 
-const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6'];
+const COLORS = ['#f97316', '#6366f1', '#10b981', '#8b5cf6', '#3b82f6', '#ec4899', '#f59e0b', '#14b8a6', '#ef4444', '#a855f7'];
 
 // ── Detail Modal ──────────────────────────────────────────────
 function DetailModal({ type, students, payments, lessons, onClose }) {
@@ -431,7 +431,7 @@ export default function TeacherFinance() {
                 const SIZE = 200;
                 const total = pendingByStudent.reduce((s, x) => s + x.amount, 0);
                 let cumulative = 0;
-                const slices = pendingByStudent.slice(0, 5).map((x, i) => {
+                const slices = pendingByStudent.map((x, i) => {
                   const pct = x.amount / total;
                   const dash = pct * CIRC;
                   const gap = CIRC - dash;
@@ -472,7 +472,7 @@ export default function TeacherFinance() {
 
               {/* Legend */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {pendingByStudent.slice(0, 5).map(({ student, amount }, i) => {
+                {pendingByStudent.map(({ student, amount }, i) => {
                   const total = pendingByStudent.reduce((s, x) => s + x.amount, 0);
                   const pct = total > 0 ? Math.round(amount / total * 100) : 0;
                   return (
