@@ -84,6 +84,10 @@ export default function Landing() {
       window.location.href = '/checkout' + window.location.search;
       return;
     }
+    // Skip redirect for bots/crawlers so search engines can index the landing page
+    const ua = navigator.userAgent || '';
+    const isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|google-inspectiontool/i.test(ua);
+    if (isBot) return;
     const role = localStorage.getItem('tilki_role');
     if (role === 'teacher') window.location.href = createPageUrl('TeacherDashboard');
     else if (role === 'parent') window.location.href = createPageUrl('ParentDashboard');
