@@ -5,6 +5,7 @@ import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, A
 import PaymentHistoryModal from './PaymentHistoryModal';
 import ScheduleSlotEditor from './ScheduleSlotEditor';
 import { useTranslation } from 'react-i18next';
+import StudentGamification from '../gamification/StudentGamification';
 
 const DAYS_FULL_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const DAYS_FULL_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -61,6 +62,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const [loading, setLoading] = useState(false);
   const [payments, setPayments] = useState([]);
   const [lessons, setLessons] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [homeworks, setHomeworks] = useState([]);
   const [form, setForm] = useState({ ...student });
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   const [editingSlot, setEditingSlot] = useState(null);
@@ -73,6 +76,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
     base44.entities.Lesson.filter({ studentId: student.id }).then(ls =>
       setLessons(ls.sort((a, b) => b.date?.localeCompare(a.date)).slice(0, 10))
     );
+    base44.entities.LessonReport.filter({ studentId: student.id }).then(setReports);
+    base44.entities.Homework.filter({ studentId: student.id }).then(setHomeworks);
   }, [student.id]);
 
   // Yaramaz popup fix
@@ -358,6 +363,11 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                   ))}
                 </div>
               )}
+            </Section>
+
+            {/* Gamification */}
+            <Section title={isEn ? "Gamification" : "Başarı & Puanlar"} icon={ChevronRight}>
+              <StudentGamification reports={reports} homeworks={homeworks} studentName="" />
             </Section>
 
             {/* Archive */}

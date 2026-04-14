@@ -10,6 +10,7 @@ import PendingLessonsPrompt from '../components/teacher/PendingLessonsPrompt';
 import TodayLessonPrepPrompt from '../components/teacher/TodayLessonPrepPrompt';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import StudentLeaderboard from '../components/gamification/StudentLeaderboard';
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -496,6 +497,11 @@ export default function TeacherDashboard() {
           </div>
         );
       })()}
+
+      {/* ── Leaderboard ─────────────────────────────────── */}
+      <div style={{ marginTop: '1.25rem' }}>
+        <StudentLeaderboard />
+      </div>
 
       {showModal && (
         <LessonModal students={students} defaultDate={format(new Date(), 'yyyy-MM-dd')} onClose={() => setShowModal(false)} onSaved={loadData} />

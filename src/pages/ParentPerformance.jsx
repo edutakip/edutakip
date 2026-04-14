@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Star, TrendingUp, BookOpen, Target, CheckCircle, AlertCircle, ChevronDown, ChevronUp, FileText, Zap } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import StudentGamification from '../components/gamification/StudentGamification';
 
 const UNDERSTOOD_MAP = {
   tam:    { label: 'Tam Anladı',      bg: '#d1fae5', color: '#065f46' },
@@ -23,6 +24,7 @@ const MOTIVATION_MAP = {
 export default function ParentPerformance() {
   const [student, setStudent] = useState(null);
   const [reports, setReports] = useState([]);
+  const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
 
@@ -39,8 +41,12 @@ export default function ParentPerformance() {
       if (students.length === 0) { setLoading(false); return; }
       const s = students[0];
       setStudent(s);
-      const r = await base44.entities.LessonReport.filter({ studentId: s.id }, '-date');
+      const [r, h] = await Promise.all([
+        base44.entities.LessonReport.filter({ studentId: s.id }, '-date'),
+        base44.entities.Homework.filter({ studentId: s.id }),
+      ]);
       setReports(r);
+      setHomeworks(h);
       setLoading(false);
     })();
   }, []);
@@ -87,6 +93,11 @@ export default function ParentPerformance() {
       <div style={{ marginBottom: '1.75rem' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', marginBottom: '0.25rem' }}>Gelişim Raporu</h1>
         <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{student.name} · {reports.length} değerlendirme</p>
+      </div>
+
+      {/* Gamification */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <StudentGamification reports={reports} homeworks={homeworks} studentName={student.name} />
       </div>
 
       {/* Özet Kartlar */}
