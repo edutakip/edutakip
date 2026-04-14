@@ -7,6 +7,33 @@ import { useTranslation } from 'react-i18next';
 import ScreenshotMockup from '../components/ScreenshotMockup';
 import { usePageMeta } from '../hooks/usePageMeta';
 
+function ScreenshotCard({ card, idx, icon, delay }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div data-cat={card.cat} className={`sc-card anim-scroll ${delay}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)', borderRadius: 16, aspectRatio: '16/10', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'transform .3s,box-shadow .3s', border: '1px solid rgba(124,58,237,.3)' }}>
+      <div style={{ opacity: hovered ? 0 : 1, transition: 'opacity .25s', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 10%' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: 'rgba(0,0,0,.3)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
+          {['#ff5f57', '#febc2e', '#28c840'].map((c) => <div key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c }} />)}
+        </div>
+        <div style={{ fontSize: '2.5rem', marginBottom: 12, marginTop: 20 }}>{icon}</div>
+        <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{card.label}</div>
+        <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.55)', marginTop: 4 }}>{card.sub}</div>
+        <div style={{ width: '85%', marginTop: 12 }}>
+          {['75%', '50%', '100%'].map((w, i) => <div key={i} style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,.15)', marginBottom: 8, width: w }} />)}
+        </div>
+      </div>
+      <ScreenshotMockup index={idx} visible={hovered} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 10px', background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(6px)', opacity: hovered ? 1 : 0, transition: 'opacity .25s', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: '.7rem', fontWeight: 700, color: '#fff' }}>{card.label}</span>
+        <span style={{ fontSize: '.62rem', color: 'rgba(255,255,255,.55)' }}>— {card.sub}</span>
+      </div>
+    </div>
+  );
+}
+
 function AnimSection({ children, id, style }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -321,35 +348,9 @@ export default function Landing() {
                 )}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
-                {Array.isArray(cards) && cards.map((card, idx) => {
-                  const [hovered, setHovered] = React.useState(false);
-                  return (
-                    <div key={idx} data-cat={card.cat} className={`sc-card anim-scroll ${delays[idx]}`}
-                      onMouseEnter={() => setHovered(true)}
-                      onMouseLeave={() => setHovered(false)}
-                      style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)', borderRadius: 16, aspectRatio: '16/10', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'transform .3s,box-shadow .3s', border: '1px solid rgba(124,58,237,.3)' }}>
-                      {/* Default content */}
-                      <div style={{ opacity: hovered ? 0 : 1, transition: 'opacity .25s', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 10%' }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 32, background: 'rgba(0,0,0,.3)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
-                          {['#ff5f57', '#febc2e', '#28c840'].map((c) => <div key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c }} />)}
-                        </div>
-                        <div style={{ fontSize: '2.5rem', marginBottom: 12, marginTop: 20 }}>{icons[idx]}</div>
-                        <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{card.label}</div>
-                        <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.55)', marginTop: 4 }}>{card.sub}</div>
-                        <div style={{ width: '85%', marginTop: 12 }}>
-                          {['75%', '50%', '100%'].map((w, i) => <div key={i} style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,.15)', marginBottom: 8, width: w }} />)}
-                        </div>
-                      </div>
-                      {/* Mockup preview on hover */}
-                      <ScreenshotMockup index={idx} visible={hovered} />
-                      {/* Label overlay on hover */}
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 10px', background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(6px)', opacity: hovered ? 1 : 0, transition: 'opacity .25s', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: '.7rem', fontWeight: 700, color: '#fff' }}>{card.label}</span>
-                        <span style={{ fontSize: '.62rem', color: 'rgba(255,255,255,.55)' }}>— {card.sub}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                {Array.isArray(cards) && cards.map((card, idx) => (
+                  <ScreenshotCard key={idx} card={card} idx={idx} icon={icons[idx]} delay={delays[idx]} />
+                ))}
               </div>
             </>
           );

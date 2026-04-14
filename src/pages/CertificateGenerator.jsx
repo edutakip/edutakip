@@ -230,6 +230,14 @@ export default function CertificateGenerator() {
 
   // Mobil engeli (768px altı)
   const [windowWidth, setWindowWidth] = React.useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [form, setForm] = useState({ studentName: '', tutorName: '', course: '', date: new Date().toISOString().slice(0, 10), message: '' });
+  const [certLang, setCertLang] = useState('en');
+  const [theme, setTheme] = useState('classic');
+  const [customTheme, setCustomTheme] = useState(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [applyLoading, setApplyLoading] = useState(false);
+  const [applySuccess, setApplySuccess] = useState(false);
+
   React.useEffect(() => {
     const handler = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handler);
@@ -253,14 +261,6 @@ export default function CertificateGenerator() {
       </div>
     );
   }
-
-  const [form, setForm] = useState({ studentName: '', tutorName: '', course: '', date: new Date().toISOString().slice(0, 10), message: '' });
-  const [certLang, setCertLang] = useState('en');
-  const [theme, setTheme] = useState('classic');
-  const [customTheme, setCustomTheme] = useState(null);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [applyLoading, setApplyLoading] = useState(false);
-  const [applySuccess, setApplySuccess] = useState(false);
 
   const u = (key, val) => {
     setForm(f => ({ ...f, [key]: val }));
