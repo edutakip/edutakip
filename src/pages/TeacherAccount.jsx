@@ -127,7 +127,7 @@ function ProfileTab({ user, onUpdate }) {
             <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', margin: 0 }}>{isEn ? 'Sign Out' : 'Oturumu Kapat'}</p>
             <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>{isEn ? 'Sign out securely from all devices.' : 'Tüm cihazlardan güvenli çıkış yapın.'}</p>
           </div>
-          <button onClick={() => base44.auth.logout()} style={{ padding: '0.55rem 1rem', borderRadius: 8, border: '1.5px solid #fee2e2', background: '#fef2f2', color: '#ef4444', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout('/'); }} style={{ padding: '0.55rem 1rem', borderRadius: 8, border: '1.5px solid #fee2e2', background: '#fef2f2', color: '#ef4444', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <LogOut size={14} /> {isEn ? 'Sign Out' : 'Çıkış'}
           </button>
         </div>
