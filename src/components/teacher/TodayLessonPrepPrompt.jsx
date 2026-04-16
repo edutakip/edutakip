@@ -4,7 +4,8 @@ import { BookOpen, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function TodayLessonPrepPrompt({ onClose }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const [lessons, setLessons] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +51,7 @@ export default function TodayLessonPrepPrompt({ onClose }) {
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: '800', color: '#111827' }}>
-                {t('teacher.lessonPrep.title') || 'Bugünün Derslerine Hazırlık'}
+                {isEn ? 'My previous Lesson' : 'Önceki ders ne yaptım?'}
               </h2>
               <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.15rem' }}>
                 {lessons.length} ders — Önceki derslerin özeti
