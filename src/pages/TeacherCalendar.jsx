@@ -374,84 +374,6 @@ export default function TeacherCalendar() {
 
   const SLOT_H = 80;
 
-  // ── Drag state ────────────────────────────────────────────────
-  const dragRef = useRef(null); // { lessonId, offsetMinutes }
-  const [draggingId, setDraggingId] = useState(null);
-  const [dragOver, setDragOver] = useState(null); // { date, hour, minute }
-  const [syncing, setSyncing] = useState(null); // lessonId being synced
-
-  const handleDragStart = (e, lesson) => {
-    const [sh, sm] = (lesson.startTime || '08:00').split(':').map(Number);
-    const [eh, em] = (lesson.endTime || '09:00').split(':').map(Number);
-    const duration = (eh * 60 + em) - (sh * 60 + sm);
-    dragRef.current = { lessonId: lesson.id, duration, offsetMinutes: 0 };
-    setDraggingId(lesson.id);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', lesson.id);
-  };
-
-  const handleDragEnd = () => {
-    setDraggingId(null);
-    setDragOver(null);
-    dragRef.current = null;
-  };
-
-  const getDropTime = (e, dayDate, colEl) => {
-    const rect = colEl.getBoundingClientRect();
-    const scrollTop = scrollRef.current?.scrollTop || 0;
-    const relY = e.clientY - rect.top + scrollTop;
-    const totalMinutes = Math.round((relY / SLOT_H) * 60) + 7 * 60;
-    const snapped = Math.round(totalMinutes / 15) * 15;
-    return snapped; // minutes since midnight
-  };
-
-  const handleDropOnColumn = async (e, dayDate) => {
-    e.preventDefault();
-    if (!dragRef.current) return;
-    const { lessonId, duration } = dragRef.current;
-    const lesson = lessons.find(l => l.id === lessonId);
-    if (!lesson) return;
-
-    const colEl = e.currentTarget;
-    const startMinutes = getDropTime(e, dayDate, colEl);
-    const endMinutes = startMinutes + Math.max(duration, 30);
-
-    const toTime = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
-    const newDate = format(dayDate, 'yyyy-MM-dd');
-    const newStart = toTime(startMinutes);
-    const newEnd = toTime(endMinutes);
-
-    // Optimistic update
-    setLessons(prev => prev.map(l => l.id === lessonId
-      ? { ...l, date: newDate, startTime: newStart, endTime: newEnd }
-      : l
-    ));
-    if (selectedLesson?.id === lessonId) {
-      setSelectedLesson(prev => ({ ...prev, date: newDate, startTime: newStart, endTime: newEnd }));
-    }
-
-    setDraggingId(null);
-    setDragOver(null);
-    dragRef.current = null;
-
-    // Persist
-    await base44.entities.Lesson.update(lessonId, { date: newDate, startTime: newStart, endTime: newEnd });
-
-    // Sync to Google Calendar
-    setSyncing(lessonId);
-    base44.functions.invoke('syncLessonToCalendar', { lessonId, action: 'update' })
-      .catch(() => {})
-      .finally(() => setSyncing(null));
-  };
-
-  const handleDragOverColumn = (e, dayDate) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const colEl = e.currentTarget;
-    const startMins = getDropTime(e, dayDate, colEl);
-    setDragOver({ date: format(dayDate, 'yyyy-MM-dd'), startMins });
-  };
-
   const LessonBlock = ({ lesson }) => {
     const sc = STATUS_CFG[lesson.status] || STATUS_CFG['planlandı'];
     const [sh, sm] = (lesson.startTime || '08:00').split(':').map(Number);
@@ -460,35 +382,25 @@ export default function TeacherCalendar() {
     const duration = Math.max(((eh * 60 + em) - (sh * 60 + sm)), 30);
     const height = (duration / 60) * SLOT_H - 2;
     const isSelected = selectedLesson?.id === lesson.id;
-    const isDragging = draggingId === lesson.id;
-    const isSyncing = syncing === lesson.id;
 
     return (
       <div
-        draggable
-        onDragStart={(e) => handleDragStart(e, lesson)}
-        onDragEnd={handleDragEnd}
-        onClick={(e) => { e.stopPropagation(); if (!draggingId) handleLessonClick(lesson, e); }}
-        title={`${lesson.studentName} — sürükleyerek taşıyın`}
+        onClick={(e) => handleLessonClick(lesson, e)}
         style={{
           position: 'absolute', left: 2, right: 2,
           top: topOffset, height,
           background: isSelected ? sc.bg : sc.bg + 'cc',
           borderRadius: 7,
           padding: '0.2rem 0.4rem',
-          cursor: isDragging ? 'grabbing' : 'grab',
+          cursor: 'pointer',
           overflow: 'hidden',
-          boxShadow: isDragging
-            ? `0 8px 24px ${sc.bg}66`
-            : isSelected ? `0 0 0 2px ${sc.bg}, 0 4px 12px ${sc.bg}44` : '0 1px 4px rgba(0,0,0,0.1)',
-          opacity: isDragging ? 0.45 : 1,
-          transition: isDragging ? 'none' : 'all 0.15s',
+          boxShadow: isSelected ? `0 0 0 2px ${sc.bg}, 0 4px 12px ${sc.bg}44` : '0 1px 4px rgba(0,0,0,0.1)',
+          transition: 'all 0.15s',
           zIndex: isSelected ? 5 : 2,
           borderLeft: `3px solid ${sc.dot}`,
         }}>
         <div style={{ color: 'white', fontWeight: 700, fontSize: height > 40 ? '0.7rem' : '0.6rem', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {lesson.startTime?.slice(0,5)}{height > 30 ? ' – ' + lesson.endTime?.slice(0,5) : ''}
-          {isSyncing && <span style={{ marginLeft: 4, opacity: 0.8 }}>↻</span>}
         </div>
         {height > 28 && (
           <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.68rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -554,42 +466,18 @@ export default function TeacherCalendar() {
             {days.map((day, di) => {
               const dayLessons = getLessonsForDay(day);
               const today = isToday(day);
-              const dayStr = format(day, 'yyyy-MM-dd');
-              const isDropTarget = dragOver?.date === dayStr;
-              // Ghost block for drag preview
-              const ghostTop = isDropTarget
-                ? Math.round((dragOver.startMins - 7 * 60) / 60 * SLOT_H)
-                : null;
-              const ghostHeight = dragRef.current
-                ? (dragRef.current.duration / 60) * SLOT_H - 2
-                : SLOT_H - 2;
-
               return (
                 <div key={di}
-                  onClick={() => !draggingId && openAdd(day)}
-                  onDragOver={(e) => handleDragOverColumn(e, day)}
-                  onDrop={(e) => handleDropOnColumn(e, day)}
-                  onDragLeave={() => setDragOver(null)}
+                  onClick={() => openAdd(day)}
                   style={{
                     flex: 1, minWidth: 0, position: 'relative',
                     borderLeft: '1px solid #f3f4f6',
-                    background: isDropTarget ? '#f0f4ff' : today ? '#faf9ff' : 'white',
-                    cursor: draggingId ? 'copy' : 'pointer',
-                    transition: 'background 0.1s',
+                    background: today ? '#faf9ff' : 'white',
+                    cursor: 'pointer',
                   }}>
                   {HOURS.map((_, i) => (
                     <div key={i} style={{ position: 'absolute', top: i * SLOT_H, left: 0, right: 0, borderTop: '1px solid #f3f4f6', height: SLOT_H }} />
                   ))}
-                  {/* Drop ghost */}
-                  {isDropTarget && ghostTop !== null && (
-                    <div style={{
-                      position: 'absolute', left: 2, right: 2,
-                      top: ghostTop, height: ghostHeight,
-                      background: 'rgba(99,102,241,0.25)',
-                      border: '2px dashed #6366f1',
-                      borderRadius: 7, zIndex: 10, pointerEvents: 'none',
-                    }} />
-                  )}
                   {dayLessons.map(l => (
                     <LessonBlock key={l.id} lesson={l} />
                   ))}
