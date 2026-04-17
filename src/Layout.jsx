@@ -245,7 +245,7 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'TeacherReports', 'TeacherMessages'], multiLine: true },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'TeacherReports', 'TeacherMessages'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
     { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
@@ -253,22 +253,32 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
     {
       label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen,
       submenu: [
+        { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
         { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
         { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
+        { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
         { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
         { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
       ],
     },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
-    { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+    {
+      label: 'Finans Yönetimi', icon: DollarSign,
+      submenu: [
+        { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+        { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
+      ],
+    },
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
-    { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
-    { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
-    { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
+    {
+      label: 'Araçlar', icon: Sparkles,
+      submenu: [
+        { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
+      ],
+    },
     { label: t('teacher.layout.myAccount'), icon: Settings, page: 'TeacherAccount' },
   ];
 
@@ -600,6 +610,7 @@ export default function Layout({ children, currentPageName }) {
                 { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
                 { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
                 { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
+                { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
                 { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
                 { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
 
