@@ -96,7 +96,7 @@ function InputField({ label, value, onChange, placeholder }) {
 }
 
 // ── Homework Preview ──────────────────────────────────────────
-function HomeworkPreview({ homework, editing, onEditChange, onSave, students, onAssign, assigning }) {
+function HomeworkPreview({ homework, editing, onEditChange, students, onAssign, assigning, onLastAssignedId }) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
 
   if (!homework) return null;
@@ -159,7 +159,19 @@ function HomeworkPreview({ homework, editing, onEditChange, onSave, students, on
       })}
 
       {/* Assign section */}
-      <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '1.1rem', border: '1.5px solid #bbf7d0', marginTop: '1rem' }}>
+      {onLastAssignedId && (
+        <div style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 14, padding: '1.1rem', border: '1.5px solid #6366f1', marginTop: '1rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <p style={{ fontWeight: 800, fontSize: '0.88rem', color: 'white', margin: '0 0 0.2rem' }}>✅ Ödev Atandı!</p>
+            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Öğrenci interaktif sorularla çözebilir</p>
+          </div>
+          <a href={`/HomeworkSolver?id=${onLastAssignedId}`} target="_blank" rel="noopener noreferrer"
+            style={{ padding: '0.55rem 1.1rem', borderRadius: 10, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
+            🎮 Önizle
+          </a>
+        </div>
+      )}
+      <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '1.1rem', border: '1.5px solid #bbf7d0', marginTop: '0.5rem' }}>
         <p style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065f46', marginBottom: '0.75rem' }}>📤 Ödevi Öğrenciye Ata</p>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: 1, minWidth: 180 }}>
@@ -219,6 +231,8 @@ export default function AIHomeworkGenerator() {
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [lastAssignedHwId, setLastAssignedHwId] = useState(null);
 
   // Step 4: Homework
   const [homework, setHomework] = useState(null);
@@ -268,6 +282,7 @@ export default function AIHomeworkGenerator() {
       if (res.data?.homework) {
         setHomework(res.data.homework);
         setAnalysis(res.data.analysis);
+        setQuestions(res.data.questions || []);
         setAnalyzing(false);
         setShowSuccess(true);
         setTimeout(() => {
@@ -307,14 +322,16 @@ export default function AIHomeworkGenerator() {
         homework.speaking ? `\n🎤 Speaking Activity:\n${homework.speaking}` : '',
       ].filter(Boolean).join('\n');
 
-      await base44.entities.Homework.create({
+      const created = await base44.entities.Homework.create({
         studentId,
         studentName: student?.name || '',
         teacherEmail: me.email,
         title: homework.title,
         description: homeworkText,
         status: 'verildi',
+        questions: questions,
       });
+      setLastAssignedHwId(created?.id);
       showToast({ message: `📚 Ödev atandı — ${student?.name}` });
     } catch (e) {
       showToast({ message: 'Ödev atanırken hata oluştu', type: 'error' });
@@ -331,6 +348,8 @@ export default function AIHomeworkGenerator() {
     setUploadedUrls([]);
     setAnalysis(null);
     setHomework(null);
+    setQuestions([]);
+    setLastAssignedHwId(null);
     setEditing(false);
     setOverlayVisible(false);
     setShowSuccess(false);
@@ -580,6 +599,7 @@ export default function AIHomeworkGenerator() {
               students={students}
               onAssign={handleAssign}
               assigning={assigning}
+              onLastAssignedId={lastAssignedHwId}
             />
           </SectionCard>
 

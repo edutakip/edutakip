@@ -54,6 +54,45 @@
       },
       "description": "\u00d6\u011fretmenin y\u00fckledi\u011fi dosya URL'leri"
     },
+    "questions": {
+      "type": "array",
+      "description": "Etkile\u015fimli sorular (Duolingo tarz\u0131)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "multiple",
+              "truefalse",
+              "fill"
+            ],
+            "description": "Soru t\u00fcr\u00fc"
+          },
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "\u00c7oktan se\u00e7meli se\u00e7enekler"
+          },
+          "correctIndex": {
+            "type": "number",
+            "description": "Do\u011fru se\u00e7ene\u011fin indeksi (multiple/truefalse i\u00e7in)"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Kabul edilen cevaplar (fill i\u00e7in)"
+          }
+        }
+      }
+    },
     "aiEvaluation": {
       "type": "object",
       "description": "AI de\u011ferlendirme sonucu",
