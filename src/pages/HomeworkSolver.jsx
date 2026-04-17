@@ -4,41 +4,45 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowRight, Home, Trophy, Zap, Star } from 'lucide-react';
 
 // ── Confetti burst ────────────────────────────────────────────
-function ConfettiBurst({ trigger }) {
+function ConfettiBurst() {
   const canvasRef = useRef(null);
   useEffect(() => {
-    if (!trigger) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const particles = Array.from({ length: 80 }, () => ({
+    const particles = Array.from({ length: 100 }, () => ({
       x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height * 0.4,
+      y: Math.random() * canvas.height * 0.5,
       r: Math.random() * 7 + 3,
       color: ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899'][Math.floor(Math.random() * 6)],
-      vx: (Math.random() - 0.5) * 4,
-      vy: Math.random() * 3 + 1,
+      vx: (Math.random() - 0.5) * 5,
+      vy: Math.random() * 4 + 1,
       alpha: 1,
     }));
     let raf;
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
       particles.forEach(p => {
+        if (p.alpha <= 0) return;
+        alive = true;
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
-        p.x += p.vx; p.y += p.vy; p.alpha -= 0.012;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1; // gravity
+        p.alpha -= 0.014;
       });
-      if (particles.some(p => p.alpha > 0)) raf = requestAnimationFrame(draw);
-      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (alive) raf = requestAnimationFrame(draw);
     };
     draw();
-    return () => cancelAnimationFrame(raf);
-  }, [trigger]);
+    return () => { cancelAnimationFrame(raf); ctx.clearRect(0, 0, canvas.width, canvas.height); };
+  }, []);
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />;
 }
 
@@ -358,7 +362,7 @@ export default function HomeworkSolver() {
         @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
       `}</style>
 
-      <ConfettiBurst trigger={confettiTrigger} />
+      <ConfettiBurst key={confettiTrigger} />
 
       {!finished && (
         <>
