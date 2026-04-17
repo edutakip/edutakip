@@ -1,0 +1,80 @@
+{
+  "name": "GamePool",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Oyun seti ba\u015fl\u0131\u011f\u0131"
+    },
+    "className": {
+      "type": "string",
+      "description": "S\u0131n\u0131f seviyesi (\u00d6rn: 5. S\u0131n\u0131f)"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Ders / Konu"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "Kolay",
+        "Orta",
+        "Zor"
+      ],
+      "default": "Orta",
+      "description": "Zorluk seviyesi"
+    },
+    "questions": {
+      "type": "array",
+      "description": "\u0130nteraktif sorular dizisi",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "multiple",
+              "truefalse",
+              "fill"
+            ]
+          },
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correctIndex": {
+            "type": "number"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "teacherEmail": {
+      "type": "string",
+      "description": "Olu\u015fturan \u00f6\u011fretmenin e-postas\u0131"
+    }
+  },
+  "required": [
+    "title",
+    "className",
+    "teacherEmail"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}

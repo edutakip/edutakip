@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Sparkles, Upload, X, BookOpen, ChevronDown, Loader2, CheckCircle, Send, Pencil, User, Image as ImageIcon, FileText, Zap, RotateCcw } from 'lucide-react';
+import { Sparkles, Upload, X, BookOpen, ChevronDown, Loader2, CheckCircle, Send, Pencil, User, Image as ImageIcon, FileText, Zap, RotateCcw, Gamepad2, Save } from 'lucide-react';
+import GamePoolPage, { SaveToPoolModal } from './GamePoolPage';
 import { showToast } from '@/lib/toast';
 
 const GRADE_LEVELS = ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'];
@@ -238,6 +239,8 @@ export default function AIHomeworkGenerator() {
   const [homework, setHomework] = useState(null);
   const [editing, setEditing] = useState(false);
   const [assigning, setAssigning] = useState(false);
+  const [showGamePool, setShowGamePool] = useState(false);
+  const [showSaveToPool, setShowSaveToPool] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -452,11 +455,16 @@ export default function AIHomeworkGenerator() {
               <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>Dersi analiz et, otomatik ödev oluştur</p>
             </div>
           </div>
-          {step > 0 && (
-            <button onClick={resetAll} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-              <RotateCcw size={14} /> Yeniden Başla
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button onClick={() => setShowGamePool(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: 10, border: '1.5px solid #c7d2fe', background: '#eef2ff', color: '#4f46e5', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+              <Gamepad2 size={14} /> Oyun Havuzu
             </button>
-          )}
+            {step > 0 && (
+              <button onClick={resetAll} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                <RotateCcw size={14} /> Yeniden Başla
+              </button>
+            )}
+          </div>
         </div>
 
         <StepIndicator current={step} />
@@ -584,7 +592,15 @@ export default function AIHomeworkGenerator() {
 
           {/* ── STEP 4: Oluşturulan Ödev ── */}
           <SectionCard title='Oluşturulan Ödev' icon={BookOpen} iconColor='#059669' iconBg='#d1fae5' step={4} current={step}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {questions?.length > 0 && (
+                <button
+                  onClick={() => setShowSaveToPool(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: '1.5px solid #bbf7d0', background: '#f0fdf4', color: '#16a34a', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
+                >
+                  <Save size={13} /> Havuza Kaydet
+                </button>
+              )}
               <button
                 onClick={() => setEditing(e => !e)}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', background: editing ? '#eef2ff' : 'white', color: editing ? '#4f46e5' : '#374151', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
@@ -605,6 +621,28 @@ export default function AIHomeworkGenerator() {
 
         </div>
       </div>
+
+      {showGamePool && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9998, overflowY: 'auto', background: '#f8fafc' }}>
+          <GamePoolPage
+            onClose={() => setShowGamePool(false)}
+            onSelectGame={(game) => {
+              setQuestions(game.questions || []);
+              setShowGamePool(false);
+              showToast({ message: `"${game.title}" oyunundan ${game.questions?.length} soru yüklendi` });
+            }}
+          />
+        </div>
+      )}
+
+      {showSaveToPool && (
+        <SaveToPoolModal
+          questions={questions}
+          teacherEmail={me?.email}
+          onClose={() => setShowSaveToPool(false)}
+          onSaved={() => {}}
+        />
+      )}
     </div>
   );
 }
