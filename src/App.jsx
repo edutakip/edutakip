@@ -22,6 +22,7 @@ import Checkout from './pages/Checkout';
 import SubscriptionManagement from './pages/SubscriptionManagement';
 import TeacherAccount from './pages/TeacherAccount';
 import CertificateGenerator from './pages/CertificateGenerator';
+import AIHomeworkGenerator from './pages/AIHomeworkGenerator';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -198,6 +199,7 @@ const AuthenticatedApp = () => {
       <Route path="/SubscriptionManagement" element={<LayoutWrapper currentPageName="SubscriptionManagement"><SubscriptionManagement /></LayoutWrapper>} />
       <Route path="/TeacherAccount" element={<LayoutWrapper currentPageName="TeacherAccount"><TeacherAccount /></LayoutWrapper>} />
       <Route path="/CertificateGenerator" element={<LayoutWrapper currentPageName="CertificateGenerator"><CertificateGenerator /></LayoutWrapper>} />
+      <Route path="/AIHomeworkGenerator" element={<LayoutWrapper currentPageName="AIHomeworkGenerator"><AIHomeworkGenerator /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
