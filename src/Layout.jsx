@@ -156,6 +156,9 @@ const FAB_ACTIONS_KEYS = [
 function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNav }) {
   const [subOpen, setSubOpen] = useState(isGroupActive);
   const Icon = item.icon;
+  const itemCount = item.submenu?.length || 0;
+  // Her item yaklaşık 34px yüksekliğinde + üst padding
+  const maxHeightOpen = itemCount * 38 + 8;
   return (
     <div>
       <button onClick={() => setSubOpen(o => !o)}
@@ -175,34 +178,42 @@ function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNa
         {!collapsed && (
           <>
             <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
-            <ChevronRight size={13} style={{ transform: subOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', opacity: 0.5 }} />
+            <ChevronRight size={13} style={{ transform: subOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.25s ease', opacity: 0.5 }} />
           </>
         )}
       </button>
-      {subOpen && !collapsed && (
-        <div style={{ marginLeft: '1rem', marginTop: '0.1rem', display: 'flex', flexDirection: 'column', gap: '0.05rem', borderLeft: '2px solid rgba(255,255,255,0.1)', paddingLeft: '0.5rem' }}>
-          {item.submenu.map((sub, j) => {
-            const SubIcon = sub.icon;
-            const isActive = sub.page === currentPageName;
-            return (
-              <Link key={j} to={createPageUrl(sub.page)}
-                onClick={(e) => handleNav(e, sub.page)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.6rem',
-                  padding: '0.5rem 0.65rem', borderRadius: '8px',
-                  fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
-                  background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
-                  color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
-                  fontWeight: isActive ? '600' : '400',
-                  textDecoration: 'none', whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
-                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; } }}>
-                <SubIcon size={14} style={{ flexShrink: 0 }} />
-                <span>{sub.label}</span>
-              </Link>
-            );
-          })}
+      {!collapsed && (
+        <div style={{
+          overflow: 'hidden',
+          maxHeight: subOpen ? `${maxHeightOpen}px` : '0px',
+          transition: 'max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: subOpen ? 1 : 0,
+          transition: 'max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease',
+        }}>
+          <div style={{ marginLeft: '1rem', marginTop: '0.1rem', display: 'flex', flexDirection: 'column', gap: '0.05rem', borderLeft: '2px solid rgba(255,255,255,0.1)', paddingLeft: '0.5rem', paddingBottom: '0.1rem' }}>
+            {item.submenu.map((sub, j) => {
+              const SubIcon = sub.icon;
+              const isActive = sub.page === currentPageName;
+              return (
+                <Link key={j} to={createPageUrl(sub.page)}
+                  onClick={(e) => handleNav(e, sub.page)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.6rem',
+                    padding: '0.5rem 0.65rem', borderRadius: '8px',
+                    fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
+                    background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
+                    color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
+                    fontWeight: isActive ? '600' : '400',
+                    textDecoration: 'none', whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; } }}>
+                  <SubIcon size={14} style={{ flexShrink: 0 }} />
+                  <span>{sub.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -249,11 +260,11 @@ export default function Layout({ children, currentPageName }) {
         { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
         { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
         { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
+        { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
       ],
     },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
-    { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant' },
     { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
     { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
@@ -591,6 +602,7 @@ export default function Layout({ children, currentPageName }) {
                 { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
                 { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
                 { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
+
               ].map((item, i) => {
                 const Icon = item.icon;
                 const isActive = item.page === currentPageName;
