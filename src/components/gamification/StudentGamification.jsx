@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Star, Trophy, Flame, BookOpen, CheckCircle, Target, Zap } from 'lucide-react';
 
 // ── Points calculation ────────────────────────────────────────
-// "değerlendirildi" statüsü de tamamlanmış sayılır
-const COMPLETED_HW_STATUSES = ['tamamlandı', 'değerlendirildi'];
+// Tamamlanmış sayılan statüler
+const COMPLETED_HW_STATUSES = ['tamamlandı', 'goruldu'];
 
 // teacherAssessment puan çarpanı
 const ASSESSMENT_BONUS = {
@@ -32,14 +32,16 @@ export function calcGamification(reports = [], homeworks = []) {
     else if (r.rating >= 3) points += 5;
   });
 
-  // Points from homework — "değerlendirildi" also counts as completed
-  const completedHW = homeworks.filter(h => COMPLETED_HW_STATUSES.includes(h.status)).length;
+  // Points from homework
+  // Tamamlanmış = status tamamlandı/goruldu VEYA teacherAssessment dolu (öğretmen değerlendirdi)
+  const isHWCompleted = (h) => COMPLETED_HW_STATUSES.includes(h.status) || !!h.teacherAssessment;
+  const completedHW = homeworks.filter(isHWCompleted).length;
   const totalHW = homeworks.length;
 
   homeworks.forEach(h => {
-    if (!COMPLETED_HW_STATUSES.includes(h.status)) return;
-    if (h.status === 'değerlendirildi' && h.teacherAssessment) {
-      // Assessment-based points
+    if (!isHWCompleted(h)) return;
+    if (h.teacherAssessment) {
+      // Değerlendirme varsa assessment'a göre puan
       points += ASSESSMENT_BONUS[h.teacherAssessment] ?? 15;
     } else {
       points += 20; // default completed
@@ -73,7 +75,7 @@ export function calcGamification(reports = [], homeworks = []) {
 
   // Assessment quality badges
   const cokIyiCount = homeworks.filter(h => h.teacherAssessment === 'cok_iyi').length;
-  const iyiCount = homeworks.filter(h => h.teacherAssessment === 'iyi').length;
+  const iyiCount    = homeworks.filter(h => h.teacherAssessment === 'iyi').length;
   if (cokIyiCount >= 1) earnedBadgeIds.add('cok_iyi_odev');
   if (cokIyiCount >= 3) earnedBadgeIds.add('odev_yildizi');
   if (iyiCount + cokIyiCount >= 5) earnedBadgeIds.add('kaliteli_calisan');
