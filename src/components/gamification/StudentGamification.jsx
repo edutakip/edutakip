@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { Star, Trophy, Flame, BookOpen, CheckCircle, Target, Zap } from 'lucide-react';
 
 // ── Points calculation ────────────────────────────────────────
+// "değerlendirildi" statüsü de tamamlanmış sayılır
+const COMPLETED_HW_STATUSES = ['tamamlandı', 'değerlendirildi'];
+
+// teacherAssessment puan çarpanı
+const ASSESSMENT_BONUS = {
+  cok_iyi:        30,
+  iyi:            20,
+  gelistirilmeli: 10,
+  yetersiz:        5,
+};
+
 export function calcGamification(reports = [], homeworks = []) {
   let points = 0;
   const earnedBadgeIds = new Set();
@@ -11,8 +22,9 @@ export function calcGamification(reports = [], homeworks = []) {
   const lateCount = reports.filter(r => r.attendance === 'geç kaldı').length;
   const missedCount = reports.filter(r => r.attendance === 'katılmadı').length;
 
-  attended && (points += attended * 10);        // +10 per attended lesson
-  lateCount && (points += lateCount * 3);        // +3 per late (still came)
+  attended && (points += attended * 10);   // +10 per attended lesson
+  lateCount && (points += lateCount * 3);  // +3 per late
+
   // Ratings bonus
   reports.forEach(r => {
     if (r.rating >= 5) points += 15;
@@ -20,57 +32,108 @@ export function calcGamification(reports = [], homeworks = []) {
     else if (r.rating >= 3) points += 5;
   });
 
-  // Points from homework
-  const completedHW = homeworks.filter(h => h.status === 'tamamlandı').length;
+  // Points from homework — "değerlendirildi" also counts as completed
+  const completedHW = homeworks.filter(h => COMPLETED_HW_STATUSES.includes(h.status)).length;
   const totalHW = homeworks.length;
-  completedHW && (points += completedHW * 20);   // +20 per completed homework
+
+  homeworks.forEach(h => {
+    if (!COMPLETED_HW_STATUSES.includes(h.status)) return;
+    if (h.status === 'değerlendirildi' && h.teacherAssessment) {
+      // Assessment-based points
+      points += ASSESSMENT_BONUS[h.teacherAssessment] ?? 15;
+    } else {
+      points += 20; // default completed
+    }
+  });
 
   // ── Badge logic ───────────────────────────────────────────
-  // Attendance streak: attended 5+ lessons
-  if (attended >= 5) earnedBadgeIds.add('devam_ustasi');
+  const avgRating = reports.length ? reports.reduce((s, r) => s + (r.rating || 0), 0) / reports.length : 0;
+
+  // Attendance
+  if (attended >= 3)  earnedBadgeIds.add('devam_baslangic');
+  if (attended >= 5)  earnedBadgeIds.add('devam_ustasi');
+  if (attended >= 10) earnedBadgeIds.add('devam_guclu');
   if (attended >= 20) earnedBadgeIds.add('devam_efsanesi');
 
-  // All stars: avg rating >= 4
-  const avgRating = reports.length ? reports.reduce((s, r) => s + (r.rating || 0), 0) / reports.length : 0;
-  if (avgRating >= 4 && reports.length >= 3) earnedBadgeIds.add('parlayan_yildiz');
-  if (avgRating >= 4.5 && reports.length >= 5) earnedBadgeIds.add('altin_yildiz');
+  // No miss
+  if (missedCount === 0 && attended >= 3)  earnedBadgeIds.add('hic_kacinmadi');
+  if (missedCount === 0 && attended >= 10) earnedBadgeIds.add('tam_devam');
 
-  // Homework champion
-  if (completedHW >= 5) earnedBadgeIds.add('odev_sampiyonu');
+  // Stars
+  if (avgRating >= 3 && reports.length >= 2)  earnedBadgeIds.add('yukselis');
+  if (avgRating >= 4 && reports.length >= 3)  earnedBadgeIds.add('parlayan_yildiz');
+  if (avgRating >= 4.5 && reports.length >= 5) earnedBadgeIds.add('altin_yildiz');
+  if (avgRating >= 4.8 && reports.length >= 5) earnedBadgeIds.add('kusursuz');
+
+  // Homework
+  if (completedHW >= 1)  earnedBadgeIds.add('ilk_odev');
+  if (completedHW >= 5)  earnedBadgeIds.add('odev_sampiyonu');
+  if (completedHW >= 10) earnedBadgeIds.add('odev_makinesi');
   if (totalHW > 0 && completedHW === totalHW && totalHW >= 3) earnedBadgeIds.add('mukemmel_ogrenci');
 
-  // No miss
-  if (missedCount === 0 && attended >= 5) earnedBadgeIds.add('hic_kacinmadi');
+  // Assessment quality badges
+  const cokIyiCount = homeworks.filter(h => h.teacherAssessment === 'cok_iyi').length;
+  const iyiCount = homeworks.filter(h => h.teacherAssessment === 'iyi').length;
+  if (cokIyiCount >= 1) earnedBadgeIds.add('cok_iyi_odev');
+  if (cokIyiCount >= 3) earnedBadgeIds.add('odev_yildizi');
+  if (iyiCount + cokIyiCount >= 5) earnedBadgeIds.add('kaliteli_calisan');
 
   // Points milestones
+  if (points >= 50)  earnedBadgeIds.add('ilk_50');
   if (points >= 100) earnedBadgeIds.add('100_puan');
   if (points >= 300) earnedBadgeIds.add('300_puan');
   if (points >= 500) earnedBadgeIds.add('super_kahraman');
+  if (points >= 750) earnedBadgeIds.add('efsane_750');
+
+  // Combined achievements
+  if (attended >= 5 && completedHW >= 5) earnedBadgeIds.add('tam_ogrenci');
+  if (avgRating >= 4 && completedHW >= 3 && missedCount === 0) earnedBadgeIds.add('altin_ogrenci');
 
   return { points, earnedBadgeIds, attended, missedCount, completedHW, totalHW, avgRating };
 }
 
 // ── Badge definitions ─────────────────────────────────────────
 export const ALL_BADGES = [
-  { id: 'devam_ustasi',     emoji: '🏃', label: 'Devam Ustası',      desc: '5 derse katıldı',         color: '#10b981', bg: '#d1fae5' },
-  { id: 'devam_efsanesi',   emoji: '🔥', label: 'Devam Efsanesi',    desc: '20 derse katıldı',        color: '#f97316', bg: '#ffedd5' },
-  { id: 'hic_kacinmadi',    emoji: '✨', label: 'Hiç Kaçırmadı',     desc: 'Devamsızlık sıfır',       color: '#6366f1', bg: '#eef2ff' },
-  { id: 'parlayan_yildiz',  emoji: '⭐', label: 'Parlayan Yıldız',   desc: 'Ort. 4+ yıldız (3+ ders)',color: '#f59e0b', bg: '#fef9c3' },
-  { id: 'altin_yildiz',     emoji: '🌟', label: 'Altın Yıldız',      desc: 'Ort. 4.5+ yıldız (5+ ders)', color: '#f59e0b', bg: '#fef3c7' },
-  { id: 'odev_sampiyonu',   emoji: '📚', label: 'Ödev Şampiyonu',    desc: '5 ödev tamamladı',        color: '#8b5cf6', bg: '#f5f3ff' },
-  { id: 'mukemmel_ogrenci', emoji: '🎓', label: 'Mükemmel Öğrenci',  desc: 'Tüm ödevleri tamamladı',  color: '#4f46e5', bg: '#eef2ff' },
-  { id: '100_puan',         emoji: '💯', label: '100 Puan!',         desc: '100 puana ulaştı',        color: '#ec4899', bg: '#fce7f3' },
-  { id: '300_puan',         emoji: '🏅', label: '300 Puan!',         desc: '300 puana ulaştı',        color: '#f59e0b', bg: '#fef3c7' },
-  { id: 'super_kahraman',   emoji: '🦸', label: 'Süper Kahraman',    desc: '500 puana ulaştı',        color: '#7c3aed', bg: '#f5f3ff' },
+  // Devam rozetleri
+  { id: 'devam_baslangic',  emoji: '👣', label: 'İlk Adım',          desc: '3 derse katıldı',                  color: '#10b981', bg: '#d1fae5' },
+  { id: 'devam_ustasi',     emoji: '🏃', label: 'Devam Ustası',       desc: '5 derse katıldı',                  color: '#059669', bg: '#d1fae5' },
+  { id: 'devam_guclu',      emoji: '💪', label: 'Güçlü Devam',        desc: '10 derse katıldı',                 color: '#047857', bg: '#d1fae5' },
+  { id: 'devam_efsanesi',   emoji: '🔥', label: 'Devam Efsanesi',     desc: '20 derse katıldı',                 color: '#f97316', bg: '#ffedd5' },
+  { id: 'hic_kacinmadi',    emoji: '✨', label: 'Hiç Kaçırmadı',      desc: 'Hiç devamsızlık yok (3+ ders)',    color: '#6366f1', bg: '#eef2ff' },
+  { id: 'tam_devam',        emoji: '🎯', label: 'Tam Devam',          desc: 'Hiç devamsızlık yok (10+ ders)',   color: '#4f46e5', bg: '#eef2ff' },
+  // Performans rozetleri
+  { id: 'yukselis',         emoji: '📈', label: 'Yükseliş',           desc: 'Ort. 3+ yıldız (2+ ders)',         color: '#3b82f6', bg: '#dbeafe' },
+  { id: 'parlayan_yildiz',  emoji: '⭐', label: 'Parlayan Yıldız',    desc: 'Ort. 4+ yıldız (3+ ders)',         color: '#f59e0b', bg: '#fef9c3' },
+  { id: 'altin_yildiz',     emoji: '🌟', label: 'Altın Yıldız',       desc: 'Ort. 4.5+ yıldız (5+ ders)',      color: '#d97706', bg: '#fef3c7' },
+  { id: 'kusursuz',         emoji: '💎', label: 'Kusursuz',            desc: 'Ort. 4.8+ yıldız (5+ ders)',      color: '#7c3aed', bg: '#f5f3ff' },
+  // Ödev rozetleri
+  { id: 'ilk_odev',         emoji: '✅', label: 'İlk Ödev',           desc: 'İlk ödevini tamamladı',            color: '#10b981', bg: '#d1fae5' },
+  { id: 'odev_sampiyonu',   emoji: '📚', label: 'Ödev Şampiyonu',     desc: '5 ödev tamamladı',                 color: '#8b5cf6', bg: '#f5f3ff' },
+  { id: 'odev_makinesi',    emoji: '🤖', label: 'Ödev Makinesi',      desc: '10 ödev tamamladı',                color: '#6d28d9', bg: '#ede9fe' },
+  { id: 'mukemmel_ogrenci', emoji: '🎓', label: 'Mükemmel Öğrenci',   desc: 'Tüm ödevleri tamamladı (3+)',      color: '#4f46e5', bg: '#eef2ff' },
+  // Değerlendirme rozetleri
+  { id: 'cok_iyi_odev',     emoji: '🥇', label: 'Çok İyi Ödev',       desc: '1 ödev "Çok İyi" değerlendi',      color: '#f59e0b', bg: '#fef3c7' },
+  { id: 'odev_yildizi',     emoji: '🌠', label: 'Ödev Yıldızı',       desc: '3 ödev "Çok İyi" değerlendi',      color: '#d97706', bg: '#fef9c3' },
+  { id: 'kaliteli_calisan', emoji: '🏆', label: 'Kaliteli Çalışan',   desc: '5+ ödev "İyi/Çok İyi" değerlendi', color: '#b45309', bg: '#fef3c7' },
+  // Kombinasyon rozetleri
+  { id: 'tam_ogrenci',      emoji: '🌈', label: 'Tam Öğrenci',        desc: '5+ ders & 5+ ödev tamamlandı',     color: '#ec4899', bg: '#fce7f3' },
+  { id: 'altin_ogrenci',    emoji: '👑', label: 'Altın Öğrenci',      desc: 'Devam + performans + ödev mükemmel',color: '#f59e0b', bg: '#fef3c7' },
+  // Puan rozetleri
+  { id: 'ilk_50',           emoji: '🌱', label: '50 Puan!',            desc: '50 puana ulaştı',                  color: '#10b981', bg: '#d1fae5' },
+  { id: '100_puan',         emoji: '💯', label: '100 Puan!',           desc: '100 puana ulaştı',                 color: '#ec4899', bg: '#fce7f3' },
+  { id: '300_puan',         emoji: '🏅', label: '300 Puan!',           desc: '300 puana ulaştı',                 color: '#f59e0b', bg: '#fef3c7' },
+  { id: 'super_kahraman',   emoji: '🦸', label: 'Süper Kahraman',      desc: '500 puana ulaştı',                 color: '#7c3aed', bg: '#f5f3ff' },
+  { id: 'efsane_750',       emoji: '🚀', label: 'Efsane!',             desc: '750 puana ulaştı',                 color: '#4f46e5', bg: '#eef2ff' },
 ];
 
 // ── Level from points ─────────────────────────────────────────
 export function getLevel(points) {
-  if (points >= 500) return { level: 5, label: 'Efsane 🦸',   color: '#7c3aed', next: null };
-  if (points >= 300) return { level: 4, label: 'Uzman 🏅',    color: '#f59e0b', next: 500 };
-  if (points >= 150) return { level: 3, label: 'İleri 🌟',    color: '#6366f1', next: 300 };
-  if (points >= 60)  return { level: 2, label: 'Gelişiyor ⭐', color: '#10b981', next: 150 };
-  return             { level: 1, label: 'Yeni Başlayan 🌱',   color: '#9ca3af', next: 60 };
+  if (points >= 750) return { level: 6, label: 'Efsane 🚀',    color: '#4f46e5', next: null,  prev: 500 };
+  if (points >= 500) return { level: 5, label: 'Süper Kahraman 🦸', color: '#7c3aed', next: 750, prev: 300 };
+  if (points >= 300) return { level: 4, label: 'Uzman 🏅',     color: '#f59e0b', next: 500,  prev: 150 };
+  if (points >= 150) return { level: 3, label: 'İleri 🌟',     color: '#6366f1', next: 300,  prev: 60  };
+  if (points >= 60)  return { level: 2, label: 'Gelişiyor ⭐',  color: '#10b981', next: 150,  prev: 0   };
+  return                    { level: 1, label: 'Yeni Başlayan 🌱', color: '#9ca3af', next: 60, prev: 0 };
 }
 
 // ── Main component ────────────────────────────────────────────
@@ -80,7 +143,7 @@ export default function StudentGamification({ reports = [], homeworks = [], stud
   const lvl = getLevel(points);
   const earnedBadges = ALL_BADGES.filter(b => earnedBadgeIds.has(b.id));
   const lockedBadges = ALL_BADGES.filter(b => !earnedBadgeIds.has(b.id));
-  const progressPct = lvl.next ? Math.min(100, Math.round(((points - (lvl.next === 500 ? 300 : lvl.next === 300 ? 150 : lvl.next === 150 ? 60 : 0)) / (lvl.next - (lvl.next === 500 ? 300 : lvl.next === 300 ? 150 : lvl.next === 150 ? 60 : 0))) * 100)) : 100;
+  const progressPct = lvl.next ? Math.min(100, Math.round(((points - lvl.prev) / (lvl.next - lvl.prev)) * 100)) : 100;
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
