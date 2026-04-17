@@ -216,6 +216,8 @@ export default function AIHomeworkGenerator() {
 
   // Step 3: Analysis
   const [analyzing, setAnalyzing] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [analysis, setAnalysis] = useState(null);
 
   // Step 4: Homework
@@ -254,6 +256,8 @@ export default function AIHomeworkGenerator() {
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
+    setOverlayVisible(true);
+    setShowSuccess(false);
     setStep(3);
     try {
       const res = await base44.functions.invoke('generateAIHomework', {
@@ -264,13 +268,23 @@ export default function AIHomeworkGenerator() {
       if (res.data?.homework) {
         setHomework(res.data.homework);
         setAnalysis(res.data.analysis);
-        setStep(4);
+        setAnalyzing(false);
+        setShowSuccess(true);
+        setTimeout(() => {
+          setOverlayVisible(false);
+          setTimeout(() => {
+            setShowSuccess(false);
+            setStep(4);
+          }, 500);
+        }, 1900);
       } else {
         showToast({ message: 'AI analizi başarısız oldu', type: 'error' });
+        setOverlayVisible(false);
         setStep(2);
       }
     } catch (e) {
       showToast({ message: 'Bir hata oluştu: ' + e.message, type: 'error' });
+      setOverlayVisible(false);
       setStep(2);
     } finally {
       setAnalyzing(false);
@@ -318,11 +332,93 @@ export default function AIHomeworkGenerator() {
     setAnalysis(null);
     setHomework(null);
     setEditing(false);
+    setOverlayVisible(false);
+    setShowSuccess(false);
   };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}} @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <style>{`
+        @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.18)} 28%{transform:scale(1)} 42%{transform:scale(1.12)} }
+        @keyframes pulse-ring { 0%{transform:scale(0.85);opacity:0.6} 50%{transform:scale(1.15);opacity:0} 100%{transform:scale(0.85);opacity:0} }
+        @keyframes shimmer-text { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes dot-bounce { 0%,80%,100%{transform:translateY(0);opacity:0.4} 40%{transform:translateY(-8px);opacity:1} }
+        @keyframes success-pop { 0%{transform:scale(0.4);opacity:0} 65%{transform:scale(1.12)} 85%{transform:scale(0.97)} 100%{transform:scale(1);opacity:1} }
+        @keyframes check-draw { 0%{stroke-dashoffset:50} 100%{stroke-dashoffset:0} }
+        @keyframes fade-in-up { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+      `}</style>
+
+      {/* ── Loading / Success Overlay ── */}
+      {(analyzing || showSuccess) && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999999,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: '2rem',
+          background: showSuccess
+            ? 'linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #0a1628 100%)'
+            : 'linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f0c29 100%)',
+          opacity: overlayVisible ? 1 : 0,
+          transition: 'background 0.6s ease, opacity 0.45s ease',
+          pointerEvents: overlayVisible ? 'auto' : 'none',
+        }}>
+          {/* LOADING içeriği */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem',
+            opacity: showSuccess ? 0 : 1,
+            transform: showSuccess ? 'scale(0.9)' : 'scale(1)',
+            transition: 'opacity 0.4s ease, transform 0.4s ease',
+            position: showSuccess ? 'absolute' : 'relative',
+            pointerEvents: 'none',
+          }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', width: 130, height: 130, borderRadius: '50%', border: '2px solid rgba(99,102,241,0.5)', animation: 'pulse-ring 1.8s ease-out infinite' }} />
+              <div style={{ position: 'absolute', width: 108, height: 108, borderRadius: '50%', border: '2px solid rgba(139,92,246,0.4)', animation: 'pulse-ring 1.8s ease-out 0.5s infinite' }} />
+              <div style={{ width: 84, height: 84, borderRadius: '24px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(99,102,241,0.5)', animation: 'heartbeat 1.8s ease-in-out infinite' }}>
+                <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png" alt="EduTakip" style={{ width: 56, height: 56, borderRadius: '14px', objectFit: 'cover' }} />
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>EduTakip</h2>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>Özel Ders Yönetim Platformu</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0s infinite' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.2s infinite' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: 'dot-bounce 1.2s ease-in-out 0.4s infinite' }} />
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', margin: 0, animation: 'shimmer-text 1.5s ease-in-out 0.3s infinite' }}>AI ile ödev oluşturuluyor...</p>
+          </div>
+
+          {/* SUCCESS içeriği */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem',
+            opacity: showSuccess ? 1 : 0,
+            transform: showSuccess ? 'scale(1)' : 'scale(1.05)',
+            transition: 'opacity 0.45s ease 0.15s, transform 0.45s ease 0.15s',
+            position: showSuccess ? 'relative' : 'absolute',
+            pointerEvents: showSuccess ? 'auto' : 'none',
+          }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: showSuccess ? 'success-pop 0.55s cubic-bezier(0.175,0.885,0.32,1.275) 0.1s both' : 'none' }}>
+              <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.35)', animation: showSuccess ? 'pulse-ring 1.6s ease-out 0.5s infinite' : 'none' }} />
+              <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', border: '2px solid rgba(34,197,94,0.2)', animation: showSuccess ? 'pulse-ring 1.6s ease-out 0.85s infinite' : 'none' }} />
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, #16a34a, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(34,197,94,0.45)' }}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <polyline points="9,20 17,28 31,12" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="50"
+                    style={{ strokeDashoffset: showSuccess ? undefined : '50', animation: showSuccess ? 'check-draw 0.45s ease 0.4s both' : 'none' }} />
+                </svg>
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.4rem',
+              animation: showSuccess ? 'fade-in-up 0.4s ease 0.5s both' : 'none' }}>
+              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Ödev Oluşturuldu!</h2>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: 0 }}>AI ödevinizi hazırladı, düzenleyebilirsiniz.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(1rem,4vw,2rem)' }}>
 
