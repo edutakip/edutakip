@@ -88,10 +88,24 @@ Yanıtını JSON formatında ver:
       requestBody.file_urls = imageUrls;
     }
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      ...requestBody,
-      model: 'claude_sonnet_4_6',
-    });
+    let result = null;
+    const MAX_RETRIES = 3;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      result = await base44.integrations.Core.InvokeLLM({
+        ...requestBody,
+        model: 'claude_sonnet_4_6',
+      });
+
+      if (result?.homework) break;
+
+      console.warn(`[generateAIHomework] Attempt ${attempt}/${MAX_RETRIES}: 'homework' field missing. Full LLM response:`, JSON.stringify(result));
+
+      if (attempt === MAX_RETRIES) {
+        console.error('[generateAIHomework] All retries exhausted. Last LLM response:', JSON.stringify(result));
+        return Response.json({ error: 'AI yanıtında ödev bilgisi bulunamadı. Lütfen tekrar deneyin.' }, { status: 500 });
+      }
+    }
 
     return Response.json({ analysis: result.analysis, homework: result.homework });
   } catch (error) {
