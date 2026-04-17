@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowRight, Home, Trophy, Zap, Star } from 'lucide-react';
 
 // ── Confetti burst ────────────────────────────────────────────
@@ -275,6 +276,7 @@ export default function HomeworkSolver() {
   const [finished, setFinished] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [answered, setAnswered] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -291,20 +293,35 @@ export default function HomeworkSolver() {
   const questions = hw?.questions || [];
   const total = questions.length;
 
+  const saveResult = (finalScore, finalTotal) => {
+    if (!hw?.id) return;
+    const pct = finalTotal > 0 ? Math.round((finalScore / finalTotal) * 100) : 0;
+    base44.entities.Homework.update(hw.id, {
+      status: 'tamamlandı',
+      gameResult: { score: finalScore, total: finalTotal, percentage: pct },
+    }).catch(() => {});
+  };
+
   const handleAnswer = (correct) => {
+    const newScore = correct ? score + 1 : score;
+    const newLives = correct ? lives : Math.max(0, lives - 1);
+    const next = currentIdx + 1;
+
     setAnswered(a => a + 1);
     if (correct) {
-      setScore(s => s + 1);
+      setScore(newScore);
       setConfetti(true);
       setTimeout(() => setConfetti(false), 100);
     } else {
-      setLives(l => Math.max(0, l - 1));
+      setLives(newLives);
     }
 
-    const next = currentIdx + 1;
     setSlideDir('left');
-    if (next >= total || lives - (correct ? 0 : 1) <= 0) {
-      setTimeout(() => setFinished(true), 400);
+    if (next >= total || newLives <= 0) {
+      setTimeout(() => {
+        saveResult(newScore, total);
+        setFinished(true);
+      }, 400);
     } else {
       setTimeout(() => setCurrentIdx(next), 400);
     }
@@ -372,7 +389,7 @@ export default function HomeworkSolver() {
       )}
 
       {finished ? (
-        <FinishScreen score={score} total={total} onHome={() => window.history.back()} />
+        <FinishScreen score={score} total={total} onHome={() => navigate('/ParentHomework')} />
       ) : (
         <QuestionCard
           key={currentIdx}

@@ -93,6 +93,24 @@
         }
       }
     },
+    "gameResult": {
+      "type": "object",
+      "description": "\u00d6\u011frencinin oyun sonucu",
+      "properties": {
+        "score": {
+          "type": "number",
+          "description": "Do\u011fru say\u0131s\u0131"
+        },
+        "total": {
+          "type": "number",
+          "description": "Toplam soru say\u0131s\u0131"
+        },
+        "percentage": {
+          "type": "number",
+          "description": "Ba\u015far\u0131 y\u00fczdesi"
+        }
+      }
+    },
     "aiEvaluation": {
       "type": "object",
       "description": "AI de\u011ferlendirme sonucu",

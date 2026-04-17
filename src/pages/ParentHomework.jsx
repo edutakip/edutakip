@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, CheckCircle, Clock, AlertCircle, MessageSquare, X, Upload, Calendar, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, CheckCircle, Clock, AlertCircle, MessageSquare, X, Upload, Calendar, Eye, Gamepad2, Star } from 'lucide-react';
 import { format, parseISO, differenceInSeconds } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -534,6 +535,7 @@ export default function ParentHomework() {
   const [noteHwId, setNoteHwId] = useState(null);
   const [note, setNote] = useState('');
   const [selectedHw, setSelectedHw] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -568,24 +570,30 @@ export default function ParentHomework() {
     setHomeworks(h);
   };
 
-  // ── Ödeve tıklandığında → 'goruldu' statüsüne güncelle ──────
+  // ── Ödeve tıklandığında ───────────────────────────────────────
   const handleOpenHomework = (hw) => {
-    const shouldMarkSeen = hw.status === 'verildi' || hw.status === 'gecikmiş';
+    const isInteractive = hw.questions && hw.questions.length > 0;
 
+    // İnteraktif ödev → direkt oyun sayfasına git
+    if (isInteractive) {
+      // Görüldü olarak işaretle
+      if (hw.status === 'verildi' || hw.status === 'gecikmiş') {
+        base44.entities.Homework.update(hw.id, { status: 'goruldu' }).catch(() => {});
+        setHomeworks(prev => prev.map(h => h.id === hw.id ? { ...h, status: 'goruldu' } : h));
+      }
+      navigate(`/HomeworkSolver?id=${hw.id}`);
+      return;
+    }
+
+    // Normal ödev → modal aç
+    const shouldMarkSeen = hw.status === 'verildi' || hw.status === 'gecikmiş';
     if (shouldMarkSeen) {
-      // Önce local state'i güncelle (anlık feedback)
       const updatedHw = { ...hw, status: 'goruldu' };
-      setHomeworks(prev =>
-        prev.map(h => h.id === hw.id ? updatedHw : h)
-      );
+      setHomeworks(prev => prev.map(h => h.id === hw.id ? updatedHw : h));
       setSelectedHw(updatedHw);
-      // Backend'e kaydet — hata olursa sadece console'a yaz, login'e atma
       base44.entities.Homework.update(hw.id, { status: 'goruldu' }).catch(err => {
         console.warn('goruldu güncellenemedi:', err);
-        // Geri al
-        setHomeworks(prev =>
-          prev.map(h => h.id === hw.id ? { ...h, status: hw.status } : h)
-        );
+        setHomeworks(prev => prev.map(h => h.id === hw.id ? { ...h, status: hw.status } : h));
       });
     } else {
       setSelectedHw(hw);
@@ -676,9 +684,24 @@ export default function ParentHomework() {
                     <Icon size={17} color={cfg.color} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: '700', color: '#111827', fontSize: '0.85rem' }}>{hw.title}</div>
-                    {hw.description && <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.15rem' }}>{hw.description}</div>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: '700', color: '#111827', fontSize: '0.85rem' }}>{hw.title}</span>
+                      {hw.questions?.length > 0 && (
+                        <span style={{ fontSize: '0.6rem', fontWeight: 800, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', color: 'white', padding: '0.15rem 0.45rem', borderRadius: 20, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                          <Gamepad2 size={9} /> İnteraktif
+                        </span>
+                      )}
+                    </div>
+                    {!hw.questions?.length && hw.description && <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hw.description}</div>}
                     {dueDateStr && <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.15rem' }}>Son Tarih: {dueDateStr}</div>}
+                    {hw.gameResult && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
+                        <Star size={11} color="#f59e0b" fill="#f59e0b" />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#92400e' }}>
+                          {hw.gameResult.score}/{hw.gameResult.total} doğru · %{hw.gameResult.percentage}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
                     <span style={{
