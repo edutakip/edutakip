@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Trophy, Medal } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { calcGamification, getLevel, ALL_BADGES } from './StudentGamification';
+import StudentDetailDrawer from './StudentDetailDrawer';
 
 export default function StudentLeaderboard() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRank, setSelectedRank] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -52,13 +55,18 @@ export default function StudentLeaderboard() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {rows.map((row, i) => (
-          <div key={row.student.id} style={{
-            display: 'flex', alignItems: 'center', gap: '0.85rem',
-            padding: '0.75rem 1rem', borderRadius: 14,
-            background: i === 0 ? 'linear-gradient(135deg, #fffbeb, #fef3c7)' : i === 1 ? '#f8fafc' : i === 2 ? '#fff7f0' : 'white',
-            border: `1.5px solid ${i === 0 ? '#fbbf24' : i === 1 ? '#e2e8f0' : i === 2 ? '#fed7aa' : '#f1f5f9'}`,
-            transition: 'all 0.15s',
-          }}>
+          <div key={row.student.id}
+            onClick={() => { setSelectedRow(row); setSelectedRank(i); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.85rem',
+              padding: '0.75rem 1rem', borderRadius: 14,
+              background: i === 0 ? 'linear-gradient(135deg, #fffbeb, #fef3c7)' : i === 1 ? '#f8fafc' : i === 2 ? '#fff7f0' : 'white',
+              border: `1.5px solid ${i === 0 ? '#fbbf24' : i === 1 ? '#e2e8f0' : i === 2 ? '#fed7aa' : '#f1f5f9'}`,
+              transition: 'all 0.15s', cursor: 'pointer',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
             {/* Rank */}
             <div style={{ width: 28, textAlign: 'center', fontSize: i < 3 ? '1.2rem' : '0.85rem', fontWeight: 800, color: '#9ca3af', flexShrink: 0 }}>
               {rankEmoji(i)}
@@ -90,6 +98,14 @@ export default function StudentLeaderboard() {
           </div>
         ))}
       </div>
+
+      {selectedRow && (
+        <StudentDetailDrawer
+          row={selectedRow}
+          rank={selectedRank}
+          onClose={() => { setSelectedRow(null); setSelectedRank(null); }}
+        />
+      )}
     </div>
   );
 }
