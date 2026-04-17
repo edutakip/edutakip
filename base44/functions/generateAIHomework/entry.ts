@@ -18,36 +18,30 @@ Deno.serve(async (req) => {
       pages && `Sayfalar: ${pages}`,
     ].filter(Boolean).join('\n');
 
-    const prompt = `Sen deneyimli bir İngilizce öğretmenisin. Bir öğretmen şu dersi işledi:
+    const prompt = `You are an experienced English teacher. Create a homework assignment based on this lesson.
 
-DERS BİLGİLERİ:
+LESSON INFO:
 ${lessonContext}
+${notes ? `\nNOTES:\n${notes}` : ''}
 
-DERS NOTLARI:
-${notes || '(Not girilmedi)'}
-
-Lütfen şunları yap:
-1. Dersi analiz et
-2. Bu derse uygun, öğrencinin seviyesine göre kapsamlı bir ev ödevi oluştur
-
-Yanıtını JSON formatında ver:
+Return ONLY valid JSON with this exact structure:
 {
   "analysis": {
-    "learnedTopics": "Öğrenilen konular özeti",
-    "needsReinforcement": "Pekiştirilmesi gereken noktalar",
-    "vocabulary": "Tekrar edilmesi gereken kelimeler listesi",
-    "difficulty": "Zorluk seviyesi (Başlangıç / Orta / İleri)"
+    "learnedTopics": "brief summary of topics covered",
+    "needsReinforcement": "key points to reinforce",
+    "vocabulary": "key vocabulary words",
+    "difficulty": "Başlangıç / Orta / İleri"
   },
   "homework": {
-    "title": "Ödev başlığı (İngilizce)",
-    "grade": "${grade || 'Genel'}",
-    "difficulty": "Zorluk seviyesi",
-    "instructions": "Genel ödev talimatları (İngilizce, 1-2 cümle)",
-    "vocabulary": "Kelime çalışması egzersizi — en az 5 aktivite/kelime içersin. Match the words, fill in the blanks gibi görevler ver.",
-    "grammar": "Dil bilgisi egzersizi — ${topic || 'dersin konusuna'} uygun 5-6 cümlelik alıştırma. Cümle tamamlama, dönüştürme, hata bulma gibi.",
-    "reading": "Kısa okuma metni (80-120 kelime) + 3 anlama sorusu. Metin dersin konusuyla ilişkili olsun.",
-    "writing": "Yazma görevi — 40-60 kelime, konuyla ilgili bir paragraf veya kısa yazı isteniyor.",
-    "speaking": "İsteğe bağlı konuşma aktivitesi — bir veya iki soru/tartışma konusu"
+    "title": "homework title in English",
+    "grade": "${grade || 'General'}",
+    "difficulty": "difficulty level",
+    "instructions": "1-2 sentence instructions in English",
+    "vocabulary": "5 vocabulary exercises (matching or fill-in-the-blank)",
+    "grammar": "5 grammar exercises related to ${topic || 'the lesson topic'}",
+    "reading": "Short reading text (60-80 words) + 3 comprehension questions",
+    "writing": "Writing task: 30-50 word paragraph prompt",
+    "speaking": "1-2 discussion questions (optional)"
   }
 }`;
 
@@ -94,7 +88,6 @@ Yanıtını JSON formatında ver:
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       result = await base44.integrations.Core.InvokeLLM({
         ...requestBody,
-        model: 'claude_sonnet_4_6',
       });
 
       if (result?.homework) break;
