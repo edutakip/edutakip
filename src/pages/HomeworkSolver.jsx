@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowRight, Home, Trophy, Zap, Star } from 'lucide-react';
 
 // ── Confetti burst ────────────────────────────────────────────
-function ConfettiBurst({ active }) {
+function ConfettiBurst({ trigger }) {
   const canvasRef = useRef(null);
   useEffect(() => {
-    if (!active) return;
+    if (!trigger) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ function ConfettiBurst({ active }) {
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [active]);
+  }, [trigger]);
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />;
 }
 
@@ -274,7 +274,7 @@ export default function HomeworkSolver() {
   const [lives, setLives] = useState(3);
   const [slideDir, setSlideDir] = useState('left');
   const [finished, setFinished] = useState(false);
-  const [confetti, setConfetti] = useState(false);
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
   const [answered, setAnswered] = useState(0);
   const navigate = useNavigate();
 
@@ -310,8 +310,7 @@ export default function HomeworkSolver() {
     setAnswered(a => a + 1);
     if (correct) {
       setScore(newScore);
-      setConfetti(true);
-      setTimeout(() => setConfetti(false), 100);
+      setConfettiTrigger(t => t + 1);
     } else {
       setLives(newLives);
     }
@@ -359,7 +358,7 @@ export default function HomeworkSolver() {
         @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
       `}</style>
 
-      <ConfettiBurst active={confetti} />
+      <ConfettiBurst trigger={confettiTrigger} />
 
       {!finished && (
         <>
