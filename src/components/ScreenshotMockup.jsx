@@ -200,7 +200,6 @@ const mockups = {
       </div>
     </div>
   ),
-};
 
   aiHomework: (
     <div style={{ width: '100%', height: '100%', background: '#0f0e1a', padding: '8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
