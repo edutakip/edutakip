@@ -53,6 +53,21 @@
       "title": "AI-Powered Assistant",
       "desc": "Get instant answers to questions like \"Who hasn't paid this month?\", \"What are my lessons today?\", \"Which students are struggling most?\"",
       "tag": "AI Powered"
+    },
+    "aiHomework": {
+      "title": "AI Homework Generator",
+      "desc": "Automatically generate homework from lesson notes and images. Create PDF worksheets, quiz/exam papers or Duolingo-style interactive game homework — then assign to students in one click.",
+      "tag": "3 Modes"
+    },
+    "certificate": {
+      "title": "Certificate Generator",
+      "desc": "Create professional certificates for successful students. Choose from design themes, customize with AI and print directly. Supports 9 languages.",
+      "tag": "AI Design"
+    },
+    "smartRaise": {
+      "title": "Smart Fee Suggestion",
+      "desc": "Get personalized fee increase suggestions for each student based on city, school type, market conditions and last raise date. Also generates ready-to-send parent message templates.",
+      "tag": "Data-Driven"
     }
   },
   "howItWorks": {
@@ -79,7 +94,7 @@
     "sectionBadge": "Interface",
     "title": "Modern and User-Friendly",
     "subtitle": "An intuitive and elegant teacher panel that works seamlessly on all devices.",
-    "tabs": ["All", "Students", "Lessons", "Finance", "Reports"],
+    "tabs": ["All", "Students", "Lessons", "Finance", "Reports", "AI Tools"],
     "cards": [
       { "label": "Overview", "sub": "EduTakip Dashboard", "overlay": "📊 Daily Summary Panel", "cat": "genel" },
       { "label": "My Students", "sub": "EduTakip – Student Cards", "overlay": "🎓 All Student Cards", "cat": "ogrenci" },
@@ -88,7 +103,11 @@
       { "label": "Finance Management", "sub": "EduTakip – Income Analysis", "overlay": "📈 Monthly Income Chart", "cat": "finans" },
       { "label": "Progress Reports", "sub": "EduTakip – Performance Tracking", "overlay": "⭐ Student Progress Reports", "cat": "rapor" },
       { "label": "Add New Student", "sub": "EduTakip – 4-Step Registration", "overlay": "👤 Quick Student Registration", "cat": "ogrenci" },
-      { "label": "EduTakip Assistant", "sub": "AI-Powered Teacher Assistant", "overlay": "🧠 Ask Your AI Assistant", "cat": "ai" }
+      { "label": "EduTakip Assistant", "sub": "AI-Powered Teacher Assistant", "overlay": "🧠 Ask Your AI Assistant", "cat": "ai" },
+      { "label": "AI Homework Generator", "sub": "PDF, Quiz & Game Homework", "overlay": "✨ Auto-Generate Homework", "cat": "ai" },
+      { "label": "Homework Analytics", "sub": "EduTakip – Stats & Analysis", "overlay": "📊 Student Success Statistics", "cat": "rapor" },
+      { "label": "Certificate Generator", "sub": "AI-Powered Design", "overlay": "🏆 Professional Certificates", "cat": "ai" },
+      { "label": "Smart Fee Suggestion", "sub": "Market-Based Fee Analysis", "overlay": "💡 Personalized Suggestions", "cat": "finans" }
     ]
   },
   "testimonials": {

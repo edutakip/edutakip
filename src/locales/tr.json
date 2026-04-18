@@ -53,6 +53,21 @@
       "title": "AI Destekli Asistan",
       "desc": "\"Bu ay kim ödeme yapmadı?\", \"Bugünkü derslerim neler?\", \"En çok zorlanan öğrencilerim kimler?\" gibi sorularınızı anında cevaplayın.",
       "tag": "AI Destekli"
+    },
+    "aiHomework": {
+      "title": "AI Ödev Oluşturucu",
+      "desc": "Ders notlarına ve görsellere bakarak otomatik ödev hazırlayın. PDF ödev, deneme sınavı veya Duolingo tarzı interaktif oyun ödevleri oluşturun ve tek tıkla öğrenciye atayın.",
+      "tag": "3 Farklı Mod"
+    },
+    "certificate": {
+      "title": "Sertifika Oluşturucu",
+      "desc": "Başarılı öğrencilere profesyonel sertifika hazırlayın. Farklı tasarım temalarından seçin, AI ile özelleştirin ve doğrudan yazdırın. 9 dilde destek sunar.",
+      "tag": "AI Tasarım"
+    },
+    "smartRaise": {
+      "title": "Akıllı Zam Önerisi",
+      "desc": "Şehir, okul tipi, piyasa koşulları ve son zam tarihine göre her öğrenci için kişiselleştirilmiş ücret artış önerisi alın. Veliye gönderilebilecek hazır mesaj şablonu da oluşturur.",
+      "tag": "Veri Odaklı"
     }
   },
   "howItWorks": {
@@ -79,7 +94,7 @@
     "sectionBadge": "Arayüz",
     "title": "Modern ve Kullanıcı Dostu",
     "subtitle": "Tüm cihazlarda sorunsuz çalışan, sezgisel ve şık bir öğretmen paneli.",
-    "tabs": ["Tümü", "Öğrenciler", "Dersler", "Finans", "Raporlar"],
+    "tabs": ["Tümü", "Öğrenciler", "Dersler", "Finans", "Raporlar", "AI Araçlar"],
     "cards": [
       { "label": "Genel Bakış", "sub": "EduTakip Dashboard", "overlay": "📊 Günlük Özet Paneli", "cat": "genel" },
       { "label": "Öğrencilerim", "sub": "EduTakip – Öğrenci Kartları", "overlay": "🎓 Tüm Öğrenci Kartları", "cat": "ogrenci" },
@@ -88,7 +103,11 @@
       { "label": "Finans Yönetimi", "sub": "EduTakip – Gelir Analizi", "overlay": "📈 Aylık Gelir Grafiği", "cat": "finans" },
       { "label": "Gelişim Raporları", "sub": "EduTakip – Performans Takibi", "overlay": "⭐ Öğrenci Gelişim Raporları", "cat": "rapor" },
       { "label": "Yeni Öğrenci Ekle", "sub": "EduTakip – 4 Adımlı Kayıt", "overlay": "👤 Hızlı Öğrenci Kaydı", "cat": "ogrenci" },
-      { "label": "EduTakip Asistan", "sub": "AI Destekli Öğretmen Asistanı", "overlay": "🧠 AI Asistanınıza Sorun", "cat": "ai" }
+      { "label": "EduTakip Asistan", "sub": "AI Destekli Öğretmen Asistanı", "overlay": "🧠 AI Asistanınıza Sorun", "cat": "ai" },
+      { "label": "AI Ödev Oluşturucu", "sub": "PDF, Quiz ve Oyun Ödevleri", "overlay": "✨ Otomatik Ödev Hazırla", "cat": "ai" },
+      { "label": "Ödev Analizi", "sub": "EduTakip – İstatistik & Analiz", "overlay": "📊 Öğrenci Başarı İstatistikleri", "cat": "rapor" },
+      { "label": "Sertifika Oluşturucu", "sub": "AI Destekli Tasarım", "overlay": "🏆 Profesyonel Sertifika", "cat": "ai" },
+      { "label": "Akıllı Zam Önerisi", "sub": "Piyasa Bazlı Ücret Analizi", "overlay": "💡 Kişiselleştirilmiş Öneri", "cat": "finans" }
     ]
   },
   "testimonials": {

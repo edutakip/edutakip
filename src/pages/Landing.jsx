@@ -114,6 +114,9 @@ export default function Landing() {
     { icon: '📊', bg: 'rgba(59,130,246,.1)', key: 'reports', delay: 'd4' },
     { icon: '🗓️', bg: 'rgba(124,58,237,.1)', key: 'calendar', delay: 'd5' },
     { icon: '🤖', bg: 'rgba(234,179,8,.1)', key: 'ai', delay: 'd1' },
+    { icon: '✨', bg: 'rgba(236,72,153,.1)', key: 'aiHomework', delay: 'd2' },
+    { icon: '🏆', bg: 'rgba(245,158,11,.1)', key: 'certificate', delay: 'd3' },
+    { icon: '📈', bg: 'rgba(99,102,241,.1)', key: 'smartRaise', delay: 'd4' },
   ];
 
   const steps = [
@@ -334,22 +337,25 @@ export default function Landing() {
         {(() => {
           const tabs = t('screenshots.tabs', { returnObjects: true });
           const cards = t('screenshots.cards', { returnObjects: true });
-          const icons = ['🏠', '👥', '📚', '🗓️', '💰', '📊', '➕', '🤖'];
-          const delays = ['d1', 'd2', 'd3', 'd4', 'd1', 'd2', 'd3', 'd4'];
-          const catKeys = ['all', 'ogrenci', 'ders', 'ders', 'finans', 'rapor', 'ogrenci', 'ai'];
+          const icons = ['🏠', '👥', '📚', '🗓️', '💰', '📊', '➕', '🤖', '✨', '📈', '🏆', '💡'];
+          const delays = ['d1', 'd2', 'd3', 'd4', 'd1', 'd2', 'd3', 'd4', 'd1', 'd2', 'd3', 'd4'];
+          const catKeys = ['all', 'ogrenci', 'ders', 'ders', 'finans', 'rapor', 'ogrenci', 'ai', 'ai', 'rapor', 'ai', 'finans'];
           return (
             <>
               <div className="anim-scroll" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '40px 0 36px', justifyContent: 'center' }}>
-                {Array.isArray(tabs) && tabs.map((label, i) =>
+                {Array.isArray(tabs) && tabs.map((label, i) => {
+                const tabCatMap = ['all', 'ogrenci', 'ders', 'finans', 'rapor', 'ai'];
+                return (
                   <button key={i} className={`tab-btn${i === 0 ? ' active' : ''}`} onClick={(e) => {
                     document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
                     e.currentTarget.classList.add('active');
-                    const cat = catKeys[i] || 'all';
+                    const cat = tabCatMap[i] || 'all';
                     document.querySelectorAll('.sc-card').forEach((card) => {
                       card.style.display = i === 0 || card.dataset.cat === cat ? 'flex' : 'none';
                     });
                   }}>{label}</button>
-                )}
+                );
+                })}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
                 {Array.isArray(cards) && cards.map((card, idx) => (
