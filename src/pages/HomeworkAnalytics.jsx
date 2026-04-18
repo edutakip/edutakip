@@ -171,6 +171,7 @@ export default function HomeworkAnalytics() {
   }
 
   return (
+    <>
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(1rem,4vw,2rem)' }}>
@@ -438,5 +439,6 @@ export default function HomeworkAnalytics() {
         onClose={() => setShowReportModal(false)}
       />
     )}
+    </>
   );
 }
