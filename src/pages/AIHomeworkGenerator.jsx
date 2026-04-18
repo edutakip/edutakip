@@ -76,6 +76,18 @@ function InputField({ label, value, onChange, placeholder }) {
   );
 }
 
+// ── Turkish character fixer for jsPDF (helvetica doesn't support ğüşıöç) ──
+function fixTR(str) {
+  if (!str) return '';
+  return str
+    .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
+    .replace(/ü/g, 'u').replace(/Ü/g, 'U')
+    .replace(/ş/g, 's').replace(/Ş/g, 'S')
+    .replace(/ı/g, 'i').replace(/İ/g, 'I')
+    .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+    .replace(/ç/g, 'c').replace(/Ç/g, 'C');
+}
+
 // ── Mode Selection Screen ─────────────────────────────────────
 function ModeSelection({ onSelect }) {
   return (
@@ -256,7 +268,7 @@ Return JSON with:
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', fontStyle);
       doc.setTextColor(...color);
-      const lines = doc.splitTextToSize(text, usableW);
+      const lines = doc.splitTextToSize(fixTR(text), usableW);
       lines.forEach(line => {
         if (y > 272) { doc.addPage(); y = 20; }
         doc.text(line, margin, y);
@@ -269,7 +281,7 @@ Return JSON with:
     doc.setFillColor(79, 70, 229);
     doc.rect(0, 0, 210, 14, 'F');
     doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
-    doc.text('EduTakip – AI Ödev', margin, 9);
+    doc.text(fixTR('EduTakip – AI Odev'), margin, 9);
     doc.text(new Date().toLocaleDateString('tr-TR'), pageW - margin, 9, { align: 'right' });
     y = 24;
 
@@ -279,7 +291,7 @@ Return JSON with:
 
     // Subtitle line
     doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100);
-    doc.text(pdfContent.subtitle || 'Name: ________________________  Date: ___________  Class: ___________', margin, y);
+    doc.text(fixTR(pdfContent.subtitle || 'Name: ________________________  Date: ___________  Class: ___________'), margin, y);
     y += 4;
     doc.setDrawColor(200, 200, 200); doc.line(margin, y, pageW - margin, y);
     y += 6;
@@ -327,7 +339,7 @@ Return JSON with:
       const addText = (text, opts = {}) => {
         const { fontSize = 10, fontStyle = 'normal', color = [30, 30, 30], lineHeight = 6 } = opts;
         doc.setFontSize(fontSize); doc.setFont('helvetica', fontStyle); doc.setTextColor(...color);
-        const lines = doc.splitTextToSize(text, usableW);
+        const lines = doc.splitTextToSize(fixTR(text), usableW);
         lines.forEach(line => {
           if (y > 272) { doc.addPage(); y = 20; }
           doc.text(line, margin, y); y += lineHeight;
@@ -581,7 +593,7 @@ Return JSON:
     const addText = (text, opts = {}) => {
       const { fontSize = 10, fontStyle = 'normal', color = [30, 30, 30], lineHeight = 6 } = opts;
       doc.setFontSize(fontSize); doc.setFont('helvetica', fontStyle); doc.setTextColor(...color);
-      const lines = doc.splitTextToSize(String(text), usableW);
+      const lines = doc.splitTextToSize(fixTR(String(text)), usableW);
       lines.forEach(line => {
         if (y > 275) { doc.addPage(); y = 20; }
         doc.text(line, margin, y); y += lineHeight;
@@ -593,7 +605,7 @@ Return JSON:
     doc.setFillColor(...headerColor);
     doc.rect(0, 0, 210, 14, 'F');
     doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
-    doc.text(`EduTakip – ${includeAnswers ? 'Cevap Anahtarı' : 'Deneme Sınavı'}`, margin, 9);
+    doc.text(fixTR(`EduTakip – ${includeAnswers ? 'Cevap Anahtari' : 'Deneme Sinavi'}`), margin, 9);
     doc.text(new Date().toLocaleDateString('tr-TR'), pageW - margin, 9, { align: 'right' });
     y = 24;
 
@@ -601,11 +613,11 @@ Return JSON:
     addText(quizData.title, { fontSize: 15, fontStyle: 'bold', color: [30, 27, 75], lineHeight: 8 });
     // Meta badges
     doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120);
-    doc.text(`${form.grade}  •  Zorluk: ${difficulty}  •  ${questionCount} Soru  •  ${questionType}`, margin, y);
+    doc.text(fixTR(`${form.grade}  •  Zorluk: ${difficulty}  •  ${questionCount} Soru  •  ${questionType}`), margin, y);
     y += 5;
     // Subtitle (student info line)
     doc.setFontSize(9); doc.setTextColor(80, 80, 80);
-    doc.text(quizData.subtitle || 'Name: _________________  Date: ___________  Score: ___/100', margin, y);
+    doc.text(fixTR(quizData.subtitle || 'Name: _________________  Date: ___________  Score: ___/100'), margin, y);
     y += 4;
     doc.setDrawColor(200, 200, 200); doc.line(margin, y, pageW - margin, y); y += 7;
 
@@ -627,17 +639,13 @@ Return JSON:
       quizData.questions?.forEach((q, idx) => {
         if (y > 258) { doc.addPage(); y = 20; }
 
-        const typeLabel = q.type === 'multiple_choice' ? 'Çoktan Seçmeli' :
-          q.type === 'truefalse' ? 'D/Y' :
-          q.type === 'fill' ? 'Boşluk' : 'Kısa Cevap';
-
         // Question number + type badge
         doc.setFillColor(255, 251, 235);
         doc.roundedRect(margin, y - 3.5, usableW, 8, 2, 2, 'F');
         doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 100, 0);
         doc.text(`${q.number}.`, margin + 2, y + 1);
         doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
-        const qText = doc.splitTextToSize(q.question, usableW - 14);
+        const qText = doc.splitTextToSize(fixTR(q.question), usableW - 14);
         doc.text(qText, margin + 8, y + 1);
         y += qText.length * 5.5 + 3;
 
@@ -645,7 +653,7 @@ Return JSON:
         if (q.options?.length > 0) {
           q.options.forEach(opt => {
             if (y > 278) { doc.addPage(); y = 20; }
-            const optLines = doc.splitTextToSize(opt, usableW - 8);
+            const optLines = doc.splitTextToSize(fixTR(opt), usableW - 8);
             doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
             doc.text(optLines, margin + 8, y);
             y += optLines.length * 5.5;
@@ -656,7 +664,7 @@ Return JSON:
           y += 6;
         } else if (q.type === 'truefalse') {
           doc.setFontSize(9); doc.setTextColor(60, 60, 60);
-          doc.text('○ True (Doğru)     ○ False (Yanlış)', margin + 8, y);
+          doc.text('O True (Dogru)     O False (Yanlis)', margin + 8, y);
           y += 6;
         } else {
           doc.setFontSize(9); doc.setTextColor(150, 150, 150);
