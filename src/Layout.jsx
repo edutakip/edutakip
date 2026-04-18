@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
@@ -245,7 +245,7 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'TeacherReports', 'TeacherMessages'], multiLine: true },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'HomeworkAnalytics', 'TeacherReports', 'TeacherMessages'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
     { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
@@ -260,6 +260,7 @@ export default function Layout({ children, currentPageName }) {
         { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
         { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
         { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
+        { label: 'Analiz & İstatistik', icon: PieChart, page: 'HomeworkAnalytics' },
         { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
         { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
       ],
@@ -611,6 +612,7 @@ export default function Layout({ children, currentPageName }) {
                 { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
                 { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
                 { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
+                { label: 'Analiz & İstatistik', icon: PieChart, page: 'HomeworkAnalytics' },
                 { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
                 { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
 
