@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Sparkles, Upload, X, BookOpen, ChevronDown, Loader2, CheckCircle, Send, Pencil, FileText, Zap, RotateCcw, Gamepad2, Save, FileDown, ArrowLeft, Database, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Upload, X, BookOpen, ChevronDown, Loader2, CheckCircle, Send, Pencil, FileText, Zap, RotateCcw, Gamepad2, Save, FileDown, ArrowLeft, Database, Image as ImageIcon, ClipboardList } from 'lucide-react';
 import GamePoolPage, { SaveToPoolModal } from './GamePoolPage';
 import { showToast } from '@/lib/toast';
 import { jsPDF } from 'jspdf';
@@ -107,6 +107,27 @@ function ModeSelection({ onSelect }) {
           </p>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: '#ef4444', background: '#fef2f2', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
             <FileDown size={12} /> PDF Oluştur & Kaydet
+          </span>
+        </button>
+
+        {/* Deneme / Quiz */}
+        <button onClick={() => onSelect('quiz')} style={{
+          background: 'white', borderRadius: 20, padding: '2rem 1.5rem',
+          border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left',
+          transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(245,158,11,0.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg,#f59e0b,#d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}>
+            <ClipboardList size={26} color='white' />
+          </div>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>Deneme Sınavı / Quiz</h2>
+          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>
+            Soru sayısı ve zorluk derecesi seçin, ünite ve konuya özel test oluşturun, PDF olarak indirin.
+          </p>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: '#d97706', background: '#fffbeb', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
+            <ClipboardList size={12} /> Test & Deneme Sınavı
           </span>
         </button>
 
@@ -435,6 +456,367 @@ Return JSON with:
               {savedToPool ? 'Havuza Kaydedildi!' : saving ? 'Kaydediliyor...' : 'PDF Havuzuna Kaydet'}
             </button>
             <button onClick={() => { setPdfReady(false); setPdfContent(null); setSavedToPool(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.75rem 1.25rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
+              <RotateCcw size={14} /> Yeniden Oluştur
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Quiz Mode ─────────────────────────────────────────────────
+function QuizMode({ onBack }) {
+  const QUESTION_COUNTS = [5, 10, 15, 20, 25, 30];
+  const DIFFICULTIES = ['Kolay', 'Orta', 'Zor', 'Karışık'];
+  const QUESTION_TYPES = ['Çoktan Seçmeli', 'Doğru / Yanlış', 'Boşluk Doldurma', 'Kısa Cevap', 'Karma'];
+
+  const [form, setForm] = useState({ grade: '', unit: '', topic: '', book: '' });
+  const [questionCount, setQuestionCount] = useState(10);
+  const [difficulty, setDifficulty] = useState('Orta');
+  const [questionType, setQuestionType] = useState('Karma');
+  const [notes, setNotes] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [quizData, setQuizData] = useState(null);
+
+  const formReady = form.grade && form.topic;
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setQuizData(null);
+    try {
+      const typeInstructions = {
+        'Çoktan Seçmeli': 'ALL questions must be multiple choice with 4 options (A, B, C, D) and clearly marked correct answer.',
+        'Doğru / Yanlış': 'ALL questions must be True/False statements with clearly marked correct answer (True or False).',
+        'Boşluk Doldurma': 'ALL questions must be fill-in-the-blank sentences with the answer key provided.',
+        'Kısa Cevap': 'ALL questions must be short answer questions with expected answer provided.',
+        'Karma': `Mix the ${questionCount} questions across these types: multiple choice (4 options), True/False, and fill-in-the-blank. Clearly mark the type of each question.`,
+      };
+
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an experienced English teacher creating a test/quiz for students.
+
+EXAM DETAILS:
+- Class: ${form.grade}
+${form.unit ? `- Unit: ${form.unit}` : ''}
+- Topic: ${form.topic}
+${form.book ? `- Book: ${form.book}` : ''}
+- Number of questions: ${questionCount}
+- Difficulty: ${difficulty}
+- Question type: ${questionType}
+${notes ? `\nAdditional notes: ${notes}` : ''}
+
+INSTRUCTIONS:
+${typeInstructions[questionType]}
+
+Create exactly ${questionCount} questions. Make them relevant to the topic and appropriate for the difficulty level.
+For difficulty "${difficulty}":
+- Kolay (Easy): basic recall, simple structures, common vocabulary
+- Orta (Medium): application of rules, moderate complexity
+- Zor (Hard): complex analysis, advanced vocabulary, nuanced understanding
+- Karışık (Mixed): mix of all levels
+
+Return JSON:
+{
+  "title": "exam title (e.g. 'Present Perfect Tense – Unit 3 Quiz')",
+  "subtitle": "Name: _________________  Date: ___________  Class: ___________  Score: ___/100",
+  "instructions": "General instructions for the student (2-3 sentences)",
+  "questions": [
+    {
+      "number": 1,
+      "type": "multiple_choice | truefalse | fill | short_answer",
+      "question": "the question text",
+      "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+      "answer": "the correct answer"
+    }
+  ],
+  "answerKey": "Full answer key as a readable string, e.g. '1-A, 2-True, 3-has gone, ...'"
+}`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            subtitle: { type: 'string' },
+            instructions: { type: 'string' },
+            questions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  number: { type: 'number' },
+                  type: { type: 'string' },
+                  question: { type: 'string' },
+                  options: { type: 'array', items: { type: 'string' } },
+                  answer: { type: 'string' }
+                }
+              }
+            },
+            answerKey: { type: 'string' }
+          }
+        }
+      });
+
+      if (res?.title && res?.questions?.length > 0) {
+        setQuizData(res);
+        showToast({ message: `✅ ${res.questions.length} soruluk test oluşturuldu!` });
+      } else {
+        showToast({ message: 'Test oluşturulamadı', type: 'error' });
+      }
+    } catch (e) {
+      showToast({ message: 'Hata: ' + e.message, type: 'error' });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const buildPDF = (includeAnswers) => {
+    if (!quizData) return;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageW = 210;
+    const margin = 18;
+    const usableW = pageW - margin * 2;
+    let y = 20;
+
+    const addText = (text, opts = {}) => {
+      const { fontSize = 10, fontStyle = 'normal', color = [30, 30, 30], lineHeight = 6 } = opts;
+      doc.setFontSize(fontSize); doc.setFont('helvetica', fontStyle); doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(String(text), usableW);
+      lines.forEach(line => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.text(line, margin, y); y += lineHeight;
+      });
+    };
+
+    // Header
+    const headerColor = includeAnswers ? [16, 185, 129] : [245, 158, 11];
+    doc.setFillColor(...headerColor);
+    doc.rect(0, 0, 210, 14, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+    doc.text(`EduTakip – ${includeAnswers ? 'Cevap Anahtarı' : 'Deneme Sınavı'}`, margin, 9);
+    doc.text(new Date().toLocaleDateString('tr-TR'), pageW - margin, 9, { align: 'right' });
+    y = 24;
+
+    // Title
+    addText(quizData.title, { fontSize: 15, fontStyle: 'bold', color: [30, 27, 75], lineHeight: 8 });
+    // Meta badges
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120);
+    doc.text(`${form.grade}  •  Zorluk: ${difficulty}  •  ${questionCount} Soru  •  ${questionType}`, margin, y);
+    y += 5;
+    // Subtitle (student info line)
+    doc.setFontSize(9); doc.setTextColor(80, 80, 80);
+    doc.text(quizData.subtitle || 'Name: _________________  Date: ___________  Score: ___/100', margin, y);
+    y += 4;
+    doc.setDrawColor(200, 200, 200); doc.line(margin, y, pageW - margin, y); y += 7;
+
+    // Instructions
+    if (quizData.instructions) {
+      addText(quizData.instructions, { fontSize: 9, color: [80, 80, 80], lineHeight: 5 });
+      y += 4;
+    }
+
+    if (includeAnswers) {
+      // Answer key only
+      doc.setFillColor(236, 253, 245);
+      doc.roundedRect(margin, y - 4, usableW, 10, 2, 2, 'F');
+      addText('CEVAP ANAHTARI', { fontSize: 11, fontStyle: 'bold', color: [5, 150, 105], lineHeight: 8 });
+      y += 2;
+      addText(quizData.answerKey || '', { fontSize: 9.5, color: [30, 30, 30], lineHeight: 6 });
+    } else {
+      // Questions
+      quizData.questions?.forEach((q, idx) => {
+        if (y > 258) { doc.addPage(); y = 20; }
+
+        const typeLabel = q.type === 'multiple_choice' ? 'Çoktan Seçmeli' :
+          q.type === 'truefalse' ? 'D/Y' :
+          q.type === 'fill' ? 'Boşluk' : 'Kısa Cevap';
+
+        // Question number + type badge
+        doc.setFillColor(255, 251, 235);
+        doc.roundedRect(margin, y - 3.5, usableW, 8, 2, 2, 'F');
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 100, 0);
+        doc.text(`${q.number}.`, margin + 2, y + 1);
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+        const qText = doc.splitTextToSize(q.question, usableW - 14);
+        doc.text(qText, margin + 8, y + 1);
+        y += qText.length * 5.5 + 3;
+
+        // Options
+        if (q.options?.length > 0) {
+          q.options.forEach(opt => {
+            if (y > 278) { doc.addPage(); y = 20; }
+            const optLines = doc.splitTextToSize(opt, usableW - 8);
+            doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+            doc.text(optLines, margin + 8, y);
+            y += optLines.length * 5.5;
+          });
+        } else if (q.type === 'fill') {
+          doc.setFontSize(9); doc.setTextColor(150, 150, 150);
+          doc.text('Cevap: __________________________', margin + 8, y);
+          y += 6;
+        } else if (q.type === 'truefalse') {
+          doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+          doc.text('○ True (Doğru)     ○ False (Yanlış)', margin + 8, y);
+          y += 6;
+        } else {
+          doc.setFontSize(9); doc.setTextColor(150, 150, 150);
+          doc.text('Cevap: _________________________________________________', margin + 8, y);
+          y += 6;
+        }
+        y += 3;
+      });
+    }
+
+    // Footer
+    doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(160, 160, 160);
+    doc.text('EduTakip AI Quiz Generator', pageW / 2, 289, { align: 'center' });
+
+    const suffix = includeAnswers ? '_cevap_anahtari' : '_test';
+    doc.save(`${quizData.title.replace(/[^a-zA-Z0-9\s]/g, '').trim()}${suffix}.pdf`);
+  };
+
+  return (
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(1rem,4vw,2rem)', minHeight: '100vh', background: '#f8fafc' }}>
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}>
+        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+          <ArrowLeft size={14} /> Geri
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ width: 42, height: 42, borderRadius: 14, background: 'linear-gradient(135deg,#f59e0b,#d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 16px rgba(245,158,11,0.3)' }}>
+            <ClipboardList size={20} color='white' />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>Deneme Sınavı / Quiz Oluştur</h1>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>Konuya özel test oluştur ve PDF olarak indir</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Form */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #e5e7eb', padding: '1.5rem', marginBottom: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+        <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          📋 Ders Bilgileri
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
+          <SelectField label='Sınıf Seviyesi *' value={form.grade} onChange={v => setForm(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder='Sınıf seçin...' />
+          <InputField label='Ünite' value={form.unit} onChange={v => setForm(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
+          <InputField label='Konu *' value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
+          <InputField label='Kitap' value={form.book} onChange={v => setForm(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
+        </div>
+
+        <div style={{ height: 1, background: '#f3f4f6', margin: '1rem 0' }} />
+
+        <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          ⚙️ Test Ayarları
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+          {/* Soru sayısı */}
+          <div>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Soru Sayısı</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {QUESTION_COUNTS.map(n => (
+                <button key={n} onClick={() => setQuestionCount(n)}
+                  style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: '1.5px solid', borderColor: questionCount === n ? '#f59e0b' : '#e5e7eb', background: questionCount === n ? '#fffbeb' : 'white', color: questionCount === n ? '#d97706' : '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Zorluk */}
+          <div>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Zorluk Derecesi</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {DIFFICULTIES.map(d => {
+                const colors = { 'Kolay': '#10b981', 'Orta': '#f59e0b', 'Zor': '#ef4444', 'Karışık': '#6366f1' };
+                const bgs = { 'Kolay': '#d1fae5', 'Orta': '#fef3c7', 'Zor': '#fee2e2', 'Karışık': '#eef2ff' };
+                const sel = difficulty === d;
+                return (
+                  <button key={d} onClick={() => setDifficulty(d)}
+                    style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: `1.5px solid ${sel ? colors[d] : '#e5e7eb'}`, background: sel ? bgs[d] : 'white', color: sel ? colors[d] : '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                    {d}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {/* Soru türü */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Soru Türü</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {QUESTION_TYPES.map(t => (
+                <button key={t} onClick={() => setQuestionType(t)}
+                  style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: '1.5px solid', borderColor: questionType === t ? '#6366f1' : '#e5e7eb', background: questionType === t ? '#eef2ff' : 'white', color: questionType === t ? '#4f46e5' : '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Ek notlar */}
+        <div>
+          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>Ek Notlar (isteğe bağlı)</label>
+          <textarea value={notes} onChange={e => setNotes(e.target.value)}
+            placeholder='Öğrencilerin zorlandığı konular, özellikle sorulmasını istediğiniz kavramlar...' rows={3}
+            style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.75rem', fontSize: '0.875rem', color: '#111827', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6, background: '#fafafa' }}
+            onFocus={e => e.target.style.borderColor = '#f59e0b'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+        </div>
+
+        <button onClick={handleGenerate} disabled={!formReady || generating}
+          style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 2rem', borderRadius: 12, border: 'none', background: formReady && !generating ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#e5e7eb', color: formReady && !generating ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.9rem', cursor: formReady && !generating ? 'pointer' : 'default', boxShadow: formReady && !generating ? '0 4px 14px rgba(245,158,11,0.35)' : 'none' }}>
+          {generating ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={16} />}
+          {generating ? `${questionCount} Soruluk Test Oluşturuluyor...` : `${questionCount} Soruluk Test Oluştur`}
+        </button>
+      </div>
+
+      {/* Quiz Result */}
+      {quizData && (
+        <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #fde68a', padding: '1.5rem', boxShadow: '0 4px 16px rgba(245,158,11,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
+            <CheckCircle size={20} color='#f59e0b' />
+            <h2 style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', margin: 0 }}>Test Hazır! ({quizData.questions?.length} Soru)</h2>
+          </div>
+
+          {/* Preview */}
+          <div style={{ background: '#fffbeb', borderRadius: 14, padding: '1rem', marginBottom: '1.25rem', border: '1px solid #fde68a', maxHeight: 320, overflowY: 'auto' }}>
+            <div style={{ background: 'linear-gradient(135deg,#92400e,#d97706)', borderRadius: 10, padding: '0.85rem 1.1rem', marginBottom: '1rem', color: 'white' }}>
+              <h3 style={{ fontWeight: 900, fontSize: '0.95rem', margin: '0 0 0.3rem' }}>{quizData.title}</h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.5rem', borderRadius: 12 }}>{form.grade}</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.5rem', borderRadius: 12 }}>⚡ {difficulty}</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.5rem', borderRadius: 12 }}>{quizData.questions?.length} Soru</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.5rem', borderRadius: 12 }}>{questionType}</span>
+              </div>
+            </div>
+            {quizData.questions?.slice(0, 5).map((q, i) => (
+              <div key={i} style={{ background: 'white', borderRadius: 10, padding: '0.65rem 0.85rem', marginBottom: '0.5rem', border: '1px solid #fde68a' }}>
+                <p style={{ fontWeight: 700, fontSize: '0.82rem', color: '#374151', margin: '0 0 0.25rem' }}>{q.number}. {q.question}</p>
+                {q.options?.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                    {q.options.map((opt, j) => <p key={j} style={{ fontSize: '0.78rem', color: '#6b7280', margin: 0, paddingLeft: '0.5rem' }}>{opt}</p>)}
+                  </div>
+                )}
+              </div>
+            ))}
+            {quizData.questions?.length > 5 && (
+              <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#9ca3af', margin: '0.5rem 0 0' }}>... ve {quizData.questions.length - 5} soru daha (PDF'te görünecek)</p>
+            )}
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button onClick={() => buildPDF(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(245,158,11,0.35)' }}>
+              <FileDown size={16} /> Test PDF İndir
+            </button>
+            <button onClick={() => buildPDF(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' }}>
+              <CheckCircle size={16} /> Cevap Anahtarı PDF
+            </button>
+            <button onClick={() => { setQuizData(null); }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.75rem 1.25rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
               <RotateCcw size={14} /> Yeniden Oluştur
             </button>
@@ -849,6 +1231,7 @@ export default function AIHomeworkGenerator() {
   }, []);
 
   if (mode === 'pdf') return <PDFMode me={me} onBack={() => setMode(null)} />;
+  if (mode === 'quiz') return <QuizMode onBack={() => setMode(null)} />;
   if (mode === 'game') return <GameMode me={me} students={students} onBack={() => setMode(null)} />;
   return <ModeSelection onSelect={setMode} />;
 }
