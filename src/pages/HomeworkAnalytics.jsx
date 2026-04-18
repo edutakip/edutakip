@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  RadialBarChart, RadialBar, PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell, Legend,
   LineChart, Line, CartesianGrid
 } from 'recharts';
-import { ArrowLeft, TrendingUp, Users, BookOpen, AlertTriangle, CheckCircle, Zap, Trophy, Target } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Users, BookOpen, AlertTriangle, CheckCircle, Zap, Trophy, Target, FileDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import StudentDetailPanel from '@/components/analytics/StudentDetailPanel';
+import ReportDownloadModal from '@/components/analytics/ReportDownloadModal';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -55,6 +57,8 @@ export default function HomeworkAnalytics() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('all'); // all | month | week
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -186,14 +190,21 @@ export default function HomeworkAnalytics() {
             </div>
           </div>
 
-          {/* Period selector */}
-          <div style={{ display: 'flex', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.3rem', gap: '0.25rem' }}>
-            {[{ key: 'week', label: 'Bu Hafta' }, { key: 'month', label: 'Bu Ay' }, { key: 'all', label: 'Tümü' }].map(p => (
-              <button key={p.key} onClick={() => setPeriod(p.key)}
-                style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: 'none', background: period === p.key ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : 'transparent', color: period === p.key ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s' }}>
-                {p.label}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* Period selector */}
+            <div style={{ display: 'flex', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.3rem', gap: '0.25rem' }}>
+              {[{ key: 'week', label: 'Bu Hafta' }, { key: 'month', label: 'Bu Ay' }, { key: 'all', label: 'Tümü' }].map(p => (
+                <button key={p.key} onClick={() => setPeriod(p.key)}
+                  style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: 'none', background: period === p.key ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : 'transparent', color: period === p.key ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {/* Report download */}
+            <button onClick={() => setShowReportModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.1rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
+              <FileDown size={15} /> Rapor İndir
+            </button>
           </div>
         </div>
 
@@ -356,13 +367,18 @@ export default function HomeworkAnalytics() {
                 </thead>
                 <tbody>
                   {studentStats.map((s, i) => (
-                    <tr key={s.id} style={{ borderBottom: '1px solid #f9fafb', background: i % 2 === 0 ? 'white' : '#fafafa' }}>
+                    <tr key={s.id}
+                      onClick={() => setSelectedStudent(s)}
+                      style={{ borderBottom: '1px solid #f9fafb', background: i % 2 === 0 ? 'white' : '#fafafa', cursor: 'pointer', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#eef2ff'}
+                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'white' : '#fafafa'}
+                    >
                       <td style={{ padding: '0.75rem 0.85rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                           <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(s.name), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <span style={{ fontSize: '0.55rem', fontWeight: 800, color: 'white' }}>{getInitials(s.name)}</span>
                           </div>
-                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#111827', whiteSpace: 'nowrap' }}>{s.name}</span>
+                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#4f46e5', whiteSpace: 'nowrap', textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: 3 }}>{s.name}</span>
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem 0.85rem', fontWeight: 700, fontSize: '0.88rem', color: '#374151', textAlign: 'center' }}>{s.total}</td>
@@ -406,5 +422,21 @@ export default function HomeworkAnalytics() {
 
       </div>
     </div>
+
+    {selectedStudent && (
+      <StudentDetailPanel
+        student={selectedStudent}
+        homeworks={filteredHws}
+        onClose={() => setSelectedStudent(null)}
+      />
+    )}
+
+    {showReportModal && (
+      <ReportDownloadModal
+        students={studentStats}
+        homeworks={homeworks}
+        onClose={() => setShowReportModal(false)}
+      />
+    )}
   );
 }
