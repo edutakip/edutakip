@@ -241,6 +241,8 @@ export default function AIHomeworkGenerator() {
   const [assigning, setAssigning] = useState(false);
   const [showGamePool, setShowGamePool] = useState(false);
   const [showSaveToPool, setShowSaveToPool] = useState(false);
+  const [revisePrompt, setRevisePrompt] = useState('');
+  const [revising, setRevising] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -343,6 +345,55 @@ export default function AIHomeworkGenerator() {
     }
   };
 
+  const handleRevise = async () => {
+    if (!revisePrompt.trim() || !homework) return;
+    setRevising(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an English teacher. You have an existing homework assignment and the teacher wants to revise it.
+
+CURRENT HOMEWORK:
+Title: ${homework.title}
+Instructions: ${homework.instructions || ''}
+Vocabulary Section: ${homework.vocabulary || ''}
+Grammar Section: ${homework.grammar || ''}
+Reading Section: ${homework.reading || ''}
+Writing Section: ${homework.writing || ''}
+Speaking Section: ${homework.speaking || ''}
+
+TEACHER'S REVISION REQUEST:
+"${revisePrompt}"
+
+Apply the teacher's requested changes to the homework. Return ONLY valid JSON with the same structure, updating only the relevant sections based on the request. Keep unchanged sections exactly as they are.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            grade: { type: 'string' },
+            difficulty: { type: 'string' },
+            instructions: { type: 'string' },
+            vocabulary: { type: 'string' },
+            grammar: { type: 'string' },
+            reading: { type: 'string' },
+            writing: { type: 'string' },
+            speaking: { type: 'string' },
+          }
+        }
+      });
+      if (res?.title) {
+        setHomework(prev => ({ ...prev, ...res }));
+        setRevisePrompt('');
+        showToast({ message: '✅ Ödev güncellendi!' });
+      } else {
+        showToast({ message: 'Güncelleme başarısız oldu', type: 'error' });
+      }
+    } catch (e) {
+      showToast({ message: 'Hata: ' + e.message, type: 'error' });
+    } finally {
+      setRevising(false);
+    }
+  };
+
   const resetAll = () => {
     setStep(0);
     setLessonInfo({ grade: '', unit: '', topic: '', book: '', pages: '' });
@@ -356,6 +407,8 @@ export default function AIHomeworkGenerator() {
     setEditing(false);
     setOverlayVisible(false);
     setShowSuccess(false);
+    setRevisePrompt('');
+    setRevising(false);
   };
 
   return (
@@ -608,6 +661,44 @@ export default function AIHomeworkGenerator() {
                 <Pencil size={13} /> {editing ? 'Düzenlemeyi Bitir' : 'Ödevi Düzenle'}
               </button>
             </div>
+
+            {/* ── AI Revize Kutusu ── */}
+            <div style={{ background: 'linear-gradient(135deg,#faf5ff,#f0f4ff)', borderRadius: 14, padding: '1rem 1.1rem', border: '1.5px solid #e0d7ff', marginBottom: '1rem' }}>
+              <p style={{ fontWeight: 800, fontSize: '0.82rem', color: '#5b21b6', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Sparkles size={14} /> Değişiklik yapmak istediğiniz bir yer var mı?
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                <textarea
+                  value={revisePrompt}
+                  onChange={e => setRevisePrompt(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && revisePrompt.trim() && !revising) { e.preventDefault(); handleRevise(); } }}
+                  placeholder='Örn: Grammar bölümünü daha kolay yap, 5 soru yerine 3 soru olsun...'
+                  rows={2}
+                  disabled={revising}
+                  style={{ flex: 1, padding: '0.65rem 0.85rem', borderRadius: 10, border: '1.5px solid #c4b5fd', fontSize: '0.85rem', color: '#111827', outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.55, background: 'white' }}
+                  onFocus={e => e.target.style.borderColor = '#7c3aed'}
+                  onBlur={e => e.target.style.borderColor = '#c4b5fd'}
+                />
+                <button
+                  onClick={handleRevise}
+                  disabled={!revisePrompt.trim() || revising}
+                  style={{
+                    padding: '0.65rem 1rem', borderRadius: 10, border: 'none',
+                    background: revisePrompt.trim() && !revising ? 'linear-gradient(135deg,#7c3aed,#6366f1)' : '#e5e7eb',
+                    color: revisePrompt.trim() && !revising ? 'white' : '#9ca3af',
+                    fontWeight: 800, fontSize: '0.82rem', cursor: revisePrompt.trim() && !revising ? 'pointer' : 'default',
+                    display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
+                    boxShadow: revisePrompt.trim() && !revising ? '0 4px 12px rgba(124,58,237,0.3)' : 'none',
+                    flexShrink: 0,
+                  }}
+                >
+                  {revising ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
+                  {revising ? 'Güncelleniyor...' : 'Uygula'}
+                </button>
+              </div>
+              <p style={{ fontSize: '0.7rem', color: '#7c3aed', opacity: 0.7, marginTop: '0.4rem', marginBottom: 0 }}>Enter tuşuyla da gönderebilirsiniz</p>
+            </div>
+
             <HomeworkPreview
               homework={homework}
               editing={editing}
