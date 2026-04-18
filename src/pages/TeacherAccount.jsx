@@ -541,7 +541,7 @@ export default function TeacherAccount() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '1.25rem 1rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '1.25rem 1rem' }}>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 780, margin: '0 auto' }}>
 

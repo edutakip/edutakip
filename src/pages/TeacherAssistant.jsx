@@ -285,7 +285,7 @@ export default function TeacherAssistant() {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        background: '#f4f6fb',
+        background: 'var(--bg-primary)',
         fontFamily: 'Inter, sans-serif',
       }}>
 

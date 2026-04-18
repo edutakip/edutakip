@@ -143,7 +143,7 @@ export default function TeacherReports() {
   }
 
   return (
-    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: '#f8fafc' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: 'var(--bg-primary)' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>

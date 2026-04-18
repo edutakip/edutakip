@@ -164,7 +164,7 @@ export default function TeacherLessons() {
   const hasFilter = statusFilter !== 'all' || studentFilter !== 'all' || dateFrom || dateTo;
 
   return (
-    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', height: '100vh', overflowY: 'auto', background: '#f8fafc' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', height: '100vh', overflowY: 'auto', background: 'var(--bg-primary)' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>

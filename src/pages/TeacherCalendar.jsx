@@ -506,7 +506,7 @@ export default function TeacherCalendar() {
     <div style={{
       display: 'flex', flexDirection: 'column',
       height: '100vh', overflow: 'hidden',
-      background: '#f1f5f9',
+      background: 'var(--bg-primary)',
       padding: isMobile ? '0.5rem' : '1rem',
       gap: '0.75rem',
     }}>

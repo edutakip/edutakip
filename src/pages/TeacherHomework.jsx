@@ -809,7 +809,7 @@ export default function TeacherHomework() {
   }, {});
 
   return (
-    <div style={{ minHeight:'100vh', background:'#fafafa', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ minHeight:'100vh', background:'var(--bg-primary)', fontFamily:"'DM Sans', system-ui, sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }

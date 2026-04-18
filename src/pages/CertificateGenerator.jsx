@@ -329,7 +329,7 @@ export default function CertificateGenerator() {
   const labelStyle = { fontSize: '0.72rem', color: '#6b7280', fontWeight: 700, display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.4px' };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '2rem 1rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '2rem 1rem' }}>
       <style>{`
         .cert-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
         .theme-card { transition: all 0.15s; cursor: pointer; }
