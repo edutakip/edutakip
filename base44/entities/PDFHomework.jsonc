@@ -1,0 +1,41 @@
+{
+  "name": "PDFHomework",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "\u00d6dev ba\u015fl\u0131\u011f\u0131"
+    },
+    "className": {
+      "type": "string",
+      "description": "S\u0131n\u0131f seviyesi"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Konu"
+    },
+    "teacherEmail": {
+      "type": "string"
+    },
+    "fileUrl": {
+      "type": "string",
+      "description": "Y\u00fcklenen PDF URL'si"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Ders notlar\u0131"
+    }
+  },
+  "required": [
+    "title",
+    "teacherEmail"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {
+      "data.teacherEmail": "{{user.email}}"
+    }
+  }
+}
