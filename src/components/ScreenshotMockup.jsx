@@ -202,7 +202,121 @@ const mockups = {
   ),
 };
 
-const mockupMap = ['dashboard','students','lessons','calendar','finance','reports','addStudent','ai'];
+  aiHomework: (
+    <div style={{ width: '100%', height: '100%', background: '#0f0e1a', padding: '8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+        <div style={{ width: 20, height: 20, borderRadius: 6, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem' }}>✨</div>
+        <div style={{ fontSize: '0.55rem', fontWeight: 700, color: '#fff' }}>AI Ödev Oluşturucu</div>
+      </div>
+      {/* Mode cards */}
+      {[
+        { icon: '📄', label: 'PDF Ödev', sub: 'Yazdırılabilir çalışma kağıdı', color: '#ef4444', bg: '#7f1d1d' },
+        { icon: '📋', label: 'Deneme Sınavı', sub: 'Çoktan seçmeli, T/F, boşluk', color: '#f59e0b', bg: '#78350f' },
+        { icon: '🎮', label: 'Oyun Ödev', sub: 'İnteraktif sorular', color: '#6366f1', bg: '#1e1b4b' },
+      ].map(m => (
+        <div key={m.label} style={{ background: m.bg, borderRadius: 7, padding: '5px 7px', border: `1px solid ${m.color}44`, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: '0.85rem' }}>{m.icon}</span>
+          <div>
+            <div style={{ fontSize: '0.52rem', fontWeight: 700, color: '#fff' }}>{m.label}</div>
+            <div style={{ fontSize: '0.42rem', color: 'rgba(255,255,255,.5)' }}>{m.sub}</div>
+          </div>
+          <div style={{ marginLeft: 'auto', fontSize: '0.45rem', padding: '2px 5px', borderRadius: 8, background: `${m.color}33`, color: m.color, fontWeight: 700 }}>Seç →</div>
+        </div>
+      ))}
+      <div style={{ background: '#1e1b4b', borderRadius: 5, padding: '4px 7px', display: 'flex', gap: 4, alignItems: 'center' }}>
+        <div style={{ flex:1, height: 3, borderRadius: 2, background: 'rgba(255,255,255,.08)' }} />
+        <div style={{ fontSize: '0.42rem', color: '#a78bfa' }}>AI ile Oluştur</div>
+      </div>
+    </div>
+  ),
+
+  homeworkAnalytics: (
+    <div style={{ width: '100%', height: '100%', background: '#0f0e1a', padding: '8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,.5)', marginBottom: 1 }}>Ödev Analizi & İstatistik</div>
+      {/* Stat row */}
+      <div style={{ display: 'flex', gap: 3 }}>
+        {[['#6366f1','24','Toplam'],['#10b981','75%','Tamamlanma'],['#ef4444','4','Gecikmiş']].map(([c,v,l]) => (
+          <div key={l} style={{ flex:1, background: '#1e1b4b', borderRadius: 5, padding: '4px 5px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: c }}>{v}</div>
+            <div style={{ fontSize: '0.38rem', color: 'rgba(255,255,255,.35)' }}>{l}</div>
+          </div>
+        ))}
+      </div>
+      {/* Bar chart */}
+      <div style={{ background: '#1e1b4b', borderRadius: 5, padding: '5px 6px', flex: 1 }}>
+        <div style={{ fontSize: '0.45rem', color: 'rgba(255,255,255,.4)', marginBottom: 4 }}>Öğrenci Başarı Oranı</div>
+        {[['Ahmet K.',85,'#10b981'],['Zeynep A.',72,'#6366f1'],['Mert D.',91,'#10b981'],['Elif Y.',48,'#ef4444']].map(([n,p,c]) => (
+          <div key={n} style={{ marginBottom: 3 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 1 }}>
+              <span style={{ fontSize: '0.4rem', color: 'rgba(255,255,255,.6)' }}>{n}</span>
+              <span style={{ fontSize: '0.4rem', color: c, fontWeight: 700 }}>{p}%</span>
+            </div>
+            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.08)' }}>
+              <div style={{ width: `${p}%`, height: '100%', borderRadius: 2, background: c }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+
+  certificate: (
+    <div style={{ width: '100%', height: '100%', background: '#0f0e1a', padding: '8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ fontSize: '0.52rem', color: 'rgba(255,255,255,.5)', marginBottom: 1 }}>Sertifika Oluşturucu</div>
+      {/* Mini certificate preview */}
+      <div style={{ flex: 1, background: 'linear-gradient(135deg,#fdfbf7,#fef9f0)', borderRadius: 8, border: '2px solid #c9a84c', padding: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 4, left: 4, color: '#c9a84c', fontSize: '0.5rem' }}>✦</div>
+        <div style={{ position: 'absolute', top: 4, right: 4, color: '#c9a84c', fontSize: '0.5rem' }}>✦</div>
+        <div style={{ position: 'absolute', bottom: 4, left: 4, color: '#c9a84c', fontSize: '0.5rem' }}>✦</div>
+        <div style={{ position: 'absolute', bottom: 4, right: 4, color: '#c9a84c', fontSize: '0.5rem' }}>✦</div>
+        <div style={{ fontSize: '1rem' }}>🏅</div>
+        <div style={{ fontSize: '0.55rem', fontWeight: 800, color: '#7c5c10', textTransform: 'uppercase', letterSpacing: 1 }}>Başarı Belgesi</div>
+        <div style={{ height: 1, width: '70%', background: 'linear-gradient(90deg,transparent,#c9a84c,transparent)' }} />
+        <div style={{ fontSize: '0.42rem', color: '#6b5c3e', fontStyle: 'italic' }}>Bu belge aşağıdaki kişinin</div>
+        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3d2b00', borderBottom: '1px solid #c9a84c', paddingBottom: 1 }}>Ahmet Kaya</div>
+        <div style={{ fontSize: '0.42rem', color: '#6b5c3e', fontStyle: 'italic' }}>başarıyla tamamladığını onaylar</div>
+        <div style={{ fontSize: '0.52rem', fontWeight: 700, color: '#7c5c10' }}>English File B1 Course</div>
+      </div>
+      {/* Theme picker */}
+      <div style={{ display: 'flex', gap: 4 }}>
+        {[['#c9a84c','#fdfbf7'],['#a78bfa','#1e1b4b'],['#0ea5e9','#f0f9ff'],['#16a34a','#f0fdf4']].map(([accent,bg],i) => (
+          <div key={i} style={{ flex:1, height: 16, borderRadius: 4, background: bg, border: `2px solid ${accent}`, opacity: i === 0 ? 1 : 0.6 }} />
+        ))}
+      </div>
+    </div>
+  ),
+
+  smartRaise: (
+    <div style={{ width: '100%', height: '100%', background: '#0f0e1a', padding: '8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ fontSize: '0.52rem', color: 'rgba(255,255,255,.5)', marginBottom: 1 }}>Akıllı Zam Önerisi</div>
+      {/* Selected student */}
+      <div style={{ background: 'linear-gradient(135deg,#312e81,#1e1b4b)', borderRadius: 6, padding: '5px 7px', border: '1px solid #4f46e5' }}>
+        <div style={{ fontSize: '0.45rem', color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: 0.5 }}>Seçili Öğrenci</div>
+        <div style={{ fontSize: '0.6rem', fontWeight: 800, color: '#fff' }}>Zeynep Arslan</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+          <span style={{ fontSize: '0.42rem', color: '#a5b4fc' }}>Mevcut: ₺450/saat</span>
+          <span style={{ fontSize: '0.42rem', color: '#a5b4fc' }}>İstanbul · Kolej</span>
+        </div>
+      </div>
+      {/* Result cards */}
+      <div style={{ display: 'flex', gap: 3 }}>
+        {[['🛡️','Güvenli','₺500','+%11','#10b981'],['⚖️','Dengeli','₺550','+%22','#fff'],['🚀','Üst Bant','₺600','+%33','#f59e0b']].map(([ico,lbl,price,pct,c],i) => (
+          <div key={lbl} style={{ flex:1, background: i===1 ? 'linear-gradient(135deg,#4f46e5,#3730a3)' : '#1e1b4b', borderRadius: 6, padding: '4px 5px', textAlign: 'center', transform: i===1 ? 'scale(1.04)' : 'scale(1)' }}>
+            <div style={{ fontSize: '0.6rem' }}>{ico}</div>
+            <div style={{ fontSize: '0.42rem', color: i===1 ? '#c7d2fe' : 'rgba(255,255,255,.5)' }}>{lbl}</div>
+            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: i===1 ? '#fff' : c }}>{price}</div>
+            <div style={{ fontSize: '0.38rem', padding: '1px 3px', borderRadius: 4, background: i===1 ? 'rgba(255,255,255,.2)' : `${c}33`, color: i===1 ? '#fff' : c, marginTop: 1 }}>{pct}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: '#1e1b4b', borderRadius: 5, padding: '4px 6px', marginTop: 'auto' }}>
+        <div style={{ fontSize: '0.42rem', color: '#10b981', fontWeight: 600 }}>💬 Veliye hazır mesaj şablonu oluşturuldu</div>
+      </div>
+    </div>
+  ),
+};
+
+const mockupMap = ['dashboard','students','lessons','calendar','finance','reports','addStudent','ai','aiHomework','homeworkAnalytics','certificate','smartRaise'];
 
 export default function ScreenshotMockup({ index, visible }) {
   const key = mockupMap[index] || 'dashboard';
