@@ -256,10 +256,10 @@ export default function Layout({ children, currentPageName }) {
     {
       label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen,
       submenu: [
+        { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
         { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
         { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
         { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
-        { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
         { label: 'Analiz & İstatistik', icon: PieChart, page: 'HomeworkAnalytics' },
         { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
         { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
@@ -608,10 +608,10 @@ export default function Layout({ children, currentPageName }) {
               minWidth: '160px',
             }}>
               {[
+                { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
                 { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
                 { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
                 { label: t('teacher.layout.homework'), icon: GraduationCap, page: 'TeacherHomework' },
-                { label: 'AI Ödev Oluştur', icon: Sparkles, page: 'AIHomeworkGenerator' },
                 { label: 'Analiz & İstatistik', icon: PieChart, page: 'HomeworkAnalytics' },
                 { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
                 { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
