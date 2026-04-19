@@ -53,6 +53,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function HomeworkAnalytics() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [homeworks, setHomeworks] = useState([]);
   const [students, setStudents] = useState([]);
@@ -105,9 +106,9 @@ export default function HomeworkAnalytics() {
 
   // ── Status breakdown pie ──────────────────────────────────
   const statusData = [
-    { name: 'Tamamlandı', value: completed, color: '#10b981' },
-    { name: 'Bekliyor', value: pending, color: '#6366f1' },
-    { name: 'Gecikmiş', value: late, color: '#ef4444' },
+    { name: t('analytics.statusCompleted'), value: completed, color: '#10b981' },
+    { name: t('analytics.statusPending'), value: pending, color: '#6366f1' },
+    { name: t('analytics.statusLate'), value: late, color: '#ef4444' },
   ].filter(d => d.value > 0);
 
   // ── Per-student stats ─────────────────────────────────────
@@ -129,16 +130,17 @@ export default function HomeworkAnalytics() {
   const barData = studentStats.map(s => ({
     name: s.name.split(' ')[0],
     fullName: s.name,
-    Tamamlandı: s.completed,
-    Gecikmiş: s.late,
-    Bekliyor: s.pending,
+    [t('analytics.statusCompleted')]: s.completed,
+    [t('analytics.statusLate')]: s.late,
+    [t('analytics.statusPending')]: s.pending,
   }));
 
   // ── Game score per student ────────────────────────────────
+  const avgScoreKey = t('analytics.avgScore');
   const scoreBarData = studentStats
     .filter(s => s.avgScore != null)
-    .map(s => ({ name: s.name.split(' ')[0], fullName: s.name, 'Ort. Puan (%)': s.avgScore }))
-    .sort((a, b) => b['Ort. Puan (%)'] - a['Ort. Puan (%)']);
+    .map(s => ({ name: s.name.split(' ')[0], fullName: s.name, [avgScoreKey]: s.avgScore }))
+    .sort((a, b) => b[avgScoreKey] - a[avgScoreKey]);
 
   // ── Weekly trend (last 8 weeks) ───────────────────────────
   const weeklyTrend = (() => {
@@ -152,7 +154,7 @@ export default function HomeworkAnalytics() {
         return d >= start && d <= end;
       });
       const wCompleted = weekHws.filter(h => h.status === 'tamamlandı' || h.status === 'degerlendirildi').length;
-      weeks.push({ label, Ödev: weekHws.length, Tamamlanan: wCompleted });
+      weeks.push({ label, [t('analytics.homework')]: weekHws.length, [t('analytics.completedLine')]: wCompleted });
     }
     return weeks;
   })();
@@ -181,21 +183,21 @@ export default function HomeworkAnalytics() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-              <ArrowLeft size={14} /> Geri
+              <ArrowLeft size={14} /> {t('analytics.back')}
             </button>
             <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(99,102,241,0.35)' }}>
               <TrendingUp size={22} color='white' />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#111827', margin: 0 }}>Ödev Analizi & İstatistikler</h1>
-              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>Öğrenci performansı ve başarı oranları</p>
+              <h1 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#111827', margin: 0 }}>{t('analytics.title')}</h1>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t('analytics.subtitle')}</p>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {/* Period selector */}
             <div style={{ display: 'flex', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.3rem', gap: '0.25rem' }}>
-              {[{ key: 'week', label: 'Bu Hafta' }, { key: 'month', label: 'Bu Ay' }, { key: 'all', label: 'Tümü' }].map(p => (
+              {[{ key: 'week', label: t('analytics.thisWeek') }, { key: 'month', label: t('analytics.thisMonth') }, { key: 'all', label: t('analytics.all') }].map(p => (
                 <button key={p.key} onClick={() => setPeriod(p.key)}
                   style={{ padding: '0.4rem 0.85rem', borderRadius: 8, border: 'none', background: period === p.key ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : 'transparent', color: period === p.key ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s' }}>
                   {p.label}
@@ -205,19 +207,19 @@ export default function HomeworkAnalytics() {
             {/* Report download */}
             <button onClick={() => setShowReportModal(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.1rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
-              <FileDown size={15} /> Rapor İndir
+              <FileDown size={15} /> {t('analytics.downloadReport')}
             </button>
           </div>
         </div>
 
         {/* ── Top Stats ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-          <StatCard icon={BookOpen} label='Toplam Ödev' value={total} sub={`${period === 'week' ? 'Bu hafta' : period === 'month' ? 'Bu ay' : 'Tüm zamanlar'}`} iconColor='#6366f1' iconBg='#eef2ff' />
-          <StatCard icon={Target} label='Tamamlanma Oranı' value={`${completionRate}%`} sub={`${completed} / ${total} tamamlandı`} gradient={completionRate >= 70 ? 'linear-gradient(135deg,#10b981,#059669)' : completionRate >= 40 ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#ef4444,#dc2626)'} />
-          <StatCard icon={AlertTriangle} label='Geciken Ödev' value={late} sub={total > 0 ? `%${Math.round(late / total * 100)} oran` : '—'} iconColor='#ef4444' iconBg='#fef2f2' />
+          <StatCard icon={BookOpen} label={t('analytics.totalHomework')} value={total} sub={`${period === 'week' ? t('analytics.thisWeek') : period === 'month' ? t('analytics.thisMonth') : t('analytics.allTime')}`} iconColor='#6366f1' iconBg='#eef2ff' />
+          <StatCard icon={Target} label={t('analytics.completionRate')} value={`${completionRate}%`} sub={`${completed} / ${total} ${t('analytics.completed')}`} gradient={completionRate >= 70 ? 'linear-gradient(135deg,#10b981,#059669)' : completionRate >= 40 ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#ef4444,#dc2626)'} />
+          <StatCard icon={AlertTriangle} label={t('analytics.lateHomework')} value={late} sub={total > 0 ? `%${Math.round(late / total * 100)} ${t('analytics.latePercent')}` : '—'} iconColor='#ef4444' iconBg='#fef2f2' />
           {avgScore != null
-            ? <StatCard icon={Zap} label='Ort. Quiz Puanı' value={`${avgScore}%`} sub={`${withScore.length} tamamlanan quiz`} gradient='linear-gradient(135deg,#6366f1,#7c3aed)' />
-            : <StatCard icon={Users} label='Aktif Öğrenci' value={studentStats.length} sub='ödev atanan' iconColor='#8b5cf6' iconBg='#f5f3ff' />
+            ? <StatCard icon={Zap} label={t('analytics.avgQuizScore')} value={`${avgScore}%`} sub={`${withScore.length} ${t('analytics.quizzesCompleted')}`} gradient='linear-gradient(135deg,#6366f1,#7c3aed)' />
+            : <StatCard icon={Users} label={t('analytics.activeStudents')} value={studentStats.length} sub={t('analytics.withHomework')} iconColor='#8b5cf6' iconBg='#f5f3ff' />
           }
         </div>
 
@@ -228,7 +230,7 @@ export default function HomeworkAnalytics() {
               <div style={{ background: '#fef2f2', borderRadius: 18, padding: '1.25rem', border: '1.5px solid #fecaca' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
                   <AlertTriangle size={16} color='#ef4444' />
-                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#dc2626' }}>Zorlanıyor ({struggling.length} öğrenci)</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#dc2626' }}>{t('analytics.struggling')} ({struggling.length} {t('analytics.students')})</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {struggling.map(s => (
@@ -238,7 +240,7 @@ export default function HomeworkAnalytics() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#374151', margin: 0 }}>{s.name}</p>
-                        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>{s.total} ödev • {s.late} gecikmiş</p>
+                        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>{s.total} {t('analytics.homeworks')} • {s.late} {t('analytics.late')}</p>
                       </div>
                       <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#ef4444' }}>{s.rate}%</span>
                     </div>
@@ -250,7 +252,7 @@ export default function HomeworkAnalytics() {
               <div style={{ background: '#f0fdf4', borderRadius: 18, padding: '1.25rem', border: '1.5px solid #bbf7d0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
                   <Trophy size={16} color='#10b981' />
-                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#059669' }}>Başarılı Öğrenciler ({stars.length})</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#059669' }}>{t('analytics.successfulStudents')} ({stars.length})</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {stars.map(s => (
@@ -260,7 +262,7 @@ export default function HomeworkAnalytics() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#374151', margin: 0 }}>{s.name}</p>
-                        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>{s.completed}/{s.total} tamamlandı</p>
+                        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>{s.completed}/{s.total} {t('analytics.completed')}</p>
                       </div>
                       <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#10b981' }}>{s.rate}%</span>
                     </div>
@@ -276,7 +278,7 @@ export default function HomeworkAnalytics() {
 
           {/* Ödev durumu dağılımı (Pie) */}
           <div style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <SectionTitle>🥧 Ödev Durumu Dağılımı</SectionTitle>
+            <SectionTitle>{t('analytics.statusDistribution')}</SectionTitle>
             {statusData.length > 0 ? (
               <ResponsiveContainer width='100%' height={220}>
                 <PieChart>
@@ -287,20 +289,20 @@ export default function HomeworkAnalytics() {
                   <Legend formatter={(v) => <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#374151' }}>{v}</span>} />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <p style={{ color: '#9ca3af', textAlign: 'center', padding: '2rem 0' }}>Henüz veri yok</p>}
+            ) : <p style={{ color: '#9ca3af', textAlign: 'center', padding: '2rem 0' }}>{t('analytics.noChartData')}</p>}
           </div>
 
           {/* Haftalık trend */}
           <div style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <SectionTitle>📈 Haftalık Trend (8 Hafta)</SectionTitle>
+            <SectionTitle>{t('analytics.weeklyTrend')}</SectionTitle>
             <ResponsiveContainer width='100%' height={220}>
               <LineChart data={weeklyTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray='3 3' stroke='#f1f5f9' />
                 <XAxis dataKey='label' tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Line type='monotone' dataKey='Ödev' stroke='#6366f1' strokeWidth={2.5} dot={{ fill: '#6366f1', r: 3 }} />
-                <Line type='monotone' dataKey='Tamamlanan' stroke='#10b981' strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
+                <Line type='monotone' dataKey={t('analytics.homework')} stroke='#6366f1' strokeWidth={2.5} dot={{ fill: '#6366f1', r: 3 }} />
+                <Line type='monotone' dataKey={t('analytics.completedLine')} stroke='#10b981' strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
                 <Legend formatter={(v) => <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{v}</span>} />
               </LineChart>
             </ResponsiveContainer>
@@ -310,7 +312,7 @@ export default function HomeworkAnalytics() {
         {/* ── Öğrenci bazlı ödev durumu (Stacked Bar) ── */}
         {barData.length > 0 && (
           <div style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', marginBottom: '1.5rem' }}>
-            <SectionTitle>📊 Öğrenci Başına Ödev Durumu</SectionTitle>
+            <SectionTitle>{t('analytics.perStudentStatus')}</SectionTitle>
             <ResponsiveContainer width='100%' height={260}>
               <BarChart data={barData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray='3 3' stroke='#f8fafc' />
@@ -318,9 +320,9 @@ export default function HomeworkAnalytics() {
                 <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={(v) => <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{v}</span>} />
-                <Bar dataKey='Tamamlandı' stackId='a' fill='#10b981' radius={[0, 0, 0, 0]} />
-                <Bar dataKey='Bekliyor' stackId='a' fill='#6366f1' />
-                <Bar dataKey='Gecikmiş' stackId='a' fill='#ef4444' radius={[4, 4, 0, 0]} />
+                <Bar dataKey={t('analytics.statusCompleted')} stackId='a' fill='#10b981' radius={[0, 0, 0, 0]} />
+                <Bar dataKey={t('analytics.statusPending')} stackId='a' fill='#6366f1' />
+                <Bar dataKey={t('analytics.statusLate')} stackId='a' fill='#ef4444' radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -329,22 +331,22 @@ export default function HomeworkAnalytics() {
         {/* ── Quiz / Oyun Puan Analizi ── */}
         {scoreBarData.length > 0 && (
           <div style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', marginBottom: '1.5rem' }}>
-            <SectionTitle>🎮 Öğrenci Quiz Başarı Oranları (Ortalama %)</SectionTitle>
+            <SectionTitle>{t('analytics.quizSuccessRates')}</SectionTitle>
             <ResponsiveContainer width='100%' height={240}>
               <BarChart data={scoreBarData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray='3 3' stroke='#f8fafc' />
                 <XAxis dataKey='name' tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} unit='%' />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey='Ort. Puan (%)' radius={[6, 6, 0, 0]}>
+                <Bar dataKey={avgScoreKey} radius={[6, 6, 0, 0]}>
                   {scoreBarData.map((entry, i) => (
-                    <Cell key={i} fill={entry['Ort. Puan (%)'] >= 80 ? '#10b981' : entry['Ort. Puan (%)'] >= 50 ? '#f59e0b' : '#ef4444'} />
+                    <Cell key={i} fill={entry[avgScoreKey] >= 80 ? '#10b981' : entry[avgScoreKey] >= 50 ? '#f59e0b' : '#ef4444'} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-              {[{ color: '#10b981', label: '≥80% Başarılı' }, { color: '#f59e0b', label: '50-79% Orta' }, { color: '#ef4444', label: '<50% Zayıf' }].map(l => (
+              {[{ color: '#10b981', label: t('analytics.good') }, { color: '#f59e0b', label: t('analytics.medium') }, { color: '#ef4444', label: t('analytics.weak') }].map(l => (
                 <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: l.color }} />
                   <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 600 }}>{l.label}</span>
@@ -357,12 +359,12 @@ export default function HomeworkAnalytics() {
         {/* ── Detaylı Öğrenci Tablosu ── */}
         {studentStats.length > 0 && (
           <div style={{ background: 'white', borderRadius: 18, padding: '1.5rem', border: '1.5px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <SectionTitle>📋 Öğrenci Detay Tablosu</SectionTitle>
+            <SectionTitle>{t('analytics.studentDetailTable')}</SectionTitle>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
-                    {['Öğrenci', 'Toplam', 'Tamamlandı', 'Gecikmiş', 'Bekliyor', 'Tamamlanma Oranı', 'Quiz Ortalaması'].map(h => (
+                    {[t('analytics.student'), t('analytics.total'), t('analytics.completedCol'), t('analytics.lateCol'), t('analytics.pendingCol'), t('analytics.completionRateCol'), t('analytics.quizAvg')].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '0.65rem 0.85rem', fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -417,8 +419,8 @@ export default function HomeworkAnalytics() {
         {studentStats.length === 0 && (
           <div style={{ background: 'white', borderRadius: 18, padding: '4rem 2rem', textAlign: 'center', border: '1.5px solid #f1f5f9' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
-            <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#374151', marginBottom: '0.4rem' }}>Henüz veri yok</p>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Öğrencilere ödev atadıkça burada istatistikler görünecek.</p>
+            <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#374151', marginBottom: '0.4rem' }}>{t('analytics.noData')}</p>
+            <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{t('analytics.noDataDesc')}</p>
           </div>
         )}
 
