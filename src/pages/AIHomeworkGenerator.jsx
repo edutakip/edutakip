@@ -8,6 +8,7 @@ import { jsPDF } from 'jspdf';
 import { useTranslation } from 'react-i18next';
 
 const GRADE_LEVELS = ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'];
+const STEP_LABELS = ['Ders Seçimi', 'Ders Notları', 'Görsel Yükleme', 'AI Analizi', 'Ödev'];
 
 function useT() { const { t } = useTranslation(); return t; }
 function CompletedBadge() { const t = useT(); return <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 700, color: '#10b981', background: '#d1fae5', padding: '0.2rem 0.6rem', borderRadius: 20 }}>✓ {t('aiHomework.completed')}</span>; }
