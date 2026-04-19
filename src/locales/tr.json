@@ -862,6 +862,37 @@
     "medium": "50-79% Orta",
     "weak": "<50% Zayıf"
   },
+  "proModal": {
+    "limit": {
+      "title": "Öğrenci Limitine Ulaştınız",
+      "desc": "Ücretsiz planda en fazla 3 aktif öğrenci ekleyebilirsiniz."
+    },
+    "ai": {
+      "title": "Pro Özellik: AI Ders Raporu",
+      "desc": "Yapay zeka destekli ders raporları Pro plana özeldir."
+    },
+    "finance": {
+      "title": "Pro Özellik: Detaylı Finans",
+      "desc": "Gelişmiş finans analizi ve raporları Pro plana özeldir."
+    },
+    "whatsapp": {
+      "title": "Pro Özellik: WhatsApp",
+      "desc": "Otomatik WhatsApp bildirimleri Pro plana özeldir."
+    },
+    "assistant": {
+      "title": "Pro Özellik: AI Asistan",
+      "desc": "Ücretsiz planda 2 soru hakkınız var. Sınırsız kullanım için Pro'ya geçin."
+    },
+    "activeStudents": "Aktif öğrenci sayısı",
+    "perStudent": "{{price}}₺ / öğrenci / ay",
+    "monthlyTotal": "Aylık Toplam Tutar",
+    "features": ["30 gün ücretsiz deneme", "Sınırsız AI ders raporu", "Detaylı finans analizi", "WhatsApp entegrasyonu", "Pasif öğrenciler ücretsiz", "İstediğiniz zaman iptal"],
+    "cta": "Pro Paketine Geçiş Yap",
+    "loading": "Ödeme sayfasına yönlendiriliyorsunuz...",
+    "secureNote": "Güvenli Paddle ödeme sistemi ile · İstediğiniz zaman iptal edin",
+    "trialStarted": "30 Günlük Deneme Başladı!",
+    "trialDesc": "Tüm Pro özellikler aktif. İyi dersler!"
+  },
   "refund": {
     "title": "Geri Ödeme Politikası",
     "updated": "Son güncelleme: 1 Nisan 2026",

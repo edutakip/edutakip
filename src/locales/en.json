@@ -862,6 +862,37 @@
     "medium": "50-79% Medium",
     "weak": "<50% Weak"
   },
+  "proModal": {
+    "limit": {
+      "title": "Student Limit Reached",
+      "desc": "You can add up to 3 active students on the free plan."
+    },
+    "ai": {
+      "title": "Pro Feature: AI Lesson Report",
+      "desc": "AI-powered lesson reports are exclusive to the Pro plan."
+    },
+    "finance": {
+      "title": "Pro Feature: Advanced Finance",
+      "desc": "Advanced finance analysis and reports are exclusive to the Pro plan."
+    },
+    "whatsapp": {
+      "title": "Pro Feature: WhatsApp",
+      "desc": "Automatic WhatsApp notifications are exclusive to the Pro plan."
+    },
+    "assistant": {
+      "title": "Pro Feature: AI Assistant",
+      "desc": "You have 2 free questions. Upgrade to Pro for unlimited use."
+    },
+    "activeStudents": "Number of active students",
+    "perStudent": "₺{{price}} / student / month",
+    "monthlyTotal": "Monthly Total",
+    "features": ["30-day free trial", "Unlimited AI lesson reports", "Detailed finance analytics", "WhatsApp integration", "Inactive students free", "Cancel anytime"],
+    "cta": "Upgrade to Pro Plan",
+    "loading": "Redirecting to payment...",
+    "secureNote": "Secure Paddle payment · Cancel anytime",
+    "trialStarted": "30-Day Trial Started!",
+    "trialDesc": "All Pro features are active. Happy teaching!"
+  },
   "refund": {
     "title": "Refund Policy",
     "updated": "Last updated: April 1, 2026",
