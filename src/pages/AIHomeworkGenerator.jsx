@@ -925,6 +925,7 @@ function GameMode({ me, students, onBack }) {
   const [showSaveToPool, setShowSaveToPool] = useState(false);
 
   const lessonReady = lessonInfo.grade && lessonInfo.topic;
+  const stepLabels = t('aiHomework.stepLabels', { returnObjects: true });
 
   const handleImageUpload = async (files) => {
     setUploading(true);
@@ -1011,7 +1012,7 @@ function GameMode({ me, students, onBack }) {
             </div>
             <div style={{ textAlign: 'center' }}>
               <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.3rem' }}>EduTakip</h2>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>{t('aiHomework.game.analyzingDesc')}</p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>{t('aiHomework.game.analyzing')}</p>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {[0, 0.2, 0.4].map(d => <div key={d} style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: `dot-bounce 1.2s ease-in-out ${d}s infinite` }} />)}
@@ -1028,7 +1029,7 @@ function GameMode({ me, students, onBack }) {
             </div>
             <div style={{ textAlign: 'center', animation: showSuccess ? 'fade-in-up 0.4s ease 0.5s both' : 'none' }}>
               <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{t('aiHomework.game.homeworkCreated')}</h2>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: '0.3rem 0 0' }}>{t('aiHomework.game.homeworkCreatedDesc')}</p>
+                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: '0.3rem 0 0' }}>{t('aiHomework.game.homeworkCreatedDesc')}</p>
             </div>
           </div>
         </div>
@@ -1039,14 +1040,14 @@ function GameMode({ me, students, onBack }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-              <ArrowLeft size={14} /> Geri
+              <ArrowLeft size={14} /> {t('aiHomework.back')}
             </button>
             <div style={{ width: 42, height: 42, borderRadius: 14, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 16px rgba(99,102,241,0.3)' }}>
               <Gamepad2 size={20} color='white' />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>Oyun Ödev Oluştur</h1>
-              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>İnteraktif sorularla ödev hazırla</p>
+              <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>{t('aiHomework.game.pageTitle')}</h1>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t('aiHomework.game.pageSubtitle')}</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -1064,42 +1065,42 @@ function GameMode({ me, students, onBack }) {
         <StepIndicator current={step} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          <SectionCard title='Ders Seçimi' icon={BookOpen} iconColor='#6366f1' iconBg='#eef2ff' step={0} current={step}>
+          <SectionCard title={t('aiHomework.game.lessonSelection')} icon={BookOpen} iconColor='#6366f1' iconBg='#eef2ff' step={0} current={step}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
-              <SelectField label='Sınıf Seviyesi *' value={lessonInfo.grade} onChange={v => setLessonInfo(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder='Sınıf seçin...' />
-              <InputField label='Ünite Adı' value={lessonInfo.unit} onChange={v => setLessonInfo(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
-              <InputField label='Konu Başlığı *' value={lessonInfo.topic} onChange={v => setLessonInfo(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
-              <InputField label='Kullanılan Kitap' value={lessonInfo.book} onChange={v => setLessonInfo(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
-              <InputField label='Sayfa Numaraları' value={lessonInfo.pages} onChange={v => setLessonInfo(p => ({ ...p, pages: v }))} placeholder='Ör: 48-52' />
+              <SelectField label={t('aiHomework.pdf.grade')} value={lessonInfo.grade} onChange={v => setLessonInfo(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder={t('aiHomework.game.gradePlaceholder')} />
+              <InputField label={t('aiHomework.pdf.unit')} value={lessonInfo.unit} onChange={v => setLessonInfo(p => ({ ...p, unit: v }))} placeholder={t('aiHomework.game.unitPlaceholder')} />
+              <InputField label={t('aiHomework.pdf.topic')} value={lessonInfo.topic} onChange={v => setLessonInfo(p => ({ ...p, topic: v }))} placeholder={t('aiHomework.game.topicPlaceholder')} />
+              <InputField label={t('aiHomework.pdf.book')} value={lessonInfo.book} onChange={v => setLessonInfo(p => ({ ...p, book: v }))} placeholder={t('aiHomework.game.bookPlaceholder')} />
+              <InputField label={t('aiHomework.pdf.pages')} value={lessonInfo.pages} onChange={v => setLessonInfo(p => ({ ...p, pages: v }))} placeholder={t('aiHomework.game.pageNumPlaceholder')} />
             </div>
             <button onClick={() => setStep(1)} disabled={!lessonReady}
               style={{ marginTop: '1.25rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: lessonReady ? 'linear-gradient(135deg,#6366f1,#7c3aed)' : '#e5e7eb', color: lessonReady ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.9rem', cursor: lessonReady ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: lessonReady ? '0 4px 14px rgba(99,102,241,0.3)' : 'none' }}>
-              Devam Et →
+              {t('aiHomework.continue')}
             </button>
           </SectionCard>
 
-          <SectionCard title='Ders Notları' icon={FileText} iconColor='#f97316' iconBg='#fff7ed' step={1} current={step}>
-            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.75rem', lineHeight: 1.5 }}>Bu derste neler yaptınız? Öğrencilerin zorlandığı noktalar, etkinlikler, öğretilen kelimeler...</p>
+          <SectionCard title={t('aiHomework.game.lessonNotes')} icon={FileText} iconColor='#f97316' iconBg='#fff7ed' step={1} current={step}>
+            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.75rem', lineHeight: 1.5 }}>{t('aiHomework.game.notesDesc')}</p>
             <textarea value={notes} onChange={e => setNotes(e.target.value)}
-              placeholder='Örnek: Bugün Present Perfect Tense konusunu işledik...' rows={7}
+              placeholder={t('aiHomework.game.notesPlaceholder')} rows={7}
               style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.85rem', fontSize: '0.875rem', color: '#111827', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.65, background: '#fafafa' }}
               onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-              <button onClick={() => setStep(0)} style={{ padding: '0.65rem 1.25rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>← Geri</button>
-              <button onClick={() => setStep(2)} style={{ padding: '0.65rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#f97316,#ea580c)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.3)' }}>Devam Et →</button>
+              <button onClick={() => setStep(0)} style={{ padding: '0.65rem 1.25rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>← {t('aiHomework.back')}</button>
+              <button onClick={() => setStep(2)} style={{ padding: '0.65rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#f97316,#ea580c)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.3)' }}>{t('aiHomework.continue')}</button>
             </div>
           </SectionCard>
 
-          <SectionCard title='Görsel Yükleme' icon={Upload} iconColor='#10b981' iconBg='#d1fae5' step={2} current={step}>
-            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.85rem', lineHeight: 1.5 }}>Kitap sayfaları, tahta fotoğrafları gibi görselleri yükleyin. (İsteğe bağlı, max 5)</p>
+          <SectionCard title={t('aiHomework.game.imageUpload')} icon={Upload} iconColor='#10b981' iconBg='#d1fae5' step={2} current={step}>
+            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.85rem', lineHeight: 1.5 }}>{t('aiHomework.game.imageDesc')}</p>
             <input ref={fileRef} type='file' multiple accept='image/*' style={{ display: 'none' }} onChange={e => handleImageUpload(e.target.files)} />
             <div onClick={() => fileRef.current?.click()}
               style={{ border: '2px dashed #a7f3d0', borderRadius: 14, padding: '2rem', textAlign: 'center', background: '#f0fdf4', cursor: 'pointer', transition: 'all 0.2s', marginBottom: images.length ? '1rem' : 0 }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.background = '#dcfce7'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#a7f3d0'; e.currentTarget.style.background = '#f0fdf4'; }}>
               {uploading ? <Loader2 size={28} color='#10b981' style={{ animation: 'spin 1s linear infinite', marginBottom: '0.5rem' }} /> : <Upload size={28} color='#10b981' style={{ marginBottom: '0.5rem' }} />}
-              <p style={{ fontWeight: 700, color: '#065f46', fontSize: '0.88rem', marginBottom: '0.2rem' }}>{uploading ? 'Yükleniyor...' : 'Görsel yüklemek için tıklayın'}</p>
-              <p style={{ color: '#6b7280', fontSize: '0.75rem' }}>Kitap sayfası, tahta, çalışma kağıdı (max 5)</p>
+              <p style={{ fontWeight: 700, color: '#065f46', fontSize: '0.88rem', marginBottom: '0.2rem' }}>{uploading ? t('aiHomework.game.uploading') : t('aiHomework.game.uploadClick')}</p>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem' }}>{t('aiHomework.game.uploadSub')}</p>
             </div>
             {images.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -1114,27 +1115,27 @@ function GameMode({ me, students, onBack }) {
               </div>
             )}
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => setStep(1)} style={{ padding: '0.65rem 1.25rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>← Geri</button>
+              <button onClick={() => setStep(1)} style={{ padding: '0.65rem 1.25rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>← {t('aiHomework.back')}</button>
               <button onClick={handleAnalyze} disabled={uploading}
                 style={{ flex: 1, padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: uploading ? '#e5e7eb' : 'linear-gradient(135deg,#6366f1,#7c3aed)', color: uploading ? '#9ca3af' : 'white', fontWeight: 800, fontSize: '0.9rem', cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', boxShadow: uploading ? 'none' : '0 4px 14px rgba(99,102,241,0.35)' }}>
-                <Sparkles size={18} /> AI ile Analiz Et & Ödev Oluştur
+                <Sparkles size={18} /> {t('aiHomework.game.analyzeBtn')}
               </button>
             </div>
           </SectionCard>
 
-          <SectionCard title='AI Analizi' icon={Zap} iconColor='#7c3aed' iconBg='#f5f3ff' step={3} current={step}>
+          <SectionCard title={t('aiHomework.game.aiAnalysis')} icon={Zap} iconColor='#7c3aed' iconBg='#f5f3ff' step={3} current={step}>
             {analyzing && (
               <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 24px rgba(99,102,241,0.35)' }}>
                   <Sparkles size={28} color='white' style={{ animation: 'spin 2s linear infinite' }} />
                 </div>
-                <p style={{ fontWeight: 800, color: '#111827', fontSize: '1rem', marginBottom: '0.35rem' }}>Ders analiz ediliyor...</p>
-                <p style={{ color: '#9ca3af', fontSize: '0.82rem' }}>AI ders bilgilerini, notları ve görselleri inceliyor</p>
+                <p style={{ fontWeight: 800, color: '#111827', fontSize: '1rem', marginBottom: '0.35rem' }}>{t('aiHomework.game.analyzing')}</p>
+                <p style={{ color: '#9ca3af', fontSize: '0.82rem' }}>{t('aiHomework.game.analyzingDesc')}</p>
               </div>
             )}
             {analysis && !analyzing && (
               <div>
-                {[{ label: '📚 Öğrenilen Konular', value: analysis.learnedTopics }, { label: '🔁 Pekiştirilmesi Gerekenler', value: analysis.needsReinforcement }, { label: '📝 Tekrar Edilecek Kelimeler', value: analysis.vocabulary }, { label: '⚡ Zorluk Seviyesi', value: analysis.difficulty }].filter(r => r.value).map(row => (
+                {[{ label: t('aiHomework.game.learnedTopics'), value: analysis.learnedTopics }, { label: t('aiHomework.game.needsReinforcement'), value: analysis.needsReinforcement }, { label: t('aiHomework.game.vocabulary'), value: analysis.vocabulary }, { label: t('aiHomework.game.difficultyLevel'), value: analysis.difficulty }].filter(r => r.value).map(row => (
                   <div key={row.label} style={{ marginBottom: '0.65rem', background: '#f8fafc', borderRadius: 10, padding: '0.75rem 1rem' }}>
                     <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>{row.label}</p>
                     <p style={{ fontSize: '0.85rem', color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{row.value}</p>
@@ -1144,22 +1145,22 @@ function GameMode({ me, students, onBack }) {
             )}
           </SectionCard>
 
-          <SectionCard title='Oluşturulan Sorular' icon={Gamepad2} iconColor='#059669' iconBg='#d1fae5' step={4} current={step}>
+          <SectionCard title={t('aiHomework.game.generatedQuestions')} icon={Gamepad2} iconColor='#059669' iconBg='#d1fae5' step={4} current={step}>
             {/* Homework title banner */}
             {homework && (
               <div style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1rem', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.6rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: '0.2rem' }}>Oyun Ödevi</div>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: '0.2rem' }}>{t('aiHomework.game.gameHomework')}</div>
                   <h3 style={{ fontWeight: 900, fontSize: '1rem', margin: 0 }}>{homework.title}</h3>
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
                     {homework.grade && <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(255,255,255,0.15)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>📚 {homework.grade}</span>}
                     {homework.difficulty && <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(255,255,255,0.15)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>⚡ {homework.difficulty}</span>}
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(99,102,241,0.4)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>🎮 {questions.length} soru</span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(99,102,241,0.4)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>🎮 {questions.length} {t('aiHomework.quiz.questions').toLowerCase()}</span>
                   </div>
                 </div>
                 {questions?.length > 0 && (
                   <button onClick={() => setShowSaveToPool(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
-                    <Save size={13} /> Havuza Kaydet
+                    <Save size={13} /> {t('aiHomework.game.saveToPool')}
                   </button>
                 )}
               </div>
@@ -1170,23 +1171,23 @@ function GameMode({ me, students, onBack }) {
 
             {/* Assign section */}
             <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '1.1rem', border: '1.5px solid #bbf7d0', marginTop: '1rem' }}>
-              <p style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065f46', marginBottom: '0.75rem' }}>📤 Ödevi Öğrenciye Ata</p>
+              <p style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065f46', marginBottom: '0.75rem' }}>{t('aiHomework.game.assignTitle')}</p>
               {lastAssignedHwId && (
                 <div style={{ background: '#d1fae5', borderRadius: 10, padding: '0.65rem 0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#065f46' }}>✅ Ödev atandı!</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#065f46' }}>{t('aiHomework.game.assigned')}</span>
                   <a href={`/HomeworkSolver?id=${lastAssignedHwId}`} target="_blank" rel="noopener noreferrer"
                     style={{ padding: '0.4rem 0.85rem', borderRadius: 8, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.75rem', textDecoration: 'none' }}>
-                    🎮 Önizle
+                    {t('aiHomework.game.preview')}
                   </a>
                 </div>
               )}
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1, minWidth: 180 }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.35rem' }}>Öğrenci</label>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.35rem' }}>{t('aiHomework.game.studentLabel')}</label>
                   <div style={{ position: 'relative' }}>
                     <select id="assignStudentSelect" defaultValue=''
                       style={{ width: '100%', padding: '0.65rem 2rem 0.65rem 0.85rem', borderRadius: 10, border: '1.5px solid #a7f3d0', fontSize: '0.88rem', color: '#111827', outline: 'none', background: 'white', appearance: 'none', cursor: 'pointer', boxSizing: 'border-box' }}>
-                      <option value=''>Öğrenci seçin...</option>
+                      <option value=''>{t('aiHomework.game.studentPlaceholder')}</option>
                       {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                     <ChevronDown size={14} color='#9ca3af' style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
@@ -1202,7 +1203,7 @@ function GameMode({ me, students, onBack }) {
                   disabled={assigning || questions.length === 0}
                   style={{ padding: '0.65rem 1.5rem', borderRadius: 10, border: 'none', background: questions.length > 0 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb', color: questions.length > 0 ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.88rem', cursor: questions.length > 0 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                   {assigning ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
-                  {assigning ? 'Atanıyor...' : 'Ödevi Ata'}
+                  {assigning ? t('aiHomework.game.assigning') : t('aiHomework.game.assign')}
                 </button>
               </div>
             </div>

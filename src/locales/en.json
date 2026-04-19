@@ -811,7 +811,8 @@
       "learnedTopics": "📚 Topics Learned",
       "needsReinforcement": "🔁 Needs Reinforcement",
       "vocabulary": "📝 Vocabulary to Review",
-      "difficultyLevel": "⚡ Difficulty Level"
+      "difficultyLevel": "⚡ Difficulty Level",
+      "aiAnalysis": "AI Analysis"
     }
   },
   "analytics": {

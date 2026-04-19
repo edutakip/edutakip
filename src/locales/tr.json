@@ -811,7 +811,8 @@
       "learnedTopics": "📚 Öğrenilen Konular",
       "needsReinforcement": "🔁 Pekiştirilmesi Gerekenler",
       "vocabulary": "📝 Tekrar Edilecek Kelimeler",
-      "difficultyLevel": "⚡ Zorluk Seviyesi"
+      "difficultyLevel": "⚡ Zorluk Seviyesi",
+      "aiAnalysis": "AI Analizi"
     }
   },
   "analytics": {
