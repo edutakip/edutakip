@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft, ChevronRight, Plus, Video, MapPin,
   Edit2, X, Check, DollarSign, Trash2, ExternalLink, Copy,
-  Clock, BookOpen, ChevronRight as ChevRight
+  Clock, BookOpen, ChevronRight as ChevRight, RefreshCw
 } from 'lucide-react';
 import LessonModal from '../components/teacher/LessonModal';
 
@@ -300,6 +300,34 @@ export default function TeacherCalendar() {
   const [view, setView] = useState('weekly');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+
+  const handleSyncToGoogle = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const me = await base44.auth.me();
+      const upcomingLessons = lessons.filter(l => l.status !== 'iptal');
+      let success = 0, skipped = 0;
+      for (const lesson of upcomingLessons) {
+        const res = await base44.functions.invoke('syncLessonToCalendar', {
+          lessonId: lesson.id,
+          action: lesson.googleEventId ? 'update' : 'create',
+        });
+        if (res.data?.success) success++;
+        else skipped++;
+      }
+      setSyncResult({ success, skipped });
+      setTimeout(() => setSyncResult(null), 4000);
+    } catch (e) {
+      setSyncResult({ error: e.message });
+      setTimeout(() => setSyncResult(null), 4000);
+    } finally {
+      setSyncing(false);
+      loadData();
+    }
+  };
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -506,6 +534,11 @@ export default function TeacherCalendar() {
     <div style={{
       display: 'flex', flexDirection: 'column',
       height: '100vh', overflow: 'hidden',
+    }}>
+    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    <div style={{
+      display: 'flex', flexDirection: 'column',
+      height: '100vh', overflow: 'hidden',
       background: 'var(--bg-primary)',
       padding: isMobile ? '0.5rem' : '1rem',
       gap: '0.75rem',
@@ -540,6 +573,16 @@ export default function TeacherCalendar() {
               style={{ background: 'white', border: '1px solid #e5e7eb', color: '#4f46e5', borderRadius: 9, padding: '0.4rem 0.75rem', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
               {t('teacher.calendar.today')}
             </button>
+          )}
+          <button onClick={handleSyncToGoogle} disabled={syncing}
+            style={{ background: syncing ? '#e5e7eb' : 'white', border: '1px solid #e5e7eb', color: syncing ? '#9ca3af' : '#10b981', borderRadius: 9, padding: '0.45rem 0.9rem', fontWeight: 700, fontSize: '0.78rem', cursor: syncing ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <RefreshCw size={14} style={{ animation: syncing ? 'spin 1s linear infinite' : 'none' }} />
+            {syncing ? 'Güncelleniyor...' : 'Google Takvimi Güncelle'}
+          </button>
+          {syncResult && (
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: syncResult.error ? '#ef4444' : '#10b981', background: syncResult.error ? '#fef2f2' : '#ecfdf5', border: `1px solid ${syncResult.error ? '#fecaca' : '#bbf7d0'}`, borderRadius: 8, padding: '0.35rem 0.7rem', whiteSpace: 'nowrap' }}>
+              {syncResult.error ? `❌ ${syncResult.error}` : `✅ ${syncResult.success} ders eklendi`}
+            </div>
           )}
           <button onClick={() => openAdd(currentDate)}
             style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none', color: 'white', borderRadius: 9, padding: '0.45rem 0.9rem', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem', boxShadow: '0 4px 12px rgba(79,70,229,0.35)' }}>
@@ -664,6 +707,7 @@ export default function TeacherCalendar() {
           onSaved={() => { setShowModal(false); setEditingLesson(null); loadData(); }}
         />
       )}
+    </div>
     </div>
   );
 }
