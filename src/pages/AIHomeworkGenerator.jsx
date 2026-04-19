@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Sparkles, Upload, X, BookOpen, ChevronDown, Loader2, CheckCircle, Send, Pencil, FileText, Zap, RotateCcw, Gamepad2, Save, FileDown, ArrowLeft, Database, Image as ImageIcon, ClipboardList } from 'lucide-react';
 import GamePoolPage, { SaveToPoolModal } from './GamePoolPage';
+import QuestionEditor from '@/components/teacher/QuestionEditor';
 import { showToast } from '@/lib/toast';
 import { jsPDF } from 'jspdf';
 
@@ -937,8 +938,6 @@ function GameMode({ me, students, onBack }) {
   const [assigning, setAssigning] = useState(false);
   const [showGamePool, setShowGamePool] = useState(false);
   const [showSaveToPool, setShowSaveToPool] = useState(false);
-  const [revisePrompt, setRevisePrompt] = useState('');
-  const [revising, setRevising] = useState(false);
 
   const lessonReady = lessonInfo.grade && lessonInfo.topic;
 
@@ -996,28 +995,10 @@ function GameMode({ me, students, onBack }) {
     finally { setAssigning(false); }
   };
 
-  const handleRevise = async () => {
-    if (!revisePrompt.trim() || !homework) return;
-    setRevising(true);
-    try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an English teacher. You have an existing homework assignment and the teacher wants to revise it.\n\nCURRENT HOMEWORK:\nTitle: ${homework.title}\nInstructions: ${homework.instructions || ''}\nVocabulary Section: ${homework.vocabulary || ''}\nGrammar Section: ${homework.grammar || ''}\nReading Section: ${homework.reading || ''}\nWriting Section: ${homework.writing || ''}\nSpeaking Section: ${homework.speaking || ''}\n\nTEACHER'S REVISION REQUEST:\n"${revisePrompt}"\n\nApply the teacher's requested changes. Return ONLY valid JSON with the same structure, updating only relevant sections. Keep unchanged sections exactly as they are.`,
-        response_json_schema: {
-          type: 'object',
-          properties: { title: { type: 'string' }, grade: { type: 'string' }, difficulty: { type: 'string' }, instructions: { type: 'string' }, vocabulary: { type: 'string' }, grammar: { type: 'string' }, reading: { type: 'string' }, writing: { type: 'string' }, speaking: { type: 'string' } }
-        }
-      });
-      if (res?.title) { setHomework(prev => ({ ...prev, ...res })); setRevisePrompt(''); showToast({ message: '✅ Ödev güncellendi!' }); }
-      else showToast({ message: 'Güncelleme başarısız oldu', type: 'error' });
-    } catch (e) { showToast({ message: 'Hata: ' + e.message, type: 'error' }); }
-    finally { setRevising(false); }
-  };
-
   const resetAll = () => {
     setStep(0); setLessonInfo({ grade: '', unit: '', topic: '', book: '', pages: '' }); setNotes('');
     setImages([]); setUploadedUrls([]); setAnalysis(null); setHomework(null); setQuestions([]);
     setLastAssignedHwId(null); setEditing(false); setOverlayVisible(false); setShowSuccess(false);
-    setRevisePrompt(''); setRevising(false);
   };
 
   return (
@@ -1178,39 +1159,68 @@ function GameMode({ me, students, onBack }) {
             )}
           </SectionCard>
 
-          <SectionCard title='Oluşturulan Ödev' icon={BookOpen} iconColor='#059669' iconBg='#d1fae5' step={4} current={step}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {questions?.length > 0 && (
-                <button onClick={() => setShowSaveToPool(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: '1.5px solid #bbf7d0', background: '#f0fdf4', color: '#16a34a', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-                  <Save size={13} /> Havuza Kaydet
-                </button>
-              )}
-              <button onClick={() => setEditing(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', background: editing ? '#eef2ff' : 'white', color: editing ? '#4f46e5' : '#374151', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-                <Pencil size={13} /> {editing ? 'Düzenlemeyi Bitir' : 'Ödevi Düzenle'}
-              </button>
-            </div>
+          <SectionCard title='Oluşturulan Sorular' icon={Gamepad2} iconColor='#059669' iconBg='#d1fae5' step={4} current={step}>
+            {/* Homework title banner */}
+            {homework && (
+              <div style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1rem', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: '0.2rem' }}>Oyun Ödevi</div>
+                  <h3 style={{ fontWeight: 900, fontSize: '1rem', margin: 0 }}>{homework.title}</h3>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                    {homework.grade && <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(255,255,255,0.15)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>📚 {homework.grade}</span>}
+                    {homework.difficulty && <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(255,255,255,0.15)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>⚡ {homework.difficulty}</span>}
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, background: 'rgba(99,102,241,0.4)', padding: '0.15rem 0.5rem', borderRadius: 20 }}>🎮 {questions.length} soru</span>
+                  </div>
+                </div>
+                {questions?.length > 0 && (
+                  <button onClick={() => setShowSaveToPool(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
+                    <Save size={13} /> Havuza Kaydet
+                  </button>
+                )}
+              </div>
+            )}
 
-            {/* AI Revize Kutusu */}
-            <div style={{ background: 'linear-gradient(135deg,#faf5ff,#f0f4ff)', borderRadius: 14, padding: '1rem 1.1rem', border: '1.5px solid #e0d7ff', marginBottom: '1rem' }}>
-              <p style={{ fontWeight: 800, fontSize: '0.82rem', color: '#5b21b6', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Sparkles size={14} /> Değişiklik yapmak istediğiniz bir yer var mı?
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                <textarea value={revisePrompt} onChange={e => setRevisePrompt(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && revisePrompt.trim() && !revising) { e.preventDefault(); handleRevise(); } }}
-                  placeholder='Örn: Grammar bölümünü daha kolay yap, 5 soru yerine 3 soru olsun...' rows={2} disabled={revising}
-                  style={{ flex: 1, padding: '0.65rem 0.85rem', borderRadius: 10, border: '1.5px solid #c4b5fd', fontSize: '0.85rem', color: '#111827', outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.55, background: 'white' }}
-                  onFocus={e => e.target.style.borderColor = '#7c3aed'} onBlur={e => e.target.style.borderColor = '#c4b5fd'} />
-                <button onClick={handleRevise} disabled={!revisePrompt.trim() || revising}
-                  style={{ padding: '0.65rem 1rem', borderRadius: 10, border: 'none', background: revisePrompt.trim() && !revising ? 'linear-gradient(135deg,#7c3aed,#6366f1)' : '#e5e7eb', color: revisePrompt.trim() && !revising ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.82rem', cursor: revisePrompt.trim() && !revising ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap', flexShrink: 0, boxShadow: revisePrompt.trim() && !revising ? '0 4px 12px rgba(124,58,237,0.3)' : 'none' }}>
-                  {revising ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
-                  {revising ? 'Güncelleniyor...' : 'Uygula'}
+            {/* Question Editor */}
+            <QuestionEditor questions={questions} setQuestions={setQuestions} lessonInfo={lessonInfo} notes={notes} />
+
+            {/* Assign section */}
+            <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '1.1rem', border: '1.5px solid #bbf7d0', marginTop: '1rem' }}>
+              <p style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065f46', marginBottom: '0.75rem' }}>📤 Ödevi Öğrenciye Ata</p>
+              {lastAssignedHwId && (
+                <div style={{ background: '#d1fae5', borderRadius: 10, padding: '0.65rem 0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#065f46' }}>✅ Ödev atandı!</span>
+                  <a href={`/HomeworkSolver?id=${lastAssignedHwId}`} target="_blank" rel="noopener noreferrer"
+                    style={{ padding: '0.4rem 0.85rem', borderRadius: 8, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.75rem', textDecoration: 'none' }}>
+                    🎮 Önizle
+                  </a>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1, minWidth: 180 }}>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.35rem' }}>Öğrenci</label>
+                  <div style={{ position: 'relative' }}>
+                    <select id="assignStudentSelect" defaultValue=''
+                      style={{ width: '100%', padding: '0.65rem 2rem 0.65rem 0.85rem', borderRadius: 10, border: '1.5px solid #a7f3d0', fontSize: '0.88rem', color: '#111827', outline: 'none', background: 'white', appearance: 'none', cursor: 'pointer', boxSizing: 'border-box' }}>
+                      <option value=''>Öğrenci seçin...</option>
+                      {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <ChevronDown size={14} color='#9ca3af' style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    const sel = document.getElementById('assignStudentSelect');
+                    const studentId = sel?.value;
+                    if (!studentId) return;
+                    handleAssign(studentId, students.find(s => s.id === studentId));
+                  }}
+                  disabled={assigning || questions.length === 0}
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: 10, border: 'none', background: questions.length > 0 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb', color: questions.length > 0 ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.88rem', cursor: questions.length > 0 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                  {assigning ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
+                  {assigning ? 'Atanıyor...' : 'Ödevi Ata'}
                 </button>
               </div>
-              <p style={{ fontSize: '0.7rem', color: '#7c3aed', opacity: 0.7, marginTop: '0.4rem', marginBottom: 0 }}>Enter tuşuyla da gönderebilirsiniz</p>
             </div>
-
-            <HomeworkPreview homework={homework} editing={editing} onEditChange={setHomework} students={students} onAssign={handleAssign} assigning={assigning} onLastAssignedId={lastAssignedHwId} />
           </SectionCard>
         </div>
       </div>
