@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { base44 } from '@/api/base44Client';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,

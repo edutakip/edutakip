@@ -5,15 +5,20 @@ import GamePoolPage, { SaveToPoolModal } from './GamePoolPage';
 import QuestionEditor from '@/components/teacher/QuestionEditor';
 import { showToast } from '@/lib/toast';
 import { jsPDF } from 'jspdf';
+import { useTranslation } from 'react-i18next';
 
 const GRADE_LEVELS = ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'];
-const STEP_LABELS = ['Ders Seçimi', 'Ders Notları', 'Görsel Yükleme', 'AI Analizi', 'Ödev'];
+
+function useT() { const { t } = useTranslation(); return t; }
+function CompletedBadge() { const t = useT(); return <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 700, color: '#10b981', background: '#d1fae5', padding: '0.2rem 0.6rem', borderRadius: 20 }}>✓ {t('aiHomework.completed')}</span>; }
 
 // ── Helpers ───────────────────────────────────────────────────
 function StepIndicator({ current }) {
+  const t = useT();
+  const stepLabels = t('aiHomework.stepLabels', { returnObjects: true });
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: '2rem', flexWrap: 'wrap', rowGap: '0.5rem' }}>
-      {STEP_LABELS.map((label, i) => {
+      {stepLabels.map((label, i) => {
         const done = i < current;
         const active = i === current;
         return (
@@ -44,7 +49,7 @@ function SectionCard({ title, icon: Icon, iconColor = '#6366f1', iconBg = '#eef2
           {isDone ? <CheckCircle size={18} color='#10b981' /> : <Icon size={18} color={isDone ? '#10b981' : iconColor} />}
         </div>
         <h2 style={{ fontWeight: 800, color: '#111827', fontSize: '1rem', margin: 0 }}>{title}</h2>
-        {isDone && <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 700, color: '#10b981', background: '#d1fae5', padding: '0.2rem 0.6rem', borderRadius: 20 }}>✓ Tamamlandı</span>}
+        {isDone && <CompletedBadge />}
       </div>
       {(isActive || isDone) && <div style={{ padding: '1.25rem 1.5rem' }}>{children}</div>}
     </div>
@@ -91,77 +96,57 @@ function fixTR(str) {
 
 // ── Mode Selection Screen ─────────────────────────────────────
 function ModeSelection({ onSelect }) {
+  const t = useT();
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: 'clamp(1rem,4vw,2rem)' }}>
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{ width: 64, height: 64, borderRadius: 20, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 24px rgba(99,102,241,0.35)' }}>
           <Sparkles size={30} color='white' />
         </div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem', letterSpacing: '-0.5px' }}>AI Ödev Oluşturucu</h1>
-        <p style={{ color: '#6b7280', fontSize: '0.88rem', margin: 0 }}>Hangi tür ödev oluşturmak istersiniz?</p>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem', letterSpacing: '-0.5px' }}>{t('aiHomework.pageTitle')}</h1>
+        <p style={{ color: '#6b7280', fontSize: '0.88rem', margin: 0 }}>{t('aiHomework.pageSubtitle')}</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
-        {/* PDF Ödev */}
-        <button onClick={() => onSelect('pdf')} style={{
-          background: 'white', borderRadius: 20, padding: '2rem 1.5rem',
-          border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left',
-          transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        }}
+        {/* PDF */}
+        <button onClick={() => onSelect('pdf')} style={{ background: 'white', borderRadius: 20, padding: '2rem 1.5rem', border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(239,68,68,0.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
           <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg,#ef4444,#dc2626)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 4px 14px rgba(239,68,68,0.3)' }}>
             <FileDown size={26} color='white' />
           </div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>PDF Ödev</h2>
-          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>
-            Ders notlarına göre AI ödev içeriği oluşturur, PDF olarak indirir ve PDF Havuzuna kaydeder.
-          </p>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>{t('aiHomework.pdf.title')}</h2>
+          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>{t('aiHomework.pdf.desc')}</p>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: '#ef4444', background: '#fef2f2', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
-            <FileDown size={12} /> PDF Oluştur & Kaydet
+            <FileDown size={12} /> {t('aiHomework.pdf.tag')}
           </span>
         </button>
 
-        {/* Deneme / Quiz */}
-        <button onClick={() => onSelect('quiz')} style={{
-          background: 'white', borderRadius: 20, padding: '2rem 1.5rem',
-          border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left',
-          transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        }}
+        {/* Quiz */}
+        <button onClick={() => onSelect('quiz')} style={{ background: 'white', borderRadius: 20, padding: '2rem 1.5rem', border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(245,158,11,0.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
           <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg,#f59e0b,#d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}>
             <ClipboardList size={26} color='white' />
           </div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>Deneme Sınavı / Quiz</h2>
-          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>
-            Soru sayısı ve zorluk derecesi seçin, ünite ve konuya özel test oluşturun, PDF olarak indirin.
-          </p>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>{t('aiHomework.quiz.title')}</h2>
+          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>{t('aiHomework.quiz.desc')}</p>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: '#d97706', background: '#fffbeb', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
-            <ClipboardList size={12} /> Test & Deneme Sınavı
+            <ClipboardList size={12} /> {t('aiHomework.quiz.tag')}
           </span>
         </button>
 
-        {/* Oyun Ödev */}
-        <button onClick={() => onSelect('game')} style={{
-          background: 'white', borderRadius: 20, padding: '2rem 1.5rem',
-          border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left',
-          transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        }}
+        {/* Game */}
+        <button onClick={() => onSelect('game')} style={{ background: 'white', borderRadius: 20, padding: '2rem 1.5rem', border: '2px solid #e5e7eb', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
           <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg,#6366f1,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 4px 14px rgba(99,102,241,0.3)' }}>
             <Gamepad2 size={26} color='white' />
           </div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>Oyun Ödev</h2>
-          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>
-            Çoktan seçmeli, doğru/yanlış ve boşluk doldurma sorularıyla interaktif ödev oluşturur.
-          </p>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#111827', margin: '0 0 0.4rem' }}>{t('aiHomework.game.title')}</h2>
+          <p style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, margin: '0 0 1rem' }}>{t('aiHomework.game.desc')}</p>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: '#6366f1', background: '#eef2ff', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
-            <Gamepad2 size={12} /> İnteraktif & Oyunlaştırılmış
+            <Gamepad2 size={12} /> {t('aiHomework.game.tag')}
           </span>
         </button>
       </div>
@@ -171,6 +156,7 @@ function ModeSelection({ onSelect }) {
 
 // ── PDF Mode ──────────────────────────────────────────────────
 function PDFMode({ me, onBack }) {
+  const t = useT();
   const [form, setForm] = useState({ grade: '', topic: '', unit: '', book: '', pages: '' });
   const [notes, setNotes] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -396,15 +382,15 @@ Return JSON with:
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}>
         <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-          <ArrowLeft size={14} /> Geri
+          <ArrowLeft size={14} /> {t('aiHomework.back')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <div style={{ width: 42, height: 42, borderRadius: 14, background: 'linear-gradient(135deg,#ef4444,#dc2626)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 16px rgba(239,68,68,0.3)' }}>
             <FileDown size={20} color='white' />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>PDF Ödev Oluştur</h1>
-            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>AI ile ödev içeriği oluştur, PDF olarak kaydet</p>
+            <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>{t('aiHomework.pdf.pageTitle')}</h1>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t('aiHomework.pdf.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -412,16 +398,16 @@ Return JSON with:
       {/* Form */}
       <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #e5e7eb', padding: '1.5rem', marginBottom: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
-          <SelectField label='Sınıf Seviyesi *' value={form.grade} onChange={v => setForm(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder='Sınıf seçin...' />
-          <InputField label='Ünite' value={form.unit} onChange={v => setForm(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
-          <InputField label='Konu *' value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
-          <InputField label='Kitap' value={form.book} onChange={v => setForm(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
-          <InputField label='Sayfalar' value={form.pages} onChange={v => setForm(p => ({ ...p, pages: v }))} placeholder='Ör: 48-52' />
+          <SelectField label={t('aiHomework.pdf.grade')} value={form.grade} onChange={v => setForm(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder={t('aiHomework.pdf.gradePlaceholder')} />
+          <InputField label={t('aiHomework.pdf.unit')} value={form.unit} onChange={v => setForm(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
+          <InputField label={t('aiHomework.pdf.topic')} value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
+          <InputField label={t('aiHomework.pdf.book')} value={form.book} onChange={v => setForm(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
+          <InputField label={t('aiHomework.pdf.pages')} value={form.pages} onChange={v => setForm(p => ({ ...p, pages: v }))} placeholder='Ör: 48-52' />
         </div>
         <div>
-          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>Ders Notları (isteğe bağlı)</label>
+          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>{t('aiHomework.pdf.notes')}</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)}
-            placeholder='Bu derste neler işlendi? Öğrencilerin zorlandığı noktalar, öğretilen kelimeler...'
+            placeholder={t('aiHomework.pdf.notesPlaceholder')}
             rows={4}
             style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 12, padding: '0.85rem', fontSize: '0.875rem', color: '#111827', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.65, background: '#fafafa' }}
             onFocus={e => e.target.style.borderColor = '#ef4444'} onBlur={e => e.target.style.borderColor = '#e5e7eb'}
@@ -430,7 +416,7 @@ Return JSON with:
         <button onClick={handleGenerate} disabled={!formReady || generating}
           style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.75rem', borderRadius: 12, border: 'none', background: formReady && !generating ? 'linear-gradient(135deg,#ef4444,#dc2626)' : '#e5e7eb', color: formReady && !generating ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.9rem', cursor: formReady && !generating ? 'pointer' : 'default', boxShadow: formReady && !generating ? '0 4px 14px rgba(239,68,68,0.3)' : 'none' }}>
           {generating ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={16} />}
-          {generating ? 'Ödev Oluşturuluyor...' : 'AI ile Ödev Oluştur'}
+          {generating ? t('aiHomework.pdf.generating') : t('aiHomework.pdf.generate')}
         </button>
       </div>
 
@@ -439,13 +425,13 @@ Return JSON with:
         <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #bbf7d0', padding: '1.5rem', boxShadow: '0 4px 16px rgba(16,185,129,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
             <CheckCircle size={20} color='#10b981' />
-            <h2 style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', margin: 0 }}>Ödev Oluşturuldu!</h2>
+            <h2 style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', margin: 0 }}>{t('aiHomework.pdf.homeworkCreated')}</h2>
           </div>
 
           {/* Preview */}
           <div style={{ background: '#f8fafc', borderRadius: 14, padding: '1.25rem', marginBottom: '1rem', border: '1px solid #e5e7eb' }}>
             <div style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 10, padding: '0.85rem 1.1rem', marginBottom: '1rem', color: 'white' }}>
-              <p style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 0.25rem' }}>Ödev Başlığı</p>
+              <p style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 0.25rem' }}>{t('aiHomework.pdf.homeworkTitle')}</p>
               <h3 style={{ fontWeight: 900, fontSize: '1rem', margin: 0 }}>{pdfContent.title}</h3>
               <p style={{ fontSize: '0.78rem', opacity: 0.6, margin: '0.3rem 0 0' }}>{form.grade} • {form.topic}</p>
             </div>
@@ -461,16 +447,16 @@ Return JSON with:
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button onClick={buildAndDownloadPDF}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.3)' }}>
-              <FileDown size={16} /> PDF İndir
+              <FileDown size={16} /> {t('aiHomework.pdf.downloadPdf')}
             </button>
             <button onClick={handleSaveToPool} disabled={saving || savedToPool}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: savedToPool ? '#d1fae5' : saving ? '#e5e7eb' : 'linear-gradient(135deg,#10b981,#059669)', color: savedToPool ? '#065f46' : saving ? '#9ca3af' : 'white', fontWeight: 800, fontSize: '0.88rem', cursor: saving || savedToPool ? 'default' : 'pointer', boxShadow: saving || savedToPool ? 'none' : '0 4px 14px rgba(16,185,129,0.3)' }}>
               {saving ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : savedToPool ? <CheckCircle size={16} /> : <Database size={16} />}
-              {savedToPool ? 'Havuza Kaydedildi!' : saving ? 'Kaydediliyor...' : 'PDF Havuzuna Kaydet'}
+              {savedToPool ? t('aiHomework.pdf.savedToPool') : saving ? t('aiHomework.pdf.saving') : t('aiHomework.pdf.saveToPool')}
             </button>
             <button onClick={() => { setPdfReady(false); setPdfContent(null); setSavedToPool(false); }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.75rem 1.25rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
-              <RotateCcw size={14} /> Yeniden Oluştur
+              <RotateCcw size={14} /> {t('aiHomework.pdf.regenerate')}
             </button>
           </div>
         </div>
@@ -481,9 +467,10 @@ Return JSON with:
 
 // ── Quiz Mode ─────────────────────────────────────────────────
 function QuizMode({ onBack }) {
+  const t = useT();
   const QUESTION_COUNTS = [5, 10, 15, 20, 25, 30];
-  const DIFFICULTIES = ['Kolay', 'Orta', 'Zor', 'Karışık'];
-  const QUESTION_TYPES = ['Çoktan Seçmeli', 'Doğru / Yanlış', 'Boşluk Doldurma', 'Kısa Cevap', 'Karma'];
+  const DIFFICULTIES = t('aiHomework.quiz.difficulties', { returnObjects: true });
+  const QUESTION_TYPES = t('aiHomework.quiz.questionTypes', { returnObjects: true });
 
   const [form, setForm] = useState({ grade: '', unit: '', topic: '', book: '' });
   const [questionCount, setQuestionCount] = useState(10);
@@ -691,15 +678,15 @@ Return JSON:
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}>
         <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-          <ArrowLeft size={14} /> Geri
+          <ArrowLeft size={14} /> {t('aiHomework.back')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <div style={{ width: 42, height: 42, borderRadius: 14, background: 'linear-gradient(135deg,#f59e0b,#d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 16px rgba(245,158,11,0.3)' }}>
             <ClipboardList size={20} color='white' />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>Deneme Sınavı / Quiz Oluştur</h1>
-            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>Konuya özel test oluştur ve PDF olarak indir</p>
+            <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#111827', margin: 0 }}>{t('aiHomework.quiz.pageTitle')}</h1>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t('aiHomework.quiz.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -707,24 +694,23 @@ Return JSON:
       {/* Settings Form */}
       <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #e5e7eb', padding: '1.5rem', marginBottom: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          📋 Ders Bilgileri
+          {t('aiHomework.quiz.lessonInfo')}
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
-          <SelectField label='Sınıf Seviyesi *' value={form.grade} onChange={v => setForm(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder='Sınıf seçin...' />
-          <InputField label='Ünite' value={form.unit} onChange={v => setForm(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
-          <InputField label='Konu *' value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
-          <InputField label='Kitap' value={form.book} onChange={v => setForm(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
+          <SelectField label={t('aiHomework.pdf.grade')} value={form.grade} onChange={v => setForm(p => ({ ...p, grade: v }))} options={GRADE_LEVELS} placeholder={t('aiHomework.pdf.gradePlaceholder')} />
+          <InputField label={t('aiHomework.pdf.unit')} value={form.unit} onChange={v => setForm(p => ({ ...p, unit: v }))} placeholder='Ör: Unit 3 – Free Time' />
+          <InputField label={t('aiHomework.pdf.topic')} value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} placeholder='Ör: Present Perfect Tense' />
+          <InputField label={t('aiHomework.pdf.book')} value={form.book} onChange={v => setForm(p => ({ ...p, book: v }))} placeholder='Ör: Speak Out B1' />
         </div>
 
         <div style={{ height: 1, background: '#f3f4f6', margin: '1rem 0' }} />
 
         <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#374151', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          ⚙️ Test Ayarları
+          {t('aiHomework.quiz.testSettings')}
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-          {/* Soru sayısı */}
           <div>
-            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Soru Sayısı</label>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>{t('aiHomework.quiz.questionCount')}</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {QUESTION_COUNTS.map(n => (
                 <button key={n} onClick={() => setQuestionCount(n)}
@@ -734,9 +720,8 @@ Return JSON:
               ))}
             </div>
           </div>
-          {/* Zorluk */}
           <div>
-            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Zorluk Derecesi</label>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>{t('aiHomework.quiz.difficulty')}</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {DIFFICULTIES.map(d => {
                 const colors = { 'Kolay': '#10b981', 'Orta': '#f59e0b', 'Zor': '#ef4444', 'Karışık': '#6366f1' };
@@ -751,9 +736,8 @@ Return JSON:
               })}
             </div>
           </div>
-          {/* Soru türü */}
           <div style={{ gridColumn: '1 / -1' }}>
-            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Soru Türü</label>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>{t('aiHomework.quiz.questionType')}</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {QUESTION_TYPES.map(t => (
                 <button key={t} onClick={() => setQuestionType(t)}
@@ -765,11 +749,10 @@ Return JSON:
           </div>
         </div>
 
-        {/* Ek notlar */}
         <div>
-          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>Ek Notlar (isteğe bağlı)</label>
+          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>{t('aiHomework.quiz.additionalNotes')}</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)}
-            placeholder='Öğrencilerin zorlandığı konular, özellikle sorulmasını istediğiniz kavramlar...' rows={3}
+            placeholder={t('aiHomework.quiz.notesPlaceholder')} rows={3}
             style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '0.75rem', fontSize: '0.875rem', color: '#111827', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6, background: '#fafafa' }}
             onFocus={e => e.target.style.borderColor = '#f59e0b'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
         </div>
@@ -777,7 +760,7 @@ Return JSON:
         <button onClick={handleGenerate} disabled={!formReady || generating}
           style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 2rem', borderRadius: 12, border: 'none', background: formReady && !generating ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#e5e7eb', color: formReady && !generating ? 'white' : '#9ca3af', fontWeight: 800, fontSize: '0.9rem', cursor: formReady && !generating ? 'pointer' : 'default', boxShadow: formReady && !generating ? '0 4px 14px rgba(245,158,11,0.35)' : 'none' }}>
           {generating ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={16} />}
-          {generating ? `${questionCount} Soruluk Test Oluşturuluyor...` : `${questionCount} Soruluk Test Oluştur`}
+          {generating ? `${questionCount} ${t('aiHomework.quiz.generating')}` : `${questionCount} ${t('aiHomework.quiz.generate')}`}
         </button>
       </div>
 
@@ -786,7 +769,7 @@ Return JSON:
         <div style={{ background: 'white', borderRadius: 20, border: '1.5px solid #fde68a', padding: '1.5rem', boxShadow: '0 4px 16px rgba(245,158,11,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
             <CheckCircle size={20} color='#f59e0b' />
-            <h2 style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', margin: 0 }}>Test Hazır! ({quizData.questions?.length} Soru)</h2>
+            <h2 style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', margin: 0 }}>{t('aiHomework.quiz.testReady')} ({quizData.questions?.length} {t('aiHomework.quiz.questions')})</h2>
           </div>
 
           {/* Preview */}
@@ -811,7 +794,7 @@ Return JSON:
               </div>
             ))}
             {quizData.questions?.length > 5 && (
-              <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#9ca3af', margin: '0.5rem 0 0' }}>... ve {quizData.questions.length - 5} soru daha (PDF'te görünecek)</p>
+              <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#9ca3af', margin: '0.5rem 0 0' }}>... ve {quizData.questions.length - 5} {t('aiHomework.quiz.moreQuestions')}</p>
             )}
           </div>
 
@@ -819,15 +802,15 @@ Return JSON:
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button onClick={() => buildPDF(false)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(245,158,11,0.35)' }}>
-              <FileDown size={16} /> Test PDF İndir
+              <FileDown size={16} /> {t('aiHomework.quiz.downloadTest')}
             </button>
             <button onClick={() => buildPDF(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' }}>
-              <CheckCircle size={16} /> Cevap Anahtarı PDF
+              <CheckCircle size={16} /> {t('aiHomework.quiz.downloadAnswerKey')}
             </button>
             <button onClick={() => { setQuizData(null); }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.75rem 1.25rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
-              <RotateCcw size={14} /> Yeniden Oluştur
+              <RotateCcw size={14} /> {t('aiHomework.quiz.regenerate')}
             </button>
           </div>
         </div>
@@ -920,6 +903,7 @@ function HomeworkPreview({ homework, editing, onEditChange, students, onAssign, 
 }
 
 function GameMode({ me, students, onBack }) {
+  const t = useT();
   const [step, setStep] = useState(0);
   const [lessonInfo, setLessonInfo] = useState({ grade: '', unit: '', topic: '', book: '', pages: '' });
   const [notes, setNotes] = useState('');
@@ -1026,7 +1010,7 @@ function GameMode({ me, students, onBack }) {
             </div>
             <div style={{ textAlign: 'center' }}>
               <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.3rem' }}>EduTakip</h2>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>AI ile ödev oluşturuluyor...</p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, animation: 'shimmer-text 2s ease-in-out infinite' }}>{t('aiHomework.game.analyzingDesc')}</p>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {[0, 0.2, 0.4].map(d => <div key={d} style={{ width: 8, height: 8, borderRadius: '50%', background: '#818cf8', animation: `dot-bounce 1.2s ease-in-out ${d}s infinite` }} />)}
@@ -1042,8 +1026,8 @@ function GameMode({ me, students, onBack }) {
               </div>
             </div>
             <div style={{ textAlign: 'center', animation: showSuccess ? 'fade-in-up 0.4s ease 0.5s both' : 'none' }}>
-              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Ödev Oluşturuldu!</h2>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: '0.3rem 0 0' }}>AI ödevinizi hazırladı, düzenleyebilirsiniz.</p>
+              <h2 style={{ color: 'white', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{t('aiHomework.game.homeworkCreated')}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', margin: '0.3rem 0 0' }}>{t('aiHomework.game.homeworkCreatedDesc')}</p>
             </div>
           </div>
         </div>
@@ -1066,11 +1050,11 @@ function GameMode({ me, students, onBack }) {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button onClick={() => setShowGamePool(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: 10, border: '1.5px solid #c7d2fe', background: '#eef2ff', color: '#4f46e5', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-              <Gamepad2 size={14} /> Oyun Havuzu
+              <Gamepad2 size={14} /> {t('aiHomework.gamePool')}
             </button>
             {step > 0 && (
               <button onClick={resetAll} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-                <RotateCcw size={14} /> Yeniden Başla
+                <RotateCcw size={14} /> {t('aiHomework.restart')}
               </button>
             )}
           </div>
