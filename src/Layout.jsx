@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
@@ -279,6 +279,7 @@ export default function Layout({ children, currentPageName }) {
       label: t('teacher.layout.tools'), icon: Sparkles,
       submenu: [
         { label: t('teacher.layout.certificate'), icon: GraduationCap, page: 'CertificateGenerator' },
+        { label: 'Hesap Makinesi', icon: Calculator, page: 'Calculator' },
       ],
     },
     { label: t('teacher.layout.myAccount'), icon: Settings, page: 'TeacherAccount' },

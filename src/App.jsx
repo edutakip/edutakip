@@ -22,6 +22,7 @@ import Checkout from './pages/Checkout';
 import SubscriptionManagement from './pages/SubscriptionManagement';
 import TeacherAccount from './pages/TeacherAccount';
 import CertificateGenerator from './pages/CertificateGenerator';
+import Calculator from './pages/Calculator';
 import AIHomeworkGenerator from './pages/AIHomeworkGenerator';
 import HomeworkAnalytics from './pages/HomeworkAnalytics';
 import HomeworkSolver from './pages/HomeworkSolver';
@@ -201,6 +202,7 @@ const AuthenticatedApp = () => {
       <Route path="/SubscriptionManagement" element={<LayoutWrapper currentPageName="SubscriptionManagement"><SubscriptionManagement /></LayoutWrapper>} />
       <Route path="/TeacherAccount" element={<LayoutWrapper currentPageName="TeacherAccount"><TeacherAccount /></LayoutWrapper>} />
       <Route path="/CertificateGenerator" element={<LayoutWrapper currentPageName="CertificateGenerator"><CertificateGenerator /></LayoutWrapper>} />
+      <Route path="/Calculator" element={<LayoutWrapper currentPageName="Calculator"><Calculator /></LayoutWrapper>} />
       <Route path="/AIHomeworkGenerator" element={<LayoutWrapper currentPageName="AIHomeworkGenerator"><AIHomeworkGenerator /></LayoutWrapper>} />
       <Route path="/HomeworkAnalytics" element={<LayoutWrapper currentPageName="HomeworkAnalytics"><HomeworkAnalytics /></LayoutWrapper>} />
       <Route path="/HomeworkSolver" element={<HomeworkSolver />} />
