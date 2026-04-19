@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = '69d0d68af50f7f9115160538';
 
@@ -8,15 +8,31 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     const { data } = body;
-    if (!data || !data.googleEventId) {
-      return Response.json({ status: 'skipped', reason: 'no googleEventId' });
+    if (!data || !data.googleEventId || !data.teacherEmail) {
+      return Response.json({ status: 'skipped', reason: 'no googleEventId or teacherEmail' });
     }
+
+    // Entity automation'dan geldiği için "current user" yok.
+    // teacherEmail üzerinden öğretmenin userId'sini bulup token al.
+    let teacherUsers;
+    try {
+      teacherUsers = await base44.asServiceRole.entities.User.filter({ email: data.teacherEmail });
+    } catch (e) {
+      return Response.json({ status: 'skipped', reason: 'teacher lookup failed' });
+    }
+
+    if (!teacherUsers || teacherUsers.length === 0) {
+      return Response.json({ status: 'skipped', reason: 'teacher not found' });
+    }
+
+    const teacherId = teacherUsers[0].id;
 
     let accessToken;
     try {
-      accessToken = await base44.asServiceRole.connectors.getCurrentAppUserAccessToken(CONNECTOR_ID);
+      const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID, { userId: teacherId });
+      accessToken = conn.accessToken;
     } catch (e) {
-      return Response.json({ status: 'skipped', reason: 'not connected' });
+      return Response.json({ status: 'skipped', reason: 'not connected: ' + e.message });
     }
 
     const delRes = await fetch(

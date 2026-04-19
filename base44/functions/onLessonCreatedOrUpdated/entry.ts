@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = '69d0d68af50f7f9115160538';
 
@@ -30,9 +30,11 @@ Deno.serve(async (req) => {
     const teacherId = teacherUsers[0].id;
 
     // Get access token for the teacher using their user ID
+    // We impersonate the teacher by building a service-role client scoped to their userId
     let accessToken;
     try {
-      accessToken = await base44.asServiceRole.connectors.getAppUserAccessToken(CONNECTOR_ID, teacherId);
+      const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID, { userId: teacherId });
+      accessToken = conn.accessToken;
     } catch (e) {
       // Teacher hasn't connected Google Calendar — skip silently
       return Response.json({ status: 'skipped', reason: 'not connected: ' + e.message });

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = '69d0d68af50f7f9115160538';
 
@@ -10,7 +10,8 @@ Deno.serve(async (req) => {
       return Response.json({ connected: false }, { status: 401 });
     }
 
-    const accessToken = await base44.asServiceRole.connectors.getCurrentAppUserAccessToken(CONNECTOR_ID);
+    // getCurrentAppUserConnection doğru yöntem
+    const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
     if (!accessToken) {
       return Response.json({ connected: false });
     }
