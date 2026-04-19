@@ -221,7 +221,8 @@ function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNa
 }
 
 function MobileSubscriptionButton({ plan, daysLeft, onOpenModal }) {
-  const label = plan === 'expired' ? 'Yenile' : plan === 'trialing' && daysLeft !== null ? `${daysLeft}g • Abone Ol` : 'Abone Ol';
+  const { t } = useTranslation();
+  const label = plan === 'expired' ? t('teacher.layout.renew') : plan === 'trialing' && daysLeft !== null ? `${daysLeft}g • ${t('teacher.layout.subscribe')}` : t('teacher.layout.subscribe');
   return (
     <button onClick={onOpenModal} style={{
       display: 'flex', alignItems: 'center', gap: '0.35rem',
@@ -248,7 +249,7 @@ export default function Layout({ children, currentPageName }) {
     { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'HomeworkAnalytics', 'TeacherReports', 'TeacherMessages'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
-    { label: 'Asistan', icon: Bot, page: 'TeacherAssistant', multiLine: false },
+    { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant', multiLine: false },
   ];
 
   const TEACHER_NAV = [
@@ -522,9 +523,9 @@ export default function Layout({ children, currentPageName }) {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
               <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
-                {plan === 'trialing' ? 'Deneme Süresi' : plan === 'expired' ? 'Abonelik Süresi Doldu' : 'Ücretsiz Plan'}
+                {plan === 'trialing' ? t('teacher.layout.trialPeriod') : plan === 'expired' ? t('teacher.layout.subscriptionExpired') : t('teacher.layout.freePlan')}
                 {plan === 'trialing' && daysLeft !== null && (
-                  <span style={{ marginLeft: 6, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24', fontWeight: 800 }}>{daysLeft} gün kaldı</span>
+                  <span style={{ marginLeft: 6, color: daysLeft < 5 ? '#fca5a5' : '#fbbf24', fontWeight: 800 }}>{daysLeft} {t('teacher.layout.daysLeft')}</span>
                 )}
               </span>
               <MobileSubscriptionButton plan={plan} daysLeft={daysLeft} onOpenModal={() => setShowProModal(true)} />
