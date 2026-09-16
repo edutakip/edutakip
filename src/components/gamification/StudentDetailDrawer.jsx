@@ -5,7 +5,7 @@ import { ALL_BADGES, getLevel } from './StudentGamification';
 export default function StudentDetailDrawer({ row, rank, onClose }) {
   if (!row) return null;
 
-  const { student, points, earnedBadgeIds, attended, missedCount, completedHW, totalHW, avgRating, lvl, badges } = row;
+  const { student, points, earnedBadgeIds, attended, missedCount, completedHW, totalHW, avgRating, lvl, badges, pointsAdjustment } = row;
   const lockedBadges = ALL_BADGES.filter(b => !earnedBadgeIds.has(b.id));
 
   const avatarColors = ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#f97316', '#8b5cf6'];
@@ -44,6 +44,11 @@ export default function StudentDetailDrawer({ row, rank, onClose }) {
             <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
               <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', lineHeight: 1 }}>{points}</div>
               <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase' }}>puan</div>
+              {pointsAdjustment ? (
+                <div style={{ fontSize: '0.65rem', color: pointsAdjustment > 0 ? '#86efac' : '#fca5a5', fontWeight: 700, marginTop: '0.15rem' }}>
+                  {pointsAdjustment > 0 ? '+' : ''}{pointsAdjustment} manuel
+                </div>
+              ) : null}
             </div>
           </div>
 

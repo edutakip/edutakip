@@ -88,6 +88,15 @@
     },
     "user_email": {
       "type": "string"
+    },
+    "pointsAdjustment": {
+      "type": "number",
+      "default": 0,
+      "description": "\u00d6\u011fretmenin manuel puan ekleme/\u00e7\u0131karma miktar\u0131 (ClassDojo tarz\u0131)"
+    },
+    "pointsNote": {
+      "type": "string",
+      "description": "Manuel puan d\u00fczenleme notu"
     }
   },
   "required": [
