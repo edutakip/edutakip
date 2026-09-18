@@ -308,13 +308,29 @@ export default function Layout({ children, currentPageName }) {
   const isNarrowMobile = windowWidth < 430;
 
   useEffect(() => {
-    if (role === 'teacher') {
-      import('@/api/base44Client').then(({ base44 }) => {
-        base44.auth.me().then(me => {
-          base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }).then(setFabStudents).catch(() => {});
-        }).catch(() => {});
-      });
-    }
+    if (role !== 'teacher') return;
+    const loadTeacherData = async () => {
+      try {
+        const { base44 } = await import('@/api/base44Client');
+        const me = await base44.auth.me();
+        const [lessons, students] = await Promise.all([
+          base44.entities.Lesson.filter({ teacherEmail: me.email }),
+          base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+        ]);
+        setFabStudents(students);
+        const d = new Date();
+        const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const active = lessons.some(l =>
+          l.date === todayStr && l.startTime && l.endTime &&
+          l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
+        );
+        setHasActiveLesson(active);
+      } catch {}
+    };
+    loadTeacherData();
+    const interval = setInterval(loadTeacherData, 120000);
+    return () => clearInterval(interval);
   }, [role]);
 
   useEffect(() => {
@@ -347,30 +363,6 @@ export default function Layout({ children, currentPageName }) {
       base44.auth.me().then(setUser).catch(() => {});
     });
   }, []);
-
-  useEffect(() => {
-    if (role !== 'teacher') return;
-    const checkActive = async () => {
-      try {
-        const { base44 } = await import('@/api/base44Client');
-        const me = await base44.auth.me();
-        const lessons = await base44.entities.Lesson.filter({ teacherEmail: me.email });
-        const d = new Date();
-        const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const active = lessons.some(l =>
-          l.date === todayStr && l.startTime && l.endTime &&
-          l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
-        );
-        setHasActiveLesson(active);
-      } catch {}
-    };
-    checkActive();
-    const interval = setInterval(checkActive, 60000);
-    const onFocus = () => checkActive();
-    window.addEventListener('focus', onFocus);
-    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
-  }, [role]);
 
   if (currentPageName === 'Landing') {
     return <div>{children}</div>;
