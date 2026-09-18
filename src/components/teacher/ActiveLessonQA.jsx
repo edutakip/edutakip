@@ -78,7 +78,7 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
           notes: notesSummary,
         }),
         base44.entities.LessonReport.create({
-          lessonId: manual ? null : lesson.id,
+          lessonId: lesson.id,
           studentId: lesson.studentId,
           studentName: lesson.studentName,
           teacherEmail: me.email,
