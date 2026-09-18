@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
-import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight, History } from 'lucide-react';
+import { X, Edit2, Save, Phone, Mail, BookOpen, Calendar, DollarSign, Archive, ArchiveRestore, Loader2, User, Clock, ChevronRight, History, Send, CheckCircle, Clock3 } from 'lucide-react';
 import PaymentHistoryModal from './PaymentHistoryModal';
 import ScheduleSlotEditor from './ScheduleSlotEditor';
 import { useTranslation } from 'react-i18next';
@@ -67,6 +67,8 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
   const [form, setForm] = useState({ ...student });
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   const [editingSlot, setEditingSlot] = useState(null);
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
   const isMobile = useWindowSize() < 640;
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -104,12 +106,26 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
       name: form.name, grade: form.grade, subject: form.subject,
       phone: form.phone, feePerLesson: Number(form.feePerLesson) || 0,
       lessonDuration: Number(form.lessonDuration) || 60,
+      weeklyLessons: Number(form.weeklyLessons) || 1,
       parentName: form.parentName, parentPhone: form.parentPhone, parentEmail: form.parentEmail,
       resourceName: form.resourceName, notes: form.notes,
     });
     setLoading(false);
     setEditing(false);
     onSaved();
+  };
+
+  const sendInvite = async () => {
+    if (!student.parentEmail) return;
+    setInviteSending(true);
+    try {
+      await base44.users.inviteUser(student.parentEmail, 'user');
+      await base44.entities.Student.update(student.id, { parentInviteSent: true });
+      setInviteSent(true);
+    } catch (e) {
+      console.error('Davet gönderilemedi:', e);
+    }
+    setInviteSending(false);
   };
 
   const toggleArchive = async () => {
@@ -294,6 +310,10 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                     <input style={inp} type="number" value={form.lessonDuration || 60} onChange={e => u('lessonDuration', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
                   </Field>
+                  <Field label={isEn ? "Weekly Lessons" : "Haftalık Ders Sayısı"}>
+                    <input style={inp} type="number" min="1" value={form.weeklyLessons || 1} onChange={e => u('weeklyLessons', e.target.value)}
+                      onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                  </Field>
                   <Field label={isEn ? "Parent Name" : "Veli Adı"}>
                     <input style={inp} value={form.parentName || ''} onChange={e => u('parentName', e.target.value)}
                       onFocus={e => e.target.style.borderColor = '#f97316'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
@@ -342,6 +362,41 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                   </div>
                 ))}
               </div>
+            </Section>
+
+            {/* Veli Davet */}
+            <Section title={isEn ? "Parent Invite" : "Veli Daveti"} icon={Mail}>
+              {!student.parentEmail ? (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem' }}>{isEn ? 'No parent email — add one via Edit.' : 'Veli e-postası yok — Düzenle ile ekleyin.'}</p>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    {student.inviteAccepted ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: '700', color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', padding: '0.25rem 0.6rem', borderRadius: '7px' }}>
+                        <CheckCircle size={12} /> {isEn ? 'Accepted' : 'Kabul Edildi'}
+                      </span>
+                    ) : (student.parentInviteSent || inviteSent) ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: '700', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', padding: '0.25rem 0.6rem', borderRadius: '7px' }}>
+                        <Clock3 size={12} /> {isEn ? 'Pending' : 'Bekliyor'}
+                      </span>
+                    ) : (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: '700', color: '#9ca3af', background: 'rgba(156,163,175,0.12)', border: '1px solid rgba(156,163,175,0.3)', padding: '0.25rem 0.6rem', borderRadius: '7px' }}>
+                        <Mail size={12} /> {isEn ? 'Not Sent' : 'Davet Yok'}
+                      </span>
+                    )}
+                  </div>
+                  <button onClick={sendInvite} disabled={inviteSending || student.inviteAccepted}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.4)', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontWeight: '700', fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', opacity: student.inviteAccepted ? 0.5 : 1 }}>
+                    {inviteSending ? <Loader2 size={13} className='animate-spin' /> : <Send size={13} />}
+                    {(student.parentInviteSent || inviteSent) && !student.inviteAccepted
+                      ? (isEn ? 'Resend Invite' : 'Yeniden Davet Gönder')
+                      : (isEn ? 'Send Invite' : 'Davet Gönder')}
+                  </button>
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem', marginTop: '0.5rem', lineHeight: 1.5 }}>
+                    {isEn ? 'Parent will receive an email to set their password and auto-connect on login.' : 'Veli e-posta alır, şifresini belirler ve giriş yapınca otomatik bağlanır.'}
+                  </p>
+                </>
+              )}
             </Section>
 
             {/* Son Dersler */}

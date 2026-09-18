@@ -72,6 +72,11 @@
       "type": "boolean",
       "default": false
     },
+    "parentInviteSent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Veliye davet e-postas\u0131 g\u00f6nderilip g\u00f6nderilmedi\u011fi"
+    },
     "notes": {
       "type": "string"
     },

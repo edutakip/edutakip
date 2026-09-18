@@ -24,7 +24,8 @@ export default function ParentDashboard() {
   }, []);
 
   const loadStudentData = async (email) => {
-    const all = await base44.entities.Student.filter({ parentEmail: email, inviteAccepted: true });
+    // E-posta eşleşmesiyle otomatik bağlanma (inviteAccepted zorunlu değil)
+    const all = await base44.entities.Student.filter({ parentEmail: email });
     if (all.length > 0) {
       const s = all[0];
       setStudent(s);
