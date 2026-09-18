@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Radio, Clock, BookOpen, ChevronRight, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { Radio, Clock, BookOpen, ChevronRight, ArrowLeft, CheckCircle, AlertCircle, BarChart2, FilePlus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ActiveLessonQA from '@/components/teacher/ActiveLessonQA';
 
@@ -17,6 +17,8 @@ export default function ActiveLesson() {
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(new Date());
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [manualStudent, setManualStudent] = useState(null);
+  const [showStudentSelect, setShowStudentSelect] = useState(false);
 
   const loadData = async () => {
     const me = await base44.auth.me();
@@ -90,6 +92,30 @@ export default function ActiveLesson() {
         student={student}
         payments={payments}
         onBack={() => { setSelectedLesson(null); navigate('/ActiveLesson'); }}
+        onSaved={() => { loadData(); }}
+      />
+    );
+  }
+
+  // ── Manuel rapor akışı ──
+  if (manualStudent) {
+    const syntheticLesson = {
+      id: 'manual-' + Date.now(),
+      studentId: manualStudent.id,
+      studentName: manualStudent.name,
+      subject: manualStudent.subject || '',
+      date: todayStr,
+      startTime: null,
+      endTime: null,
+      lessonFee: manualStudent.feePerLesson || 0,
+    };
+    return (
+      <ActiveLessonQA
+        lesson={syntheticLesson}
+        student={manualStudent}
+        payments={payments}
+        manual={true}
+        onBack={() => setManualStudent(null)}
         onSaved={() => { loadData(); }}
       />
     );
@@ -174,6 +200,33 @@ export default function ActiveLesson() {
             <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>{t('activeLesson.noActiveDesc')}</p>
           </div>
 
+          {/* Hızlı aksiyonlar */}
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowStudentSelect(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.85rem 1.25rem', borderRadius: 14, border: 'none',
+                background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white',
+                fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(79,70,229,0.25)', transition: 'all 0.15s',
+              }}
+            >
+              <FilePlus size={18} /> {t('activeLesson.addManualReport')}
+            </button>
+            <button
+              onClick={() => navigate('/TeacherReports')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.85rem 1.25rem', borderRadius: 14,
+                border: '1.5px solid #e5e7eb', background: 'white', color: '#4f46e5',
+                fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              <BarChart2 size={18} /> {t('activeLesson.viewReports')}
+            </button>
+          </div>
+
           {/* Bugünkü yaklaşan dersler */}
           {upcomingToday.length > 0 && (
             <div style={{ marginTop: '1.5rem' }}>
@@ -199,6 +252,32 @@ export default function ActiveLesson() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Öğrenci seçme modalı */}
+      {showStudentSelect && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowStudentSelect(false)}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 380, boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>{t('activeLesson.selectStudent')}</h2>
+              <button onClick={() => setShowStudentSelect(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 0 }}><X size={20} /></button>
+            </div>
+            <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginBottom: '1.25rem' }}>{t('activeLesson.selectStudentDesc')}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 300, overflowY: 'auto' }}>
+              {students.filter(s => s.status !== 'archived').map(s => (
+                <button key={s.id} onClick={() => { setManualStudent(s); setShowStudentSelect(false); }} style={{ padding: '0.75rem 1rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#111827', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.75rem', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#6366f1'; }} onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: getColor(s.name), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'white' }}>{getInitials(s.name)}</span>
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div>{s.name}</div>
+                    {s.subject && <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 400 }}>{s.subject}</div>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

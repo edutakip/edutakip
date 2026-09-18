@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Star, X, Save, CheckCircle } from 'lucide
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 
-export default function ActiveLessonQA({ lesson, student, payments, onBack, onSaved }) {
+export default function ActiveLessonQA({ lesson, student, payments, onBack, onSaved, manual }) {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -71,14 +71,14 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
       // Öğrenci ücreti
       const fee = lesson.lessonFee || student?.feePerLesson || 0;
 
-      // Lesson güncelle + LessonReport oluştur (paralel)
+      // Lesson güncelle (manuel modda atla) + LessonReport oluştur (paralel)
       await Promise.all([
-        base44.entities.Lesson.update(lesson.id, {
+        manual ? Promise.resolve() : base44.entities.Lesson.update(lesson.id, {
           status: 'tamamlandı',
           notes: notesSummary,
         }),
         base44.entities.LessonReport.create({
-          lessonId: lesson.id,
+          lessonId: manual ? null : lesson.id,
           studentId: lesson.studentId,
           studentName: lesson.studentName,
           teacherEmail: me.email,
@@ -101,8 +101,8 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
         await base44.entities.Payment.create({
           studentId: lesson.studentId, studentName: lesson.studentName,
           teacherEmail: me.email, amount: fee, date: lesson.date,
-          status: 'bekliyor', description: `${lesson.subject || 'Ders'} - ${lesson.date} ${lesson.startTime?.slice(0,5) || ''}`,
-          month: lesson.date?.slice(0, 7), lessonId: lesson.id,
+          status: 'bekliyor', description: `${lesson.subject || 'Ders'} - ${lesson.date}${manual ? ' (Manuel)' : ' ' + (lesson.startTime?.slice(0,5) || '')}`,
+          month: lesson.date?.slice(0, 7), lessonId: manual ? null : lesson.id,
         });
       }
 
@@ -150,13 +150,15 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'white' }}>{lesson.studentName}</div>
             <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.15rem' }}>
-              {lesson.subject} · {lesson.startTime?.slice(0,5)} - {lesson.endTime?.slice(0,5)}
+              {lesson.subject}{manual ? ` · ${t('activeLesson.manualMode')}` : ` · ${lesson.startTime?.slice(0,5)} - ${lesson.endTime?.slice(0,5)}`}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: 700, color: '#fca5a5', background: 'rgba(239,68,68,0.15)', padding: '0.25rem 0.65rem', borderRadius: 20 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', animation: 'al-pulse 1.5s ease-in-out infinite' }} />
-            {t('activeLesson.live')}
-          </div>
+          {!manual && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: 700, color: '#fca5a5', background: 'rgba(239,68,68,0.15)', padding: '0.25rem 0.65rem', borderRadius: 20 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', animation: 'al-pulse 1.5s ease-in-out infinite' }} />
+              {t('activeLesson.live')}
+            </div>
+          )}
         </div>
 
         {/* Progress bar */}

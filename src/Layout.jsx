@@ -246,7 +246,8 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
-    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['ActiveLesson', 'TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'HomeworkAnalytics', 'TeacherReports', 'TeacherMessages'], multiLine: true },
+    { label: t('teacher.layout.activeLesson'), icon: Radio, page: 'ActiveLesson' },
+    { label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen, submenu: ['TeacherStudents', 'TeacherLessons', 'TeacherHomework', 'AIHomeworkGenerator', 'HomeworkAnalytics', 'TeacherReports', 'TeacherMessages'], multiLine: true },
     { label: t('teacher.layout.calendar'), icon: CalendarDays, page: 'TeacherCalendar' },
     { label: t('teacher.layout.finance'), icon: DollarSign, financeSubmenu: true, multiLine: false },
     { label: t('teacher.layout.assistant'), icon: Bot, page: 'TeacherAssistant', multiLine: false },
@@ -254,10 +255,10 @@ export default function Layout({ children, currentPageName }) {
 
   const TEACHER_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
+    { label: t('teacher.layout.activeLesson'), icon: Radio, page: 'ActiveLesson' },
     {
       label: t('teacher.layout.lessonMgmtGroup'), icon: BookOpen,
       submenu: [
-        { label: t('teacher.layout.activeLesson'), icon: Radio, page: 'ActiveLesson' },
         { label: t('teacher.layout.aiHomework'), icon: Sparkles, page: 'AIHomeworkGenerator' },
         { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
         { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
@@ -298,6 +299,7 @@ export default function Layout({ children, currentPageName }) {
   const [derslerOpen, setDerslerOpen] = useState(false);
   const [finansOpen, setFinansOpen] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
+  const [hasActiveLesson, setHasActiveLesson] = useState(false);
 
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
@@ -345,6 +347,30 @@ export default function Layout({ children, currentPageName }) {
       base44.auth.me().then(setUser).catch(() => {});
     });
   }, []);
+
+  useEffect(() => {
+    if (role !== 'teacher') return;
+    const checkActive = async () => {
+      try {
+        const { base44 } = await import('@/api/base44Client');
+        const me = await base44.auth.me();
+        const lessons = await base44.entities.Lesson.filter({ teacherEmail: me.email });
+        const d = new Date();
+        const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const active = lessons.some(l =>
+          l.date === todayStr && l.startTime && l.endTime &&
+          l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
+        );
+        setHasActiveLesson(active);
+      } catch {}
+    };
+    checkActive();
+    const interval = setInterval(checkActive, 60000);
+    const onFocus = () => checkActive();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
+  }, [role]);
 
   if (currentPageName === 'Landing') {
     return <div>{children}</div>;
@@ -414,6 +440,9 @@ export default function Layout({ children, currentPageName }) {
               onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}>
               <Icon size={17} style={{ flexShrink: 0 }} />
               {!collapsed && <span>{item.label}</span>}
+              {item.page === 'ActiveLesson' && hasActiveLesson && (
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'al-pulse-nav 1.5s ease-in-out infinite', flexShrink: 0, marginLeft: '0.35rem', boxShadow: '0 0 6px rgba(239,68,68,0.6)' }} />
+              )}
             </Link>
           );
         })}
@@ -514,6 +543,7 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
+        <style>{`@keyframes al-pulse-nav { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }`}</style>
 
         {/* ── Üst şerit (sadece pro değilse) ── */}
         {showSubscriptionChip && (
@@ -611,7 +641,6 @@ export default function Layout({ children, currentPageName }) {
               minWidth: '160px',
             }}>
               {[
-                { label: t('teacher.layout.activeLesson'), icon: Radio, page: 'ActiveLesson' },
                 { label: t('teacher.layout.aiHomework'), icon: Sparkles, page: 'AIHomeworkGenerator' },
                 { label: t('teacher.layout.myStudents'), icon: Users, page: 'TeacherStudents' },
                 { label: t('teacher.layout.lessons'), icon: BookOpen, page: 'TeacherLessons' },
@@ -619,7 +648,6 @@ export default function Layout({ children, currentPageName }) {
                 { label: t('teacher.layout.homeworkAnalytics'), icon: PieChart, page: 'HomeworkAnalytics' },
                 { label: t('teacher.layout.progressReports'), icon: BarChart2, page: 'TeacherReports' },
                 { label: t('teacher.layout.parentComm'), icon: MessageCircle, page: 'TeacherMessages' },
-
               ].map((item, i) => {
                 const Icon = item.icon;
                 const isActive = item.page === currentPageName;
@@ -690,7 +718,12 @@ export default function Layout({ children, currentPageName }) {
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}>
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+                <div style={{ position: 'relative' }}>
+                  <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+                  {item.page === 'ActiveLesson' && hasActiveLesson && (
+                    <span style={{ position: 'absolute', top: -2, right: -4, width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'al-pulse-nav 1.5s ease-in-out infinite', boxShadow: '0 0 6px rgba(239,68,68,0.7)' }} />
+                  )}
+                </div>
                 <span style={{ fontSize: '0.58rem', fontWeight: isActive ? '700' : '400', whiteSpace: 'normal', letterSpacing: '0.1px', textAlign: 'center', lineHeight: 1.2, maxWidth: 44 }}>
                   {(item.submenu || item.financeSubmenu) ? <>{item.label} ›</> : labelText}
                 </span>
@@ -787,6 +820,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <LoadingBar active={navigating} />
+      <style>{`@keyframes al-pulse-nav { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }`}</style>
 
       <aside style={{
         width: sideW, flexShrink: 0,
