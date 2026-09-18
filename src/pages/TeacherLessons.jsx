@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { format, parseISO, differenceInMinutes, isToday, isPast } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
-import { Plus, CheckCircle, XCircle, Filter, BookOpen, Pencil, ClipboardList, Clock, Phone, ChevronDown } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, Filter, BookOpen, Pencil, ClipboardList, Clock, Phone, ChevronDown, Radio } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import LessonModal from '../components/teacher/LessonModal';
 import LessonReportModal from '../components/teacher/LessonReportModal';
 
@@ -15,6 +16,7 @@ const STATUS_CONFIG_TR = {
 
 export default function TeacherLessons() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const dateLocale = i18n.language?.startsWith('tr') ? tr : enUS;
   const STATUS_CONFIG = {
     planlandı:  { ...STATUS_CONFIG_TR.planlandı, label: t('teacher.lessons.planned') },
@@ -32,8 +34,29 @@ export default function TeacherLessons() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+  const [now, setNow] = useState(new Date());
+  const [activeBadgeLesson, setActiveBadgeLesson] = useState(null);
 
   useEffect(() => { loadData(); }, []);
+
+  // Aktif ders rozeti için saati güncelle
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const todayStr = (() => {
+    const d = now;
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  })();
+  const nowTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const isLessonActiveNow = (lesson) =>
+    lesson.date === todayStr &&
+    lesson.startTime && lesson.endTime &&
+    lesson.startTime <= nowTime &&
+    lesson.endTime > nowTime &&
+    lesson.status === 'planlandı';
 
   // Modal açıkken body scroll'u kilitle
   useEffect(() => {
@@ -292,6 +315,22 @@ export default function TeacherLessons() {
                             )}
                           </div>
 
+                          {/* Aktif ders rozeti (yanıp sönen kırmızı) */}
+                          {isLessonActiveNow(lesson) && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setActiveBadgeLesson(lesson); }}
+                              title={t('activeLesson.badgeTooltip')}
+                              style={{
+                                width: 32, height: 32, borderRadius: '50%', border: 'none',
+                                background: '#ef4444', cursor: 'pointer', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                boxShadow: '0 0 0 0 rgba(239,68,68,0.5)', animation: 'tl-badge-pulse 1.5s ease-in-out infinite',
+                              }}
+                            >
+                              <Radio size={16} color='white' />
+                            </button>
+                          )}
+
                           {/* Expand ikonu */}
                           <ChevronDown size={16} color="#9ca3af" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
                         </div>
@@ -331,6 +370,49 @@ export default function TeacherLessons() {
           })}
         </div>
       )}
+
+      {/* Aktif ders rozet onay diyaloğu */}
+      {activeBadgeLesson && (
+        <div
+          onClick={() => setActiveBadgeLesson(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 400, padding: '1.75rem', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', textAlign: 'center' }}
+          >
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', animation: 'tl-badge-pulse 1.5s ease-in-out infinite' }}>
+              <Radio size={26} color='#ef4444' />
+            </div>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>{t('activeLesson.confirmTitle')}</h3>
+            <p style={{ fontSize: '0.88rem', color: '#6b7280', lineHeight: 1.5, marginBottom: '1.5rem' }}>
+              {t('activeLesson.confirmDesc', { name: activeBadgeLesson.studentName, time: activeBadgeLesson.startTime?.slice(0,5) })}
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => setActiveBadgeLesson(null)}
+                style={{ flex: 1, padding: '0.7rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                {t('activeLesson.confirmCancel')}
+              </button>
+              <button
+                onClick={() => { const l = activeBadgeLesson; setActiveBadgeLesson(null); navigate(`/ActiveLesson?lessonId=${l.id}`); }}
+                style={{ flex: 1, padding: '0.7rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.3)' }}
+              >
+                {t('activeLesson.confirmGo')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes tl-badge-pulse {
+          0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); transform: scale(1); }
+          50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); transform: scale(1.08); }
+          100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); transform: scale(1); }
+        }
+      `}</style>
 
       {reportLesson && <LessonReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} onSaved={loadData} />}
       {showModal && (

@@ -26,6 +26,7 @@ import Calculator from './pages/Calculator';
 import AIHomeworkGenerator from './pages/AIHomeworkGenerator';
 import HomeworkAnalytics from './pages/HomeworkAnalytics';
 import HomeworkSolver from './pages/HomeworkSolver';
+import ActiveLesson from './pages/ActiveLesson';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -206,6 +207,7 @@ const AuthenticatedApp = () => {
       <Route path="/AIHomeworkGenerator" element={<LayoutWrapper currentPageName="AIHomeworkGenerator"><AIHomeworkGenerator /></LayoutWrapper>} />
       <Route path="/HomeworkAnalytics" element={<LayoutWrapper currentPageName="HomeworkAnalytics"><HomeworkAnalytics /></LayoutWrapper>} />
       <Route path="/HomeworkSolver" element={<HomeworkSolver />} />
+      <Route path="/ActiveLesson" element={<LayoutWrapper currentPageName="ActiveLesson"><ActiveLesson /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
