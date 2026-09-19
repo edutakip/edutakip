@@ -52,6 +52,7 @@ function ProfileTab({ user, onUpdate }) {
   const isEn = i18n.language === 'en';
   const [form, setForm] = useState({ full_name: user?.full_name || '', phone: user?.phone || '' });
   const [saving, setSaving] = useState(false);
+  const [showResetInfo, setShowResetInfo] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -115,11 +116,35 @@ function ProfileTab({ user, onUpdate }) {
             <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', margin: 0 }}>{isEn ? 'Password reset link' : 'Şifre sıfırlama bağlantısı'}</p>
             <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>{isEn ? 'Clicking will sign you out and send a password reset link to your email.' : 'Butona tıkladığınızda çıkış yapılır ve e-postanıza şifre sıfırlama bağlantısı gönderilir.'}</p>
           </div>
-          <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout(); }} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          <button onClick={() => setShowResetInfo(true)} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             {isEn ? 'Reset Password' : 'Şifremi Sıfırla'}
           </button>
         </div>
       </SectionCard>
+
+      {showResetInfo && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '2rem', maxWidth: 420, width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <Lock size={24} color='#4f46e5' />
+            </div>
+            <h3 style={{ textAlign: 'center', fontWeight: 800, color: '#111827', fontSize: '1.05rem', marginBottom: '0.75rem' }}>{isEn ? 'Password Reset' : 'Şifre Sıfırlama'}</h3>
+            <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.85rem', lineHeight: 1.65, marginBottom: '1.5rem' }}>
+              {isEn
+                ? 'You will be signed out and redirected to the login page. There, click the "Forgot Password" link to receive a password reset email.'
+                : 'Çıkış yapılacak ve giriş sayfasına yönlendirileceksiniz. Orada "Şifremi Unuttum" bağlantısına tıklayarak şifre sıfırlama e-postası alabilirsiniz.'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout(); }} style={{ padding: '0.8rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <LogOut size={14} /> {isEn ? 'Continue' : 'Devam Et'}
+              </button>
+              <button onClick={() => setShowResetInfo(false)} style={{ padding: '0.75rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
+                {isEn ? 'Cancel' : 'Vazgeç'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SectionCard title={isEn ? "Account" : "Hesap"} icon={LogOut} subtitle={isEn ? "Account actions" : "Hesap işlemleri"}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0' }}>
