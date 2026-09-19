@@ -313,6 +313,7 @@ export default function Layout({ children, currentPageName }) {
       try {
         const { base44 } = await import('@/api/base44Client');
         const me = await base44.auth.me();
+        setUser(me);
         const [lessons, students] = await Promise.all([
           base44.entities.Lesson.filter({ teacherEmail: me.email }),
           base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
@@ -331,6 +332,14 @@ export default function Layout({ children, currentPageName }) {
     loadTeacherData();
     const interval = setInterval(loadTeacherData, 120000);
     return () => clearInterval(interval);
+  }, [role]);
+
+  useEffect(() => {
+    if (role !== 'teacher') {
+      import('@/api/base44Client').then(({ base44 }) => {
+        base44.auth.me().then(setUser).catch(() => {});
+      });
+    }
   }, [role]);
 
   useEffect(() => {
@@ -358,11 +367,7 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  React.useEffect(() => {
-    import('@/api/base44Client').then(({ base44 }) => {
-      base44.auth.me().then(setUser).catch(() => {});
-    });
-  }, []);
+
 
   if (currentPageName === 'Landing') {
     return <div>{children}</div>;
