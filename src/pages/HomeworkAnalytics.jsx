@@ -64,14 +64,17 @@ export default function HomeworkAnalytics() {
 
   useEffect(() => {
     (async () => {
-      const me = await base44.auth.me();
-      const [hws, stds] = await Promise.all([
-        base44.entities.Homework.filter({ teacherEmail: me.email }, '-created_date', 500),
-        base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-      ]);
-      setHomeworks(hws);
-      setStudents(stds);
-      setLoading(false);
+      try {
+        const me = await base44.auth.me();
+        const hws = await base44.entities.Homework.filter({ teacherEmail: me.email }, '-created_date', 500);
+        setHomeworks(hws);
+        const stds = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
+        setStudents(stds);
+      } catch (e) {
+        console.error('Analytics load error:', e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 

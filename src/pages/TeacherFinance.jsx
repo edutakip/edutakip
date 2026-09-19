@@ -226,14 +226,18 @@ export default function TeacherFinance() {
   }, []);
 
   const loadAll = async () => {
-    const me = await base44.auth.me();
-    setCurrentUser(me);
-    const [p, s, l] = await Promise.all([
-      base44.entities.Payment.filter({ teacherEmail: me.email }),
-      base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-      base44.entities.Lesson.filter({ teacherEmail: me.email }),
-    ]);
-    setPayments(p); setStudents(s); setLessons(l);
+    try {
+      const me = await base44.auth.me();
+      setCurrentUser(me);
+      const p = await base44.entities.Payment.filter({ teacherEmail: me.email });
+      setPayments(p);
+      const s = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
+      setStudents(s);
+      const l = await base44.entities.Lesson.filter({ teacherEmail: me.email });
+      setLessons(l);
+    } catch (e) {
+      console.error('Finance load error:', e);
+    }
   };
 
   const totalIncome = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);

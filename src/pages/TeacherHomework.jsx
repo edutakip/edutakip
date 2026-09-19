@@ -708,21 +708,24 @@ export default function TeacherHomework() {
 
   useEffect(() => {
     (async () => {
-      const user = await base44.auth.me();
-      setMe(user);
-      const [h, s] = await Promise.all([
-        base44.entities.Homework.filter({ teacherEmail: user.email }, '-created_date'),
-        base44.entities.Student.filter({ teacherEmail: user.email, status: 'active' }),
-      ]);
-      const updated = h.map(hw => {
-        if (hw.status === 'verildi' && hw.dueDate && isPast(new Date(hw.dueDate + 'T23:59:59'))) {
-          return { ...hw, status: 'gecikmiş' };
-        }
-        return hw;
-      });
-      setHomeworks(updated);
-      setStudents(s);
-      setTimeout(() => setLoaded(true), 50);
+      try {
+        const user = await base44.auth.me();
+        setMe(user);
+        const h = await base44.entities.Homework.filter({ teacherEmail: user.email }, '-created_date');
+        const updated = h.map(hw => {
+          if (hw.status === 'verildi' && hw.dueDate && isPast(new Date(hw.dueDate + 'T23:59:59'))) {
+            return { ...hw, status: 'gecikmiş' };
+          }
+          return hw;
+        });
+        setHomeworks(updated);
+        const s = await base44.entities.Student.filter({ teacherEmail: user.email, status: 'active' });
+        setStudents(s);
+      } catch (e) {
+        console.error('Homework load error:', e);
+      } finally {
+        setTimeout(() => setLoaded(true), 50);
+      }
     })();
   }, []);
 

@@ -12,9 +12,7 @@ const _base44 = createClient({
   appBaseUrl
 });
 
-// ── Global auth.me() cache ─────────────────────────────────────
-// Every page/component calls base44.auth.me() on mount, causing
-// 8+ redundant API calls per page load → rate limit exceeded.
+// ── Global auth.me() cache (60s) ──────────────────────────────
 let _cachedUser = null;
 let _cachedUserTime = 0;
 const _USER_CACHE_TTL = 60000;
@@ -22,9 +20,7 @@ const _USER_CACHE_TTL = 60000;
 const _originalMe = _base44.auth.me.bind(_base44.auth);
 _base44.auth.me = async function () {
   const now = Date.now();
-  if (_cachedUser && now - _cachedUserTime < _USER_CACHE_TTL) {
-    return _cachedUser;
-  }
+  if (_cachedUser && now - _cachedUserTime < _USER_CACHE_TTL) return _cachedUser;
   try {
     const user = await _originalMe();
     _cachedUser = user;
@@ -37,25 +33,38 @@ _base44.auth.me = async function () {
   }
 };
 
-// ── Entity filter/list cache + dedup + retry via Proxy ─────────
-// Wraps base44.entities so every filter/list call is cached for 30s
-// and deduplicated (concurrent identical calls share one request).
-// Write operations invalidate the cache for that entity.
+// ── Global API call queue ─────────────────────────────────────
+// Serializes ALL entity API calls with a small gap so they never
+// burst and trigger rate-limit, regardless of how many pages fire
+// calls simultaneously.
+let _apiQueue = Promise.resolve();
+const _API_GAP_MS = 300;
+
+function _queueCall(fn) {
+  const result = _apiQueue.then(async () => {
+    const data = await fn();
+    await new Promise(r => setTimeout(r, _API_GAP_MS));
+    return data;
+  });
+  // Keep chain alive even if one call fails
+  _apiQueue = result.catch(() => null);
+  return result;
+}
+
+// ── Retry with exponential backoff ────────────────────────────
+async function _retry(fn, retries = 4) {
+  for (let i = 0; i <= retries; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (i === retries) throw e;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+    }
+  }
+}
+
+// ── Entity filter/list cache (30s) + dedup ────────────────────
 const _filterCache = new Map();
 const _FILTER_CACHE_TTL = 30000;
-
-function _retry(fn, retries = 4) {
-  return (async () => {
-    for (let i = 0; i <= retries; i++) {
-      try { return await fn(); }
-      catch (e) {
-        if (i === retries) throw e;
-        const delay = 1000 * Math.pow(2, i); // 1s, 2s, 4s, 8s
-        await new Promise(r => setTimeout(r, delay));
-      }
-    }
-  })();
-}
 
 function _invalidateEntity(entityName) {
   for (const key of _filterCache.keys()) {
@@ -76,14 +85,17 @@ const _entitiesProxy = new Proxy(_base44.entities, {
         const method = entTarget[methodName];
         if (typeof method !== 'function') return method;
 
+        // Cached read methods (filter, list)
         if (CACHE_METHODS.has(methodName)) {
           return function (...args) {
             const key = `${entityName}:${methodName}:${JSON.stringify(args)}`;
             const now = Date.now();
             const cached = _filterCache.get(key);
-            if (cached && now - cached.time < _FILTER_CACHE_TTL) return Promise.resolve(cached.data);
+            if (cached && now - cached.time < _FILTER_CACHE_TTL) {
+              return Promise.resolve(cached.data);
+            }
             if (cached && cached.promise) return cached.promise;
-            const promise = _retry(() => method.apply(entTarget, args)).then(data => {
+            const promise = _queueCall(() => _retry(() => method.apply(entTarget, args))).then(data => {
               _filterCache.set(key, { data, time: Date.now() });
               return data;
             }).catch(e => { _filterCache.delete(key); throw e; });
@@ -92,24 +104,29 @@ const _entitiesProxy = new Proxy(_base44.entities, {
           };
         }
 
+        // Write methods — invalidate cache, queue the call
         if (WRITE_METHODS.has(methodName)) {
           return function (...args) {
             _invalidateEntity(entityName);
-            return method.apply(entTarget, args);
+            return _queueCall(() => method.apply(entTarget, args));
           };
         }
 
-        return method.bind(entTarget);
+        // Other methods (get, schema, subscribe) — queue with retry
+        return function (...args) {
+          return _queueCall(() => _retry(() => method.apply(entTarget, args)));
+        };
       }
     });
   }
 });
 
+// ── Wrap base44 so .entities returns the proxy ────────────────
 const base44 = new Proxy(_base44, {
   get(target, prop) {
     if (prop === 'entities') return _entitiesProxy;
     return target[prop];
-  }
+  },
 });
 
 export { base44 };

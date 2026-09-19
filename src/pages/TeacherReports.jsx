@@ -66,15 +66,18 @@ export default function TeacherReports() {
 
   useEffect(() => {
     (async () => {
-      const me = await base44.auth.me();
-      setCurrentUser(me);
-      const [s, r] = await Promise.all([
-        base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
-        base44.entities.LessonReport.filter({ teacherEmail: me.email }, '-date'),
-      ]);
-      setStudents(s);
-      setReports(r);
-      setLoading(false);
+      try {
+        const me = await base44.auth.me();
+        setCurrentUser(me);
+        const s = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
+        setStudents(s);
+        const r = await base44.entities.LessonReport.filter({ teacherEmail: me.email }, '-date');
+        setReports(r);
+      } catch (e) {
+        console.error('Reports load error:', e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
