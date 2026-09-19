@@ -77,11 +77,13 @@ export default function TeacherLessons() {
   const loadData = async () => {
     try {
       const me = await base44.auth.me();
-      const l = await base44.entities.Lesson.filter({ teacherEmail: me.email }, 'date');
+      const [l, s, p] = await Promise.all([
+        base44.entities.Lesson.filter({ teacherEmail: me.email }, 'date'),
+        base44.entities.Student.filter({ teacherEmail: me.email }),
+        base44.entities.Payment.filter({ teacherEmail: me.email }),
+      ]);
       setLessons(l);
-      const s = await base44.entities.Student.filter({ teacherEmail: me.email });
       setStudents(s);
-      const p = await base44.entities.Payment.filter({ teacherEmail: me.email });
       setPayments(p);
     } catch (e) {
       console.error('Lessons load error:', e);

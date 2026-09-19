@@ -33,44 +33,18 @@ _base44.auth.me = async function () {
   }
 };
 
-// ── Global API call queue ─────────────────────────────────────
-// Serializes ALL entity API calls with a small gap so they never
-// burst and trigger rate-limit, regardless of how many pages fire
-// calls simultaneously.
-let _apiQueue = Promise.resolve();
-const _API_GAP_MS = 500;
-
+// ── Retry with exponential backoff (rate-limit safety net) ───
 function _isRateLimit(e) {
   const msg = (e?.message || String(e || '')).toLowerCase();
   return msg.includes('rate limit') || msg.includes('rate_limit') || msg.includes('429');
 }
 
-function _queueCall(fn) {
-  const result = _apiQueue.then(async () => {
-    try {
-      const data = await fn();
-      await new Promise(r => setTimeout(r, _API_GAP_MS));
-      return data;
-    } catch (e) {
-      // Keep the gap even on failure so the next call doesn't burst
-      await new Promise(r => setTimeout(r, _API_GAP_MS));
-      throw e;
-    }
-  });
-  // Keep chain alive even if one call fails
-  _apiQueue = result.catch(() => null);
-  return result;
-}
-
-// ── Retry with exponential backoff ────────────────────────────
-// Rate-limit errors get much longer delays (5s, 10s, 20s, 40s)
-// to outlast the server's rate-limit window.
-async function _retry(fn, retries = 4) {
+async function _retry(fn, retries = 3) {
   for (let i = 0; i <= retries; i++) {
     try { return await fn(); }
     catch (e) {
       if (i === retries) throw e;
-      const base = _isRateLimit(e) ? 5000 : 1000;
+      const base = _isRateLimit(e) ? 1000 : 500;
       await new Promise(r => setTimeout(r, base * Math.pow(2, i)));
     }
   }
@@ -99,7 +73,7 @@ const _entitiesProxy = new Proxy(_base44.entities, {
         const method = entTarget[methodName];
         if (typeof method !== 'function') return method;
 
-        // Cached read methods (filter, list)
+        // Cached read methods (filter, list) — run in parallel, dedup identical calls
         if (CACHE_METHODS.has(methodName)) {
           return function (...args) {
             const key = `${entityName}:${methodName}:${JSON.stringify(args)}`;
@@ -108,8 +82,9 @@ const _entitiesProxy = new Proxy(_base44.entities, {
             if (cached && now - cached.time < _FILTER_CACHE_TTL) {
               return Promise.resolve(Array.isArray(cached.data) ? cached.data : []);
             }
+            // Dedup: if a request for this key is already in-flight, reuse it
             if (cached && cached.promise) return cached.promise;
-            const promise = _queueCall(() => _retry(() => method.apply(entTarget, args))).then(data => {
+            const promise = _retry(() => method.apply(entTarget, args)).then(data => {
               const safe = Array.isArray(data) ? data : [];
               _filterCache.set(key, { data: safe, time: Date.now() });
               return safe;
@@ -119,17 +94,17 @@ const _entitiesProxy = new Proxy(_base44.entities, {
           };
         }
 
-        // Write methods — invalidate cache, queue the call
+        // Write methods — invalidate cache
         if (WRITE_METHODS.has(methodName)) {
           return function (...args) {
             _invalidateEntity(entityName);
-            return _queueCall(() => method.apply(entTarget, args));
+            return _retry(() => method.apply(entTarget, args));
           };
         }
 
-        // Other methods (get, schema, subscribe) — queue with retry
+        // Other methods (get, schema, subscribe)
         return function (...args) {
-          return _queueCall(() => _retry(() => method.apply(entTarget, args)));
+          return _retry(() => method.apply(entTarget, args));
         };
       }
     });

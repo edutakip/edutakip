@@ -349,9 +349,11 @@ export default function TeacherCalendar() {
   const loadData = async () => {
     try {
       const me = await base44.auth.me();
-      const l = await base44.entities.Lesson.filter({ teacherEmail: me.email });
+      const [l, s] = await Promise.all([
+        base44.entities.Lesson.filter({ teacherEmail: me.email }),
+        base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
+      ]);
       setLessons(l);
-      const s = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
       setStudents(s);
     } catch (e) {
       console.error('Calendar load error:', e);

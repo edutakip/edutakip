@@ -23,11 +23,13 @@ export default function ActiveLesson() {
   const loadData = async (retry = 0) => {
     try {
       const me = await base44.auth.me();
-      const l = await base44.entities.Lesson.filter({ teacherEmail: me.email });
+      const [l, s, p] = await Promise.all([
+        base44.entities.Lesson.filter({ teacherEmail: me.email }),
+        base44.entities.Student.filter({ teacherEmail: me.email }),
+        base44.entities.Payment.filter({ teacherEmail: me.email }),
+      ]);
       setLessons(Array.isArray(l) ? l : []);
-      const s = await base44.entities.Student.filter({ teacherEmail: me.email });
       setStudents(Array.isArray(s) ? s : []);
-      const p = await base44.entities.Payment.filter({ teacherEmail: me.email });
       setPayments(Array.isArray(p) ? p : []);
       setLoading(false);
 
