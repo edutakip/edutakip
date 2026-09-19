@@ -14,12 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
-    // Login redirect'inden önce ?code= parametresini localStorage'a kaydet
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    if (code) {
-      localStorage.setItem('pendingInviteCode', code);
-    }
     checkAppState();
   }, []);
 

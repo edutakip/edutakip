@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 const LOGO_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png';
 
 export function buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, inviteCode, isEn }) {
-  const finalUrl = inviteCode ? `${appUrl}?code=${encodeURIComponent(inviteCode)}` : appUrl;
   const greeting = isEn
     ? `Hello${parentName ? ` ${parentName}` : ''},`
     : `Merhaba${parentName ? ` ${parentName}` : ''},`;
@@ -30,6 +29,14 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
   const passwordNote = isEn
     ? "You'll receive a separate email to set your password. Use that link to create your password, then come back here to log in."
     : 'Şifrenizi belirlemek için ayrı bir e-posta alacaksınız. O e-postadaki bağlantı ile şifrenizi oluşturduktan sonra buradan giriş yapabilirsiniz.';
+
+  const codeLabel = isEn ? 'Your Connection Code' : 'Bağlantı Kodunuz';
+  const codeInstruction = isEn
+    ? 'After logging in, enter this code to connect to your child:'
+    : 'Giriş yaptıktan sonra çocuğunuza bağlanmak için bu kodu girin:';
+  const codeReminder = isEn
+    ? 'Save this code — you may need it again if you log in from another device.'
+    : 'Bu kodu kaydedin — başka cihazdan giriş yaparsanız tekrar gerekebilir.';
 
   const footerText = isEn
     ? '© 2024 EduTakip · Teacher & Parent Lesson Management Platform'
@@ -76,10 +83,24 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
                 ${featuresHtml}
               </table>
               <p style="color:#92400e;font-size:13px;line-height:1.5;margin:0 0 24px;padding:12px 16px;background:#fef3c7;border-radius:8px;">⚠️ ${passwordNote}</p>
+              ${inviteCode ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:#eef2ff;border:2px dashed #6366f1;border-radius:12px;padding:20px;text-align:center;">
+                <tr>
+                  <td>
+                    <p style="color:#4338ca;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">${codeLabel}</p>
+                    <p style="color:#374151;font-size:13px;line-height:1.5;margin:0 0 14px;">${codeInstruction}</p>
+                    <div style="display:inline-block;background:#ffffff;border:2px solid #6366f1;border-radius:10px;padding:12px 28px;">
+                      <span style="color:#1e1b4b;font-size:28px;font-weight:900;letter-spacing:6px;font-family:'Courier New',monospace;">${inviteCode}</span>
+                    </div>
+                    <p style="color:#6b7280;font-size:12px;margin:14px 0 0;">💡 ${codeReminder}</p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" style="padding:8px 0;">
-                    <a href="${finalUrl}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 40px;border-radius:12px;">${ctaText}</a>
+                    <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 40px;border-radius:12px;">${ctaText}</a>
                   </td>
                 </tr>
               </table>
