@@ -24,11 +24,11 @@ export default function ActiveLesson() {
     try {
       const me = await base44.auth.me();
       const l = await base44.entities.Lesson.filter({ teacherEmail: me.email });
-      setLessons(l);
+      setLessons(Array.isArray(l) ? l : []);
       const s = await base44.entities.Student.filter({ teacherEmail: me.email });
-      setStudents(s);
+      setStudents(Array.isArray(s) ? s : []);
       const p = await base44.entities.Payment.filter({ teacherEmail: me.email });
-      setPayments(p);
+      setPayments(Array.isArray(p) ? p : []);
       setLoading(false);
 
       // URL'den gelen lessonId varsa otomatik seç
@@ -67,7 +67,7 @@ export default function ActiveLesson() {
 
   // Aktif dersler: bugün, startTime geçti, endTime gelmedi, planlandı
   const activeLessons = useMemo(() => {
-    return lessons.filter(l =>
+    return (lessons || []).filter(l =>
       l.date === todayStr &&
       l.startTime && l.endTime &&
       l.startTime <= nowTime &&
@@ -78,14 +78,14 @@ export default function ActiveLesson() {
 
   // Bugünkü yaklaşan dersler (henüz başlamamış)
   const upcomingToday = useMemo(() => {
-    return lessons.filter(l =>
+    return (lessons || []).filter(l =>
       l.date === todayStr &&
       l.startTime && l.startTime > nowTime &&
       l.status === 'planlandı'
     ).sort((a,b) => a.startTime.localeCompare(b.startTime));
   }, [lessons, todayStr, nowTime]);
 
-  const getStudent = (lesson) => students.find(s => s.id === lesson.studentId);
+  const getStudent = (lesson) => (students || []).find(s => s.id === lesson.studentId);
 
   const avatarColors = ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#f97316', '#8b5cf6'];
   const getColor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length];
@@ -273,7 +273,7 @@ export default function ActiveLesson() {
             </div>
             <p style={{ color: '#9ca3af', fontSize: '0.82rem', marginBottom: '1.25rem' }}>{t('activeLesson.selectStudentDesc')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 300, overflowY: 'auto' }}>
-              {students.filter(s => s.status !== 'archived').map(s => (
+              {(students || []).filter(s => s.status !== 'archived').map(s => (
                 <button key={s.id} onClick={() => { setManualStudent(s); setShowStudentSelect(false); }} style={{ padding: '0.75rem 1rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#111827', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.75rem', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#6366f1'; }} onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: getColor(s.name), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'white' }}>{getInitials(s.name)}</span>

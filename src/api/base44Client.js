@@ -92,12 +92,13 @@ const _entitiesProxy = new Proxy(_base44.entities, {
             const now = Date.now();
             const cached = _filterCache.get(key);
             if (cached && now - cached.time < _FILTER_CACHE_TTL) {
-              return Promise.resolve(cached.data);
+              return Promise.resolve(Array.isArray(cached.data) ? cached.data : []);
             }
             if (cached && cached.promise) return cached.promise;
             const promise = _queueCall(() => _retry(() => method.apply(entTarget, args))).then(data => {
-              _filterCache.set(key, { data, time: Date.now() });
-              return data;
+              const safe = Array.isArray(data) ? data : [];
+              _filterCache.set(key, { data: safe, time: Date.now() });
+              return safe;
             }).catch(e => { _filterCache.delete(key); throw e; });
             _filterCache.set(key, { promise, time: now });
             return promise;
