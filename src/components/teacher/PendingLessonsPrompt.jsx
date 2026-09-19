@@ -12,55 +12,76 @@ export default function PendingLessonsPrompt({ onDone }) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const me = await base44.auth.me();
-      const lessons = await base44.entities.Lesson.filter({ teacherEmail: me.email, status: 'planlandı' });
-      const now = new Date();
-      const overdue = lessons.filter(l => {
-        if (!l.date || !l.endTime) return false;
-        const end = new Date(`${l.date}T${l.endTime}`);
-        return end < now;
-      });
-      if (overdue.length > 0) {
-        setPending(overdue);
-        setCurrent(overdue[0]);
+    let cancelled = false;
+    const load = async (retry = 0) => {
+      try {
+        const me = await base44.auth.me();
+        const lessons = await base44.entities.Lesson.filter({ teacherEmail: me.email, status: 'planlandı' });
+        if (cancelled) return;
+        const now = new Date();
+        const overdue = lessons.filter(l => {
+          if (!l.date || !l.endTime) return false;
+          const end = new Date(`${l.date}T${l.endTime}`);
+          return end < now;
+        });
+        if (overdue.length > 0) {
+          setPending(overdue);
+          setCurrent(overdue[0]);
+        }
+      } catch (e) {
+        if (!cancelled && retry < 3) {
+          setTimeout(() => load(retry + 1), 2000 * (retry + 1));
+        }
       }
-    })();
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   if (!current || dismissed) return null;
 
+  const withRetry = async (fn, retries = 3) => {
+    for (let i = 0; i <= retries; i++) {
+      try { return await fn(); }
+      catch (e) { if (i === retries) throw e; await new Promise(r => setTimeout(r, 2000 * (i + 1))); }
+    }
+  };
+
   const markDone = async () => {
-    await base44.entities.Lesson.update(current.id, { status: 'tamamlandı' });
+    try {
+      await withRetry(() => base44.entities.Lesson.update(current.id, { status: 'tamamlandı' }));
 
-    // Ders ücretini hesapla
-    let fee = current.lessonFee || 0;
-    if (!fee) {
-      try {
-        const student = await base44.entities.Student.filter({ id: current.studentId });
-        fee = student?.[0]?.feePerLesson || 0;
-      } catch {}
-    }
-
-    // Bekliyor ödeme kaydı oluştur (yoksa)
-    if (fee > 0) {
-      const existing = await base44.entities.Payment.filter({ studentId: current.studentId, date: current.date });
-      const alreadyExists = existing.some(p => p.description?.includes('Ders') || p.date === current.date);
-      if (!alreadyExists) {
-        await base44.entities.Payment.create({
-          studentId: current.studentId,
-          studentName: current.studentName,
-          teacherEmail: current.teacherEmail,
-          amount: fee,
-          date: current.date,
-          status: 'bekliyor',
-          description: `${current.subject || 'Ders'} - ${current.date}`,
-          month: current.date?.slice(0, 7),
-        });
+      // Ders ücretini hesapla
+      let fee = current.lessonFee || 0;
+      if (!fee) {
+        try {
+          const student = await withRetry(() => base44.entities.Student.filter({ id: current.studentId }));
+          fee = student?.[0]?.feePerLesson || 0;
+        } catch {}
       }
-    }
 
-    setShowReport(true);
+      // Bekliyor ödeme kaydı oluştur (yoksa)
+      if (fee > 0) {
+        const existing = await withRetry(() => base44.entities.Payment.filter({ studentId: current.studentId, date: current.date }));
+        const alreadyExists = existing.some(p => p.description?.includes('Ders') || p.date === current.date);
+        if (!alreadyExists) {
+          await withRetry(() => base44.entities.Payment.create({
+            studentId: current.studentId,
+            studentName: current.studentName,
+            teacherEmail: current.teacherEmail,
+            amount: fee,
+            date: current.date,
+            status: 'bekliyor',
+            description: `${current.subject || 'Ders'} - ${current.date}`,
+            month: current.date?.slice(0, 7),
+          }));
+        }
+      }
+
+      setShowReport(true);
+    } catch (e) {
+      setShowReport(true);
+    }
   };
 
   const markCancel = async () => {
