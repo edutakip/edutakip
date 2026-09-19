@@ -120,7 +120,9 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
 }
 
 export async function sendParentInviteEmail({ parentEmail, teacherName, studentName, parentName, inviteCode, isEn }) {
-  const appUrl = 'https://edu-track-492b7a1e.base44.app/ParentDashboard';
+  const appUrl = inviteCode
+    ? `https://edu-track-492b7a1e.base44.app/?code=${inviteCode}`
+    : 'https://edu-track-492b7a1e.base44.app/';
   const html = buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, inviteCode, isEn });
   const subject = isEn
     ? `You're invited to track ${studentName}'s lessons on EduTakip`
