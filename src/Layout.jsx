@@ -789,7 +789,7 @@ export default function Layout({ children, currentPageName }) {
           <PaymentModal
             student={selectedPayStudent}
             onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-            onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
+            onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); }}
           />
         )}
         {showProModal && (
@@ -870,7 +870,7 @@ export default function Layout({ children, currentPageName }) {
         <PaymentModal
           student={selectedPayStudent}
           onClose={() => { setShowPaymentModal(false); setSelectedPayStudent(null); }}
-          onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); setShowPaymentModal(false); setSelectedPayStudent(null); }}
+          onSaved={() => { showToast({ message: `Ödeme alındı — ${selectedPayStudent.name}` }); }}
         />
       )}
       <div className="app-fab" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>

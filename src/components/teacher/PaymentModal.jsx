@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { X, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import WhatsAppMessageModal from './WhatsAppMessageModal';
+import PaymentReceiptModal from './PaymentReceiptModal';
 
 export default function PaymentModal({ student, onClose, onSaved }) {
   const { t } = useTranslation();
@@ -13,7 +13,8 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     status: 'alındı', method: 'nakit', description: '', month: format(new Date(), 'yyyy-MM'),
   });
   const [loading, setLoading] = useState(false);
-  const [whatsapp, setWhatsapp] = useState(null);
+  const [receiptData, setReceiptData] = useState(null);
+  const [receiptStudent, setReceiptStudent] = useState(null);
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const save = async () => {
@@ -54,7 +55,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
 
     const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
 
-    await base44.entities.Payment.create({
+    const createdPayment = await base44.entities.Payment.create({
       ...form,
       amount: paidAmount,
       date: paymentDate,
@@ -70,11 +71,16 @@ export default function PaymentModal({ student, onClose, onSaved }) {
     setLoading(false);
     onSaved();
 
-    const phone = freshStudent.parentPhone;
-    if (phone) {
-      const methodLabel = { nakit: 'Nakit', havale: 'Havale', diger: 'Diger' }[form.method] || form.method;
-      const msg = `Merhaba ${freshStudent.parentName || ''},\n\n*Odeme Kaydedildi*\nOgrenci: ${student.name}\nTutar: ${paidAmount} TL\nTarih: ${form.date}\nYontem: ${methodLabel}${form.description ? '\nAciklama: ' + form.description : ''}\n\n─────────────────\nEduTakip.com`;
-      setWhatsapp({ phone, message: msg });
+    if (form.status === 'alındı') {
+      setReceiptStudent(freshStudent);
+      setReceiptData({
+        ...createdPayment,
+        ...form,
+        amount: paidAmount,
+        date: paymentDate,
+        studentName: student.name,
+        studentId: student.id,
+      });
     } else {
       onClose();
     }
@@ -83,8 +89,8 @@ export default function PaymentModal({ student, onClose, onSaved }) {
   const inputStyle = { width: '100%', padding: '0.6rem 0.85rem', borderRadius: '10px', background: '#f9fafb', border: '1.5px solid #e5e7eb', color: '#111827', fontSize: '0.875rem', outline: 'none' };
   const labelStyle = { fontSize: '0.72rem', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
-  if (whatsapp) {
-    return <WhatsAppMessageModal phone={whatsapp.phone} message={whatsapp.message} onClose={onClose} />;
+  if (receiptData) {
+    return <PaymentReceiptModal payment={receiptData} student={receiptStudent || student} onClose={onClose} />;
   }
 
   return (

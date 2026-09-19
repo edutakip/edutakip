@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, TrendingDown, TrendingUp } from 'lucide-react';
+import { X, TrendingDown, TrendingUp, Receipt } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import PaymentReceiptModal from './PaymentReceiptModal';
 
 export default function PaymentHistoryModal({ student, onClose }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   useEffect(() => {
     base44.entities.Payment.filter({ studentId: student.id }, '-date').then(p => {
@@ -139,9 +141,19 @@ export default function PaymentHistoryModal({ student, onClose }) {
                           <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', marginTop: '0.2rem' }}>{formatDate(payment.date)}</div>
                         </div>
 
-                        {/* Amount */}
-                        <div style={{ color: iconColor, fontWeight: '800', fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
-                          {amountPrefix}₺{(payment.amount || 0).toLocaleString('tr-TR')}
+                        {/* Amount + Receipt */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ color: iconColor, fontWeight: '800', fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
+                            {amountPrefix}₺{(payment.amount || 0).toLocaleString('tr-TR')}
+                          </div>
+                          {isReceived && (
+                            <button onClick={() => setSelectedReceipt(payment)} title="Makbuz Göster"
+                              style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.3)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; }}>
+                              <Receipt size={13} color='#a5b4fc' />
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -152,6 +164,13 @@ export default function PaymentHistoryModal({ student, onClose }) {
           )}
         </div>
       </div>
+      {selectedReceipt && (
+        <PaymentReceiptModal
+          payment={selectedReceipt}
+          student={student}
+          onClose={() => setSelectedReceipt(null)}
+        />
+      )}
     </div>
   );
 }
