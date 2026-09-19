@@ -26,9 +26,9 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
       ];
 
   const ctaText = isEn ? 'Access EduTakip' : "EduTakip'e Giriş Yap";
-  const passwordNote = isEn
-    ? "You'll receive a separate email to set your password. Use that link to create your password, then come back here to log in."
-    : 'Şifrenizi belirlemek için ayrı bir e-posta alacaksınız. O e-postadaki bağlantı ile şifrenizi oluşturduktan sonra buradan giriş yapabilirsiniz.';
+  const registerNote = isEn
+    ? 'Click the button below to go to EduTakip. If you don\'t have an account yet, register from the login page, then enter your connection code.'
+    : 'Aşağıdaki butona tıklayarak EduTakip\'e gidin. Henüz hesabınız yoksa giriş sayfasından kayıt olun, ardından bağlantı kodunuzu girin.';
 
   const codeLabel = isEn ? 'Your Connection Code' : 'Bağlantı Kodunuz';
   const codeInstruction = isEn
@@ -82,7 +82,7 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:#f8fafc;border-radius:12px;padding:16px 20px;">
                 ${featuresHtml}
               </table>
-              <p style="color:#92400e;font-size:13px;line-height:1.5;margin:0 0 24px;padding:12px 16px;background:#fef3c7;border-radius:8px;">⚠️ ${passwordNote}</p>
+              <p style="color:#92400e;font-size:13px;line-height:1.5;margin:0 0 24px;padding:12px 16px;background:#fef3c7;border-radius:8px;">⚠️ ${registerNote}</p>
               ${inviteCode ? `
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:#eef2ff;border:2px dashed #6366f1;border-radius:12px;padding:20px;text-align:center;">
                 <tr>
@@ -131,4 +131,18 @@ export async function sendParentInviteEmail({ parentEmail, teacherName, studentN
     subject,
     html,
   });
+}
+
+// Shared: send branded invite email + mark student as invited
+export async function sendParentInviteFull({ student, teacherName, isEn }) {
+  if (!student.parentEmail) throw new Error('NO_PARENT_EMAIL');
+  await sendParentInviteEmail({
+    parentEmail: student.parentEmail,
+    teacherName,
+    studentName: student.name,
+    parentName: student.parentName,
+    inviteCode: student.inviteCode,
+    isEn,
+  });
+  await base44.entities.Student.update(student.id, { parentInviteSent: true });
 }

@@ -6,7 +6,7 @@ import PaymentHistoryModal from './PaymentHistoryModal';
 import ScheduleSlotEditor from './ScheduleSlotEditor';
 import { useTranslation } from 'react-i18next';
 import StudentGamification from '../gamification/StudentGamification';
-import { sendParentInviteEmail } from '@/lib/parentInviteEmail';
+import { sendParentInviteFull } from '@/lib/parentInviteEmail';
 
 const DAYS_FULL_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const DAYS_FULL_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -123,25 +123,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
       const me = await base44.auth.me();
       const teacherName = me.full_name || me.email;
       const isEn = i18n.language === 'en';
-
-      // 1. Hesap oluştur (platform şifre belirleme e-postası gönderir)
-      await base44.users.inviteUser(student.parentEmail, 'user');
-
-      // 2. Marka uyumlu, dil duyarlı davet e-postası gönder
-      try {
-        await sendParentInviteEmail({
-          parentEmail: student.parentEmail,
-          teacherName,
-          studentName: student.name,
-          parentName: student.parentName,
-          inviteCode: student.inviteCode,
-          isEn,
-        });
-      } catch (emailErr) {
-        console.warn('Özel e-posta gönderilemedi, platform e-postası yine de gitti:', emailErr);
-      }
-
-      await base44.entities.Student.update(student.id, { parentInviteSent: true });
+      await sendParentInviteFull({ student, teacherName, isEn });
       setInviteSent(true);
     } catch (e) {
       console.error('Davet gönderilemedi:', e);
@@ -414,7 +396,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
                       : (isEn ? 'Send Invite' : 'Davet Gönder')}
                   </button>
                   <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem', marginTop: '0.5rem', lineHeight: 1.5 }}>
-                    {isEn ? 'Parent will receive an email to set their password and auto-connect on login.' : 'Veli e-posta alır, şifresini belirler ve giriş yapınca otomatik bağlanır.'}
+                    {isEn ? 'Parent will receive an email with the connection code. They register from the login page and enter the code.' : 'Veli, bağlantı kodunu içeren bir e-posta alır. Giriş sayfasından kayıt olup kodu girer.'}
                   </p>
                 </>
               )}

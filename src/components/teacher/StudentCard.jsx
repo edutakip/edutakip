@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import InviteMethodPopup from './InviteMethodPopup';
 
 export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const { t } = useTranslation();
   const [payments, setPayments] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [showInvitePopup, setShowInvitePopup] = useState(false);
 
   const copyCode = (e) => {
     e.stopPropagation();
@@ -27,36 +29,7 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const handleInvite = (e) => {
     e.stopPropagation();
     if (!student.inviteCode) return;
-
-    const appUrl = "https://edutakip.com";
-
-    const msg = encodeURIComponent(
-      `Merhaba 👋\n\n` +
-      `Ben öğretmeniniz. ${student.name}'in ders sürecini daha düzenli takip edebilmeniz için sizi EduTakip platformuna davet ediyorum.\n\n` +
-      `EduTakip, velilerin öğrencilerin derslerini, ödevlerini ve gelişimlerini takip edebilmesi için aylar süren çalışmalar sonucunda geliştirdiğim bir sistemdir.\n\n` +
-      `Platform üzerinden:\n` +
-      `📚 İşlenen dersleri\n` +
-      `📝 Verilen ödevleri\n` +
-      `📊 Gelişim durumunu\n` +
-      `💳 Ödeme bilgisini\n\n` +
-      `tek bir yerden takip edebilirsiniz.\n\n` +
-      `Önce hesap oluşturun ardından aşağıdaki davet kodunu girin.\n\n` +
-      `🔑 Davet kodunuz: ${student.inviteCode}\n\n` +
-      `Giriş: ${appUrl}`
-    );
-
-    const phone = student.parentPhone?.replace(/\D/g, '');
-
-    if (phone) {
-      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    } else {
-      navigator.clipboard.writeText(
-        `Merhaba! ${student.name} için EduTakip platformuna davet edildiniz.\n\n` +
-        `Davet kodunuz: ${student.inviteCode}\n\n` +
-        `Giriş: ${appUrl}`
-      );
-      alert('Veli telefonu yok — davet mesajı panoya kopyalandı.');
-    }
+    setShowInvitePopup(true);
   };
 
   const handleAddPayment = async (e) => {
@@ -212,6 +185,10 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
           </button>
         </div>
       </div>
+
+      {showInvitePopup && (
+        <InviteMethodPopup student={student} onClose={() => setShowInvitePopup(false)} />
+      )}
     </div>
   );
 }
