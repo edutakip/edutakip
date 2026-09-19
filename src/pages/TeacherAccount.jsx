@@ -520,15 +520,11 @@ export default function TeacherAccount() {
     try {
       const me = await base44.auth.me();
       setUser(me);
-      setLoading(false);
-      try {
-        const s = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
-        setStudents(s);
-      } catch (e) {
-        console.error('Student load error:', e);
-      }
+      const s = await base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' });
+      setStudents(s);
     } catch (e) {
-      console.error('Auth error:', e);
+      console.error(e);
+    } finally {
       setLoading(false);
     }
   };
