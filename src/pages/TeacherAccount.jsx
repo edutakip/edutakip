@@ -135,7 +135,7 @@ function ProfileTab({ user, onUpdate }) {
                 : 'Çıkış yapılacak ve giriş sayfasına yönlendirileceksiniz. Orada "Şifremi Unuttum" bağlantısına tıklayarak şifre sıfırlama e-postası alabilirsiniz.'}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout(); }} style={{ padding: '0.8rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout('/Landing'); }} style={{ padding: '0.8rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                 <LogOut size={14} /> {isEn ? 'Continue' : 'Devam Et'}
               </button>
               <button onClick={() => setShowResetInfo(false)} style={{ padding: '0.75rem', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
