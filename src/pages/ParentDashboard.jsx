@@ -20,9 +20,11 @@ export default function ParentDashboard() {
     base44.auth.me().then(async u => {
       setUser(u);
       // URL'de ?code= varsa otomatik bağlan (veli kodu hiç görmez)
+      // Login redirect parametreyi kaybetmiş olabilir — localStorage fallback
       const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
+      const code = urlParams.get('code') || localStorage.getItem('pendingInviteCode');
       if (code) {
+        localStorage.removeItem('pendingInviteCode');
         try {
           await base44.functions.invoke('joinWithInviteCode', { inviteCode: code });
         } catch (e) { console.warn('Otomatik bağlanma başarısız:', e); }
