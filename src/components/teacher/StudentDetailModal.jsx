@@ -6,6 +6,7 @@ import PaymentHistoryModal from './PaymentHistoryModal';
 import ScheduleSlotEditor from './ScheduleSlotEditor';
 import { useTranslation } from 'react-i18next';
 import StudentGamification from '../gamification/StudentGamification';
+import { sendParentInviteEmail } from '@/lib/parentInviteEmail';
 
 const DAYS_FULL_TR = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const DAYS_FULL_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -119,7 +120,26 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
     if (!student.parentEmail) return;
     setInviteSending(true);
     try {
+      const me = await base44.auth.me();
+      const teacherName = me.full_name || me.email;
+      const isEn = i18n.language === 'en';
+
+      // 1. Hesap oluştur (platform şifre belirleme e-postası gönderir)
       await base44.users.inviteUser(student.parentEmail, 'user');
+
+      // 2. Marka uyumlu, dil duyarlı davet e-postası gönder
+      try {
+        await sendParentInviteEmail({
+          parentEmail: student.parentEmail,
+          teacherName,
+          studentName: student.name,
+          parentName: student.parentName,
+          isEn,
+        });
+      } catch (emailErr) {
+        console.warn('Özel e-posta gönderilemedi, platform e-postası yine de gitti:', emailErr);
+      }
+
       await base44.entities.Student.update(student.id, { parentInviteSent: true });
       setInviteSent(true);
     } catch (e) {
