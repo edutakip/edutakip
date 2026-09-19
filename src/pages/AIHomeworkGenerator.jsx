@@ -1230,8 +1230,8 @@ export default function AIHomeworkGenerator() {
   useEffect(() => {
     base44.auth.me().then(u => {
       setMe(u);
-      base44.entities.Student.filter({ teacherEmail: u.email, status: 'active' }).then(setStudents);
-    });
+      base44.entities.Student.filter({ teacherEmail: u.email, status: 'active' }).then(setStudents).catch(e => console.error('AIHomework students load error:', e));
+    }).catch(e => console.error('AIHomework auth error:', e));
   }, []);
 
   if (mode === 'pdf') return <PDFMode me={me} onBack={() => setMode(null)} />;

@@ -20,26 +20,28 @@ export default function ParentDashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       loadStudentData(u.email);
-    });
+    }).catch(e => console.error('Parent auth error:', e));
   }, []);
 
   const loadStudentData = async (email) => {
-    // E-posta eşleşmesiyle otomatik bağlanma (inviteAccepted zorunlu değil)
-    let all = await base44.entities.Student.filter({ parentEmail: email });
-    // Case-insensitive fallback: büyük/küçük harf farkı nedeniyle eşleşmeyorsa
-    if (all.length === 0) {
-      const every = await base44.entities.Student.list();
-      all = every.filter(s => (s.parentEmail || '').toLowerCase() === email.toLowerCase());
-    }
-    if (all.length > 0) {
-      const s = all[0];
-      setStudent(s);
-      const [l, p] = await Promise.all([
-        base44.entities.Lesson.filter({ studentId: s.id }),
-        base44.entities.Payment.filter({ studentId: s.id }),
-      ]);
-      setLessons(l.sort((a, b) => new Date(a.date) - new Date(b.date)));
-      setPayments(p);
+    try {
+      // E-posta eşleşmesiyle otomatik bağlanma (inviteAccepted zorunlu değil)
+      let all = await base44.entities.Student.filter({ parentEmail: email });
+      // Case-insensitive fallback: büyük/küçük harf farkı nedeniyle eşleşmeyorsa
+      if (all.length === 0) {
+        const every = await base44.entities.Student.list();
+        all = every.filter(s => (s.parentEmail || '').toLowerCase() === email.toLowerCase());
+      }
+      if (all.length > 0) {
+        const s = all[0];
+        setStudent(s);
+        const l = await base44.entities.Lesson.filter({ studentId: s.id });
+        setLessons(l.sort((a, b) => new Date(a.date) - new Date(b.date)));
+        const p = await base44.entities.Payment.filter({ studentId: s.id });
+        setPayments(p);
+      }
+    } catch (e) {
+      console.error('Parent data load error:', e);
     }
   };
 

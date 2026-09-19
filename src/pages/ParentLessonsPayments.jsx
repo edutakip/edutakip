@@ -27,18 +27,20 @@ export default function ParentLessonsPayments() {
 
   useEffect(() => {
     base44.auth.me().then(async u => {
-      const all = await base44.entities.Student.filter({ parentEmail: u.email, inviteAccepted: true });
-      if (all.length > 0) {
-        const s = all[0];
-        setStudent(s);
-        const [l, p] = await Promise.all([
-          base44.entities.Lesson.filter({ studentId: s.id }),
-          base44.entities.Payment.filter({ studentId: s.id }),
-        ]);
-        setLessons(l.sort((a, b) => new Date(b.date) - new Date(a.date)));
-        setPayments(p.sort((a, b) => new Date(b.date) - new Date(a.date)));
+      try {
+        const all = await base44.entities.Student.filter({ parentEmail: u.email, inviteAccepted: true });
+        if (all.length > 0) {
+          const s = all[0];
+          setStudent(s);
+          const l = await base44.entities.Lesson.filter({ studentId: s.id });
+          setLessons(l.sort((a, b) => new Date(b.date) - new Date(a.date)));
+          const p = await base44.entities.Payment.filter({ studentId: s.id });
+          setPayments(p.sort((a, b) => new Date(b.date) - new Date(a.date)));
+        }
+      } catch (e) {
+        console.error('Parent finance load error:', e);
       }
-    });
+    }).catch(e => console.error('Parent auth error:', e));
   }, []);
 
   const totalPaid = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);

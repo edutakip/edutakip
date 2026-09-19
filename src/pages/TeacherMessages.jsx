@@ -18,10 +18,14 @@ export default function TeacherMessages() {
 
   useEffect(() => {
     const load = async () => {
-      const user = await base44.auth.me();
-      setMe(user);
-      const all = await base44.entities.Student.filter({ teacherEmail: user.email, status: 'active' });
-      setStudents(all);
+      try {
+        const user = await base44.auth.me();
+        setMe(user);
+        const all = await base44.entities.Student.filter({ teacherEmail: user.email, status: 'active' });
+        setStudents(all);
+      } catch (e) {
+        console.error('Messages load error:', e);
+      }
     };
     load();
   }, []);

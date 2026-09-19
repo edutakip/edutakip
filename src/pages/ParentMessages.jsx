@@ -14,8 +14,8 @@ export default function ParentMessages() {
       base44.entities.Student.filter({ parentEmail: u.email, inviteAccepted: true }).then(all => {
         if (all.length > 0) setStudent(all[0]);
         setLoading(false);
-      });
-    });
+      }).catch(e => { console.error('Parent messages load error:', e); setLoading(false); });
+    }).catch(e => { console.error('Parent auth error:', e); setLoading(false); });
   }, []);
 
   if (loading) {

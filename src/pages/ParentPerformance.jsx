@@ -30,24 +30,27 @@ export default function ParentPerformance() {
 
   useEffect(() => {
     (async () => {
-      const me = await base44.auth.me();
-      const inviteCode = localStorage.getItem('tilki_invite_code');
-      let students = [];
-      if (inviteCode && inviteCode.trim()) {
-        students = await base44.entities.Student.filter({ inviteCode: inviteCode.trim() });
-      } else if (me.email) {
-        students = await base44.entities.Student.filter({ parentEmail: me.email });
+      try {
+        const me = await base44.auth.me();
+        const inviteCode = localStorage.getItem('tilki_invite_code');
+        let students = [];
+        if (inviteCode && inviteCode.trim()) {
+          students = await base44.entities.Student.filter({ inviteCode: inviteCode.trim() });
+        } else if (me.email) {
+          students = await base44.entities.Student.filter({ parentEmail: me.email });
+        }
+        if (students.length === 0) { setLoading(false); return; }
+        const s = students[0];
+        setStudent(s);
+        const r = await base44.entities.LessonReport.filter({ studentId: s.id }, '-date');
+        setReports(r);
+        const h = await base44.entities.Homework.filter({ studentId: s.id });
+        setHomeworks(h);
+      } catch (e) {
+        console.error('Parent performance load error:', e);
+      } finally {
+        setLoading(false);
       }
-      if (students.length === 0) { setLoading(false); return; }
-      const s = students[0];
-      setStudent(s);
-      const [r, h] = await Promise.all([
-        base44.entities.LessonReport.filter({ studentId: s.id }, '-date'),
-        base44.entities.Homework.filter({ studentId: s.id }),
-      ]);
-      setReports(r);
-      setHomeworks(h);
-      setLoading(false);
     })();
   }, []);
 
