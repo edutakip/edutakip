@@ -25,7 +25,12 @@ export default function ParentDashboard() {
 
   const loadStudentData = async (email) => {
     // E-posta eşleşmesiyle otomatik bağlanma (inviteAccepted zorunlu değil)
-    const all = await base44.entities.Student.filter({ parentEmail: email });
+    let all = await base44.entities.Student.filter({ parentEmail: email });
+    // Case-insensitive fallback: büyük/küçük harf farkı nedeniyle eşleşmeyorsa
+    if (all.length === 0) {
+      const every = await base44.entities.Student.list();
+      all = every.filter(s => (s.parentEmail || '').toLowerCase() === email.toLowerCase());
+    }
     if (all.length > 0) {
       const s = all[0];
       setStudent(s);
