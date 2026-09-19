@@ -39,10 +39,10 @@ export default function ActiveLesson() {
 
   useEffect(() => { loadData(); }, []);
 
-  // 30 saniyede bir saati güncelle
+  // 30 saniyede bir saati güncelle (API çağrısı yok — rate limit önlemi)
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 30000);
-    const onFocus = () => { setNow(new Date()); loadData(); };
+    const onFocus = () => setNow(new Date());
     window.addEventListener('focus', onFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
   }, []);
