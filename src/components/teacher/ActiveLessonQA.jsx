@@ -97,15 +97,17 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
 
       base44.analytics.track({ eventName: 'lesson_recorded' });
 
-      // Ödeme kaydı oluştur (mevcut markDone mantığı)
-      const existing = payments.find(p => p.lessonId === lesson.id || (p.studentId === lesson.studentId && p.date === lesson.date && p.description?.includes(lesson.startTime?.slice(0,5) || '__')));
-      if (!existing && fee > 0) {
+      // Ödeme kaydı oluştur (manuel modda atla — finans'a karışmasın)
+      if (!manual) {
+        const existing = payments.find(p => p.lessonId === lesson.id || (p.studentId === lesson.studentId && p.date === lesson.date && p.description?.includes(lesson.startTime?.slice(0,5) || '__')));
+        if (!existing && fee > 0) {
         await base44.entities.Payment.create({
           studentId: lesson.studentId, studentName: lesson.studentName,
           teacherEmail: me.email, amount: fee, date: lesson.date,
           status: 'bekliyor', description: `${lesson.subject || 'Ders'} - ${lesson.date}${manual ? ' (Manuel)' : ' ' + (lesson.startTime?.slice(0,5) || '')}`,
           month: lesson.date?.slice(0, 7), lessonId: manual ? null : lesson.id,
         });
+        }
       }
 
       setSaved(true);
