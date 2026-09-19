@@ -1,0 +1,64 @@
+{
+  "name": "SubscriptionPayment",
+  "type": "object",
+  "properties": {
+    "userEmail": {
+      "type": "string",
+      "description": "\u00d6deme yapan \u00f6\u011fretmenin e-postas\u0131"
+    },
+    "userFullName": {
+      "type": "string",
+      "description": "\u00d6deme yapan \u00f6\u011fretmenin ad\u0131"
+    },
+    "userId": {
+      "type": "string",
+      "description": "\u00d6deme yapan \u00f6\u011fretmenin kullan\u0131c\u0131 ID'si"
+    },
+    "amount": {
+      "type": "number",
+      "description": "\u00d6denecek tutar (TL)"
+    },
+    "code": {
+      "type": "string",
+      "description": "A\u00e7\u0131klamaya yaz\u0131lacak 5 haneli benzersiz kod"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly"
+      ],
+      "default": "monthly",
+      "description": "Abonelik plan\u0131"
+    },
+    "studentCount": {
+      "type": "number",
+      "description": "Se\u00e7ilen \u00f6\u011frenci say\u0131s\u0131"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bekliyor",
+        "onayland\u0131",
+        "reddedildi"
+      ],
+      "default": "bekliyor",
+      "description": "\u00d6deme durumu"
+    },
+    "adminNote": {
+      "type": "string",
+      "description": "Admin notu (onay/red sebebi)"
+    }
+  },
+  "required": [
+    "userEmail",
+    "amount",
+    "code"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

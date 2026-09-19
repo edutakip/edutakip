@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, Zap } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const PER_STUDENT_PRICE = 50;
 
 export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [studentCount, setStudentCount] = useState(10);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -16,22 +17,8 @@ export default function ProUpgradeModal({ onClose, onUpgraded, reason = 'limit' 
 
   const handleStartCheckout = async () => {
     setLoading(true);
-    try {
-      const response = await base44.functions.invoke('paddleCheckout', {
-        studentCount,
-      });
-
-      if (response.data?.checkout_url) {
-        window.location.href = response.data.checkout_url;
-      } else {
-        alert('Ödeme sayfasına yönlendirilirken hata oluştu. Lütfen tekrar deneyin.');
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Ödeme sayfasına yönlendirilirken hata oluştu. Lütfen tekrar deneyin.');
-      setLoading(false);
-    }
+    onClose();
+    navigate(`/ManuelCheckout?students=${studentCount}&plan=monthly`);
   };
 
   const reasonKey = ['limit','ai','finance','whatsapp','assistant'].includes(reason) ? reason : 'limit';

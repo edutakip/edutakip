@@ -28,6 +28,7 @@ import HomeworkAnalytics from './pages/HomeworkAnalytics';
 import HomeworkSolver from './pages/HomeworkSolver';
 import ActiveLesson from './pages/ActiveLesson';
 import Receipts from './pages/Receipts';
+import ManuelCheckout from './pages/ManuelCheckout';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ToastNotification from './components/ToastNotification';
@@ -210,6 +211,7 @@ const AuthenticatedApp = () => {
       <Route path="/HomeworkSolver" element={<HomeworkSolver />} />
       <Route path="/ActiveLesson" element={<LayoutWrapper currentPageName="ActiveLesson"><ActiveLesson /></LayoutWrapper>} />
       <Route path="/Receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
+      <Route path="/ManuelCheckout" element={<ManuelCheckout />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

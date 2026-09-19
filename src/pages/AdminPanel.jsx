@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, CreditCard, BarChart2, Shield, Search, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, CreditCard, BarChart2, Shield, Search, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, Receipt } from 'lucide-react';
 import { getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -25,34 +25,40 @@ export default function AdminPanel() {
   const [me, setMe] = useState(null);
   const [users, setUsers] = useState([]);
   const [students, setStudents] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState('users');
   const [expandedUser, setExpandedUser] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [processingPayId, setProcessingPayId] = useState(null);
 
   useEffect(() => {
     (async () => {
       const user = await base44.auth.me();
       setMe(user);
       if (user?.role !== 'admin') { setLoading(false); return; }
-      const [u, s] = await Promise.all([
+      const [u, s, p] = await Promise.all([
         base44.entities.User.list(),
         base44.entities.Student.list(),
+        base44.entities.SubscriptionPayment.list(),
       ]);
       setUsers(u);
       setStudents(s);
+      setPayments(p);
       setLoading(false);
     })();
   }, []);
 
   const reload = async () => {
-    const [u, s] = await Promise.all([
+    const [u, s, p] = await Promise.all([
       base44.entities.User.list(),
       base44.entities.Student.list(),
+      base44.entities.SubscriptionPayment.list(),
     ]);
     setUsers(u);
     setStudents(s);
+    setPayments(p);
   };
 
   const updateUserPlan = async (userId, updates) => {
@@ -88,6 +94,44 @@ export default function AdminPanel() {
   const filteredTeachers = teachers.filter(u =>
     !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const pendingPayments = payments.filter(p => p.status === 'bekliyor').sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  const processedPayments = payments.filter(p => p.status !== 'bekliyor').sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
+  const approvePayment = async (pay) => {
+    setProcessingPayId(pay.id);
+    try {
+      // Update user plan to pro
+      await base44.entities.User.update(pay.userId, {
+        plan: 'pro',
+        aiReportsEnabled: true,
+        detailedFinanceEnabled: true,
+        whatsappEnabled: true,
+        studentLimit: pay.studentCount,
+      });
+      // Mark payment as approved
+      await base44.entities.SubscriptionPayment.update(pay.id, { status: 'onaylandı' });
+      await reload();
+    } catch (e) {
+      console.error('Approve payment error:', e);
+      alert('Ödeme onaylanırken hata oluştu.');
+    } finally {
+      setProcessingPayId(null);
+    }
+  };
+
+  const rejectPayment = async (pay) => {
+    setProcessingPayId(pay.id);
+    try {
+      await base44.entities.SubscriptionPayment.update(pay.id, { status: 'reddedildi' });
+      await reload();
+    } catch (e) {
+      console.error('Reject payment error:', e);
+      alert('Ödeme reddedilirken hata oluştu.');
+    } finally {
+      setProcessingPayId(null);
+    }
+  };
 
   // İstatistikler
   const stats = {
@@ -144,6 +188,7 @@ export default function AdminPanel() {
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
           {[
             { key: 'users', label: 'Kullanıcılar & Abonelikler', icon: Users },
+            { key: 'payments', label: `Bekleyen Ödemeler${pendingPayments.length > 0 ? ` (${pendingPayments.length})` : ''}`, icon: Receipt },
             { key: 'stats', label: 'Genel İstatistik', icon: BarChart2 },
           ].map(t => {
             const TabIcon = t.icon;
@@ -250,6 +295,80 @@ export default function AdminPanel() {
                 </div>
               )}
             </div>
+          </>
+        )}
+
+        {tab === 'payments' && (
+          <>
+            {/* Pending payments */}
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
+              Bekleyen Ödemeler {pendingPayments.length > 0 && `(${pendingPayments.length})`}
+            </h3>
+            {pendingPayments.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', background: 'white', borderRadius: 14, border: '1.5px solid #f1f5f9' }}>
+                <CheckCircle size={36} style={{ margin: '0 auto 0.75rem', opacity: 0.3 }} color="#10b981" />
+                <p style={{ fontSize: '0.88rem' }}>Bekleyen ödeme yok</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '2rem' }}>
+                {pendingPayments.map(pay => (
+                  <div key={pay.id} style={{ background: 'white', borderRadius: 14, border: '1.5px solid #fde68a', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', flexWrap: 'wrap' }}>
+                      {/* Code badge */}
+                      <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #4f46e5)', borderRadius: 10, padding: '0.6rem 0.85rem', textAlign: 'center', flexShrink: 0 }}>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.58rem', fontWeight: 700, textTransform: 'uppercase', margin: 0 }}>Kod</p>
+                        <p style={{ color: 'white', fontSize: '1.1rem', fontWeight: 900, fontFamily: 'Courier New, monospace', letterSpacing: '2px', margin: '0.1rem 0 0' }}>{pay.code}</p>
+                      </div>
+                      {/* User info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, color: '#111827', fontSize: '0.9rem', margin: 0 }}>{pay.userFullName || 'İsimsiz'}</p>
+                        <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: '0.1rem 0 0' }}>{pay.userEmail}</p>
+                        <p style={{ color: '#6b7280', fontSize: '0.72rem', margin: '0.2rem 0 0' }}>
+                          {pay.studentCount} öğrenci · {pay.created_date ? format(parseISO(pay.created_date), 'd MMMM yyyy HH:mm', { locale: tr }) : ''}
+                        </p>
+                      </div>
+                      {/* Amount */}
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <p style={{ fontSize: '1.3rem', fontWeight: 900, color: '#111827', margin: 0 }}>{pay.amount.toLocaleString('tr-TR')}₺</p>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div style={{ borderTop: '1px solid #f3f4f6', padding: '0.6rem 1.25rem', background: '#fffbeb', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <button disabled={processingPayId === pay.id} onClick={() => rejectPayment(pay)}
+                        style={{ padding: '0.45rem 0.9rem', borderRadius: 8, border: 'none', background: '#fee2e2', color: '#b91c1c', fontWeight: 700, fontSize: '0.8rem', cursor: processingPayId === pay.id ? 'wait' : 'pointer' }}>
+                        Reddet
+                      </button>
+                      <button disabled={processingPayId === pay.id} onClick={() => approvePayment(pay)}
+                        style={{ padding: '0.45rem 0.9rem', borderRadius: 8, border: 'none', background: '#d1fae5', color: '#065f46', fontWeight: 700, fontSize: '0.8rem', cursor: processingPayId === pay.id ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        {processingPayId === pay.id ? 'İşleniyor...' : '✓ Onayla & Pro Yap'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Processed payments */}
+            {processedPayments.length > 0 && (
+              <>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>İşlem Geçmişi</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {processedPayments.slice(0, 20).map(pay => (
+                    <div key={pay.id} style={{ background: 'white', borderRadius: 12, border: '1.5px solid #f1f5f9', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: 'Courier New, monospace', fontWeight: 800, color: '#6b7280', fontSize: '0.85rem', letterSpacing: '1px' }}>{pay.code}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 600, color: '#111827', fontSize: '0.85rem', margin: 0 }}>{pay.userFullName || pay.userEmail}</p>
+                        <p style={{ color: '#9ca3af', fontSize: '0.72rem', margin: '0.1rem 0 0' }}>{pay.created_date ? format(parseISO(pay.created_date), 'd MMMM yyyy', { locale: tr }) : ''}</p>
+                      </div>
+                      <span style={{ fontWeight: 700, color: '#111827', fontSize: '0.88rem' }}>{pay.amount.toLocaleString('tr-TR')}₺</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 20, background: pay.status === 'onaylandı' ? '#d1fae5' : '#fee2e2', color: pay.status === 'onaylandı' ? '#065f46' : '#b91c1c' }}>
+                        {pay.status === 'onaylandı' ? 'Onaylandı' : 'Reddedildi'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
 
