@@ -115,7 +115,7 @@ function ProfileTab({ user, onUpdate }) {
             <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', margin: 0 }}>{isEn ? 'Password reset link' : 'Şifre sıfırlama bağlantısı'}</p>
             <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: '0.15rem 0 0' }}>{isEn ? 'Clicking will sign you out and send a password reset link to your email.' : 'Butona tıkladığınızda çıkış yapılır ve e-postanıza şifre sıfırlama bağlantısı gönderilir.'}</p>
           </div>
-          <button onClick={() => base44.auth.logout('/forgot-password')} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          <button onClick={() => { localStorage.removeItem('tilki_role'); base44.auth.logout(); }} style={{ padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             {isEn ? 'Reset Password' : 'Şifremi Sıfırla'}
           </button>
         </div>
