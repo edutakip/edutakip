@@ -34,9 +34,13 @@ export default function TeacherStudents() {
   useEffect(() => { loadStudents(); }, []);
 
   const loadStudents = async () => {
-    const me = await base44.auth.me();
-    const all = await base44.entities.Student.filter({ teacherEmail: me.email });
-    setStudents(all);
+    try {
+      const me = await base44.auth.me();
+      const all = await base44.entities.Student.filter({ teacherEmail: me.email });
+      setStudents(all);
+    } catch (e) {
+      console.error('Student load error:', e);
+    }
   };
 
   const filtered = students.filter(s => {
