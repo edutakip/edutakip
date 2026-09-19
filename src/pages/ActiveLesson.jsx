@@ -20,20 +20,28 @@ export default function ActiveLesson() {
   const [manualStudent, setManualStudent] = useState(null);
   const [showStudentSelect, setShowStudentSelect] = useState(false);
 
-  const loadData = async () => {
-    const me = await base44.auth.me();
-    const [l, s, p] = await Promise.all([
-      base44.entities.Lesson.filter({ teacherEmail: me.email }),
-      base44.entities.Student.filter({ teacherEmail: me.email }),
-      base44.entities.Payment.filter({ teacherEmail: me.email }),
-    ]);
-    setLessons(l); setStudents(s); setPayments(p);
-    setLoading(false);
+  const loadData = async (retry = 0) => {
+    try {
+      const me = await base44.auth.me();
+      const [l, s, p] = await Promise.all([
+        base44.entities.Lesson.filter({ teacherEmail: me.email }),
+        base44.entities.Student.filter({ teacherEmail: me.email }),
+        base44.entities.Payment.filter({ teacherEmail: me.email }),
+      ]);
+      setLessons(l); setStudents(s); setPayments(p);
+      setLoading(false);
 
-    // URL'den gelen lessonId varsa otomatik seç
-    if (focusLessonId) {
-      const target = l.find(x => x.id === focusLessonId);
-      if (target) setSelectedLesson(target);
+      // URL'den gelen lessonId varsa otomatik seç
+      if (focusLessonId) {
+        const target = l.find(x => x.id === focusLessonId);
+        if (target) setSelectedLesson(target);
+      }
+    } catch (e) {
+      if (retry < 3) {
+        setTimeout(() => loadData(retry + 1), 2000 * (retry + 1));
+      } else {
+        setLoading(false);
+      }
     }
   };
 
