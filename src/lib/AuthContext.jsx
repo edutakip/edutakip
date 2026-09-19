@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }) => {
       if (currentUser.role === 'teacher' && !currentUser.plan) {
         try {
           await base44.functions.invoke('initializeTeacherTrial', {});
+          base44.analytics.track({ eventName: 'teacher_signup' });
           // Güncellenmiş user data'sı al
           const updatedUser = await base44.auth.me();
           setUser(updatedUser);

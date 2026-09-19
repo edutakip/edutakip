@@ -30,6 +30,7 @@ export default function Checkout() {
       const params = new URLSearchParams(window.location.search);
       const studentCount = parseInt(params.get('studentCount')) || 10;
       await base44.functions.invoke('activateTrialAfterCheckout', { transactionId, studentCount });
+      base44.analytics.track({ eventName: 'trial_converted_to_pro' });
       console.log('[Checkout] User activated successfully');
     } catch (err) {
       console.error('[Checkout] Activation error:', err);

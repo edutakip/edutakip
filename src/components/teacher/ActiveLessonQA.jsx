@@ -95,6 +95,8 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
         }),
       ]);
 
+      base44.analytics.track({ eventName: 'lesson_recorded' });
+
       // Ödeme kaydı oluştur (mevcut markDone mantığı)
       const existing = payments.find(p => p.lessonId === lesson.id || (p.studentId === lesson.studentId && p.date === lesson.date && p.description?.includes(lesson.startTime?.slice(0,5) || '__')));
       if (!existing && fee > 0) {
