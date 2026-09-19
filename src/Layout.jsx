@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator, Radio } from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator, Radio, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
@@ -273,6 +273,7 @@ export default function Layout({ children, currentPageName }) {
       label: t('teacher.layout.financeGroup'), icon: DollarSign,
       submenu: [
         { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+        { label: 'Makbuzlar', icon: Receipt, page: 'Receipts' },
         { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
       ],
     },
@@ -590,6 +591,7 @@ export default function Layout({ children, currentPageName }) {
             }}>
               {[
                 { label: t('teacher.layout.finance'), icon: DollarSign, page: 'TeacherFinance' },
+                { label: 'Makbuzlar', icon: Receipt, page: 'Receipts' },
                 { label: t('teacher.layout.smartRaise'), icon: TrendingUp, page: 'Page1' },
               ].map((item, i) => {
                 const Icon = item.icon;
@@ -672,7 +674,7 @@ export default function Layout({ children, currentPageName }) {
             const isActive = item.submenu
               ? item.submenu.some(s => s === currentPageName)
               : item.financeSubmenu
-              ? (currentPageName === 'TeacherFinance' || currentPageName === 'Page1')
+              ? (currentPageName === 'TeacherFinance' || currentPageName === 'Page1' || currentPageName === 'Receipts')
               : item.page === currentPageName;
             const handleClick = (e) => {
               if (item.submenu) {
