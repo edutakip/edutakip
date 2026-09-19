@@ -330,7 +330,7 @@ export default function Layout({ children, currentPageName }) {
       } catch {}
     };
     loadTeacherData();
-    const interval = setInterval(loadTeacherData, 120000);
+    const interval = setInterval(loadTeacherData, 300000);
     return () => clearInterval(interval);
   }, [role]);
 
@@ -354,17 +354,7 @@ export default function Layout({ children, currentPageName }) {
     if (page === currentPageName) return;
     e.preventDefault();
     setNavigating(true);
-    const prefetch = PAGE_PREFETCH[page];
-    if (prefetch) {
-      import('@/api/base44Client').then(({ base44 }) => {
-        base44.auth.me().then(me => {
-          const timeout = new Promise(res => setTimeout(res, 1200));
-          Promise.race([prefetch(base44, me), timeout]).finally(() => navigate(createPageUrl(page)));
-        }).catch(() => navigate(createPageUrl(page)));
-      });
-    } else {
-      setTimeout(() => navigate(createPageUrl(page)), 300);
-    }
+    setTimeout(() => navigate(createPageUrl(page)), 300);
   };
 
 
