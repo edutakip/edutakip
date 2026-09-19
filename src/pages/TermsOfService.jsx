@@ -1,10 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function TermsOfService() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en';
   const sections = t('terms.sections', { returnObjects: true });
+
+  usePageMeta({
+    title: isEnglish ? 'EduTakip Terms of Service' : 'EduTakip Kullanım Şartları',
+    description: isEnglish
+      ? 'EduTakip terms of service and conditions. Platform usage rules, payment terms, and user rights.'
+      : 'EduTakip kullanım şartları ve koşulları. Platform kullanım kuralları, ödeme koşulları ve kullanıcı hakları.',
+    canonical: 'https://edutakip.com/terms'
+  });
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif", color: '#1e293b' }}>

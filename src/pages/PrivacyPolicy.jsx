@@ -1,10 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function PrivacyPolicy() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en';
   const sections = t('privacy.sections', { returnObjects: true });
+
+  usePageMeta({
+    title: isEnglish ? 'EduTakip Privacy Policy' : 'EduTakip Gizlilik Politikası',
+    description: isEnglish
+      ? 'EduTakip privacy policy: Personal data protection, data collection and usage practices.'
+      : 'EduTakip gizlilik politikası: Kişisel verilerin korunması, veri toplama ve kullanım pratikleri.',
+    canonical: 'https://edutakip.com/privacy'
+  });
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif", color: '#1e293b' }}>

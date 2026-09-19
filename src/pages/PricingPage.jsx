@@ -2,13 +2,28 @@ import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const PER_STUDENT = 50;
 const VAT_RATE = 0.20;
 
 export default function PricingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [studentCount, setStudentCount] = useState(10);
+  const isEnglish = i18n.language === 'en';
+
+  usePageMeta({
+    title: isEnglish
+      ? 'EduTakip Pricing | Private Tutor Management Plans'
+      : 'EduTakip Fiyatlandırma | Özel Ders Yönetimi Ücretleri',
+    description: isEnglish
+      ? 'EduTakip pricing: Flexible Pro plan based on student count, free trial. See the cost of private tutor management.'
+      : 'EduTakip fiyatlandırması: Öğrenci sayısına göre esnek Pro plan, ücretsiz deneme. Özel ders yönetiminin maliyetini görün.',
+    keywords: isEnglish
+      ? 'pricing, tutor software cost, education management pricing, private tutor plans'
+      : 'fiyatlandırma, özel ders ücreti, öğretmen yazılımı fiyatı, ders takip planı',
+    canonical: 'https://edutakip.com/pricing'
+  });
   const totalNet = studentCount * PER_STUDENT;
   const totalVat = Math.round(totalNet * VAT_RATE);
   const totalGross = totalNet + totalVat;

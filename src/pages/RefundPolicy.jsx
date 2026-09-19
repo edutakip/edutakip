@@ -1,10 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function RefundPolicy() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en';
   const sections = t('refund.sections', { returnObjects: true });
+
+  usePageMeta({
+    title: isEnglish ? 'EduTakip Refund Policy' : 'EduTakip İade Politikası',
+    description: isEnglish
+      ? 'EduTakip refund policy: Payment refunds, cancellation terms, and refund processes.'
+      : 'EduTakip iade politikası: Ödeme iadeleri, iptal koşulları ve para iade süreçleri.',
+    canonical: 'https://edutakip.com/refund'
+  });
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif", color: '#1e293b' }}>
