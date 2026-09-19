@@ -134,6 +134,7 @@ export default function StudentDetailModal({ student, onClose, onSaved }) {
           teacherName,
           studentName: student.name,
           parentName: student.parentName,
+          inviteCode: student.inviteCode,
           isEn,
         });
       } catch (emailErr) {

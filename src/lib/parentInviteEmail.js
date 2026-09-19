@@ -2,7 +2,8 @@ import { base44 } from '@/api/base44Client';
 
 const LOGO_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png';
 
-export function buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, isEn }) {
+export function buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, inviteCode, isEn }) {
+  const finalUrl = inviteCode ? `${appUrl}?code=${encodeURIComponent(inviteCode)}` : appUrl;
   const greeting = isEn
     ? `Hello${parentName ? ` ${parentName}` : ''},`
     : `Merhaba${parentName ? ` ${parentName}` : ''},`;
@@ -78,7 +79,7 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" style="padding:8px 0;">
-                    <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 40px;border-radius:12px;">${ctaText}</a>
+                    <a href="${finalUrl}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 40px;border-radius:12px;">${ctaText}</a>
                   </td>
                 </tr>
               </table>
@@ -97,9 +98,9 @@ export function buildParentInviteHTML({ teacherName, studentName, parentName, ap
 </html>`;
 }
 
-export async function sendParentInviteEmail({ parentEmail, teacherName, studentName, parentName, isEn }) {
+export async function sendParentInviteEmail({ parentEmail, teacherName, studentName, parentName, inviteCode, isEn }) {
   const appUrl = 'https://edu-track-492b7a1e.base44.app/ParentDashboard';
-  const html = buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, isEn });
+  const html = buildParentInviteHTML({ teacherName, studentName, parentName, appUrl, inviteCode, isEn });
   const subject = isEn
     ? `You're invited to track ${studentName}'s lessons on EduTakip`
     : `${studentName} için EduTakip daveti`;

@@ -17,8 +17,17 @@ export default function ParentDashboard() {
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    base44.auth.me().then(async u => {
       setUser(u);
+      // URL'de ?code= varsa otomatik bağlan (veli kodu hiç görmez)
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code) {
+        try {
+          await base44.functions.invoke('joinWithInviteCode', { inviteCode: code });
+        } catch (e) { console.warn('Otomatik bağlanma başarısız:', e); }
+        window.history.replaceState({}, '', window.location.pathname);
+      }
       loadStudentData(u.email);
     });
   }, []);
