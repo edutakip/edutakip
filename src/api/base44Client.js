@@ -79,8 +79,9 @@ const _entitiesProxy = new Proxy(_base44.entities, {
             const key = `${entityName}:${methodName}:${JSON.stringify(args)}`;
             const now = Date.now();
             const cached = _filterCache.get(key);
-            if (cached && now - cached.time < _FILTER_CACHE_TTL) {
-              return Promise.resolve(Array.isArray(cached.data) ? cached.data : []);
+            // Return cached data only if we actually have resolved data
+            if (cached && cached.data && now - cached.time < _FILTER_CACHE_TTL) {
+              return Promise.resolve(cached.data);
             }
             // Dedup: if a request for this key is already in-flight, reuse it
             if (cached && cached.promise) return cached.promise;
