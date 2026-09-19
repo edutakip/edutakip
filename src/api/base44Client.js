@@ -38,13 +38,24 @@ _base44.auth.me = async function () {
 // burst and trigger rate-limit, regardless of how many pages fire
 // calls simultaneously.
 let _apiQueue = Promise.resolve();
-const _API_GAP_MS = 300;
+const _API_GAP_MS = 500;
+
+function _isRateLimit(e) {
+  const msg = (e?.message || String(e || '')).toLowerCase();
+  return msg.includes('rate limit') || msg.includes('rate_limit') || msg.includes('429');
+}
 
 function _queueCall(fn) {
   const result = _apiQueue.then(async () => {
-    const data = await fn();
-    await new Promise(r => setTimeout(r, _API_GAP_MS));
-    return data;
+    try {
+      const data = await fn();
+      await new Promise(r => setTimeout(r, _API_GAP_MS));
+      return data;
+    } catch (e) {
+      // Keep the gap even on failure so the next call doesn't burst
+      await new Promise(r => setTimeout(r, _API_GAP_MS));
+      throw e;
+    }
   });
   // Keep chain alive even if one call fails
   _apiQueue = result.catch(() => null);
@@ -52,12 +63,15 @@ function _queueCall(fn) {
 }
 
 // ── Retry with exponential backoff ────────────────────────────
+// Rate-limit errors get much longer delays (5s, 10s, 20s, 40s)
+// to outlast the server's rate-limit window.
 async function _retry(fn, retries = 4) {
   for (let i = 0; i <= retries; i++) {
     try { return await fn(); }
     catch (e) {
       if (i === retries) throw e;
-      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+      const base = _isRateLimit(e) ? 5000 : 1000;
+      await new Promise(r => setTimeout(r, base * Math.pow(2, i)));
     }
   }
 }
