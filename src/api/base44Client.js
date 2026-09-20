@@ -34,8 +34,8 @@ _base44.auth.me = async function () {
 };
 
 // ── Global request queue (spaces out requests to avoid rate limits) ───
-const _MIN_GAP = 180;          // ms between consecutive requests
-const _MAX_CONCURRENT = 4;     // max parallel in-flight requests
+const _MIN_GAP = 60;           // ms between consecutive requests
+const _MAX_CONCURRENT = 6;     // max parallel in-flight requests
 let _inFlight = 0;
 let _lastReqTime = 0;
 let _queueTail = Promise.resolve();
@@ -87,7 +87,8 @@ async function _retry(fn, retries = 5) {
 
 // ── Entity filter/list cache (30s) + dedup ────────────────────
 const _filterCache = new Map();
-const _FILTER_CACHE_TTL = 30000;
+const _FRESH_TTL = 30000;    // 30s: fresh, no refresh needed
+const _STALE_TTL = 300000;   // 5min: stale but usable, refresh in background
 
 function _invalidateEntity(entityName) {
   for (const key of _filterCache.keys()) {
@@ -114,18 +115,31 @@ const _entitiesProxy = new Proxy(_base44.entities, {
             const key = `${entityName}:${methodName}:${JSON.stringify(args)}`;
             const now = Date.now();
             const cached = _filterCache.get(key);
-            // Return cached data only if we actually have resolved data
-            if (cached && cached.data && now - cached.time < _FILTER_CACHE_TTL) {
+            // SWR: return cached data immediately if available
+            if (cached && cached.data) {
+              const age = now - cached.time;
+              if (age < _FRESH_TTL) return Promise.resolve(cached.data);
+              // Stale: return immediately, refresh in background
+              if (!cached.refreshing) {
+                cached.refreshing = true;
+                _retry(() => method.apply(entTarget, args)).then(data => {
+                  const safe = Array.isArray(data) ? data : [];
+                  _filterCache.set(key, { data: safe, time: Date.now(), refreshing: false });
+                }).catch(() => {
+                  const e = _filterCache.get(key);
+                  if (e) e.refreshing = false;
+                });
+              }
               return Promise.resolve(cached.data);
             }
-            // Dedup: if a request for this key is already in-flight, reuse it
+            // No cached data: dedup in-flight, or fetch fresh
             if (cached && cached.promise) return cached.promise;
             const promise = _retry(() => method.apply(entTarget, args)).then(data => {
               const safe = Array.isArray(data) ? data : [];
-              _filterCache.set(key, { data: safe, time: Date.now() });
+              _filterCache.set(key, { data: safe, time: Date.now(), refreshing: false });
               return safe;
             }).catch(e => { _filterCache.delete(key); throw e; });
-            _filterCache.set(key, { promise, time: now });
+            _filterCache.set(key, { data: null, promise, time: now, refreshing: false });
             return promise;
           };
         }

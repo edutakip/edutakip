@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator, Radio, Receipt } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
 import LessonStartPopup from './components/teacher/LessonStartPopup';
+import { base44 } from '@/api/base44Client';
 import { showToast } from '@/lib/toast';
 import SubscriptionWidget from './components/SubscriptionWidget';
 import ProUpgradeModal from './components/ProUpgradeModal';
@@ -152,7 +153,7 @@ const FAB_ACTIONS_KEYS = [
 ];
 
 // ── SubmenuItem: hook'u doğru yerde kullanmak için ayrı component ────
-function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNav }) {
+function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNav, prefetchPage }) {
   const [subOpen, setSubOpen] = useState(isGroupActive);
   const Icon = item.icon;
   const itemCount = item.submenu?.length || 0;
@@ -205,7 +206,7 @@ function SubmenuItem({ item, isGroupActive, currentPageName, collapsed, handleNa
                     fontWeight: isActive ? '600' : '400',
                     textDecoration: 'none', whiteSpace: 'nowrap',
                   }}
-                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
+                  onMouseEnter={e => { prefetchPage?.(sub.page); if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
                   onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; } }}>
                   <SubIcon size={14} style={{ flexShrink: 0 }} />
                   <span>{sub.label}</span>
@@ -332,6 +333,22 @@ export default function Layout() {
     return () => clearInterval(interval);
   }, [role]);
 
+  // Idle prefetch — bir sonraki sayfanın verisini arka planda önbelleğe al
+  useEffect(() => {
+    if (role !== 'teacher' || !user) return;
+    const run = () => {
+      Object.keys(PAGE_PREFETCH).forEach(page => {
+        if (page !== currentPageName) PAGE_PREFETCH[page](base44, user).catch(() => {});
+      });
+    };
+    if (window.requestIdleCallback) {
+      const h = window.requestIdleCallback(run, { timeout: 3000 });
+      return () => window.cancelIdleCallback?.(h);
+    }
+    const h = setTimeout(run, 2000);
+    return () => clearTimeout(h);
+  }, [user, role, currentPageName]);
+
   // Saati 30 saniyede bir güncelle — ders başlangıç anını yakalamak için
   useEffect(() => {
     if (role !== 'teacher') return;
@@ -380,6 +397,12 @@ export default function Layout() {
     setNavigating(true);
     setTimeout(() => navigate(createPageUrl(page)), 300);
   };
+
+  const prefetchPage = useCallback((pageName) => {
+    if (!user) return;
+    const fn = PAGE_PREFETCH[pageName];
+    if (fn) fn(base44, user).catch(() => {});
+  }, [user]);
 
 
 
@@ -431,7 +454,7 @@ export default function Layout() {
           const Icon = item.icon;
           if (item.submenu) {
             const isGroupActive = item.submenu.some(s => s.page === currentPageName);
-            return <SubmenuItem key={i} item={item} isGroupActive={isGroupActive} currentPageName={currentPageName} collapsed={collapsed} handleNav={handleNav} />;
+            return <SubmenuItem key={i} item={item} isGroupActive={isGroupActive} currentPageName={currentPageName} collapsed={collapsed} handleNav={handleNav} prefetchPage={prefetchPage} />;
           }
           const isActive = item.page === currentPageName;
           return (
@@ -447,7 +470,7 @@ export default function Layout() {
                 textDecoration: 'none', overflow: 'hidden', whiteSpace: 'nowrap',
                 borderLeft: isActive ? '3px solid #6366f1' : '3px solid transparent',
               }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}
+              onMouseEnter={e => { prefetchPage(item.page); if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; } }}
               onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}>
               <Icon size={17} style={{ flexShrink: 0 }} />
               {!collapsed && <span>{item.label}</span>}
