@@ -33,19 +33,54 @@ _base44.auth.me = async function () {
   }
 };
 
+// ── Global request queue (spaces out requests to avoid rate limits) ───
+const _MIN_GAP = 180;          // ms between consecutive requests
+const _MAX_CONCURRENT = 4;     // max parallel in-flight requests
+let _inFlight = 0;
+let _lastReqTime = 0;
+let _queueTail = Promise.resolve();
+
+function _throttled(fn) {
+  const run = async () => {
+    // Wait for a concurrency slot
+    while (_inFlight >= _MAX_CONCURRENT) {
+      await new Promise(r => setTimeout(r, 20));
+    }
+    // Enforce minimum gap since last request started
+    const elapsed = Date.now() - _lastReqTime;
+    if (elapsed < _MIN_GAP) {
+      await new Promise(r => setTimeout(r, _MIN_GAP - elapsed));
+    }
+    _inFlight++;
+    _lastReqTime = Date.now();
+    try {
+      return await fn();
+    } finally {
+      _inFlight--;
+    }
+  };
+  // Serialize queue chaining so gap is preserved across burst calls
+  const task = _queueTail.then(run, run);
+  // Keep the chain moving even if this task rejects
+  _queueTail = task.catch(() => {});
+  return task;
+}
+
 // ── Retry with exponential backoff (rate-limit safety net) ───
 function _isRateLimit(e) {
   const msg = (e?.message || String(e || '')).toLowerCase();
   return msg.includes('rate limit') || msg.includes('rate_limit') || msg.includes('429');
 }
 
-async function _retry(fn, retries = 3) {
+async function _retry(fn, retries = 5) {
   for (let i = 0; i <= retries; i++) {
-    try { return await fn(); }
+    try { return await _throttled(fn); }
     catch (e) {
       if (i === retries) throw e;
-      const base = _isRateLimit(e) ? 1000 : 500;
-      await new Promise(r => setTimeout(r, base * Math.pow(2, i)));
+      const isRL = _isRateLimit(e);
+      const base = isRL ? 1500 : 400;
+      const delay = isRL ? base * Math.pow(1.8, i) : base * Math.pow(2, i);
+      await new Promise(r => setTimeout(r, delay));
     }
   }
 }
