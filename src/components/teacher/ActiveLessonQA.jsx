@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { ArrowLeft, ArrowRight, Check, Star, X, Save, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 
+function useWindowWidth() {
+  const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
+}
+
 export default function ActiveLessonQA({ lesson, student, payments, onBack, onSaved, manual }) {
   const { t } = useTranslation();
+  const windowWidth = useWindowWidth();
+  const isDesktop = windowWidth >= 1024;
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -138,6 +150,155 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
     );
   }
 
+  // ── Yardımcı: tek bir alanı render et (desktop grid için) ──
+  const renderField = (field) => {
+    const val = answers[field.key];
+    const setFieldVal = (v) => setAnswers(a => ({ ...a, [field.key]: v }));
+    return (
+      <div key={field.key}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '1rem' }}>{field.icon}</span> {field.label}
+        </label>
+        {field.type === 'textarea' && (
+          <textarea
+            value={val}
+            onChange={e => setFieldVal(e.target.value)}
+            placeholder={field.placeholder}
+            rows={3}
+            style={{
+              width: '100%', padding: '0.75rem 0.9rem', borderRadius: 10,
+              border: '1.5px solid #e5e7eb', fontSize: '0.88rem', outline: 'none',
+              resize: 'vertical', fontFamily: 'inherit', transition: 'border 0.15s',
+              background: '#fafafa',
+            }}
+            onFocus={e => e.currentTarget.style.borderColor = '#6366f1'}
+            onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+          />
+        )}
+        {field.type === 'text' && (
+          <input
+            type="text"
+            value={val}
+            onChange={e => setFieldVal(e.target.value)}
+            placeholder={field.placeholder}
+            style={{
+              width: '100%', padding: '0.75rem 0.9rem', borderRadius: 10,
+              border: '1.5px solid #e5e7eb', fontSize: '0.88rem', outline: 'none',
+              transition: 'border 0.15s', background: '#fafafa',
+            }}
+            onFocus={e => e.currentTarget.style.borderColor = '#6366f1'}
+            onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+          />
+        )}
+        {field.type === 'rating' && (
+          <div style={{ display: 'flex', gap: '0.4rem', padding: '0.25rem 0' }}>
+            {[1, 2, 3, 4, 5].map(n => (
+              <button key={n} onClick={() => setFieldVal(n)} style={{ background: 'none', border: 'none', cursor: 'pointer', transform: val >= n ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.15s', padding: '0.15rem' }}>
+                <Star size={32} fill={val >= n ? '#f59e0b' : 'none'} color={val >= n ? '#f59e0b' : '#d1d5db'} />
+              </button>
+            ))}
+          </div>
+        )}
+        {field.type === 'choice' && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {field.options.map(opt => (
+              <button key={opt.val} onClick={() => setFieldVal(opt.val)} style={{
+                flex: '1', minWidth: 100, padding: '0.7rem 1rem', borderRadius: 10,
+                border: `2px solid ${val === opt.val ? opt.color : '#e5e7eb'}`,
+                background: val === opt.val ? opt.bg : 'white',
+                color: val === opt.val ? opt.color : '#6b7280',
+                fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+              }}>
+                {val === opt.val && <Check size={16} />} {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ── Masaüstü: iki sütunlu tek sayfa form ──
+  if (isDesktop) {
+    return (
+      <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1.25rem', padding: 0 }}>
+          <ArrowLeft size={16} /> {t('activeLesson.back')}
+        </button>
+
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          {/* Lesson info card */}
+          <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%)', borderRadius: 18, padding: '1.1rem 1.5rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: 46, height: 46, borderRadius: '50%', background: getColor(lesson.studentName), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '2px solid rgba(255,255,255,0.2)' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'white' }}>{getInitials(lesson.studentName)}</span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white' }}>{lesson.studentName}</div>
+              <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.15rem' }}>
+                {lesson.subject}{manual ? ` · ${t('activeLesson.manualMode')}` : ` · ${lesson.startTime?.slice(0,5)} - ${lesson.endTime?.slice(0,5)}`}
+              </div>
+            </div>
+            {!manual && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', fontWeight: 700, color: '#fca5a5', background: 'rgba(239,68,68,0.15)', padding: '0.25rem 0.65rem', borderRadius: 20 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', animation: 'al-pulse 1.5s ease-in-out infinite' }} />
+                {t('activeLesson.live')}
+              </div>
+            )}
+          </div>
+
+          {/* Form kartı — iki sütunlu grid */}
+          <div style={{ background: 'white', borderRadius: 18, border: '1.5px solid #f1f5f9', padding: '1.5rem', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem 1.5rem' }}>
+              {/* İşlenen konular — tam genişlik */}
+              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[0])}</div>
+              {/* Sayfa + Puan — yan yana */}
+              {renderField(STEPS[1])}
+              {renderField(STEPS[2])}
+              {/* Ödev yapıldı mı — tam genişlik */}
+              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[3])}</div>
+              {/* Güçlü yönler + Geliştirilecek — yan yana */}
+              {renderField(STEPS[4])}
+              {renderField(STEPS[5])}
+              {/* Verilen ödev + Sonraki hedef — yan yana */}
+              {renderField(STEPS[6])}
+              {renderField(STEPS[7])}
+              {/* Genel not — tam genişlik */}
+              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[8])}</div>
+            </div>
+
+            {/* Kaydet butonu */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #f3f4f6' }}>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  padding: '0.8rem 2rem', borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: 'white', fontWeight: 800, fontSize: '0.9rem',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  boxShadow: '0 4px 14px rgba(16,185,129,0.3)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Save size={17} /> {saving ? t('activeLesson.saving') : t('activeLesson.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes al-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // ── Mobil: adım adım sihirbaz ──
   return (
     <div style={{ padding: 'clamp(1rem, 4vw, 2rem)', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Back + header */}

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator, Radio, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LessonModal from './components/teacher/LessonModal';
 import PaymentModal from './components/teacher/PaymentModal';
+import LessonStartPopup from './components/teacher/LessonStartPopup';
 import { showToast } from '@/lib/toast';
 import SubscriptionWidget from './components/SubscriptionWidget';
 import ProUpgradeModal from './components/ProUpgradeModal';
@@ -299,6 +300,8 @@ export default function Layout({ children, currentPageName }) {
   const [finansOpen, setFinansOpen] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [hasActiveLesson, setHasActiveLesson] = useState(false);
+  const [teacherLessons, setTeacherLessons] = useState([]);
+  const [nowTick, setNowTick] = useState(new Date());
 
   const navigate = useNavigate();
   const prevPage = useRef(currentPageName);
@@ -318,20 +321,40 @@ export default function Layout({ children, currentPageName }) {
           base44.entities.Student.filter({ teacherEmail: me.email, status: 'active' }),
         ]);
         setFabStudents(students);
-        const d = new Date();
-        const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const active = lessons.some(l =>
-          l.date === todayStr && l.startTime && l.endTime &&
-          l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
-        );
-        setHasActiveLesson(active);
+        setTeacherLessons(Array.isArray(lessons) ? lessons : []);
       } catch {}
     };
     loadTeacherData();
-    const interval = setInterval(loadTeacherData, 300000);
+    // Ders verilerini 2 dakikada bir yenile
+    const interval = setInterval(loadTeacherData, 120000);
     return () => clearInterval(interval);
   }, [role]);
+
+  // Saati 30 saniyede bir güncelle — ders başlangıç anını yakalamak için
+  useEffect(() => {
+    if (role !== 'teacher') return;
+    const tick = () => setNowTick(new Date());
+    const interval = setInterval(tick, 30000);
+    const onFocus = () => tick();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
+  }, [role]);
+
+  // Aktif dersleri hesapla (nowTick + teacherLessons)
+  const activeLessonsArr = useMemo(() => {
+    if (role !== 'teacher') return [];
+    const d = nowTick;
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return (teacherLessons || []).filter(l =>
+      l.date === todayStr && l.startTime && l.endTime &&
+      l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
+    ).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }, [teacherLessons, nowTick, role]);
+
+  useEffect(() => {
+    setHasActiveLesson(activeLessonsArr.length > 0);
+  }, [activeLessonsArr]);
 
   useEffect(() => {
     if (role !== 'teacher') {
@@ -529,9 +552,10 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
         <LoadingBar active={navigating} />
+        <LessonStartPopup activeLessons={activeLessonsArr} />
         <style>{`@keyframes al-pulse-nav { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }`}</style>
 
-        {/* ── Üst şerit (sadece pro değilse) ── */}
+          {/* ── Üst şerit (sadece pro değilse) ── */}
         {showSubscriptionChip && (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 51,
@@ -807,6 +831,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <LoadingBar active={navigating} />
+      <LessonStartPopup activeLessons={activeLessonsArr} />
       <style>{`@keyframes al-pulse-nav { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }`}</style>
 
       <aside style={{
