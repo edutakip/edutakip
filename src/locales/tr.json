@@ -829,7 +829,23 @@
       "nextGoal": "Bir sonraki ders hedefi?",
       "nextGoalPh": "Sonraki hedefi yazın...",
       "generalNote": "Genel not",
-      "generalNotePh": "Eklemek istediğiniz genel not..."
+      "generalNotePh": "Eklemek istediğiniz genel not...",
+      "attendance": "Derse katıldı mı?",
+      "attended": "Katıldı",
+      "late": "Geç Kaldı",
+      "absent": "Katılmadı",
+      "understood": "Konuyu ne kadar anladı?",
+      "understoodFull": "Tam Anladı",
+      "understoodPartial": "Kısmen Anladı",
+      "understoodRepeat": "Tekrar Gerekli",
+      "participation": "Derse katılımı nasıldı?",
+      "participationActive": "Aktif",
+      "participationMedium": "Orta",
+      "participationPassive": "Pasif",
+      "motivation": "Motivasyonu nasıldı?",
+      "motivationHigh": "Yüksek",
+      "motivationNormal": "Normal",
+      "motivationLow": "Düşük"
     }
   },
   "aiHomework": {
