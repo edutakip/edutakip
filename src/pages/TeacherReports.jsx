@@ -6,6 +6,8 @@ import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { isPro } from '@/lib/subscription';
 import ProUpgradeModal from '@/components/ProUpgradeModal';
+import ReportEditModal from '@/components/teacher/ReportEditModal';
+import { Edit3 } from 'lucide-react';
 
 const UNDERSTOOD_MAP = {
   tam:    { label: 'Tam Anladı',      bg: '#d1fae5', color: '#065f46' },
@@ -63,6 +65,7 @@ export default function TeacherReports() {
   const [search, setSearch] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [showProModal, setShowProModal] = useState(false);
+  const [editingReport, setEditingReport] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -80,6 +83,17 @@ export default function TeacherReports() {
       }
     })();
   }, []);
+
+  const handleReportSaved = async () => {
+    setEditingReport(null);
+    try {
+      const me = await base44.auth.me();
+      const r = await base44.entities.LessonReport.filter({ teacherEmail: me.email }, '-date');
+      setReports(r);
+    } catch (e) {
+      console.error('Reports reload error:', e);
+    }
+  };
 
   const filteredReports = reports.filter(r => {
     const matchStudent = selectedStudentId === 'all' || r.studentId === selectedStudentId;
@@ -285,12 +299,28 @@ export default function TeacherReports() {
                       {report.homework && <InfoBox icon={FileText} iconColor='#ec4899' title={t('teacher.lessonReport.homework')} text={report.homework} accent='#fce7f3' />}
                       {report.nextGoal && <InfoBox icon={Target} iconColor='#10b981' title={t('teacher.lessonReport.nextGoal')} text={report.nextGoal} accent='#d1fae5' />}
                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.25rem' }}>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingReport(report); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: 10, border: '1.5px solid #c7d2fe', background: '#eef2ff', color: '#4338ca', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = '#6366f1'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.borderColor = '#c7d2fe'; }}>
+                        <Edit3 size={14} /> Düzenle
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
+      )}
+
+      {editingReport && (
+        <ReportEditModal
+          report={editingReport}
+          onClose={() => setEditingReport(null)}
+          onSaved={handleReportSaved}
+        />
       )}
     </div>
   );
