@@ -134,14 +134,12 @@ const PARENT_NAV = [
   { label: 'Ödevler', icon: GraduationCap, page: 'ParentHomework' },
   { label: 'Gelişim Raporu', icon: BookOpen, page: 'ParentPerformance' },
   { label: 'Finans', icon: DollarSign, page: 'ParentLessonsPayments' },
-  { label: 'Mesajlar', icon: MessageCircle, page: 'ParentMessages' },
 ];
 const PARENT_MOBILE_NAV = [
   { label: 'Ana Sayfa', shortLabel: 'Ana', icon: Home, page: 'ParentDashboard' },
   { label: 'Ödevler', shortLabel: 'Ödev', icon: GraduationCap, page: 'ParentHomework' },
   { label: 'Gelişim Raporu', shortLabel: 'Gelişim', icon: BookOpen, page: 'ParentPerformance' },
   { label: 'Finans', shortLabel: 'Finans', icon: DollarSign, page: 'ParentLessonsPayments' },
-  { label: 'Mesajlar', shortLabel: 'Mesaj', icon: MessageCircle, page: 'ParentMessages' },
 ];
 
 // TEACHER_MOBILE_NAV defined inside component using t()
