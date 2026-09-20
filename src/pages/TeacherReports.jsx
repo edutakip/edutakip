@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTranslation } from 'react-i18next';
-import { Star, TrendingUp, BookOpen, Target, CheckCircle, AlertCircle, ChevronDown, ChevronUp, FileText, Zap, Users, Search } from 'lucide-react';
+import { Star, TrendingUp, BookOpen, Target, CheckCircle, AlertCircle, ChevronDown, ChevronUp, FileText, Zap, Users, Search, Award, FileEdit } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { isPro } from '@/lib/subscription';
@@ -23,6 +23,11 @@ const MOTIVATION_MAP = {
   yuksek: { label: 'Yüksek Motivasyon', bg: '#d1fae5', color: '#065f46' },
   normal: { label: 'Normal Motivasyon', bg: '#e0e7ff', color: '#4338ca' },
   dusuk:  { label: 'Düşük Motivasyon',  bg: '#fee2e2', color: '#b91c1c' },
+};
+const HOMEWORK_DONE_MAP = {
+  evet:   { label: 'Ödev Yapıldı',     bg: '#d1fae5', color: '#065f46' },
+  hayir:  { label: 'Ödev Yapılmadı',   bg: '#fee2e2', color: '#b91c1c' },
+  kismen: { label: 'Kısmen Yapıldı',   bg: '#fef3c7', color: '#92400e' },
 };
 
 const ratingColor = (r) => {
@@ -283,8 +288,13 @@ export default function TeacherReports() {
                       {report.motivation && MOTIVATION_MAP[report.motivation] && (
                         <Badge label={MOTIVATION_MAP[report.motivation].label} bg={MOTIVATION_MAP[report.motivation].bg} color={MOTIVATION_MAP[report.motivation].color} />
                       )}
+                      {report.homeworkDone && HOMEWORK_DONE_MAP[report.homeworkDone] && (
+                        <Badge label={HOMEWORK_DONE_MAP[report.homeworkDone].label} bg={HOMEWORK_DONE_MAP[report.homeworkDone].bg} color={HOMEWORK_DONE_MAP[report.homeworkDone].color} />
+                      )}
                     </div>
                     {report.topicsCovered && <InfoBox icon={BookOpen} iconColor='#6366f1' title={t('teacher.lessonReport.topicsCovered')} text={report.topicsCovered} accent='#e0e7ff' />}
+                    {report.pageLeft && <InfoBox icon={FileEdit} iconColor='#0ea5e9' title='Kalınan Sayfa' text={report.pageLeft} accent='#e0f2fe' />}
+                    {report.strengths && <InfoBox icon={Award} iconColor='#10b981' title='Güçlü Yönler' text={report.strengths} accent='#d1fae5' />}
                     {report.generalNote && (
                       <div style={{ background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', borderRadius: 12, padding: '1rem 1.25rem', border: '1.5px solid #c7d2fe' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>

@@ -52,6 +52,15 @@
       "type": "string",
       "description": "Verilen \u00f6dev"
     },
+    "homeworkDone": {
+      "type": "string",
+      "enum": [
+        "evet",
+        "hayir",
+        "kismen"
+      ],
+      "description": "\u00d6nceki \u00f6dev yap\u0131ld\u0131 m\u0131"
+    },
     "nextGoal": {
       "type": "string",
       "description": "Bir sonraki ders hedefi"
@@ -59,6 +68,10 @@
     "topicsCovered": {
       "type": "string",
       "description": "\u0130\u015flenen konular"
+    },
+    "pageLeft": {
+      "type": "string",
+      "description": "Kal\u0131nan sayfa/konu"
     }
   },
   "required": [

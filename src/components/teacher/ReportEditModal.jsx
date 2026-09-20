@@ -24,6 +24,11 @@ const MOTIVATION_OPTS = [
   { value: 'normal', label: 'Normal Motivasyon' },
   { value: 'dusuk', label: 'Düşük Motivasyon' },
 ];
+const HOMEWORK_DONE_OPTS = [
+  { value: 'evet', label: 'Evet, Yapıldı' },
+  { value: 'kismen', label: 'Kısmen Yapıldı' },
+  { value: 'hayir', label: 'Hayır, Yapılmadı' },
+];
 
 function Field({ label, children }) {
   return (
@@ -75,10 +80,12 @@ export default function ReportEditModal({ report, onClose, onSaved }) {
       participation: report.participation || '',
       motivation: report.motivation || '',
       topicsCovered: report.topicsCovered || '',
+      pageLeft: report.pageLeft || '',
       generalNote: report.generalNote || '',
       strengths: report.strengths || '',
       improvements: report.improvements || '',
       homework: report.homework || '',
+      homeworkDone: report.homeworkDone || '',
       nextGoal: report.nextGoal || '',
     });
   }, [report]);
@@ -97,10 +104,12 @@ export default function ReportEditModal({ report, onClose, onSaved }) {
         participation: form.participation || undefined,
         motivation: form.motivation || undefined,
         topicsCovered: form.topicsCovered || undefined,
+        pageLeft: form.pageLeft || undefined,
         generalNote: form.generalNote || undefined,
         strengths: form.strengths || undefined,
         improvements: form.improvements || undefined,
         homework: form.homework || undefined,
+        homeworkDone: form.homeworkDone || undefined,
         nextGoal: form.nextGoal || undefined,
       });
       onSaved?.();
@@ -150,6 +159,7 @@ export default function ReportEditModal({ report, onClose, onSaved }) {
 
           {/* Textareas */}
           <Field label="İşlenen Konular"><TextArea value={form.topicsCovered} onChange={v => set('topicsCovered', v)} placeholder="Derste işlenen konular..." /></Field>
+          <Field label="Kalınan Sayfa"><input type="text" value={form.pageLeft} onChange={e => set('pageLeft', e.target.value)} placeholder="Örn: Sayfa 45, 3. ünite..." style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: '0.85rem', color: '#111827', outline: 'none', boxSizing: 'border-box' }} /></Field>
           <Field label="Genel Değerlendirme"><TextArea value={form.generalNote} onChange={v => set('generalNote', v)} placeholder="Genel değerlendirme notu..." /></Field>
           <Field label="Güçlü Yönler"><TextArea value={form.strengths} onChange={v => set('strengths', v)} placeholder="Öğrencinin güçlü yönleri..." /></Field>
           <Field label="Geliştirilmesi Gereken Alanlar"><TextArea value={form.improvements} onChange={v => set('improvements', v)} placeholder="Geliştirilmesi gereken alanlar..." /></Field>
@@ -157,6 +167,7 @@ export default function ReportEditModal({ report, onClose, onSaved }) {
             <Field label="Verilen Ödev"><TextArea value={form.homework} onChange={v => set('homework', v)} placeholder="Ödev..." /></Field>
             <Field label="Sonraki Ders Hedefi"><TextArea value={form.nextGoal} onChange={v => set('nextGoal', v)} placeholder="Hedef..." /></Field>
           </div>
+          <Field label="Önceki Ödev Yapıldı mı?"><Select value={form.homeworkDone} onChange={v => set('homeworkDone', v)} options={HOMEWORK_DONE_OPTS} /></Field>
         </div>
 
         {/* Footer */}
