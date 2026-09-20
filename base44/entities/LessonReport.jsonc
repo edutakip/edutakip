@@ -23,9 +23,9 @@
     },
     "rating": {
       "type": "number",
-      "minimum": 1,
+      "minimum": 0,
       "maximum": 5,
-      "description": "Genel performans puan\u0131 (1-5)"
+      "description": "Genel performans puan\u0131 (0-5)"
     },
     "attendance": {
       "type": "string",
@@ -35,6 +35,33 @@
         "kat\u0131lmad\u0131"
       ],
       "default": "kat\u0131ld\u0131"
+    },
+    "understood": {
+      "type": "string",
+      "enum": [
+        "tam",
+        "kismen",
+        "tekrar"
+      ],
+      "description": "Anlama d\u00fczeyi"
+    },
+    "participation": {
+      "type": "string",
+      "enum": [
+        "aktif",
+        "orta",
+        "pasif"
+      ],
+      "description": "Derse kat\u0131l\u0131m"
+    },
+    "motivation": {
+      "type": "string",
+      "enum": [
+        "yuksek",
+        "normal",
+        "dusuk"
+      ],
+      "description": "Motivasyon d\u00fczeyi"
     },
     "generalNote": {
       "type": "string",
