@@ -46,16 +46,27 @@ export default function ParentDashboard() {
   };
 
   const handleJoinWithCode = async () => {
-    const code = codeDigits.join('');
+    const code = codeDigits.join('').toUpperCase().trim();
     if (code.length < 6) return;
     setLoading(true); setError('');
-    const res = await base44.functions.invoke('joinWithInviteCode', { inviteCode: code });
-    if (!res.data?.found) {
-      setError('Geçersiz davet kodu. Lütfen öğretmeninizden aldığınız kodu kontrol edin.');
-      setLoading(false); return;
+    try {
+      const students = await base44.entities.Student.filter({ inviteCode: code });
+      if (!students || students.length === 0) {
+        setError('Geçersiz davet kodu. Lütfen öğretmeninizden aldığınız kodu kontrol edin.');
+        setLoading(false); return;
+      }
+      const student = students[0];
+      await base44.entities.Student.update(student.id, {
+        inviteAccepted: true,
+        parentEmail: user?.email || '',
+      });
+      setLoading(false);
+      loadStudentData(user?.email || '');
+    } catch (e) {
+      console.error('Join error:', e);
+      setError('Bağlanırken bir hata oluştu. Lütfen tekrar deneyin.');
+      setLoading(false);
     }
-    setLoading(false);
-    loadStudentData(user?.email || '');
   };
 
   const totalPaid = payments.filter(p => p.status === 'alındı').reduce((s, p) => s + (p.amount || 0), 0);
