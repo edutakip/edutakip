@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Radio, X, ChevronRight } from 'lucide-react';
@@ -33,6 +33,9 @@ function playChime() {
 
 const STORAGE_KEY = 'edutakip_notified_lessons';
 
+// Modül seviyesinde — Layout remount olsa bile aynı ders için tekrar tetiklenmez
+const shownLessonIds = new Set();
+
 function getNotifiedIds() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -61,19 +64,19 @@ export default function LessonStartPopup({ activeLessons }) {
   const navigate = useNavigate();
   const [popupLesson, setPopupLesson] = useState(null);
   const [visible, setVisible] = useState(false);
-  const shownRef = useRef(false);
 
   // Aktif dersler değiştiğinde bildirilmemiş ilk dersi bul
   useEffect(() => {
     if (!activeLessons || activeLessons.length === 0) return;
     const notified = getNotifiedIds();
-    const target = activeLessons.find(l => !notified.has(l.id));
-    if (target && !shownRef.current) {
-      shownRef.current = true;
+    const target = activeLessons.find(l => !notified.has(l.id) && !shownLessonIds.has(l.id));
+    if (target) {
+      // Hem modül seviyesinde hem localStorage'da hemen işaretle —
+      // remount veya tekrar koşma durumunda tekrar tetiklenmesin
+      shownLessonIds.add(target.id);
+      markNotified(target.id);
       setPopupLesson(target);
-      // Animasyon girişi
       requestAnimationFrame(() => setVisible(true));
-      // Ses efekti (kullanıcı etkileşimi sonrası AudioContext genelde çalışır)
       playChime();
     }
   }, [activeLessons]);
@@ -83,7 +86,6 @@ export default function LessonStartPopup({ activeLessons }) {
     setVisible(false);
     setTimeout(() => {
       setPopupLesson(null);
-      shownRef.current = false;
     }, 300);
   };
 
@@ -92,7 +94,6 @@ export default function LessonStartPopup({ activeLessons }) {
     setVisible(false);
     setTimeout(() => {
       setPopupLesson(null);
-      shownRef.current = false;
       navigate(createPageUrl('ActiveLesson') + '?lessonId=' + popupLesson.id);
     }, 300);
   };

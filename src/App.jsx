@@ -37,10 +37,6 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
-
 // ── Güncelleme tespiti ────────────────────────────────────────
 // index.html'deki script hash'ini okur, değişince banner gösterir
 function useUpdateDetection() {
@@ -179,38 +175,28 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/TeacherReports" element={<LayoutWrapper currentPageName="TeacherReports"><TeacherReports /></LayoutWrapper>} />
-      <Route path="/ParentLessonsPayments" element={<LayoutWrapper currentPageName="ParentLessonsPayments"><ParentLessonsPayments /></LayoutWrapper>} />
-      <Route path="/ParentLessonRequests" element={<LayoutWrapper currentPageName="ParentLessonRequests"><ParentLessonRequests /></LayoutWrapper>} />
-      <Route path="/ParentSettings" element={<LayoutWrapper currentPageName="ParentSettings"><ParentSettings /></LayoutWrapper>} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<MainPage />} />
+        {Object.entries(Pages).map(([path, Page]) => (
+          <Route key={path} path={`/${path}`} element={<Page />} />
+        ))}
+        <Route path="/TeacherReports" element={<TeacherReports />} />
+        <Route path="/ParentLessonsPayments" element={<ParentLessonsPayments />} />
+        <Route path="/ParentLessonRequests" element={<ParentLessonRequests />} />
+        <Route path="/ParentSettings" element={<ParentSettings />} />
+        <Route path="/TeacherAssistant" element={<TeacherAssistant />} />
+        <Route path="/Page1" element={<Page1 />} />
+        <Route path="/SubscriptionManagement" element={<SubscriptionManagement />} />
+        <Route path="/TeacherAccount" element={<TeacherAccount />} />
+        <Route path="/CertificateGenerator" element={<CertificateGenerator />} />
+        <Route path="/Calculator" element={<Calculator />} />
+        <Route path="/AIHomeworkGenerator" element={<AIHomeworkGenerator />} />
+        <Route path="/HomeworkAnalytics" element={<HomeworkAnalytics />} />
+        <Route path="/ActiveLesson" element={<ActiveLesson />} />
+        <Route path="/Receipts" element={<Receipts />} />
+      </Route>
       <Route path="/adminreis" element={<AdminPanel />} />
-      <Route path="/TeacherAssistant" element={<LayoutWrapper currentPageName="TeacherAssistant"><TeacherAssistant /></LayoutWrapper>} />
-      <Route path="/Page1" element={<LayoutWrapper currentPageName="Page1"><Page1 /></LayoutWrapper>} />
-      <Route path="/SubscriptionManagement" element={<LayoutWrapper currentPageName="SubscriptionManagement"><SubscriptionManagement /></LayoutWrapper>} />
-      <Route path="/TeacherAccount" element={<LayoutWrapper currentPageName="TeacherAccount"><TeacherAccount /></LayoutWrapper>} />
-      <Route path="/CertificateGenerator" element={<LayoutWrapper currentPageName="CertificateGenerator"><CertificateGenerator /></LayoutWrapper>} />
-      <Route path="/Calculator" element={<LayoutWrapper currentPageName="Calculator"><Calculator /></LayoutWrapper>} />
-      <Route path="/AIHomeworkGenerator" element={<LayoutWrapper currentPageName="AIHomeworkGenerator"><AIHomeworkGenerator /></LayoutWrapper>} />
-      <Route path="/HomeworkAnalytics" element={<LayoutWrapper currentPageName="HomeworkAnalytics"><HomeworkAnalytics /></LayoutWrapper>} />
       <Route path="/HomeworkSolver" element={<HomeworkSolver />} />
-      <Route path="/ActiveLesson" element={<LayoutWrapper currentPageName="ActiveLesson"><ActiveLesson /></LayoutWrapper>} />
-      <Route path="/Receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
       <Route path="/ManuelCheckout" element={<ManuelCheckout />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

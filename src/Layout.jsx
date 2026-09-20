@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight, Users, BookOpen, CalendarDays, DollarSign, MessageCircle, LayoutDashboard, Home, Plus, BarChart2, Bot, TrendingUp, CreditCard, Settings, Sparkles, PieChart, Calculator, Radio, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -240,8 +240,10 @@ function MobileSubscriptionButton({ plan, daysLeft, onOpenModal }) {
   );
 }
 
-export default function Layout({ children, currentPageName }) {
+export default function Layout() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const currentPageName = location.pathname === '/' ? 'Landing' : location.pathname.replace(/^\//, '');
 
   const TEACHER_MOBILE_NAV = [
     { label: t('teacher.layout.overview'), icon: LayoutDashboard, page: 'TeacherDashboard' },
@@ -382,7 +384,7 @@ export default function Layout({ children, currentPageName }) {
 
 
   if (currentPageName === 'Landing') {
-    return <div>{children}</div>;
+    return <div><Outlet /></div>;
   }
 
   const nav = role === 'teacher' ? TEACHER_NAV : PARENT_NAV;
@@ -492,7 +494,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </header>
         <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '56px', paddingBottom: '80px' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+          <PageTransition pageKey={currentPageName}><Outlet /></PageTransition>
         </main>
         {/* Alt tab bar */}
         <nav style={{
@@ -595,7 +597,7 @@ export default function Layout({ children, currentPageName }) {
         )}
 
         <main style={{ flex: 1, minHeight: '100vh', overflow: 'auto', paddingTop: '62px', paddingBottom: '80px' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+          <PageTransition pageKey={currentPageName}><Outlet /></PageTransition>
         </main>
 
         {/* Finans alt menü popup */}
@@ -858,7 +860,7 @@ export default function Layout({ children, currentPageName }) {
 
       <main style={{ marginLeft: sideW, flex: 1, minHeight: '100vh', overflow: 'auto', transition: 'margin-left 0.2s ease' }}>
         <div style={{ maxWidth: '1300px', width: '100%', margin: '0 auto' }}>
-          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+          <PageTransition pageKey={currentPageName}><Outlet /></PageTransition>
         </div>
       </main>
 
