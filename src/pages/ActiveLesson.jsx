@@ -5,6 +5,15 @@ import { Radio, Clock, BookOpen, ChevronRight, ArrowLeft, CheckCircle, AlertCirc
 import { useTranslation } from 'react-i18next';
 import ActiveLessonQA from '@/components/teacher/ActiveLessonQA';
 
+// endTime geçersizse (startTime'den önce veya yok) startTime + duration'a göre hesapla
+function getEffectiveEndTime(l) {
+  if (l.endTime && l.endTime > l.startTime) return l.endTime;
+  const duration = l.duration || 60;
+  const [h, m] = (l.startTime || '00:00').split(':').map(Number);
+  const endMin = h * 60 + m + duration;
+  return `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+}
+
 export default function ActiveLesson() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -71,9 +80,9 @@ export default function ActiveLesson() {
   const activeLessons = useMemo(() => {
     return (lessons || []).filter(l =>
       l.date === todayStr &&
-      l.startTime && l.endTime &&
+      l.startTime &&
       l.startTime <= nowTime &&
-      l.endTime > nowTime &&
+      getEffectiveEndTime(l) > nowTime &&
       l.status === 'planlandı'
     ).sort((a,b) => a.startTime.localeCompare(b.startTime));
   }, [lessons, todayStr, nowTime]);

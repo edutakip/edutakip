@@ -129,6 +129,15 @@ const PAGE_PREFETCH = {
 
 const LESSON_TRACKING_PAGES = ['TeacherLessons', 'TeacherHomework', 'TeacherReports'];
 
+// endTime geçersizse (startTime'den önce veya yok) startTime + duration'a göre hesapla
+function getEffectiveEndTime(l) {
+  if (l.endTime && l.endTime > l.startTime) return l.endTime;
+  const duration = l.duration || 60;
+  const [h, m] = (l.startTime || '00:00').split(':').map(Number);
+  const endMin = h * 60 + m + duration;
+  return `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+}
+
 // Nav items defined inside component using t() — see below
 
 const PARENT_NAV = [
@@ -366,8 +375,8 @@ export default function Layout() {
     const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const nowTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     return (teacherLessons || []).filter(l =>
-      l.date === todayStr && l.startTime && l.endTime &&
-      l.startTime <= nowTime && l.endTime > nowTime && l.status === 'planlandı'
+      l.date === todayStr && l.startTime &&
+      l.startTime <= nowTime && getEffectiveEndTime(l) > nowTime && l.status === 'planlandı'
     ).sort((a, b) => a.startTime.localeCompare(b.startTime));
   }, [teacherLessons, nowTick, role]);
 

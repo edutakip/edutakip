@@ -62,6 +62,17 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
 
   const u = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  // startTime değişince endTime'i otomatik güncelle (öğrencinin lessonDuration'ına göre)
+  const handleStartTimeChange = (newStart) => {
+    const student = students.find(s => s.id === form.studentId);
+    const duration = student?.lessonDuration || 60;
+    const [h, m] = newStart.split(':').map(Number);
+    const endMin = h * 60 + m + duration;
+    const endH = String(Math.floor(endMin / 60) % 24).padStart(2, '0');
+    const endM = String(endMin % 60).padStart(2, '0');
+    setForm(f => ({ ...f, startTime: newStart, endTime: `${endH}:${endM}` }));
+  };
+
   const generateZoom = async () => {
     setZoomLoading(true);
     try {
@@ -317,7 +328,7 @@ export default function LessonModal({ students, defaultDate, existingLesson, onC
             ].map(({ label, type, val, key }) => (
               <div key={key}>
                 <label style={lbl}>{label}</label>
-                <input style={inp} type={type} value={val} onChange={e => u(key, e.target.value)}
+                <input style={inp} type={type} value={val} onChange={e => key === 'startTime' ? handleStartTimeChange(e.target.value) : u(key, e.target.value)}
                   onFocus={e => e.target.style.borderColor = '#4f46e5'}
                   onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
               </div>
