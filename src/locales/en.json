@@ -348,7 +348,23 @@
         "nextGoal": "Next lesson goal?",
         "nextGoalPh": "Write next goal...",
         "generalNote": "General note",
-        "generalNotePh": "Any general note to add..."
+        "generalNotePh": "Any general note to add...",
+        "attendance": "Did they attend the lesson?",
+        "attended": "Attended",
+        "late": "Late",
+        "absent": "Absent",
+        "understood": "How well did they understand?",
+        "understoodFull": "Fully Understood",
+        "understoodPartial": "Partially Understood",
+        "understoodRepeat": "Needs Review",
+        "participation": "How was their participation?",
+        "participationActive": "Active",
+        "participationMedium": "Medium",
+        "participationPassive": "Passive",
+        "motivation": "How was their motivation?",
+        "motivationHigh": "High",
+        "motivationNormal": "Normal",
+        "motivationLow": "Low"
       }
     },
     "dashboard": {

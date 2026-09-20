@@ -25,6 +25,10 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
     topicsCovered: '',
     pageLeft: '',
     rating: 0,
+    attendance: '',
+    understood: '',
+    participation: '',
+    motivation: '',
     homeworkDone: '',
     strengths: '',
     improvements: '',
@@ -37,6 +41,26 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
     { key: 'topicsCovered', type: 'textarea', icon: '📖', label: t('activeLesson.q.topicsCovered'), placeholder: t('activeLesson.q.topicsCoveredPh') },
     { key: 'pageLeft', type: 'text', icon: '📄', label: t('activeLesson.q.pageLeft'), placeholder: t('activeLesson.q.pageLeftPh') },
     { key: 'rating', type: 'rating', icon: '⭐', label: t('activeLesson.q.rating') },
+    { key: 'attendance', type: 'choice', icon: '📋', label: t('activeLesson.q.attendance'), options: [
+      { val: 'katıldı', label: t('activeLesson.q.attended'), color: '#10b981', bg: '#d1fae5' },
+      { val: 'geç kaldı', label: t('activeLesson.q.late'), color: '#f59e0b', bg: '#fef3c7' },
+      { val: 'katılmadı', label: t('activeLesson.q.absent'), color: '#ef4444', bg: '#fee2e2' },
+    ]},
+    { key: 'understood', type: 'choice', icon: '🧠', label: t('activeLesson.q.understood'), options: [
+      { val: 'tam', label: t('activeLesson.q.understoodFull'), color: '#10b981', bg: '#d1fae5' },
+      { val: 'kismen', label: t('activeLesson.q.understoodPartial'), color: '#f59e0b', bg: '#fef3c7' },
+      { val: 'tekrar', label: t('activeLesson.q.understoodRepeat'), color: '#ef4444', bg: '#fee2e2' },
+    ]},
+    { key: 'participation', type: 'choice', icon: '🙋', label: t('activeLesson.q.participation'), options: [
+      { val: 'aktif', label: t('activeLesson.q.participationActive'), color: '#10b981', bg: '#d1fae5' },
+      { val: 'orta', label: t('activeLesson.q.participationMedium'), color: '#f59e0b', bg: '#fef3c7' },
+      { val: 'pasif', label: t('activeLesson.q.participationPassive'), color: '#ef4444', bg: '#fee2e2' },
+    ]},
+    { key: 'motivation', type: 'choice', icon: '🔥', label: t('activeLesson.q.motivation'), options: [
+      { val: 'yuksek', label: t('activeLesson.q.motivationHigh'), color: '#10b981', bg: '#d1fae5' },
+      { val: 'normal', label: t('activeLesson.q.motivationNormal'), color: '#6366f1', bg: '#e0e7ff' },
+      { val: 'dusuk', label: t('activeLesson.q.motivationLow'), color: '#ef4444', bg: '#fee2e2' },
+    ]},
     { key: 'homeworkDone', type: 'choice', icon: '✅', label: t('activeLesson.q.homeworkDone'), options: [
       { val: 'evet', label: t('activeLesson.q.yes'), color: '#10b981', bg: '#d1fae5' },
       { val: 'hayir', label: t('activeLesson.q.no'), color: '#ef4444', bg: '#fee2e2' },
@@ -71,6 +95,10 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
         answers.topicsCovered && `${t('activeLesson.q.topicsCovered')}: ${answers.topicsCovered}`,
         answers.pageLeft && `${t('activeLesson.q.pageLeft')}: ${answers.pageLeft}`,
         answers.rating && `${t('activeLesson.q.rating')}: ${answers.rating}/5`,
+        answers.attendance && `${t('activeLesson.q.attendance')}: ${answers.attendance}`,
+        answers.understood && `${t('activeLesson.q.understood')}: ${answers.understood}`,
+        answers.participation && `${t('activeLesson.q.participation')}: ${answers.participation}`,
+        answers.motivation && `${t('activeLesson.q.motivation')}: ${answers.motivation}`,
         answers.homeworkDone && `${t('activeLesson.q.homeworkDone')}: ${answers.homeworkDone}`,
         answers.strengths && `${t('activeLesson.q.strengths')}: ${answers.strengths}`,
         answers.improvements && `${t('activeLesson.q.improvements')}: ${answers.improvements}`,
@@ -97,7 +125,10 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
           date: lesson.date,
           subject: lesson.subject,
           rating: answers.rating || 0,
-          attendance: 'katıldı',
+          attendance: answers.attendance || 'katıldı',
+          understood: answers.understood,
+          participation: answers.participation,
+          motivation: answers.motivation,
           topicsCovered: answers.topicsCovered,
           pageLeft: answers.pageLeft,
           strengths: answers.strengths,
@@ -257,16 +288,22 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
               {/* Sayfa + Puan — yan yana */}
               {renderField(STEPS[1])}
               {renderField(STEPS[2])}
-              {/* Ödev yapıldı mı — tam genişlik */}
+              {/* Katılım durumu — tam genişlik */}
               <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[3])}</div>
-              {/* Güçlü yönler + Geliştirilecek — yan yana */}
+              {/* Anlama + Katılım — yan yana */}
               {renderField(STEPS[4])}
               {renderField(STEPS[5])}
-              {/* Verilen ödev + Sonraki hedef — yan yana */}
+              {/* Motivasyon + Ödev yapıldı mı — yan yana */}
               {renderField(STEPS[6])}
               {renderField(STEPS[7])}
+              {/* Güçlü yönler + Geliştirilecek — yan yana */}
+              {renderField(STEPS[8])}
+              {renderField(STEPS[9])}
+              {/* Verilen ödev + Sonraki hedef — yan yana */}
+              {renderField(STEPS[10])}
+              {renderField(STEPS[11])}
               {/* Genel not — tam genişlik */}
-              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[8])}</div>
+              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[12])}</div>
             </div>
 
             {/* Kaydet butonu */}
