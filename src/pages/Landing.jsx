@@ -60,16 +60,19 @@ export default function Landing() {
   const isMobile = windowWidth < 768;
   const isNarrow = windowWidth < 430;
 
-  // SEO Meta Tags — bilingual (Turkish primary, English for English browsers)
+  // SEO Meta Tags — Turkish primary (bots always see Turkish); English only for real users with en locale
   const isEnglish = i18n.language === 'en';
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+  const isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|google-inspectiontool/i.test(ua);
+  const seoEnglish = isEnglish && !isBot;
   usePageMeta({
-    title: isEnglish
+    title: seoEnglish
       ? 'EduTakip - Teacher & Parent Lesson Management App | Private Tutor Software'
       : 'EduTakip - Öğretmen & Veli Ders Takip Uygulaması | Özel Ders Yönetimi',
-    description: isEnglish
+    description: seoEnglish
       ? 'EduTakip: Complete lesson planning, student tracking, payment management, and AI assistant for teachers and parents. Start free trial today.'
       : 'EduTakip: Öğretmenler için ders planlama, öğrenci takibi, ödeme yönetimi ve AI asistanı. Veliler için çocuklarının gelişim raporu. Ücretsiz deneme başlatın.',
-    keywords: isEnglish
+    keywords: seoEnglish
       ? 'teacher app, lesson management, student tracking, private tutor, education management, online teaching, tutor software'
       : 'öğretmen, veli, ders takip, özel ders, ders yönetimi, öğrenci takip sistemi, eğitim, özel ders programı',
     ogImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png',
