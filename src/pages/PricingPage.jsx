@@ -13,16 +13,11 @@ export default function PricingPage() {
   const isEnglish = i18n.language === 'en';
 
   usePageMeta({
-    title: isEnglish
-      ? 'EduTakip Pricing | Private Tutor Management Plans'
-      : 'EduTakip Fiyatlandırma | Özel Ders Yönetimi Ücretleri',
-    description: isEnglish
-      ? 'EduTakip pricing: Flexible Pro plan based on student count, free trial. See the cost of private tutor management.'
-      : 'EduTakip fiyatlandırması: Öğrenci sayısına göre esnek Pro plan, ücretsiz deneme. Özel ders yönetiminin maliyetini görün.',
-    keywords: isEnglish
-      ? 'pricing, tutor software cost, education management pricing, private tutor plans'
-      : 'fiyatlandırma, özel ders ücreti, öğretmen yazılımı fiyatı, ders takip planı',
-    canonical: 'https://edutakip.com/pricing'
+    title: 'Fiyatlandırma | EduTakip – Özel Ders Takip Programı',
+    description: 'EduTakip fiyatlandırması: Öğrenci sayısına göre esnek Pro plan, ücretsiz deneme. Özel ders takip programının maliyetini görün.',
+    keywords: 'özel ders ücreti, öğretmen yazılımı fiyatı, ders takip planı, fiyatlandırma',
+    canonical: 'https://edutakip.com/pricing',
+    robots: 'index, follow'
   });
   const totalNet = studentCount * PER_STUDENT;
   const totalVat = Math.round(totalNet * VAT_RATE);

@@ -27,6 +27,11 @@ export function usePageMeta(config) {
       updateMetaTag('twitter:image', config.ogImage);
     }
 
+    // Robots
+    if (config.robots) {
+      updateMetaTag('robots', config.robots);
+    }
+
     // Canonical URL
     if (config.canonical) {
       updateCanonical(config.canonical);

@@ -400,6 +400,19 @@ export default function Layout() {
     }
   }, [currentPageName]);
 
+  // SEO: auth sayfalarına noindex, public sayfalara index,follow
+  useEffect(() => {
+    const PUBLIC_PAGES = ['Landing', 'TermsOfService', 'PrivacyPolicy', 'RefundPolicy', 'PricingPage'];
+    const isPublic = PUBLIC_PAGES.includes(currentPageName);
+    let tag = document.querySelector('meta[name="robots"]');
+    if (!tag) {
+      tag = document.createElement('meta');
+      tag.setAttribute('name', 'robots');
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', isPublic ? 'index, follow' : 'noindex, nofollow');
+  }, [currentPageName]);
+
   const handleNav = (e, page) => {
     if (page === currentPageName) return;
     e.preventDefault();

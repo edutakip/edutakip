@@ -9,11 +9,10 @@ export default function TermsOfService() {
   const sections = t('terms.sections', { returnObjects: true });
 
   usePageMeta({
-    title: isEnglish ? 'EduTakip Terms of Service' : 'EduTakip Kullanım Şartları',
-    description: isEnglish
-      ? 'EduTakip terms of service and conditions. Platform usage rules, payment terms, and user rights.'
-      : 'EduTakip kullanım şartları ve koşulları. Platform kullanım kuralları, ödeme koşulları ve kullanıcı hakları.',
-    canonical: 'https://edutakip.com/terms'
+    title: 'Kullanım Koşulları | EduTakip',
+    description: 'EduTakip kullanım şartları ve koşulları. Özel ders platformu kullanım kuralları, ödeme koşulları ve kullanıcı hakları.',
+    canonical: 'https://edutakip.com/terms',
+    robots: 'index, follow'
   });
 
   return (

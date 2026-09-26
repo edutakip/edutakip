@@ -9,11 +9,10 @@ export default function RefundPolicy() {
   const sections = t('refund.sections', { returnObjects: true });
 
   usePageMeta({
-    title: isEnglish ? 'EduTakip Refund Policy' : 'EduTakip İade Politikası',
-    description: isEnglish
-      ? 'EduTakip refund policy: Payment refunds, cancellation terms, and refund processes.'
-      : 'EduTakip iade politikası: Ödeme iadeleri, iptal koşulları ve para iade süreçleri.',
-    canonical: 'https://edutakip.com/refund'
+    title: 'İade Politikası | EduTakip',
+    description: 'EduTakip iade politikası: Ödeme iadeleri, iptal koşulları ve para iade süreçleri.',
+    canonical: 'https://edutakip.com/refund',
+    robots: 'index, follow'
   });
 
   return (

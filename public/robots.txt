@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /terms
+Allow: /privacy
+Allow: /refund
+
+Disallow: /TeacherDashboard
+Disallow: /TeacherStudents
+Disallow: /TeacherLessons
+Disallow: /TeacherHomework
+Disallow: /TeacherCalendar
+Disallow: /TeacherFinance
+Disallow: /TeacherMessages
+Disallow: /TeacherReports
+Disallow: /TeacherAssistant
+Disallow: /TeacherAccount
+Disallow: /ActiveLesson
+Disallow: /ParentDashboard
+Disallow: /ParentHomework
+Disallow: /ParentPerformance
+Disallow: /ParentLessonsPayments
+Disallow: /ParentLessonRequests
+Disallow: /ParentSettings
+Disallow: /ParentMessages
+Disallow: /adminreis
+Disallow: /checkout
+Disallow: /ManuelCheckout
+Disallow: /SubscriptionManagement
+
+Sitemap: https://edutakip.com/sitemap.xml

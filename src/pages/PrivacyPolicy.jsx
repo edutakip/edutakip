@@ -9,11 +9,10 @@ export default function PrivacyPolicy() {
   const sections = t('privacy.sections', { returnObjects: true });
 
   usePageMeta({
-    title: isEnglish ? 'EduTakip Privacy Policy' : 'EduTakip Gizlilik Politikası',
-    description: isEnglish
-      ? 'EduTakip privacy policy: Personal data protection, data collection and usage practices.'
-      : 'EduTakip gizlilik politikası: Kişisel verilerin korunması, veri toplama ve kullanım pratikleri.',
-    canonical: 'https://edutakip.com/privacy'
+    title: 'Gizlilik Politikası | EduTakip',
+    description: 'EduTakip gizlilik politikası: Kişisel verilerin korunması, veri toplama ve kullanım pratikleri.',
+    canonical: 'https://edutakip.com/privacy',
+    robots: 'index, follow'
   });
 
   return (
