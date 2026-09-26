@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Bot, Sparkles, Lock, MessageCircle } from 'lucide-react';
+import { Send, Bot, Sparkles, Lock, MessageCircle, Bell, X, Check, Menu, ChevronLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import ProUpgradeModal from '@/components/ProUpgradeModal';
 import { isPro } from '@/lib/subscription';
+import ChatHistorySidebar from '@/components/assistant/ChatHistorySidebar';
+import RemindersPanel from '@/components/assistant/RemindersPanel';
+import { isReminderCommand, parseReminder } from '@/lib/reminderParser';
 
 const WHATSAPP_TRIGGER = 'SHOW_WHATSAPP_BUTTON';
 
@@ -177,6 +180,7 @@ function TypingIndicator() {
 export default function TeacherAssistant() {
   const { i18n } = useTranslation();
   const isEn = i18n.language === 'en';
+  const lang = isEn ? 'en' : 'tr';
   const AGENT_NAME = getAgentName(i18n.language);
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -185,8 +189,17 @@ export default function TeacherAssistant() {
   const [initializing, setInitializing] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [showProModal, setShowProModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState(null);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [remindersRefreshKey, setRemindersRefreshKey] = useState(0);
+  const [pendingReminder, setPendingReminder] = useState(null);
+  const [phoneInput, setPhoneInput] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const unsubscribeRef = useRef(null);
+  const lastSavedAssistantRef = useRef('');
+  const savedUserMsgsRef = useRef(new Set());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -195,39 +208,154 @@ export default function TeacherAssistant() {
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setCurrentUser(u);
+      if (u?.phone) setPhoneInput(u.phone);
+    }).catch(() => {});
     initConversation();
+    return () => { unsubscribeRef.current?.(); };
   }, []);
 
   const initConversation = async () => {
     try {
+      setInitializing(true);
       const conv = await base44.agents.createConversation({
         agent_name: AGENT_NAME,
-        metadata: { name: 'EduTakip Asistan Oturumu' },
+        metadata: { name: isEn ? 'EduTakip Assistant Session' : 'EduTakip Asistan Oturumu' },
       });
       setConversation(conv);
+      setActiveConversationId(conv.id);
+      lastSavedAssistantRef.current = '';
+      savedUserMsgsRef.current = new Set();
 
-      // Subscribe to updates
-      const unsubscribe = base44.agents.subscribeToConversation(conv.id, (data) => {
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
         setMessages(data.messages || []);
         setLoading(false);
       });
 
-      // Load existing messages
       const full = await base44.agents.getConversation(conv.id);
       setMessages(full.messages || []);
 
       setInitializing(false);
-      return unsubscribe;
     } catch (err) {
       console.error(err);
       setInitializing(false);
     }
   };
 
+  const saveChatMessage = async (convId, role, content, title) => {
+    try {
+      await base44.entities.AssistantChatHistory.create({
+        conversation_id: convId,
+        role,
+        content,
+        language: lang,
+        title: title || null,
+      });
+      setHistoryRefreshKey(k => k + 1);
+    } catch (err) {
+      console.error('Failed to save chat message:', err);
+    }
+  };
+
+  // Save assistant messages when loading completes
+  useEffect(() => {
+    if (!loading && !initializing && messages.length > 0 && conversation) {
+      const visibleMsgs = messages.filter(m => m.role === 'user' || m.role === 'assistant');
+      const lastMsg = visibleMsgs[visibleMsgs.length - 1];
+      if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content) {
+        const cleanContent = lastMsg.content.replace(/\[?SHOW_WHATSAPP_BUTTON\]?/g, '').trim();
+        if (cleanContent && cleanContent !== lastSavedAssistantRef.current) {
+          lastSavedAssistantRef.current = cleanContent;
+          saveChatMessage(conversation.id, 'assistant', cleanContent);
+        }
+      }
+    }
+  }, [loading, initializing, messages, conversation]);
+
+  const loadConversation = async (convId) => {
+    try {
+      setSidebarOpen(false);
+      setInitializing(true);
+      unsubscribeRef.current?.();
+      lastSavedAssistantRef.current = '';
+      savedUserMsgsRef.current = new Set();
+
+      // Try to get the existing agent conversation
+      try {
+        const conv = await base44.agents.getConversation(convId);
+        setConversation(conv);
+        setActiveConversationId(conv.id);
+        setMessages(conv.messages || []);
+
+        unsubscribeRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
+          setMessages(data.messages || []);
+          setLoading(false);
+        });
+      } catch {
+        // Agent conversation expired — load from AssistantChatHistory
+        const historyMsgs = await base44.entities.AssistantChatHistory.filter({ conversation_id: convId }, 'created_date', 200);
+        setMessages((historyMsgs || []).map(h => ({ role: h.role, content: h.content })));
+        // Create new conversation to continue
+        const newConv = await base44.agents.createConversation({
+          agent_name: AGENT_NAME,
+          metadata: { name: isEn ? 'EduTakip Assistant Session' : 'EduTakip Asistan Oturumu' },
+        });
+        setConversation(newConv);
+        setActiveConversationId(newConv.id);
+
+        unsubscribeRef.current = base44.agents.subscribeToConversation(newConv.id, (data) => {
+          setMessages(data.messages || []);
+          setLoading(false);
+        });
+      }
+
+      setInitializing(false);
+    } catch (err) {
+      console.error('Failed to load conversation:', err);
+      setInitializing(false);
+    }
+  };
+
+  const newChat = () => {
+    setSidebarOpen(false);
+    initConversation();
+  };
+
+  const createReminder = async (parsed) => {
+    if (!currentUser) return;
+    try {
+      const phone = phoneInput || currentUser.phone || '';
+      await base44.entities.AssistantReminder.create({
+        user_id: currentUser.id,
+        user_phone: phone,
+        message: parsed.message,
+        remind_at: parsed.remind_at,
+        repeat_rule: parsed.repeat_rule || 'none',
+        status: 'pending',
+        language: lang,
+      });
+      setRemindersRefreshKey(k => k + 1);
+      setPendingReminder(null);
+    } catch (err) {
+      console.error('Failed to create reminder:', err);
+    }
+  };
+
   const sendMessage = async (text) => {
     const msg = text || input.trim();
     if (!msg || loading || !conversation) return;
+
+    // Check for reminder command (doesn't count against free limit)
+    if (isReminderCommand(msg, lang)) {
+      const parsed = parseReminder(msg, lang);
+      if (parsed) {
+        setPendingReminder(parsed);
+        setInput('');
+        return;
+      }
+    }
 
     // Free plan limit check
     const userQuestionCount = messages.filter(m => m.role === 'user').length;
@@ -236,9 +364,12 @@ export default function TeacherAssistant() {
       return;
     }
 
-
     setInput('');
     setLoading(true);
+
+    // Save user message to chat history
+    const title = messages.filter(m => m.role === 'user').length === 0 ? msg.slice(0, 40) : null;
+    saveChatMessage(conversation.id, 'user', msg, title);
 
     try {
       await base44.agents.addMessage(conversation, { role: 'user', content: msg });
@@ -283,11 +414,69 @@ export default function TeacherAssistant() {
 
       <div style={{
         display: 'flex',
-        flexDirection: 'column',
         height: '100vh',
         background: 'var(--bg-primary)',
         fontFamily: 'Inter, sans-serif',
+        overflow: 'hidden',
       }}>
+
+        {/* ── Sidebar ── */}
+        <div style={{
+          width: sidebarOpen ? '280px' : '0px',
+          flexShrink: 0,
+          background: '#f8fafc',
+          borderRight: sidebarOpen ? '1px solid #e5e7eb' : 'none',
+          transition: 'width 0.2s ease',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {sidebarOpen && (
+            <>
+              <div style={{
+                padding: '0.85rem 1rem',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#111827' }}>
+                  {isEn ? 'History & Reminders' : 'Geçmiş & Hatırlatmalar'}
+                </span>
+                <button onClick={() => setSidebarOpen(false)} style={{
+                  background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px',
+                }}>
+                  <ChevronLeft size={18} />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem' }}>
+                <ChatHistorySidebar
+                  language={lang}
+                  activeConversationId={activeConversationId}
+                  onSelect={loadConversation}
+                  onNewChat={newChat}
+                  refreshKey={historyRefreshKey}
+                />
+              </div>
+
+              <div style={{ borderTop: '1px solid #e5e7eb', padding: '0.85rem', flexShrink: 0, maxHeight: '40%', overflowY: 'auto' }}>
+                <RemindersPanel
+                  language={lang}
+                  userId={currentUser?.id}
+                  refreshKey={remindersRefreshKey}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── Main Chat Area ── */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minWidth: 0,
+        }}>
 
         {/* ── Header ── */}
         <div style={{
@@ -300,6 +489,16 @@ export default function TeacherAssistant() {
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           flexShrink: 0,
         }}>
+          <button onClick={() => setSidebarOpen(o => !o)} style={{
+            background: '#f4f6fb', border: '1.5px solid #e5e7eb', borderRadius: '10px',
+            padding: '0.4rem', cursor: 'pointer', display: 'flex', alignItems: 'center',
+            color: '#6b7280', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.borderColor = '#c7d2fe'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f4f6fb'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+          >
+            <Menu size={18} />
+          </button>
           <div style={{
             width: 44, height: 44, borderRadius: '12px',
             background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
@@ -474,7 +673,7 @@ export default function TeacherAssistant() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isEn ? "Ask the EduTakip Assistant anything..." : "EduTakip Asistanına bir şeyler sorun..."}
+                placeholder={isEn ? "Ask the EduTakip Assistant anything... (or 'remind: tomorrow 18:00 lesson')" : "EduTakip Asistanına bir şeyler sorun... (veya 'hatırlat: yarın 18:00 ders')"}
                 rows={1}
                 style={{
                   flex: 1,
@@ -519,7 +718,93 @@ export default function TeacherAssistant() {
             {isEn ? 'EduTakip Assistant is powered by AI and may make mistakes.' : 'EduTakip Asistanı yapay zeka tarafından desteklenmektedir ve hatalar yapabilir.'}
           </p>
         </div>
+        </div>
       </div>
+
+      {/* ── Reminder Confirmation Modal ── */}
+      {pendingReminder && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+          backdropFilter: 'blur(4px)',
+        }} onClick={() => setPendingReminder(null)}>
+          <div style={{
+            background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 400,
+            boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: '12px', background: '#fef3c7',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Bell size={20} color='#f59e0b' />
+              </div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', margin: 0 }}>
+                {isEn ? 'Create Reminder?' : 'Hatırlatma Oluştur?'}
+              </h3>
+            </div>
+
+            <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1rem', marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>
+                  {isEn ? 'Message' : 'Mesaj'}
+                </span>
+                <p style={{ fontSize: '0.9rem', color: '#111827', margin: '0.2rem 0 0', fontWeight: 600 }}>
+                  {pendingReminder.message}
+                </p>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>
+                  {isEn ? 'When' : 'Zaman'}
+                </span>
+                <p style={{ fontSize: '0.9rem', color: '#111827', margin: '0.2rem 0 0', fontWeight: 600 }}>
+                  {new Date(pendingReminder.remind_at).toLocaleString(isEn ? 'en-GB' : 'tr-TR', {
+                    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', display: 'block', marginBottom: '0.3rem' }}>
+                {isEn ? 'WhatsApp Number (E.164)' : 'WhatsApp Numarası (E.164)'}
+              </label>
+              <input
+                type="tel"
+                value={phoneInput}
+                onChange={e => setPhoneInput(e.target.value)}
+                placeholder="+90 5xx xxx xx xx"
+                style={{
+                  width: '100%', padding: '0.6rem 0.8rem', borderRadius: 10,
+                  border: '1.5px solid #e5e7eb', fontSize: '0.88rem', outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <p style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.3rem' }}>
+                {isEn ? 'Required for WhatsApp reminders' : 'WhatsApp hatırlatmaları için gerekli'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
+              <button onClick={() => setPendingReminder(null)} style={{
+                flex: 1, padding: '0.7rem', borderRadius: 12, border: '1.5px solid #e5e7eb',
+                background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+              }}>
+                {isEn ? 'Cancel' : 'İptal'}
+              </button>
+              <button onClick={() => createReminder(pendingReminder)} style={{
+                flex: 1, padding: '0.7rem', borderRadius: 12, border: 'none',
+                background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white',
+                fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                boxShadow: '0 4px 12px rgba(79,70,229,0.35)',
+              }}>
+                <Check size={16} /> {isEn ? 'Confirm' : 'Onayla'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

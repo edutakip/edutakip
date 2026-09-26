@@ -1,0 +1,49 @@
+{
+  "name": "AssistantChatHistory",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Agent conversation ID"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "assistant"
+      ]
+    },
+    "content": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "tr",
+        "en"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Short summary of conversation"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "role",
+    "content",
+    "language"
+  ],
+  "rls": {
+    "read": {
+      "data.created_by_id": "{{user.id}}"
+    },
+    "create": {},
+    "update": {
+      "data.created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.created_by_id": "{{user.id}}"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Asistan Hat\u0131rlat\u0131c\u0131",
+  "description": "Her 10 dakikada bir bekleyen hat\u0131rlatmalar\u0131 WhatsApp \u00fczerinden g\u00f6nderir",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/10 * * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "asistan_hat_rlat_c",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendAssistantReminders",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

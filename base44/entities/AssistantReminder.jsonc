@@ -1,0 +1,64 @@
+{
+  "name": "AssistantReminder",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_phone": {
+      "type": "string",
+      "description": "WhatsApp number in E.164 format"
+    },
+    "message": {
+      "type": "string",
+      "description": "Reminder text"
+    },
+    "remind_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repeat_rule": {
+      "type": "string",
+      "enum": [
+        "none",
+        "daily",
+        "weekly"
+      ],
+      "default": "none"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "tr",
+        "en"
+      ],
+      "default": "tr"
+    }
+  },
+  "required": [
+    "user_id",
+    "message",
+    "remind_at"
+  ],
+  "rls": {
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "create": {},
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}
