@@ -31,6 +31,7 @@ export default function LoginPage() {
     base44.auth.isAuthenticated().then(auth => {
       if (auth) {
         const savedRole = localStorage.getItem('tilki_role') || role;
+        localStorage.setItem('tilki_role', savedRole);
         window.location.href = `/${savedRole === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard'}`;
       }
     }).catch(() => {});
