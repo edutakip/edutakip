@@ -121,7 +121,7 @@ export default function Landing() {
   }, []);
 
   const selectRole = (role) => {
-    window.location.href = `/login?role=${role}`;
+    window.location.href = `/giris?role=${role}`;
   };
   const handleAuthSuccess = () => {
     window.location.href = createPageUrl(selectedRole === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');

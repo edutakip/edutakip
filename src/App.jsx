@@ -217,7 +217,7 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/giris" element={<LoginPage />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>
