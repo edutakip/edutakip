@@ -19,6 +19,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import Checkout from './pages/Checkout';
+import LoginPage from './pages/LoginPage';
 import SubscriptionManagement from './pages/SubscriptionManagement';
 import TeacherAccount from './pages/TeacherAccount';
 import CertificateGenerator from './pages/CertificateGenerator';
@@ -216,6 +217,7 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>

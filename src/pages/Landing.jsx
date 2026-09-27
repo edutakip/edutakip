@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPageUrl } from '@/utils';
 import { CheckCircle, GraduationCap, Users, ChevronRight } from 'lucide-react';
-import AuthModal from '../components/AuthModal';
+
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import ScreenshotMockup from '../components/ScreenshotMockup';
@@ -120,7 +120,9 @@ export default function Landing() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const selectRole = (role) => setSelectedRole(role);
+  const selectRole = (role) => {
+    window.location.href = `/login?role=${role}`;
+  };
   const handleAuthSuccess = () => {
     window.location.href = createPageUrl(selectedRole === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard');
   };
@@ -160,7 +162,7 @@ export default function Landing() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', sans-serif", color: '#1e293b', overflowX: 'hidden' }}>
-      {selectedRole && <AuthModal role={selectedRole} onClose={() => setSelectedRole(null)} onSuccess={handleAuthSuccess} />}
+
 
       <style>{`
         @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
