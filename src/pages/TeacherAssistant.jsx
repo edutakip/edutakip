@@ -202,6 +202,9 @@ export default function TeacherAssistant() {
   const lastSavedAssistantRef = useRef('');
   const savedUserMsgsRef = useRef(new Set());
   const assistantSaveTimerRef = useRef(null);
+  const pendingAssistantContentRef = useRef(null);
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -217,7 +220,20 @@ export default function TeacherAssistant() {
     initConversation();
     return () => {
       unsubscribeRef.current?.();
-      if (assistantSaveTimerRef.current) clearTimeout(assistantSaveTimerRef.current);
+      // Save pending assistant message before unmount (prevents losing last response)
+      if (assistantSaveTimerRef.current) {
+        clearTimeout(assistantSaveTimerRef.current);
+        const pending = pendingAssistantContentRef.current;
+        if (pending?.content) {
+          base44.entities.AssistantChatHistory.create({
+            conversation_id: pending.convId,
+            role: 'assistant',
+            content: pending.content,
+            language: langRef.current,
+            title: null,
+          }).catch(() => {});
+        }
+      }
     };
   }, []);
 
@@ -232,6 +248,7 @@ export default function TeacherAssistant() {
       setActiveConversationId(conv.id);
       lastSavedAssistantRef.current = '';
       savedUserMsgsRef.current = new Set();
+      pendingAssistantContentRef.current = null;
       if (assistantSaveTimerRef.current) {
         clearTimeout(assistantSaveTimerRef.current);
         assistantSaveTimerRef.current = null;
@@ -270,24 +287,28 @@ export default function TeacherAssistant() {
   };
 
   // Save assistant messages with debounce — wait for streaming to stabilize before saving
+  // Not dependent on `loading` — fires on every messages change, debounce handles streaming
   useEffect(() => {
-    if (!loading && !initializing && messages.length > 0 && conversation) {
+    if (!initializing && messages.length > 0 && conversation) {
       const visibleMsgs = messages.filter(m => m.role === 'user' || m.role === 'assistant');
       const lastMsg = visibleMsgs[visibleMsgs.length - 1];
       if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content) {
         const cleanContent = lastMsg.content.replace(/\[?SHOW_WHATSAPP_BUTTON\]?/g, '').trim();
         if (cleanContent && cleanContent !== lastSavedAssistantRef.current) {
-          // Debounce: wait 2.5s for streaming to stabilize, then save final version only
+          // Track pending content so we can save on unmount
+          pendingAssistantContentRef.current = { convId: conversation.id, content: cleanContent };
+          // Debounce: wait 1.5s for streaming to stabilize, then save final version only
           if (assistantSaveTimerRef.current) clearTimeout(assistantSaveTimerRef.current);
           assistantSaveTimerRef.current = setTimeout(async () => {
             assistantSaveTimerRef.current = null;
             lastSavedAssistantRef.current = cleanContent;
+            pendingAssistantContentRef.current = null;
             await saveChatMessage(conversation.id, 'assistant', cleanContent);
-          }, 2500);
+          }, 1500);
         }
       }
     }
-  }, [loading, initializing, messages, conversation]);
+  }, [messages, conversation, initializing]);
 
   const loadConversation = async (convId) => {
     try {
@@ -296,6 +317,7 @@ export default function TeacherAssistant() {
       unsubscribeRef.current?.();
       lastSavedAssistantRef.current = '';
       savedUserMsgsRef.current = new Set();
+      pendingAssistantContentRef.current = null;
       if (assistantSaveTimerRef.current) {
         clearTimeout(assistantSaveTimerRef.current);
         assistantSaveTimerRef.current = null;
@@ -399,6 +421,7 @@ export default function TeacherAssistant() {
       clearTimeout(assistantSaveTimerRef.current);
       assistantSaveTimerRef.current = null;
     }
+    pendingAssistantContentRef.current = null;
 
     // Save user message to chat history
     const title = messages.filter(m => m.role === 'user').length === 0 ? msg.slice(0, 40) : null;
