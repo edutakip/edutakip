@@ -13,26 +13,32 @@ export default function ChatHistorySidebar({ language, activeConversationId, onS
   const loadConversations = async () => {
     try {
       setLoading(true);
-      const records = await base44.entities.AssistantChatHistory.filter({ language }, '-created_date', 200);
+      // RLS scopes records to the current user (created_by_id) — no language filter needed
+      const records = await base44.entities.AssistantChatHistory.list('-created_date', 200);
       // Group by conversation_id
       const grouped = {};
       for (const r of records || []) {
         if (!grouped[r.conversation_id]) {
           grouped[r.conversation_id] = {
             conversation_id: r.conversation_id,
-            title: r.title || (r.role === 'user' ? r.content.slice(0, 40) : 'Sohbet'),
+            title: '',
             date: r.created_date,
             messageCount: 0,
+            allMsgs: [],
           };
         }
         grouped[r.conversation_id].messageCount++;
+        grouped[r.conversation_id].allMsgs.push(r);
         if (r.created_date > grouped[r.conversation_id].date) {
           grouped[r.conversation_id].date = r.created_date;
         }
-        // Set title from first user message if not set
-        if (!grouped[r.conversation_id].title && r.role === 'user') {
-          grouped[r.conversation_id].title = r.content.slice(0, 40);
-        }
+      }
+      // Derive title from the earliest user message (title field is mostly null)
+      for (const conv of Object.values(grouped)) {
+        const sorted = conv.allMsgs.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+        const firstUser = sorted.find(m => m.role === 'user');
+        conv.title = (firstUser?.title || firstUser?.content || (language === 'en' ? 'Conversation' : 'Sohbet')).slice(0, 40);
+        delete conv.allMsgs;
       }
       const list = Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
       setConversations(list);
