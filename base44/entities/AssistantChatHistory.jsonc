@@ -35,9 +35,7 @@
     "language"
   ],
   "rls": {
-    "read": {
-      "data.created_by_id": "{{user.id}}"
-    },
+    "read": {},
     "create": {},
     "update": {
       "data.created_by_id": "{{user.id}}"
