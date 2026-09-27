@@ -436,8 +436,9 @@ export default function Layout() {
   const sideW = collapsed ? '64px' : '224px';
   const isParent = role === 'parent';
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('tilki_role');
+    try { await base44.auth.logout(); } catch {}
     window.location.href = createPageUrl('Landing');
   };
 
