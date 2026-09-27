@@ -16,6 +16,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+  const [mode, setMode] = useState(searchParams.get('mode') || 'login'); // 'login' | 'register' | 'forgot'
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
@@ -33,12 +36,50 @@ export default function LoginPage() {
     }).catch(() => {});
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const redirectAfterAuth = () => {
     localStorage.setItem('tilki_role', role);
     const redirectPage = role === 'teacher' ? 'TeacherDashboard' : 'ParentDashboard';
-    base44.auth.redirectToLogin(`/${redirectPage}`);
+    window.location.href = `/${redirectPage}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    setError('');
+    setInfo('');
+    if (mode === 'forgot') {
+      if (!email) { setError(isEn ? 'Please enter your email' : 'Lütfen e-postanızı girin'); return; }
+      setLoading(true);
+      try {
+        await base44.auth.resetPasswordRequest(email);
+        setInfo(isEn ? 'Password reset link sent! Check your email.' : 'Şifre sıfırlama bağlantısı gönderildi! E-postanızı kontrol edin.');
+      } catch (err) {
+        setError(isEn ? 'Failed to send reset email.' : 'Sıfırlama e-postası gönderilemedi.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    if (!email || !password) { setError(isEn ? 'Please fill in all fields' : 'Lütfen tüm alanları doldurun'); return; }
+    setLoading(true);
+    try {
+      if (mode === 'register') {
+        await base44.auth.register({ email, password });
+        setInfo(isEn ? 'Registration successful! Check your email to verify your account, then sign in.' : 'Kayıt başarılı! Hesabınızı doğrulamak için e-postanızı kontrol edin, ardından giriş yapın.');
+        setMode('login');
+        setPassword('');
+      } else {
+        await base44.auth.loginViaEmailPassword(email, password);
+        redirectAfterAuth();
+      }
+    } catch (err) {
+      if (mode === 'register') {
+        setError(isEn ? 'Registration failed. This email may already be registered.' : 'Kayıt başarısız. Bu e-posta zaten kayıtlı olabilir.');
+      } else {
+        setError(isEn ? 'Invalid email or password.' : 'Geçersiz e-posta veya şifre.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isMobile = windowWidth < 1024;
@@ -78,6 +119,17 @@ export default function LoginPage() {
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
     backHome: '← Back to home',
+    registerTitle: 'Create Account',
+    registerSub: 'Sign up to get started with EduTakip.',
+    registerBtn: 'Sign Up',
+    forgotTitle: 'Forgot Password',
+    forgotSub: 'Enter your email to receive a reset link.',
+    forgotBtn: 'Send Reset Link',
+    backToLogin: '← Back to login',
+    haveAccount: 'Already have an account?',
+    signInLink: 'Sign In',
+    fillEmail: 'Please enter your email',
+    errGeneric: 'Something went wrong. Please try again.',
   } : {
     badge: 'EDUTAKIP ÖĞRETMEN',
     headline1: 'Siz dersinizi anlatın,',
@@ -113,6 +165,17 @@ export default function LoginPage() {
     privacy: 'Gizlilik Politikası',
     terms: 'Kullanım Koşulları',
     backHome: '← Ana sayfaya dön',
+    registerTitle: 'Hesap Oluştur',
+    registerSub: 'EduTakip ile başlamak için kaydolun.',
+    registerBtn: 'Kayıt Ol',
+    forgotTitle: 'Şifremi Unuttum',
+    forgotSub: 'Sıfırlama bağlantısı almak için e-postanızı girin.',
+    forgotBtn: 'Sıfırlama Bağlantısı Gönder',
+    backToLogin: '← Girişe dön',
+    haveAccount: 'Zaten hesabın var mı?',
+    signInLink: 'Giriş Yap',
+    fillEmail: 'Lütfen e-postanızı girin',
+    errGeneric: 'Bir şeyler ters gitti. Lütfen tekrar deneyin.',
   };
 
   return (
@@ -343,66 +406,76 @@ export default function LoginPage() {
           }}>
             {/* Heading */}
             <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#1a1a1a', marginBottom: '0.5rem' }}>
-              {t.welcome}
+              {mode === 'login' ? t.welcome : mode === 'register' ? t.registerTitle : t.forgotTitle}
             </h2>
             <p style={{ fontSize: '0.9rem', color: '#71717a', marginBottom: '1.75rem' }}>
-              {t.subheadline}
+              {mode === 'login' ? t.subheadline : mode === 'register' ? t.registerSub : t.forgotSub}
             </p>
 
-            {/* Role toggle */}
-            <div style={{
-              display: 'flex',
-              gap: '0.5rem',
-              marginBottom: '1.5rem',
-              padding: '0.3rem',
-              background: '#f4f4f5',
-              borderRadius: 12,
-            }}>
-              <button
-                onClick={() => setRole('teacher')}
-                className={`role-tab ${role === 'teacher' ? 'active' : ''}`}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.6rem',
-                  borderRadius: 9,
-                  border: 'none',
-                  background: role === 'teacher' ? '' : 'transparent',
-                  color: role === 'teacher' ? '' : '#71717a',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <GraduationCap size={16} />
-                {t.teacher}
-              </button>
-              <button
-                onClick={() => setRole('parent')}
-                className={`role-tab ${role === 'parent' ? 'active' : ''}`}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.6rem',
-                  borderRadius: 9,
-                  border: 'none',
-                  background: role === 'parent' ? '' : 'transparent',
-                  color: role === 'parent' ? '' : '#71717a',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <User size={16} />
-                {t.parent}
-              </button>
-            </div>
+            {/* Role toggle (hidden in forgot mode) */}
+            {mode !== 'forgot' && (
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '1.5rem',
+                padding: '0.3rem',
+                background: '#f4f4f5',
+                borderRadius: 12,
+              }}>
+                <button
+                  onClick={() => setRole('teacher')}
+                  className={`role-tab ${role === 'teacher' ? 'active' : ''}`}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    gap: '0.4rem', padding: '0.6rem', borderRadius: 9, border: 'none',
+                    background: role === 'teacher' ? '' : 'transparent',
+                    color: role === 'teacher' ? '' : '#71717a',
+                    fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                  }}
+                >
+                  <GraduationCap size={16} />
+                  {t.teacher}
+                </button>
+                <button
+                  onClick={() => setRole('parent')}
+                  className={`role-tab ${role === 'parent' ? 'active' : ''}`}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    gap: '0.4rem', padding: '0.6rem', borderRadius: 9, border: 'none',
+                    background: role === 'parent' ? '' : 'transparent',
+                    color: role === 'parent' ? '' : '#71717a',
+                    fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                  }}
+                >
+                  <User size={16} />
+                  {t.parent}
+                </button>
+              </div>
+            )}
+
+            {/* Error message */}
+            {error && (
+              <div style={{
+                marginBottom: '1rem', padding: '0.7rem 0.85rem',
+                background: '#fef2f2', borderRadius: 10, border: '1px solid #fecaca',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+              }}>
+                <span style={{ fontSize: '0.85rem' }}>⚠️</span>
+                <span style={{ fontSize: '0.78rem', color: '#dc2626', fontWeight: 600 }}>{error}</span>
+              </div>
+            )}
+
+            {/* Info message */}
+            {info && (
+              <div style={{
+                marginBottom: '1rem', padding: '0.7rem 0.85rem',
+                background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+              }}>
+                <span style={{ fontSize: '0.85rem' }}>✅</span>
+                <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>{info}</span>
+              </div>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
@@ -420,75 +493,62 @@ export default function LoginPage() {
                     placeholder={t.emailPlaceholder}
                     className="login-input"
                     style={{
-                      width: '100%',
-                      padding: '0.8rem 0.85rem 0.8rem 2.5rem',
-                      borderRadius: 12,
-                      border: '1.5px solid #e5e7eb',
-                      fontSize: '0.9rem',
-                      outline: 'none',
+                      width: '100%', padding: '0.8rem 0.85rem 0.8rem 2.5rem',
+                      borderRadius: 12, border: '1.5px solid #e5e7eb',
+                      fontSize: '0.9rem', outline: 'none',
                       transition: 'border-color 0.2s, box-shadow 0.2s',
-                      fontFamily: 'inherit',
-                      boxSizing: 'border-box',
+                      fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
                   />
                 </div>
               </div>
 
-              {/* Password */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151' }}>
-                    {t.passwordLabel}
-                  </label>
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleSubmit(e); }} style={{
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#7c3aed',
-                    textDecoration: 'none',
-                  }}>
-                    {t.forgotPassword}
-                  </a>
+              {/* Password (hidden in forgot mode) */}
+              {mode !== 'forgot' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151' }}>
+                      {t.passwordLabel}
+                    </label>
+                    {mode === 'login' && (
+                      <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setInfo(''); setMode('forgot'); }} style={{
+                        fontSize: '0.78rem', fontWeight: 600, color: '#7c3aed', textDecoration: 'none',
+                      }}>
+                        {t.forgotPassword}
+                      </a>
+                    )}
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={17} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder={t.passwordPlaceholder}
+                      className="login-input"
+                      style={{
+                        width: '100%', padding: '0.8rem 2.5rem 0.8rem 2.5rem',
+                        borderRadius: 12, border: '1.5px solid #e5e7eb',
+                        fontSize: '0.9rem', outline: 'none',
+                        transition: 'border-color 0.2s, box-shadow 0.2s',
+                        fontFamily: 'inherit', boxSizing: 'border-box',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(s => !s)}
+                      style={{
+                        position: 'absolute', right: '0.85rem', top: '50%',
+                        transform: 'translateY(-50%)', background: 'none',
+                        border: 'none', cursor: 'pointer', color: '#9ca3af',
+                        padding: 0, display: 'flex',
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
                 </div>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={17} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder={t.passwordPlaceholder}
-                    className="login-input"
-                    style={{
-                      width: '100%',
-                      padding: '0.8rem 2.5rem 0.8rem 2.5rem',
-                      borderRadius: 12,
-                      border: '1.5px solid #e5e7eb',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                      transition: 'border-color 0.2s, box-shadow 0.2s',
-                      fontFamily: 'inherit',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(s => !s)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.85rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#9ca3af',
-                      padding: 0,
-                      display: 'flex',
-                    }}
-                  >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* Submit */}
               <button
@@ -496,20 +556,12 @@ export default function LoginPage() {
                 disabled={loading}
                 className="login-btn"
                 style={{
-                  width: '100%',
-                  padding: '0.9rem',
-                  borderRadius: 12,
-                  border: 'none',
+                  width: '100%', padding: '0.9rem', borderRadius: 12, border: 'none',
                   background: loading ? '#d1d5db' : 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                  color: 'white',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
+                  color: 'white', fontWeight: 800, fontSize: '0.95rem',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   transition: 'transform 0.15s, box-shadow 0.15s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 }}
               >
                 {loading ? (
@@ -519,38 +571,43 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    {t.signIn} <ArrowRight size={18} />
+                    {mode === 'login' ? t.signIn : mode === 'register' ? t.registerBtn : t.forgotBtn}
+                    <ArrowRight size={18} />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Info note */}
-            <div style={{
-              marginTop: '1rem',
-              padding: '0.7rem 0.85rem',
-              background: '#f5f3ff',
-              borderRadius: 10,
-              border: '1px solid #e0e7ff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}>
-              <span style={{ fontSize: '0.85rem' }}>🔒</span>
-              <span style={{ fontSize: '0.75rem', color: '#6d28d9', fontWeight: 600 }}>{t.infoNote}</span>
-            </div>
-
-            {/* Sign up link */}
-            <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: '#71717a' }}>
-              {t.noAccount}{' '}
-              <a href="#" onClick={(e) => { e.preventDefault(); handleSubmit(e); }} style={{
-                fontWeight: 700,
-                color: '#7c3aed',
-                textDecoration: 'none',
-              }}>
-                {t.signUp}
-              </a>
-            </p>
+            {/* Mode switch links */}
+            {mode === 'login' && (
+              <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: '#71717a' }}>
+                {t.noAccount}{' '}
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setInfo(''); setMode('register'); }} style={{
+                  fontWeight: 700, color: '#7c3aed', textDecoration: 'none',
+                }}>
+                  {t.signUp}
+                </a>
+              </p>
+            )}
+            {mode === 'register' && (
+              <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: '#71717a' }}>
+                {t.haveAccount}{' '}
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setInfo(''); setMode('login'); }} style={{
+                  fontWeight: 700, color: '#7c3aed', textDecoration: 'none',
+                }}>
+                  {t.signInLink}
+                </a>
+              </p>
+            )}
+            {mode === 'forgot' && (
+              <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: '#71717a' }}>
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setInfo(''); setMode('login'); }} style={{
+                  fontWeight: 700, color: '#7c3aed', textDecoration: 'none',
+                }}>
+                  {t.backToLogin}
+                </a>
+              </p>
+            )}
           </div>
 
           {/* Footer */}
