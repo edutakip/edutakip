@@ -7,6 +7,7 @@ import { isPro } from '@/lib/subscription';
 import ChatHistorySidebar from '@/components/assistant/ChatHistorySidebar';
 import RemindersPanel from '@/components/assistant/RemindersPanel';
 import { isReminderCommand, parseReminder } from '@/lib/reminderParser';
+import { showToast } from '@/lib/toast';
 
 const WHATSAPP_TRIGGER = 'SHOW_WHATSAPP_BUTTON';
 
@@ -200,6 +201,7 @@ export default function TeacherAssistant() {
   const unsubscribeRef = useRef(null);
   const lastSavedAssistantRef = useRef('');
   const savedUserMsgsRef = useRef(new Set());
+  const assistantSaveTimerRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -213,7 +215,10 @@ export default function TeacherAssistant() {
       if (u?.phone) setPhoneInput(u.phone);
     }).catch(() => {});
     initConversation();
-    return () => { unsubscribeRef.current?.(); };
+    return () => {
+      unsubscribeRef.current?.();
+      if (assistantSaveTimerRef.current) clearTimeout(assistantSaveTimerRef.current);
+    };
   }, []);
 
   const initConversation = async () => {
@@ -227,6 +232,10 @@ export default function TeacherAssistant() {
       setActiveConversationId(conv.id);
       lastSavedAssistantRef.current = '';
       savedUserMsgsRef.current = new Set();
+      if (assistantSaveTimerRef.current) {
+        clearTimeout(assistantSaveTimerRef.current);
+        assistantSaveTimerRef.current = null;
+      }
 
       unsubscribeRef.current?.();
       unsubscribeRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
@@ -256,10 +265,11 @@ export default function TeacherAssistant() {
       setHistoryRefreshKey(k => k + 1);
     } catch (err) {
       console.error('Failed to save chat message:', err);
+      showToast({ message: isEn ? 'Chat could not be saved' : 'Sohbet kaydedilemedi', variant: 'error' });
     }
   };
 
-  // Save assistant messages when loading completes
+  // Save assistant messages with debounce — wait for streaming to stabilize before saving
   useEffect(() => {
     if (!loading && !initializing && messages.length > 0 && conversation) {
       const visibleMsgs = messages.filter(m => m.role === 'user' || m.role === 'assistant');
@@ -267,8 +277,13 @@ export default function TeacherAssistant() {
       if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content) {
         const cleanContent = lastMsg.content.replace(/\[?SHOW_WHATSAPP_BUTTON\]?/g, '').trim();
         if (cleanContent && cleanContent !== lastSavedAssistantRef.current) {
-          lastSavedAssistantRef.current = cleanContent;
-          saveChatMessage(conversation.id, 'assistant', cleanContent);
+          // Debounce: wait 2.5s for streaming to stabilize, then save final version only
+          if (assistantSaveTimerRef.current) clearTimeout(assistantSaveTimerRef.current);
+          assistantSaveTimerRef.current = setTimeout(async () => {
+            assistantSaveTimerRef.current = null;
+            lastSavedAssistantRef.current = cleanContent;
+            await saveChatMessage(conversation.id, 'assistant', cleanContent);
+          }, 2500);
         }
       }
     }
@@ -281,6 +296,10 @@ export default function TeacherAssistant() {
       unsubscribeRef.current?.();
       lastSavedAssistantRef.current = '';
       savedUserMsgsRef.current = new Set();
+      if (assistantSaveTimerRef.current) {
+        clearTimeout(assistantSaveTimerRef.current);
+        assistantSaveTimerRef.current = null;
+      }
 
       // Try to get the existing agent conversation
       try {
@@ -296,7 +315,15 @@ export default function TeacherAssistant() {
       } catch {
         // Agent conversation expired — load from AssistantChatHistory
         const historyMsgs = await base44.entities.AssistantChatHistory.filter({ conversation_id: convId }, 'created_date', 200);
-        setMessages((historyMsgs || []).map(h => ({ role: h.role, content: h.content })));
+        // Deduplicate consecutive identical messages (from streaming save bug)
+        const deduped = (historyMsgs || []).reduce((acc, h) => {
+          const prev = acc[acc.length - 1];
+          if (!prev || prev.role !== h.role || prev.content !== h.content) {
+            acc.push({ role: h.role, content: h.content });
+          }
+          return acc;
+        }, []);
+        setMessages(deduped);
         // Create new conversation to continue
         const newConv = await base44.agents.createConversation({
           agent_name: AGENT_NAME,
@@ -366,6 +393,12 @@ export default function TeacherAssistant() {
 
     setInput('');
     setLoading(true);
+
+    // Clear any pending assistant message save (streaming debounce)
+    if (assistantSaveTimerRef.current) {
+      clearTimeout(assistantSaveTimerRef.current);
+      assistantSaveTimerRef.current = null;
+    }
 
     // Save user message to chat history
     const title = messages.filter(m => m.role === 'user').length === 0 ? msg.slice(0, 40) : null;
