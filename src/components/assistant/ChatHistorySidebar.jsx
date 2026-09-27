@@ -2,19 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, MessageSquare, Clock } from 'lucide-react';
 
-export default function ChatHistorySidebar({ language, activeConversationId, onSelect, onNewChat, refreshKey }) {
+export default function ChatHistorySidebar({ language, activeConversationId, onSelect, onNewChat, refreshKey, userId }) {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadConversations();
-  }, [language, refreshKey]);
+  }, [language, refreshKey, userId]);
 
   const loadConversations = async () => {
     try {
       setLoading(true);
-      // RLS scopes records to the current user (created_by_id) — no language filter needed
-      const records = await base44.entities.AssistantChatHistory.list('-created_date', 200);
+      // Explicitly filter by created_by_id so each user only sees their own chats
+      const query = userId ? { created_by_id: userId } : {};
+      const records = await base44.entities.AssistantChatHistory.filter(query, '-created_date', 200);
+      console.log('[ChatHistorySidebar] userId:', userId, 'records:', records?.length, records?.slice(0, 2));
       // Group by conversation_id
       const grouped = {};
       for (const r of records || []) {

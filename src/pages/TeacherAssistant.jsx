@@ -512,6 +512,7 @@ export default function TeacherAssistant() {
                   onSelect={loadConversation}
                   onNewChat={newChat}
                   refreshKey={historyRefreshKey}
+                  userId={currentUser?.id}
                 />
               </div>
 
