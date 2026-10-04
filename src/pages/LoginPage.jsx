@@ -18,7 +18,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
-  const [mode, setMode] = useState(searchParams.get('mode') || 'login'); // 'login' | 'register' | 'forgot'
+  const [mode, setMode] = useState(searchParams.get('mode') || 'login'); // 'login' | 'register' | 'forgot' | 'verify'
+  const [otp, setOtp] = useState('');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
@@ -68,14 +69,28 @@ export default function LoginPage() {
       }
       return;
     }
+    if (mode === 'verify') {
+      if (!otp || otp.length !== 6) { setError(isEn ? 'Please enter the 6-digit code' : '6 haneli doğrulama kodunu girin'); return; }
+      setLoading(true);
+      try {
+        await base44.auth.verifyOtp({ email, otpCode: otp });
+        await base44.auth.loginViaEmailPassword(email, password);
+        redirectAfterAuth();
+      } catch (err) {
+        setError(isEn ? 'Invalid code. Please try again.' : 'Geçersiz kod. Tekrar deneyin.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     if (!email || !password) { setError(isEn ? 'Please fill in all fields' : 'Lütfen tüm alanları doldurun'); return; }
     setLoading(true);
     try {
       if (mode === 'register') {
         await base44.auth.register({ email, password });
-        setInfo(isEn ? 'Registration successful! Check your email to verify your account, then sign in.' : 'Kayıt başarılı! Hesabınızı doğrulamak için e-postanızı kontrol edin, ardından giriş yapın.');
-        setMode('login');
-        setPassword('');
+        setMode('verify');
+        setInfo(isEn ? 'A 6-digit verification code was sent to your email. Enter it below.' : 'E-postanıza 6 haneli doğrulama kodu gönderildi. Aşağıya girin.');
+        setOtp('');
       } else {
         await base44.auth.loginViaEmailPassword(email, password);
         redirectAfterAuth();
@@ -136,6 +151,12 @@ export default function LoginPage() {
     forgotTitle: 'Forgot Password',
     forgotSub: 'Enter your email to receive a reset link.',
     forgotBtn: 'Send Reset Link',
+    verifyTitle: 'Verify Your Email',
+    verifySub: 'Enter the 6-digit code sent to your email.',
+    verifyLabel: 'Verification Code',
+    verifyPlaceholder: '6-digit code',
+    verifyBtn: 'Verify & Continue',
+    resendCode: 'Resend code',
     backToLogin: '← Back to login',
     haveAccount: 'Already have an account?',
     signInLink: 'Sign In',
@@ -184,6 +205,12 @@ export default function LoginPage() {
     forgotTitle: 'Şifremi Unuttum',
     forgotSub: 'Sıfırlama bağlantısı almak için e-postanızı girin.',
     forgotBtn: 'Sıfırlama Bağlantısı Gönder',
+    verifyTitle: 'E-postanı Doğrula',
+    verifySub: 'E-postanıza gönderilen 6 haneli kodu girin.',
+    verifyLabel: 'Doğrulama Kodu',
+    verifyPlaceholder: '6 haneli kod',
+    verifyBtn: 'Doğrula ve Devam Et',
+    resendCode: 'Kodu tekrar gönder',
     backToLogin: '← Girişe dön',
     haveAccount: 'Zaten hesabın var mı?',
     signInLink: 'Giriş Yap',
@@ -419,10 +446,10 @@ export default function LoginPage() {
           }}>
             {/* Heading */}
             <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#1a1a1a', marginBottom: '0.5rem' }}>
-              {mode === 'login' ? t.welcome : mode === 'register' ? t.registerTitle : t.forgotTitle}
+              {mode === 'login' ? t.welcome : mode === 'register' ? t.registerTitle : mode === 'verify' ? t.verifyTitle : t.forgotTitle}
             </h2>
             <p style={{ fontSize: '0.9rem', color: '#71717a', marginBottom: '1.75rem' }}>
-              {mode === 'login' ? t.subheadline : mode === 'register' ? t.registerSub : t.forgotSub}
+              {mode === 'login' ? t.subheadline : mode === 'register' ? t.registerSub : mode === 'verify' ? t.verifySub : t.forgotSub}
             </p>
 
             {/* Role toggle (hidden in forgot mode) */}
@@ -492,7 +519,31 @@ export default function LoginPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+              {/* OTP (verify mode) */}
+              {mode === 'verify' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.4rem' }}>
+                    {t.verifyLabel} <span style={{ color: '#7c3aed', fontWeight: 600 }}>({email})</span>
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder={t.verifyPlaceholder}
+                    maxLength={6}
+                    autoFocus
+                    className="login-input"
+                    style={{
+                      width: '100%', padding: '0.8rem 0.85rem', borderRadius: 12, border: '1.5px solid #e5e7eb',
+                      fontSize: '1.3rem', fontWeight: 800, textAlign: 'center', letterSpacing: '0.5rem', outline: 'none',
+                      transition: 'border-color 0.2s, box-shadow 0.2s', fontFamily: 'inherit', boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              )}
               {/* Email */}
+              {mode !== 'verify' && (
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.4rem' }}>
                   {t.emailLabel}
@@ -515,9 +566,10 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+              )}
 
-              {/* Password (hidden in forgot mode) */}
-              {mode !== 'forgot' && (
+              {/* Password (hidden in forgot/verify mode) */}
+              {mode !== 'forgot' && mode !== 'verify' && (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151' }}>
@@ -584,7 +636,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    {mode === 'login' ? t.signIn : mode === 'register' ? t.registerBtn : t.forgotBtn}
+                    {mode === 'login' ? t.signIn : mode === 'register' ? t.registerBtn : mode === 'verify' ? t.verifyBtn : t.forgotBtn}
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -592,7 +644,7 @@ export default function LoginPage() {
             </form>
 
             {/* Google Login (login & register modes only) */}
-            {mode !== 'forgot' && (
+            {mode !== 'forgot' && mode !== 'verify' && (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
                   <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
@@ -652,6 +704,27 @@ export default function LoginPage() {
                   {t.backToLogin}
                 </a>
               </p>
+            )}
+            {mode === 'verify' && (
+              <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: '#71717a' }}>
+                <a href="#" onClick={async (e) => {
+                  e.preventDefault(); setError(''); setInfo('');
+                  try {
+                    await base44.auth.register({ email, password });
+                    setInfo(isEn ? 'A new code has been sent.' : 'Yeni kod gönderildi.');
+                  } catch (err) {
+                    setError(isEn ? 'Could not resend code.' : 'Kod tekrar gönderilemedi.');
+                  }
+                }} style={{ fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>
+                  {t.resendCode}
+                </a>
+                <span style={{ margin: '0 0.5rem' }}>·</span>
+                <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setInfo(''); setMode('login'); }} style={{
+                  fontWeight: 700, color: '#7c3aed', textDecoration: 'none',
+                }}>
+                  {t.backToLogin}
+                </a>
+              </div>
             )}
           </div>
 

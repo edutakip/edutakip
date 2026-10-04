@@ -20,6 +20,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import Checkout from './pages/Checkout';
 import LoginPage from './pages/LoginPage';
+import ResetPassword from './pages/ResetPassword';
 import SubscriptionManagement from './pages/SubscriptionManagement';
 import TeacherAccount from './pages/TeacherAccount';
 import CertificateGenerator from './pages/CertificateGenerator';
@@ -218,6 +219,7 @@ function App() {
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/giris" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>

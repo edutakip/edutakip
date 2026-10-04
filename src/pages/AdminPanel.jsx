@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, CreditCard, BarChart2, Shield, Search, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, Receipt } from 'lucide-react';
+import { Users, CreditCard, BarChart2, Shield, Search, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, Receipt, UserPlus, KeyRound } from 'lucide-react';
 import { getPlanLabel, getDaysLeft } from '@/lib/subscription';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -32,6 +32,11 @@ export default function AdminPanel() {
   const [expandedUser, setExpandedUser] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [processingPayId, setProcessingPayId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState('user');
+  const [creating, setCreating] = useState(false);
+  const [resettingId, setResettingId] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +71,35 @@ export default function AdminPanel() {
     await base44.entities.User.update(userId, updates);
     await reload();
     setUpdatingId(null);
+  };
+
+  const createUser = async () => {
+    if (!newUserEmail) return;
+    setCreating(true);
+    try {
+      await base44.users.inviteUser(newUserEmail, newUserRole);
+      await reload();
+      setShowCreateModal(false);
+      setNewUserEmail('');
+      setNewUserRole('user');
+      alert('Kullanıcı daveti gönderildi: ' + newUserEmail);
+    } catch (e) {
+      alert('Kullanıcı oluşturulurken hata: ' + (e.message || 'Bilinmeyen hata'));
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const resetUserPassword = async (email) => {
+    setResettingId(email);
+    try {
+      await base44.auth.resetPasswordRequest(email);
+      alert('Şifre sıfırlama e-postası gönderildi: ' + email);
+    } catch (e) {
+      alert('Şifre sıfırlama e-postası gönderilemedi: ' + (e.message || ''));
+    } finally {
+      setResettingId(null);
+    }
   };
 
   if (loading) return (
@@ -203,11 +237,16 @@ export default function AdminPanel() {
 
         {tab === 'users' && (
           <>
-            {/* Arama */}
-            <div style={{ position: 'relative', marginBottom: '1rem' }}>
-              <Search size={15} color='#9ca3af' style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input placeholder="Ad veya e-posta ara..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{ width: '100%', padding: '0.65rem 0.85rem 0.65rem 2.4rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', fontSize: '0.875rem', color: '#111827', outline: 'none', boxSizing: 'border-box' }} />
+            {/* Arama + Oluştur */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search size={15} color='#9ca3af' style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
+                <input placeholder="Ad veya e-posta ara..." value={search} onChange={e => setSearch(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem 0.85rem 0.65rem 2.4rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', fontSize: '0.875rem', color: '#111827', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <button onClick={() => setShowCreateModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1.1rem', borderRadius: 10, border: 'none', background: '#4f46e5', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(79,70,229,0.3)' }}>
+                <UserPlus size={15} /> Kullanıcı Oluştur
+              </button>
             </div>
 
             {/* Kullanıcı Listesi */}
@@ -280,7 +319,11 @@ export default function AdminPanel() {
                             style={{ padding: '0.45rem 0.9rem', borderRadius: 8, border: 'none', background: '#fee2e2', color: '#b91c1c', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
                             ✕ Süresi Dolt
                           </button>
-                          {isUpdating && <span style={{ fontSize: '0.8rem', color: '#9ca3af', alignSelf: 'center' }}>Güncelleniyor...</span>}
+                          <button disabled={resettingId === user.email} onClick={() => resetUserPassword(user.email)}
+                            style={{ padding: '0.45rem 0.9rem', borderRadius: 8, border: 'none', background: '#e0f2fe', color: '#0369a1', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <KeyRound size={13} /> {resettingId === user.email ? 'Gönderiliyor...' : 'Şifre Sıfırla'}
+                          </button>
+                          {(isUpdating || resettingId === user.email) && <span style={{ fontSize: '0.8rem', color: '#9ca3af', alignSelf: 'center' }}>İşleniyor...</span>}
                         </div>
                       </div>
                     )}
@@ -413,6 +456,43 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowCreateModal(false)}>
+          <div style={{ background: 'white', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 420, boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <UserPlus size={18} color="#4f46e5" />
+              </div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', margin: 0 }}>Kullanıcı Oluştur</h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>E-posta</label>
+                <input type="email" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} placeholder="user@email.com" style={{ width: '100%', padding: '0.7rem 0.85rem', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Rol</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {[{ key: 'user', label: 'Öğretmen/Veli' }, { key: 'admin', label: 'Admin' }].map(r => (
+                    <button key={r.key} onClick={() => setNewUserRole(r.key)} style={{ flex: 1, padding: '0.6rem', borderRadius: 10, border: newUserRole === r.key ? 'none' : '1.5px solid #e5e7eb', background: newUserRole === r.key ? '#4f46e5' : 'white', color: newUserRole === r.key ? 'white' : '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ background: '#f0f9ff', borderRadius: 10, padding: '0.7rem 0.85rem', border: '1px solid #bae6fd' }}>
+                <p style={{ fontSize: '0.78rem', color: '#0369a1', margin: 0 }}>ℹ️ Kullanıcıya davet e-postası gönderilecek. Kullanıcı e-postasındaki bağlantıyla şifresini sıfırlayıp giriş yapabilir.</p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                <button onClick={() => setShowCreateModal(false)} style={{ padding: '0.6rem 1.1rem', borderRadius: 10, border: '1.5px solid #e5e7eb', background: 'white', color: '#6b7280', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>İptal</button>
+                <button onClick={createUser} disabled={creating || !newUserEmail} style={{ padding: '0.6rem 1.1rem', borderRadius: 10, border: 'none', background: creating ? '#d1d5db' : '#4f46e5', color: 'white', fontWeight: 700, fontSize: '0.85rem', cursor: creating || !newUserEmail ? 'not-allowed' : 'pointer' }}>{creating ? 'Oluşturuluyor...' : 'Oluştur'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
