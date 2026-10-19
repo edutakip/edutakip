@@ -167,7 +167,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
     const weeklyLessons = form.schedule.length || 1;
     const feePerLesson = Number(form.feePerLesson) || 0;
     const lessonDuration = Number(form.lessonDuration) || 60;
-    const monthlyFee = Math.round(feePerLesson * weeklyLessons * 4);
+    const monthlyFee = Math.round(feePerLesson * weeklyLessons * 4.3);
 
     const student = await base44.entities.Student.create({
       name: form.name, grade: form.grade, subject: form.subject,
@@ -398,7 +398,7 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
               </div>
               {form.feePerLesson > 0 && (
                 <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', color: '#34d399', fontSize: '0.78rem', fontWeight: '600' }}>
-                  {t('teacher.addStudentModal.estimatedMonthly')}: ₺{Math.round(Number(form.feePerLesson) * (form.schedule.length || 1) * 4).toLocaleString('tr-TR')}
+                  {t('teacher.addStudentModal.estimatedMonthly')}: ₺{Math.round(Number(form.feePerLesson) * (form.schedule.length || 1) * 4.3).toLocaleString('tr-TR')}
                 </div>
               )}
             </div>
@@ -521,10 +521,10 @@ export default function AddStudentModal({ onClose, onSaved, onNeedUpgrade }) {
                 <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '10px' }}>
                   <div style={{ color: 'rgba(165,180,252,0.8)', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{t('teacher.addStudentModal.estimatedMonthly')}</div>
                   <div style={{ color: '#c7d2fe', fontWeight: '900', fontSize: '1.4rem' }}>
-                    ₺{((Number(form.feePerLesson) || 0) * form.schedule.length * 4).toLocaleString('tr-TR')}
+                    ₺{((Number(form.feePerLesson) || 0) * form.schedule.length * 4.3).toLocaleString('tr-TR')}
                   </div>
                   <div style={{ color: 'rgba(165,180,252,0.6)', fontSize: '0.72rem', marginTop: '0.25rem' }}>
-                    {form.schedule.length} ders/hafta × 4 hafta
+                    {form.schedule.length} ders/hafta × 4.3 hafta
                   </div>
                 </div>
               )}
