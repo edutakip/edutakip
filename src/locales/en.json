@@ -20,6 +20,32 @@
     "stat3": "AI Assistant",
     "stat4": "Starting Price"
   },
+  "landing": {
+    "tagline": "Private Tutor Management",
+    "heroTitle": "The Tracking App for",
+    "heroTitleHighlight": "Private Tutors",
+    "heroSubtitle": "Manage your tutoring business — lesson planning, fee tracking, parent communication and an AI-powered assistant — all in one platform with EduTakip.",
+    "faqBadge": "FAQ",
+    "faqTitle": "Frequently Asked Questions",
+    "faqSubtitle": "Answers to questions private tutors often ask.",
+    "ctaFreeStart": "Get Started Free",
+    "features": [
+      { "icon": "🗓️", "bg": "rgba(124,58,237,.1)", "title": "Lesson Schedule & Calendar", "desc": "Create your weekly lesson schedule, auto-add recurring lessons, and sync with Google Calendar.", "tag": "Lesson Planning", "delay": "d1" },
+      { "icon": "👥", "bg": "rgba(249,115,22,.1)", "title": "Student Tracking", "desc": "Manage student info, attendance, lesson history and performance from a single screen.", "tag": "Student Management", "delay": "d2" },
+      { "icon": "💰", "bg": "rgba(16,185,129,.1)", "title": "Payment & Fee Tracking", "desc": "Monthly fees, payment status and balance tracking per student. Never miss a payment with automatic reminders.", "tag": "Financial Tracking", "delay": "d3" },
+      { "icon": "📨", "bg": "rgba(59,130,246,.1)", "title": "Parent Communication", "desc": "Automatic lesson notifications, homework status and progress reports sent to parents. Parents track their child via their own panel.", "tag": "Parent Communication", "delay": "d4" },
+      { "icon": "📚", "bg": "rgba(234,179,8,.1)", "title": "Homework Management", "desc": "AI-powered homework creation, interactive questions, automatic grading and parent approval flow.", "tag": "AI Homework", "delay": "d1" },
+      { "icon": "📊", "bg": "rgba(99,102,241,.1)", "title": "Reporting", "desc": "Student progress reports, performance analysis and monthly lesson/summary reports.", "tag": "Performance", "delay": "d2" }
+    ],
+    "faq": [
+      { "q": "How can I track my tutoring fees?", "a": "With EduTakip's finance module, set the lesson fee for each student, view payment status instantly, and track students with outstanding balances from a single screen. Never waste time with automatic payment reminders." },
+      { "q": "Are automatic notifications sent to parents?", "a": "Yes. When you create a lesson, assign homework, or receive a payment, an automatic email notification is sent to the parent. Parents can also view their child's status from their own panel." },
+      { "q": "Can I track student attendance?", "a": "Absolutely. Record attendance for each lesson, view past lessons in the student profile, and generate attendance reports. You can also view past lessons from the lesson calendar." },
+      { "q": "How does homework management work?", "a": "Prepare interactive questions with the AI-powered homework creator, and when the student completes the homework, it's automatically graded. Parents view and approve homework status from their own panel." },
+      { "q": "Does it sync with Google Calendar?", "a": "Yes. When you create a lesson, it's automatically added to your Google Calendar. When you cancel a lesson, it's also removed from the calendar. You can connect with one click." },
+      { "q": "How long is the free trial?", "a": "Try EduTakip free for 14 days with all Pro features. No credit card required. When the trial ends, you can switch to any plan you want." }
+    ]
+  },
   "features": {
     "sectionBadge": "Features",
     "title": "Everything in One Place",

@@ -130,23 +130,8 @@ export default function Landing() {
   const freePlanFeatures = t('pricing.freePlan.features', { returnObjects: true });
   const proPlanFeatures = t('pricing.proPlan.features', { returnObjects: true });
 
-  const features = [
-    { icon: '🗓️', bg: 'rgba(124,58,237,.1)', title: 'Ders Programı ve Takvim', desc: 'Haftalık ders programınızı oluşturun, tekrarlayan dersleri otomatik ekleyin, Google Takvim ile senkronize edin.', tag: 'Ders Planlama', delay: 'd1' },
-    { icon: '👥', bg: 'rgba(249,115,22,.1)', title: 'Öğrenci Takip', desc: 'Öğrenci bilgilerini, devam durumunu, ders geçmişini ve performansını tek ekrandan yönetin.', tag: 'Öğrenci Yönetimi', delay: 'd2' },
-    { icon: '💰', bg: 'rgba(16,185,129,.1)', title: 'Ödeme/Ücret Takibi', desc: 'Her öğrenci için aylık ücret, ödeme durumu ve borç takibi. Otomatik ödeme hatırlatması ile vakit kaybetmeyin.', tag: 'Finansal Takip', delay: 'd3' },
-    { icon: '📨', bg: 'rgba(59,130,246,.1)', title: 'Veli Bilgilendirme', desc: 'Veliye otomatik ders bildirimi, ödev durumu ve gelişim raporu gönderin. Veli paneli ile çocuğunun durumunu takip edin.', tag: 'Veli İletişimi', delay: 'd4' },
-    { icon: '📚', bg: 'rgba(234,179,8,.1)', title: 'Ödev Yönetimi', desc: 'AI destekli ödev oluşturma, etkileşimli sorular, otomatik değerlendirme ve veli onay akışı.', tag: 'AI Ödev', delay: 'd1' },
-    { icon: '📊', bg: 'rgba(99,102,241,.1)', title: 'Raporlama', desc: 'Öğrenci gelişim raporları, performans analizleri ve aylık ders/özet raporları.', tag: 'Performans', delay: 'd2' },
-  ];
-
-  const faqItems = [
-    { q: 'Özel ders ücretlerimi nasıl takip edebilirim?', a: "EduTakip'in finans modülü ile her öğrenci için ders ücretini belirleyin, ödeme durumunu anlık görüntüleyin ve borçlu öğrencileri tek ekrandan takip edin. Otomatik ödeme hatırlatması ile vakit kaybetmeyin." },
-    { q: 'Veliye otomatik bildirim gönderilir mi?', a: 'Evet. Ders oluşturduğunuzda, ödev verdiğinizde veya ödeme aldığınızda veliye otomatik e-posta bildirimi gider. Veli ayrıca kendi panelinden çocuğunun durumunu görüntüleyebilir.' },
-    { q: 'Öğrenci devamsızlık takibi yapabilir miyim?', a: 'Kesinlikle. Her ders için devam durumunu kaydedin, öğrenci profilinde geçmiş dersleri görün ve devamsızlık raporu çıkarın. Ders takviminden geçmiş dersleri de görüntüleyebilirsiniz.' },
-    { q: 'Ödev yönetimi nasıl çalışır?', a: 'AI destekli ödev oluşturucu ile etkileşimli sorular hazırlayın, öğrenci ödevi tamamladığında otomatik değerlendirme yapılır. Veli ödev durumunu kendi panelinden görür ve onaylar.' },
-    { q: 'Google Takvim ile senkronize olur mu?', a: "Evet. Ders oluşturduğunuzda otomatik olarak Google Takvim'inize eklenir. Ders iptal ettiğinizde takvimden de silinir. Tek tıkla bağlantı kurabilirsiniz." },
-    { q: 'Ücretsiz deneme süresi ne kadar?', a: "EduTakip'i 14 gün boyunca tüm Pro özellikleriyle ücretsiz deneyin. Kredi kartı gerekmez. Deneme süresi bitince istediğiniz plana geçebilirsiniz." },
-  ];
+  const features = t('landing.features', { returnObjects: true }) || [];
+  const faqItems = t('landing.faq', { returnObjects: true }) || [];
 
   const steps = [
     { num: 1, key: 'step1', delay: 'd1' },
@@ -256,7 +241,7 @@ export default function Landing() {
                 style={{ width: isMobile ? 62 : 88, height: isMobile ? 62 : 88, borderRadius: 22, boxShadow: '0 16px 48px rgba(124,58,237,0.45), 0 4px 16px rgba(0,0,0,0.35)', animation: 'float 3s ease-in-out infinite' }} />
               <div style={{ textAlign: 'center' }}>
                 <div style={{ color: '#fff', fontSize: isMobile ? '1.1rem' : '1.4rem', fontWeight: 800, letterSpacing: '-.5px', lineHeight: 1.2 }}>EduTakip</div>
-                <div style={{ color: 'rgba(255,255,255,.5)', fontSize: isMobile ? '.72rem' : '.8rem', fontWeight: 500, marginTop: 2, letterSpacing: '.3px' }}>Private Tutor Management</div>
+                <div style={{ color: 'rgba(255,255,255,.5)', fontSize: isMobile ? '.72rem' : '.8rem', fontWeight: 500, marginTop: 2, letterSpacing: '.3px' }}>{t('landing.tagline')}</div>
               </div>
             </div>
           </div>
@@ -265,7 +250,7 @@ export default function Landing() {
             {t('hero.badge')}
           </div>
           <h1 style={{ fontSize: isMobile ? '1.9rem' : 'clamp(2.4rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: isMobile ? 10 : 22, animation: 'fadeInUp .7s ease .1s both' }}>
-            Özel Ders Öğretmenleri için <span style={{ color: '#a78bfa' }}>Takip Programı</span>
+            {t('landing.heroTitle')} <span style={{ color: '#a78bfa' }}>{t('landing.heroTitleHighlight')}</span>
           </h1>
 
           {isMobile && (
@@ -282,7 +267,7 @@ export default function Landing() {
           )}
 
           <p style={{ fontSize: 'clamp(1rem,2vw,1.18rem)', color: 'rgba(255,255,255,.75)', maxWidth: 600, margin: '0 auto 38px', lineHeight: 1.7, animation: 'fadeInUp .7s ease .2s both' }} className="py-5">
-            EduTakip ile ders planlaması, ücret takibi, veli iletişimi ve AI destekli asistanla özel ders işinizi tek platformda yönetin.
+            {t('landing.heroSubtitle')}
           </p>
 
           {!isMobile && (
@@ -517,9 +502,9 @@ export default function Landing() {
       {/* FAQ */}
       <AnimSection id="faq" style={{ background: '#f8fafc', padding: '90px 5%' }}>
         <div className="anim-scroll" style={{ textAlign: 'center' }}>
-          <span style={{ color: '#7c3aed', fontSize: '.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>✦ SSS</span>
-          <h2 style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.25, margin: '14px 0 16px' }}>Sıkça Sorulan Sorular</h2>
-          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>Özel ders öğretmenlerinin merak ettiği soruların cevapları.</p>
+          <span style={{ color: '#7c3aed', fontSize: '.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>✦ {t('landing.faqBadge')}</span>
+          <h2 style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.25, margin: '14px 0 16px' }}>{t('landing.faqTitle')}</h2>
+          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>{t('landing.faqSubtitle')}</p>
         </div>
         <div style={{ maxWidth: 760, margin: '48px auto 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {faqItems.map((item, i) => (
@@ -546,7 +531,7 @@ export default function Landing() {
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => selectRole('teacher')}
               style={{ background: '#fff', color: '#7c3aed', padding: '15px 36px', borderRadius: 10, fontWeight: 800, fontSize: '1.05rem', cursor: 'pointer', border: 'none', boxShadow: '0 8px 30px rgba(0,0,0,.2)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              Ücretsiz Başla
+              {t('landing.ctaFreeStart')}
             </button>
             <a href="#features" style={{ background: 'transparent', color: 'rgba(255,255,255,.85)', padding: '15px 36px', borderRadius: 10, fontWeight: 600, fontSize: '1rem', textDecoration: 'none', border: '2px solid rgba(255,255,255,.3)', display: 'inline-flex', alignItems: 'center' }}>
               {t('cta.secondaryBtn')}

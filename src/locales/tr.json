@@ -20,6 +20,32 @@
     "stat3": "Destekli Asistan",
     "stat4": "Başlangıç Ücreti"
   },
+  "landing": {
+    "tagline": "Özel Ders Yönetimi",
+    "heroTitle": "Özel Ders Öğretmenleri için",
+    "heroTitleHighlight": "Takip Programı",
+    "heroSubtitle": "EduTakip ile ders planlaması, ücret takibi, veli iletişimi ve AI destekli asistanla özel ders işinizi tek platformda yönetin.",
+    "faqBadge": "SSS",
+    "faqTitle": "Sıkça Sorulan Sorular",
+    "faqSubtitle": "Özel ders öğretmenlerinin merak ettiği soruların cevapları.",
+    "ctaFreeStart": "Ücretsiz Başla",
+    "features": [
+      { "icon": "🗓️", "bg": "rgba(124,58,237,.1)", "title": "Ders Programı ve Takvim", "desc": "Haftalık ders programınızı oluşturun, tekrarlayan dersleri otomatik ekleyin, Google Takvim ile senkronize edin.", "tag": "Ders Planlama", "delay": "d1" },
+      { "icon": "👥", "bg": "rgba(249,115,22,.1)", "title": "Öğrenci Takip", "desc": "Öğrenci bilgilerini, devam durumunu, ders geçmişini ve performansını tek ekrandan yönetin.", "tag": "Öğrenci Yönetimi", "delay": "d2" },
+      { "icon": "💰", "bg": "rgba(16,185,129,.1)", "title": "Ödeme/Ücret Takibi", "desc": "Her öğrenci için aylık ücret, ödeme durumu ve borç takibi. Otomatik ödeme hatırlatması ile vakit kaybetmeyin.", "tag": "Finansal Takip", "delay": "d3" },
+      { "icon": "📨", "bg": "rgba(59,130,246,.1)", "title": "Veli Bilgilendirme", "desc": "Veliye otomatik ders bildirimi, ödev durumu ve gelişim raporu gönderin. Veli paneli ile çocuğunun durumunu takip edin.", "tag": "Veli İletişimi", "delay": "d4" },
+      { "icon": "📚", "bg": "rgba(234,179,8,.1)", "title": "Ödev Yönetimi", "desc": "AI destekli ödev oluşturma, etkileşimli sorular, otomatik değerlendirme ve veli onay akışı.", "tag": "AI Ödev", "delay": "d1" },
+      { "icon": "📊", "bg": "rgba(99,102,241,.1)", "title": "Raporlama", "desc": "Öğrenci gelişim raporları, performans analizleri ve aylık ders/özet raporları.", "tag": "Performans", "delay": "d2" }
+    ],
+    "faq": [
+      { "q": "Özel ders ücretlerimi nasıl takip edebilirim?", "a": "EduTakip'in finans modülü ile her öğrenci için ders ücretini belirleyin, ödeme durumunu anlık görüntüleyin ve borçlu öğrencileri tek ekrandan takip edin. Otomatik ödeme hatırlatması ile vakit kaybetmeyin." },
+      { "q": "Veliye otomatik bildirim gönderilir mi?", "a": "Evet. Ders oluşturduğunuzda, ödev verdiğinizde veya ödeme aldığınızda veliye otomatik e-posta bildirimi gider. Veli ayrıca kendi panelinden çocuğunun durumunu görüntüleyebilir." },
+      { "q": "Öğrenci devamsızlık takibi yapabilir miyim?", "a": "Kesinlikle. Her ders için devam durumunu kaydedin, öğrenci profilinde geçmiş dersleri görün ve devamsızlık raporu çıkarın. Ders takviminden geçmiş dersleri de görüntüleyebilirsiniz." },
+      { "q": "Ödev yönetimi nasıl çalışır?", "a": "AI destekli ödev oluşturucu ile etkileşimli sorular hazırlayın, öğrenci ödevi tamamladığında otomatik değerlendirme yapılır. Veli ödev durumunu kendi panelinden görür ve onaylar." },
+      { "q": "Google Takvim ile senkronize olur mu?", "a": "Evet. Ders oluşturduğunuzda otomatik olarak Google Takvim'inize eklenir. Ders iptal ettiğinizde takvimden de silinir. Tek tıkla bağlantı kurabilirsiniz." },
+      { "q": "Ücretsiz deneme süresi ne kadar?", "a": "EduTakip'i 14 gün boyunca tüm Pro özellikleriyle ücretsiz deneyin. Kredi kartı gerekmez. Deneme süresi bitince istediğiniz plana geçebilirsiniz." }
+    ]
+  },
   "features": {
     "sectionBadge": "Özellikler",
     "title": "Her Şey Bir Arada",
