@@ -53,13 +53,11 @@ export default function PaymentModal({ student, onClose, onSaved }) {
       )
       .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-    const paymentDate = oldestUnpaid ? oldestUnpaid.date : form.date;
-
     const createdPayment = await base44.entities.Payment.create({
       ...form,
       amount: paidAmount,
-      date: paymentDate,
-      month: paymentDate.slice(0, 7),
+      date: form.date,
+      month: form.date.slice(0, 7),
       lessonId: oldestUnpaid ? oldestUnpaid.id : null,
       studentId: student.id,
       studentName: student.name,
@@ -77,7 +75,7 @@ export default function PaymentModal({ student, onClose, onSaved }) {
         ...createdPayment,
         ...form,
         amount: paidAmount,
-        date: paymentDate,
+        date: form.date,
         studentName: student.name,
         studentId: student.id,
       });
