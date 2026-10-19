@@ -62,9 +62,9 @@ export default function Landing() {
 
   // SEO Meta Tags — her zaman Türkçe (hedef kitle Türk öğretmenler)
   usePageMeta({
-    title: 'EduTakip – Özel Ders Takip Programı | Öğrenci, Ücret ve Veli Takibi',
-    description: 'Özel ders öğretmenleri için ders planlama, öğrenci takibi, ücret/ödeme yönetimi, veli bilgilendirme ve AI destekli ödev yönetimi. Ücretsiz başlayın.',
-    keywords: 'özel ders takip programı, ders planlama, öğrenci takibi, ücret takibi, veli bilgilendirme, ödev yönetimi, özel ders yönetimi',
+    title: 'Özel Ders Yönetimi | EduTakip – Öğrenci, Ders ve Ücret Takip Programı',
+    description: 'Özel ders yönetimi için tek platform: öğrenci takibi, ders planlama, ücret/ödeme yönetimi, veli bilgilendirme ve AI destekli ödev sistemi. Ücretsiz başlayın.',
+    keywords: 'özel ders yönetimi, özel ders takip programı, ders planlama, öğrenci takibi, ücret takibi, veli bilgilendirme, ödev yönetimi, özel ders yönetim platformu',
     ogImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69ade51e0f0a53b9492b7a1e/d40c3749a_255133d07_logo.png',
     canonical: 'https://edutakip.com',
     robots: 'index, follow',
@@ -74,8 +74,8 @@ export default function Landing() {
         {
           '@type': 'SoftwareApplication',
           name: 'EduTakip',
-          alternateName: 'EduTakip Özel Ders Takip Programı',
-          description: 'Özel ders öğretmenleri için ders planlama, öğrenci takibi, ödeme yönetimi, veli iletişimi ve AI asistanı.',
+          alternateName: 'EduTakip – Özel Ders Yönetimi Platformu',
+          description: 'Özel ders yönetimi için kapsamlı platform: öğrenci takibi, ders planlama, ödeme yönetimi, veli iletişimi ve AI asistanı. Özel ders öğretmenleri için ücretsiz deneme.',
           url: 'https://edutakip.com',
           applicationCategory: 'EducationApplication',
           operatingSystem: 'Web, iOS, Android',
