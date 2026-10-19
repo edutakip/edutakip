@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check, Send } from 'lucide-react';
+import { Phone, Clock, DollarSign, BookOpen, Plus, Copy, Check, Send, Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import InviteMethodPopup from './InviteMethodPopup';
+import ParentPreviewModal from './parentPreview/ParentPreviewModal';
 
 export default function StudentCard({ student, onAddPayment, onCardClick }) {
   const { t } = useTranslation();
   const [payments, setPayments] = useState([]);
   const [copied, setCopied] = useState(false);
   const [showInvitePopup, setShowInvitePopup] = useState(false);
+  const [showParentPreview, setShowParentPreview] = useState(false);
 
   const copyCode = (e) => {
     e.stopPropagation();
@@ -170,6 +172,22 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
             </button>
           )}
           <button
+            onClick={(e) => { e.stopPropagation(); setShowParentPreview(true); }}
+            title="Veli panelini önizle"
+            style={{
+              background: 'rgba(139,92,246,0.15)',
+              border: '1px solid rgba(139,92,246,0.4)',
+              color: '#c4b5fd', borderRadius: '10px',
+              padding: '0.6rem 0.7rem', fontWeight: '700', fontSize: '0.82rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(139,92,246,0.3)'; e.currentTarget.style.transform = 'scale(1.04)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(139,92,246,0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            <Eye size={14} />
+          </button>
+          <button
             onClick={handleAddPayment}
             style={{
               background: 'linear-gradient(135deg, #16a34a, #22c55e)',
@@ -188,6 +206,9 @@ export default function StudentCard({ student, onAddPayment, onCardClick }) {
 
       {showInvitePopup && (
         <InviteMethodPopup student={student} onClose={() => setShowInvitePopup(false)} />
+      )}
+      {showParentPreview && (
+        <ParentPreviewModal student={student} onClose={() => setShowParentPreview(false)} />
       )}
     </div>
   );
