@@ -358,6 +358,8 @@
       "q": {
         "topicsCovered": "Hangi konuları işledin?",
         "topicsCoveredPh": "İşlenen konuları yazın...",
+        "bookName": "Hangi kitabı kullandın?",
+        "bookNamePh": "Örn: 8. Sınıf Matematik Soru Bankası",
         "pageLeft": "Kaçıncı sayfada kaldın?",
         "pageLeftPh": "Örn: Sayfa 45, 3. ünite",
         "rating": "Ders performansı nasıldı?",
@@ -839,6 +841,8 @@
     "q": {
       "topicsCovered": "Hangi konuları işledin?",
       "topicsCoveredPh": "İşlenen konuları yazın...",
+      "bookName": "Hangi kitabı kullandın?",
+      "bookNamePh": "Örn: 8. Sınıf Matematik Soru Bankası",
       "pageLeft": "Kaçıncı sayfada kaldın?",
       "pageLeftPh": "Örn: Sayfa 45, 3. ünite",
       "rating": "Ders performansı nasıldı?",

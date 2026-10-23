@@ -23,6 +23,7 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
   const [saved, setSaved] = useState(false);
   const [answers, setAnswers] = useState({
     topicsCovered: '',
+    bookName: '',
     pageLeft: '',
     rating: 0,
     attendance: '',
@@ -39,6 +40,7 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
 
   const STEPS = [
     { key: 'topicsCovered', type: 'textarea', icon: '📖', label: t('activeLesson.q.topicsCovered'), placeholder: t('activeLesson.q.topicsCoveredPh') },
+    { key: 'bookName', type: 'text', icon: '📚', label: t('activeLesson.q.bookName'), placeholder: t('activeLesson.q.bookNamePh') },
     { key: 'pageLeft', type: 'text', icon: '📄', label: t('activeLesson.q.pageLeft'), placeholder: t('activeLesson.q.pageLeftPh') },
     { key: 'rating', type: 'rating', icon: '⭐', label: t('activeLesson.q.rating') },
     { key: 'attendance', type: 'choice', icon: '📋', label: t('activeLesson.q.attendance'), options: [
@@ -93,6 +95,7 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
       // Özet not
       const summaryParts = [
         answers.topicsCovered && `${t('activeLesson.q.topicsCovered')}: ${answers.topicsCovered}`,
+        answers.bookName && `${t('activeLesson.q.bookName')}: ${answers.bookName}`,
         answers.pageLeft && `${t('activeLesson.q.pageLeft')}: ${answers.pageLeft}`,
         answers.rating && `${t('activeLesson.q.rating')}: ${answers.rating}/5`,
         answers.attendance && `${t('activeLesson.q.attendance')}: ${answers.attendance}`,
@@ -130,6 +133,7 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
           participation: answers.participation,
           motivation: answers.motivation,
           topicsCovered: answers.topicsCovered,
+          bookName: answers.bookName,
           pageLeft: answers.pageLeft,
           strengths: answers.strengths,
           improvements: answers.improvements,
@@ -285,25 +289,26 @@ export default function ActiveLessonQA({ lesson, student, payments, onBack, onSa
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem 1.5rem' }}>
               {/* İşlenen konular — tam genişlik */}
               <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[0])}</div>
-              {/* Sayfa + Puan — yan yana */}
+              {/* Kitap + Sayfa — yan yana */}
               {renderField(STEPS[1])}
               {renderField(STEPS[2])}
-              {/* Katılım durumu — tam genişlik */}
+              {/* Ders performansı — tam genişlik */}
               <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[3])}</div>
-              {/* Anlama + Katılım — yan yana */}
+              {/* Katılım + Anlama — yan yana */}
               {renderField(STEPS[4])}
               {renderField(STEPS[5])}
-              {/* Motivasyon + Ödev yapıldı mı — yan yana */}
+              {/* Derse katılım + Motivasyon — yan yana */}
               {renderField(STEPS[6])}
               {renderField(STEPS[7])}
-              {/* Güçlü yönler + Geliştirilecek — yan yana */}
+              {/* Ödev yapıldı mı + Güçlü yönler — yan yana */}
               {renderField(STEPS[8])}
               {renderField(STEPS[9])}
-              {/* Verilen ödev + Sonraki hedef — yan yana */}
+              {/* Geliştirilecek + Verilen ödev — yan yana */}
               {renderField(STEPS[10])}
               {renderField(STEPS[11])}
-              {/* Genel not — tam genişlik */}
-              <div style={{ gridColumn: '1 / -1' }}>{renderField(STEPS[12])}</div>
+              {/* Sonraki hedef + Genel not — yan yana */}
+              {renderField(STEPS[12])}
+              {renderField(STEPS[13])}
             </div>
 
             {/* Kaydet butonu */}

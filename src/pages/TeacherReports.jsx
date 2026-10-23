@@ -293,6 +293,7 @@ export default function TeacherReports() {
                       )}
                     </div>
                     {report.topicsCovered && <InfoBox icon={BookOpen} iconColor='#6366f1' title={t('teacher.lessonReport.topicsCovered')} text={report.topicsCovered} accent='#e0e7ff' />}
+                    {report.bookName && <InfoBox icon={BookOpen} iconColor='#7c3aed' title='Kullanılan Kitap' text={report.bookName} accent='#ede9fe' />}
                     {report.pageLeft && <InfoBox icon={FileEdit} iconColor='#0ea5e9' title='Kalınan Sayfa' text={report.pageLeft} accent='#e0f2fe' />}
                     {report.strengths && <InfoBox icon={Award} iconColor='#10b981' title='Güçlü Yönler' text={report.strengths} accent='#d1fae5' />}
                     {report.generalNote && (

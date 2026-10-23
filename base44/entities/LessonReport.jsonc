@@ -21,6 +21,10 @@
     "subject": {
       "type": "string"
     },
+    "bookName": {
+      "type": "string",
+      "description": "Derste kullan\u0131lan kitap / kaynak"
+    },
     "rating": {
       "type": "number",
       "minimum": 0,

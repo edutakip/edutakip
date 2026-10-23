@@ -358,6 +358,8 @@
       "q": {
         "topicsCovered": "What topics did you cover?",
         "topicsCoveredPh": "Write covered topics...",
+        "bookName": "Which book did you use?",
+        "bookNamePh": "E.g. Grade 8 Math Workbook",
         "pageLeft": "Which page did you stay on?",
         "pageLeftPh": "E.g. Page 45, Unit 3",
         "rating": "How was the lesson performance?",
@@ -839,6 +841,8 @@
     "q": {
       "topicsCovered": "What topics did you cover?",
       "topicsCoveredPh": "Write covered topics...",
+      "bookName": "Which book did you use?",
+      "bookNamePh": "E.g. Grade 8 Math Workbook",
       "pageLeft": "Which page did you stay on?",
       "pageLeftPh": "E.g. Page 45, Unit 3",
       "rating": "How was the lesson performance?",
